@@ -1,2 +1,2 @@
 # pop-search
-Aplicação web para indexação e busca semântica de vídeos do Twitter usando IA Multimodal e validação humana.
+Uma aplicação web que funciona como acervo para indexação e busca de vídeos do Twitter usando IA Multimodal e validação humana.
