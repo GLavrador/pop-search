@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from db import supabase
 
 app = FastAPI(
     title="Pop Search API",
@@ -8,8 +9,15 @@ app = FastAPI(
 
 @app.get("/")
 async def health_check():
+
+    try:
+        response = supabase.table("videos").select("count", count="exact").execute()
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+
     return {
         "status": "ok",
-        "message": "Pop Search API is running and welcoming the world!",
+        "database": db_status,
         "version": "0.1.0"
     }
