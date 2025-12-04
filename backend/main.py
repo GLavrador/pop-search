@@ -1,7 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from pydantic import BaseModel 
 from contextlib import asynccontextmanager
 from db import supabase
 from services.ai import analyze_video_content
+from services.downloader import download_video
 from core.logger import configure_logging, get_logger
 import shutil
 import os
@@ -21,46 +23,39 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+class VideoAnalysisRequest(BaseModel):
+    url: str
+
 @app.get("/")
 async def health_check():
-    logger.debug("Health check requested")
-    try:
-        response = supabase.table("videos").select("count", count="exact").execute()
-        db_status = "connected"
-    except Exception as e:
-        db_status = f"error: {str(e)}"
-        logger.error(f"Database connection failed: {e}")
-
     return {
         "status": "ok",
-        "database": db_status,
         "version": "0.1.0"
     }
 
-@app.post("/test-ai-analysis")
-async def test_ai_analysis(file: UploadFile = File(...)):
-   
-    temp_filename = f"temp_{file.filename}"
-    logger.info(f"Received request to analyze file: {file.filename}")
-    
+@app.post("/analyze")
+async def analyze_from_url(request: VideoAnalysisRequest):
+  
+    logger.info(f"Analysis requested for URL: {request.url}")
+    video_path = None
+
     try:
-        with open(temp_filename, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        logger.debug(f"Temporary file saved: {temp_filename}")
-            
-        result = await analyze_video_content(temp_filename)
+        video_path = download_video(request.url)
         
-        if not result:
-            logger.error("Service returned None result")
-            raise HTTPException(status_code=500, detail="AI Analysis failed")
-            
-        logger.info("Returning successful analysis to client")
-        return result
+        analysis_result = await analyze_video_content(video_path)
+        
+        if not analysis_result:
+            raise HTTPException(status_code=500, detail="Failed to analyze video content")
+        
+        analysis_result["url_original"] = request.url
+        
+        return analysis_result
 
     except Exception as e:
-        logger.exception("Critical error in /test-ai-analysis")
-        raise e
+        logger.exception("Error processing video flow")
+        raise HTTPException(status_code=500, detail=str(e))
+        
     finally:
-        if os.path.exists(temp_filename):
-            os.remove(temp_filename)
-            logger.debug(f"Cleaned up temporary file: {temp_filename}")
+        if video_path and os.path.exists(video_path):
+            os.remove(video_path)
+            logger.debug(f"Cleaned up temp file: {video_path}")
