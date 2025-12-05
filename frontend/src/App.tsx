@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './App.css'; 
+import { analyzeVideo } from './services/api';
+import type { VideoMetadata } from './types';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<VideoMetadata | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleAnalyze = async () => {
+    if (!url) return;
+    
+    setLoading(true);
+    setError(null);
+    setData(null);
+
+    console.log(`[UI] Starting analysis for URL: ${url}`);
+
+    try {
+      const result = await analyzeVideo(url);
+      console.log('[UI] Analysis received successfully', result);
+      setData(result);
+    } catch (err) {
+      console.error('[UI] Error during analysis:', err);
+      setError('Failed to analyze video. Please check the console or backend status.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="container">
+      <h1>Pop Search - Ingestion</h1>
+      
+      <div className="input-group">
+        <input 
+          type="text" 
+          placeholder="Paste Twitter/X URL here..." 
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          disabled={loading}
+        />
+        <button onClick={handleAnalyze} disabled={loading}>
+          {loading ? 'Analyzing...' : 'Analyze'}
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+
+      {error && <p className="error">{error}</p>}
+
+      {data && (
+        <div className="result-preview">
+          <h2>AI Analysis Result:</h2>
+          <pre>{JSON.stringify(data, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
