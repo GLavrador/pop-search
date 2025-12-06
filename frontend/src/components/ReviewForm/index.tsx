@@ -13,9 +13,24 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
     defaultValues: initialData,
   });
 
+  // onSubmit with arrays may need better approach
   const onSubmit: SubmitHandler<VideoMetadata> = (data) => {
-    console.log("[ReviewForm] Form submitted:", data);
-    onSave(data);
+
+  const processedData = {
+    ...data,
+    metadados_visuais: {
+      ...data.metadados_visuais,
+      pessoas: typeof data.metadados_visuais.pessoas === 'string' 
+        ? (data.metadados_visuais.pessoas as string).split(',').map((s: string) => s.trim())
+        : data.metadados_visuais.pessoas, 
+    },
+    tags_busca: typeof data.tags_busca === 'string'
+      ? (data.tags_busca as string).split(',').map((s: string) => s.trim())
+      : data.tags_busca
+  };
+
+    console.log("[ReviewForm] Form submitted with processed data:", processedData);
+    onSave(processedData);
   };
 
   return (
@@ -85,6 +100,26 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
             className={styles.input} 
           />
         </div>
+      </div>
+
+      <h3 className={styles.sectionTitle}>Keywords & Entities</h3>
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>People (comma separated)</label>
+        <input 
+          {...register("metadados_visuais.pessoas")} 
+          className={styles.input}
+          placeholder="Famous person 1, Famous person 2..."
+        />
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Search Tags</label>
+        <input 
+          {...register("tags_busca")} 
+          className={styles.input}
+          placeholder="tag1, tag2, tag3"
+        />
       </div>
 
       <div style={{ display: 'flex', gap: '1rem' }}>
