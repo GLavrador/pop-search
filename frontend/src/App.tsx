@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.css'; 
 import { analyzeVideo } from './services/api';
 import type { VideoMetadata } from './types';
+import { ReviewForm } from './components/ReviewForm';
 
 function App() {
   const [url, setUrl] = useState('');
@@ -30,6 +31,12 @@ function App() {
     }
   };
 
+  // mock
+  const handleSave = (finalData: VideoMetadata) => {
+    console.log("Saving to Supabase...", finalData);
+    alert("Data ready to be saved! (Check console)");
+  };
+
   return (
     <div className="container">
       <h1>Pop Search - Ingestion</h1>
@@ -51,8 +58,11 @@ function App() {
 
       {data && (
         <div className="result-preview">
-          <h2>AI Analysis Result:</h2>
-          <pre>{JSON.stringify(data, null, 2)}</pre>
+          <ReviewForm 
+            initialData={data} 
+            onSave={handleSave} 
+            onCancel={() => setData(null)} 
+          />
         </div>
       )}
     </div>
