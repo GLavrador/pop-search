@@ -48,6 +48,45 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
         />
       </div>
 
+      <h3 className={styles.sectionTitle}>Visual Details</h3>
+      
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Context</label>
+        <textarea 
+          {...register("metadados_visuais.contexto")} 
+          className={styles.textarea}
+          placeholder="Describe the visual context..."
+        />
+      </div>
+
+      <h3 className={styles.sectionTitle}>Audio Details</h3>
+      
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Transcription / Lyrics</label>
+        <textarea 
+          {...register("metadados_audio.transcricao_trecho")} 
+          className={styles.textarea}
+        />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Identified Music</label>
+          <input 
+            {...register("metadados_audio.musica_identificada")} 
+            className={styles.input} 
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Artist</label>
+          <input 
+            {...register("metadados_audio.artista")} 
+            className={styles.input} 
+          />
+        </div>
+      </div>
+
       <div style={{ display: 'flex', gap: '1rem' }}>
         <button type="button" onClick={onCancel} style={{ background: '#6c757d' }}>
           Cancel
