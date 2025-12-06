@@ -22,7 +22,31 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
     <form className={styles.formContainer} onSubmit={handleSubmit(onSubmit)}>
       <h2 className={styles.sectionTitle}>Review AI Data</h2>
       
-      <p>next steps</p>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Suggested Title</label>
+        <input 
+          {...register("titulo_sugerido", { required: true })} 
+          className={styles.input} 
+        />
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Summary</label>
+        <textarea 
+          {...register("resumo", { required: true })} 
+          className={styles.textarea} 
+        />
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Original URL (Read-only)</label>
+        <input 
+          {...register("url_original")} 
+          className={styles.input} 
+          disabled 
+          style={{ background: '#e9ecef' }}
+        />
+      </div>
 
       <div style={{ display: 'flex', gap: '1rem' }}>
         <button type="button" onClick={onCancel} style={{ background: '#6c757d' }}>
