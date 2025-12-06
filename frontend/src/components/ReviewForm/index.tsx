@@ -123,7 +123,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
       </div>
 
       <div style={{ display: 'flex', gap: '1rem' }}>
-        <button type="button" onClick={onCancel} style={{ background: '#6c757d' }}>
+        <button type="button" onClick={onCancel} className={styles.cancelButton}>
           Cancel
         </button>
         <button type="submit" className={styles.submitButton}>
