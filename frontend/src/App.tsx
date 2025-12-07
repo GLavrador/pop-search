@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css'; 
-import { analyzeVideo } from './services/api';
+import { analyzeVideo, saveVideo } from './services/api';
 import type { VideoMetadata } from './types';
 import { ReviewForm } from './components/ReviewForm';
 
@@ -31,10 +31,20 @@ function App() {
     }
   };
 
-  // mock
-  const handleSave = (finalData: VideoMetadata) => {
-    console.log("Saving to Supabase...", finalData);
-    alert("Data ready to be saved! (Check console)");
+  const handleSave = async (finalData: VideoMetadata) => {
+    try {
+      console.log("[UI] Saving data...", finalData);
+      
+      await saveVideo(finalData);
+      
+      alert("Video saved successfully! 🎉");
+      
+      setData(null);
+      setUrl('');
+    } catch (err) {
+      console.error("[UI] Save failed", err);
+      alert("Failed to save video. Check console for details.");
+    }
   };
 
   return (
