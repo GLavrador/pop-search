@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel 
 from contextlib import asynccontextmanager
+from services.embedding import create_embedding
+from dtos import VideoMetadataDTO
 from db import supabase
 from services.ai import analyze_video_content
 from services.downloader import download_video
@@ -59,3 +61,32 @@ async def analyze_from_url(request: VideoAnalysisRequest):
         if video_path and os.path.exists(video_path):
             os.remove(video_path)
             logger.debug(f"Cleaned up temp file: {video_path}")
+            
+@app.post("/videos")
+async def save_video(metadata: VideoMetadataDTO):
+    logger.info(f"Save request received for video: {metadata.titulo_sugerido}")
+    
+    if not metadata.url_original:
+        raise HTTPException(status_code=400, detail="url_original is required for saving")
+
+    try:
+        vector = create_embedding(metadata)
+        db_payload = metadata.model_dump()
+        if "titulo_sugerido" in db_payload:
+            db_payload["titulo_video"] = db_payload.pop("titulo_sugerido")
+        db_payload["embedding"] = vector
+        
+        logger.info("Persisting to Supabase...")
+        data, count = supabase.table("videos").insert(db_payload).execute()
+        
+        logger.info(f"Video saved successfully. ID: {data[1][0]['id']}")
+        
+        return {
+            "status": "success", 
+            "id": data[1][0]['id'],
+            "message": "Video indexed successfully"
+        }
+
+    except Exception as e:
+        logger.exception("Failed to save video")
+        raise HTTPException(status_code=500, detail=str(e))
