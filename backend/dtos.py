@@ -19,3 +19,14 @@ class VideoMetadataDTO(BaseModel):
     metadados_audio: AudioMetadata
     tags_busca: List[str]
     sentimento: str
+    
+class SearchRequest(BaseModel):
+    query: str
+    limit: int = 5
+    threshold: float = 0.5 
+
+class SearchResult(BaseModel):
+    id: str
+    titulo_video: str
+    resumo: str
+    similarity: float
