@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel 
 from contextlib import asynccontextmanager
 from services.embedding import create_embedding
-from dtos import VideoMetadataDTO
+from dtos import VideoMetadataDTO, SearchRequest, SearchResult
 from db import supabase
 from services.ai import analyze_video_content
 from services.downloader import download_video
@@ -89,4 +89,30 @@ async def save_video(metadata: VideoMetadataDTO):
 
     except Exception as e:
         logger.exception("Failed to save video")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/search", response_model=list[SearchResult])
+async def search_videos(request: SearchRequest):
+    logger.info(f"Search requested: '{request.query}'")
+    
+    try:
+        from services.embedding import embed_query 
+        
+        query_vector = embed_query(request.query)
+        
+        rpc_params = {
+            "query_embedding": query_vector,
+            "match_threshold": request.threshold,
+            "match_count": request.limit
+        }
+        
+        logger.debug("Executing RPC match_videos...")
+        response = supabase.rpc("match_videos", rpc_params).execute()
+        results = response.data
+        
+        logger.info(f"Search returned {len(results)} results")
+        return results
+
+    except Exception as e:
+        logger.exception("Search failed")
         raise HTTPException(status_code=500, detail=str(e))

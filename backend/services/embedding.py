@@ -41,3 +41,16 @@ def create_embedding(data: VideoMetadataDTO) -> list[float]:
     except Exception as e:
         logger.error(f"Failed to generate embedding: {e}")
         raise e
+    
+def embed_query(text: str) -> list[float]:
+    try:
+        logger.debug(f"Embedding query text: {text[:50]}...")
+        result = genai.embed_content(
+            model=EMBEDDING_MODEL,
+            content=text,
+            task_type="retrieval_query" 
+        )
+        return result['embedding']
+    except Exception as e:
+        logger.error(f"Failed to embed query: {e}")
+        raise e
