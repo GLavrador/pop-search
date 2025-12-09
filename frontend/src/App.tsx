@@ -3,7 +3,8 @@ import './App.css';
 import { analyzeVideo, saveVideo } from './services/api';
 import type { VideoMetadata } from './types';
 import { ReviewForm } from './components/ReviewForm';
-import { SearchSection } from './components/SearchSection'; 
+import { SearchSection } from './components/SearchSection';
+import axios from 'axios'; 
 
 type Tab = 'ingest' | 'search';
 
@@ -24,15 +25,28 @@ function App() {
       console.log(`[UI] Starting analysis for URL: ${url}`);
       
       try {
-        const result = await analyzeVideo(url);
-        console.log('[UI] Analysis received successfully', result);
-        setData(result);
-      } catch (err) {
-        console.error('[UI] Error during analysis:', err);
-        setError('Failed to analyze video. Please check the console or backend status.');
-      } finally {
-        setLoading(false);
+      const result = await analyzeVideo(url);
+      console.log('[UI] Analysis received successfully', result);
+      setData(result);
+    } catch (err: any) { 
+      console.error('[UI] Error during analysis:', err);
+      
+      let errorMessage = 'Failed to analyze video. Please check backend.';
+      
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 504) {
+          errorMessage = 'The AI is taking too long to respond (Timeout). Please try a shorter video (less than 1 min) or try again in a moment.';
+        } else if (err.response?.status === 429) {
+          errorMessage = 'You are going too fast! Please wait a minute before trying again (Rate Limit).';
+        } else if (err.response?.data?.detail) {
+          errorMessage = `Error: ${err.response.data.detail}`;
+        }
       }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
