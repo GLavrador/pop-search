@@ -12,6 +12,7 @@ import os
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded 
 from core.limiter import limiter 
+from asyncio import TimeoutError as AsyncTimeoutError
 
 configure_logging()
 logger = get_logger("main")
@@ -60,6 +61,16 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
         analysis_result["url_original"] = body.url
         
         return analysis_result
+    
+    except AsyncTimeoutError:
+        logger.error("Request timed out waiting for AI")
+        raise HTTPException(
+            status_code=504, 
+            detail="The AI service took too long to respond. Please try again later."
+        )
+
+    except HTTPException as he:
+        raise he
 
     except Exception as e:
         logger.exception("Error processing video flow")
