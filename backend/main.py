@@ -103,9 +103,10 @@ async def search_videos(request: SearchRequest):
         rpc_params = {
             "query_embedding": query_vector,
             "match_threshold": request.threshold,
-            "match_count": request.limit
+            "match_count": request.limit,
+            "query_text": request.query,
         }
-        
+        logger.debug(f"Executing RPC match_videos with query: {request.query}")
         logger.debug("Executing RPC match_videos...")
         response = supabase.rpc("match_videos", rpc_params).execute()
         results = response.data
