@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import time
 import google.generativeai as genai
 from dotenv import load_dotenv
 from core.logger import get_logger
@@ -61,6 +62,8 @@ Retorne APENAS um JSON seguindo estritamente este schema:
 }
 """
 
+TIMEOUT = 60 
+
 async def analyze_video_content(video_path: str):
     try:
         logger.info(f"Starting upload to Gemini: {video_path}")
@@ -68,27 +71,40 @@ async def analyze_video_content(video_path: str):
         video_file = genai.upload_file(path=video_path)
         logger.debug(f"File uploaded. URI: {video_file.uri}")
         
-      
+        start_time = time.time()
+        
         while video_file.state.name == "PROCESSING":
-            logger.debug("Video is processing on Gemini side...")
+            elapsed = time.time() - start_time
+            if elapsed > TIMEOUT:
+                logger.error(f"Timeout waiting for video processing ({elapsed:.1f}s)")
+                raise asyncio.TimeoutError("Video processing on Gemini took too long.")
+            
+            logger.debug(f"Video still processing... ({elapsed:.1f}s)")
+            
             await asyncio.sleep(2) 
             video_file = genai.get_file(video_file.name)
 
         if video_file.state.name == "FAILED":
-            logger.error(f"Gemini processing failed for file {video_file.name}")
-            raise ValueError("Video processing failed by Gemini.")
+            logger.error(f"Gemini processing failed state: {video_file.state.name}")
+            raise ValueError("Video processing failed by Gemini internal error.")
 
-        logger.info("Sending prompt to Gemini...")
+        logger.info(f"Video active. Sending prompt (Timeout: {TIMEOUT}s)...")
         
-        response = await model.generate_content_async([SYSTEM_PROMPT, video_file])
+        response = await asyncio.wait_for(
+            model.generate_content_async([SYSTEM_PROMPT, video_file]),
+            timeout=TIMEOUT
+        )
         
         logger.info("Analysis received successfully")
-        
         return json.loads(response.text)
+
+    except asyncio.TimeoutError as e:
+        logger.error(f"Timeout Error in AI Service: {e}")
+        raise e 
 
     except json.JSONDecodeError:
         logger.error("Failed to decode JSON from Gemini response")
         return None
     except Exception as e:
-        logger.exception("Unexpected error during video analysis") 
+        logger.exception("Unexpected error during video analysis")
         return None
