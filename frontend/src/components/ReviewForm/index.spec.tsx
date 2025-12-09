@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReviewForm } from './index';
 import type { VideoMetadata } from '../../types';
 import { vi } from 'vitest'; 
@@ -29,7 +29,7 @@ describe('ReviewForm Component', () => {
     expect(screen.getByDisplayValue('tag1')).toBeInTheDocument();
   });
 
-  it('should convert comma-separated strings back to arrays on submit', () => {
+  it('should convert comma-separated strings back to arrays on submit', async () => {
     const handleSaveMock = vi.fn();
 
     render(<ReviewForm initialData={mockData} onSave={handleSaveMock} onCancel={() => {}} />);
@@ -40,8 +40,10 @@ describe('ReviewForm Component', () => {
     const saveButton = screen.getByText('Confirm & Save');
     fireEvent.click(saveButton);
 
-    expect(handleSaveMock).toHaveBeenCalledWith(expect.objectContaining({
-      tags_busca: ['react', 'testing']
-    }));
+    await waitFor(() => {
+      expect(handleSaveMock).toHaveBeenCalledWith(expect.objectContaining({
+        tags_busca: ['react', 'testing']
+      }));
+    });
   });
 });
