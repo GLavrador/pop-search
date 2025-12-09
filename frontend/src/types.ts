@@ -15,3 +15,16 @@ export interface VideoMetadata {
   tags_busca: string[];
   sentimento: string;
 }
+
+export interface SearchResult {
+  id: string;
+  titulo_video: string;
+  resumo: string;
+  similarity: number;
+}
+
+export interface SearchParams {
+  query: string;
+  limit?: number;
+  threshold?: number;
+}
