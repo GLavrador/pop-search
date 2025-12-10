@@ -105,7 +105,7 @@ function App() {
                         style={{ flex: 1, padding: 8 }}
                       />
                       <button 
-                        className="win95-border" 
+                        className={`win95-border ${styles.actionButton}`}
                         onClick={handleAnalyze} 
                         disabled={loading}
                         style={{ padding: '0 20px', cursor: 'pointer', fontWeight: 'bold' }}

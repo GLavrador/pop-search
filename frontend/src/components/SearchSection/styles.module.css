@@ -29,7 +29,8 @@
 }
 
 .button {
-  padding: 0 20px; 
+  min-width: 140px;
+  padding: 0 10px;
   background: var(--win-gray);
   color: black;
   font-weight: bold;
@@ -40,6 +41,7 @@
   cursor: pointer;
   display: flex;
   align-items: center; 
+  justify-content: center; 
 }
 
 .button:active {
