@@ -69,73 +69,79 @@ function App() {
 
   return (
     <div className={styles.appContainer}>      
-      <div className={`win95-border ${styles.navBar}`}>
-        <button 
-          onClick={() => setActiveTab('ingest')}
-          className={`${styles.navButton} ${activeTab === 'ingest' ? `win95-inset ${styles.active}` : 'win95-border'}`}
-        >
-          💿 Add Video.exe
-        </button>
-        <button 
-          onClick={() => setActiveTab('search')}
-          className={`${styles.navButton} ${activeTab === 'search' ? `win95-inset ${styles.active}` : 'win95-border'}`}
-        >
-          🔍 Search.exe
-        </button>
-      </div>
+      <RetroWindow title="Pop Search System" icon="💻">
+        <div className={styles.mainPanel}>
+          <div className={styles.navBar}>
+            <button 
+              onClick={() => setActiveTab('ingest')}
+              className={`win95-border ${styles.navButton} ${activeTab === 'ingest' ? `win95-inset ${styles.active}` : ''}`}
+            >
+              💿 Add-Video.exe
+            </button>
+            <button 
+              onClick={() => setActiveTab('search')}
+              className={`win95-border ${styles.navButton} ${activeTab === 'search' ? `win95-inset ${styles.active}` : ''}`}
+            >
+              🔍 Search.exe
+            </button>
+          </div>
 
-      <div className="content-area">
-        {activeTab === 'ingest' ? (
-          <RetroWindow title="Video Ingestion Wizard 1.0" icon="📀">
-            {!data ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <label style={{fontWeight: 'bold'}}>Insert the URL:</label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <input 
-                    type="text" 
-                    className="win95-inset"
-                    placeholder="https://..." 
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    disabled={loading}
-                    style={{ flex: 1, padding: 8 }}
-                  />
-                  <button 
-                    className="win95-border" 
-                    onClick={handleAnalyze} 
-                    disabled={loading}
-                    style={{ padding: '0 20px', cursor: 'pointer', fontWeight: 'bold' }}
-                  >
-                    {loading ? 'Reading...' : 'Run'}
-                  </button>
-                </div>
-              </div>
-            ) : null}
+          <hr className={styles.separator} />
 
-            {error && (
-              <div className="win95-border" style={{ marginTop: 20, padding: 10, background: '#ffffcc', color: 'red', display: 'flex', gap: 10, alignItems: 'center' }}>
-                <span>⚠️</span>
-                <strong>{error}</strong>
-              </div>
+          <div className="content-area">
+            {activeTab === 'ingest' ? (
+              <>
+                {!data ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <label style={{fontWeight: 'bold'}}>Insert URL:</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input 
+                        type="text" 
+                        className="win95-inset"
+                        placeholder="https://..." 
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        disabled={loading}
+                        style={{ flex: 1, padding: 8 }}
+                      />
+                      <button 
+                        className="win95-border" 
+                        onClick={handleAnalyze} 
+                        disabled={loading}
+                        style={{ padding: '0 20px', cursor: 'pointer', fontWeight: 'bold' }}
+                      >
+                        {loading ? 'Reading...' : 'Run Analysis'}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {error && (
+                  <div className="win95-border" style={{ marginTop: 20, padding: 10, background: '#ffffcc', color: 'red', display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span>⚠️</span>
+                    <strong>{error}</strong>
+                  </div>
+                )}
+
+                {data && (
+                  <div style={{ marginTop: 20 }}>
+                    <ReviewForm 
+                      initialData={data} 
+                      onSave={handleSave} 
+                      onCancel={() => setData(null)} 
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+
+              <SearchSection />
+
             )}
+          </div>
+        </div>
+      </RetroWindow>
 
-            {data && (
-              <div style={{ marginTop: 20 }}>
-                <ReviewForm 
-                  initialData={data} 
-                  onSave={handleSave} 
-                  onCancel={() => setData(null)} 
-                />
-              </div>
-            )}
-          </RetroWindow>
-        ) : (
-          <RetroWindow title="Netscape Search Navigator" icon="🌐">
-             <SearchSection />
-          </RetroWindow>
-        )}
-      </div>
-      
       <footer className={styles.footer}>
         <p>© 1998 Pop Search Corp. - All rights reserved.</p>
       </footer>
