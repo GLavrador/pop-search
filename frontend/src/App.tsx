@@ -88,7 +88,7 @@ function App() {
 
           <hr className={styles.separator} />
 
-          <div className="content-area">
+          <div className={styles.contentArea}>
             {activeTab === 'ingest' ? (
               <>
                 {!data ? (

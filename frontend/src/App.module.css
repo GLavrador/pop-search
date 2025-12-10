@@ -61,3 +61,32 @@
   text-shadow: 1px 1px #000;
   text-align: center;
 }
+
+.contentArea {
+  padding: 10px;
+  background-color: var(--win-gray);
+  max-height: 65vh; 
+  overflow-y: auto; 
+  border-top: 2px solid var(--win-shadow-dark);
+  border-left: 2px solid var(--win-shadow-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: inset 1px 1px 0px 0px #000; 
+}
+
+.contentArea::-webkit-scrollbar {
+  width: 16px;
+}
+
+.contentArea::-webkit-scrollbar-track {
+  background: #dfdfdf; 
+  border-left: 1px solid white; 
+}
+
+.contentArea::-webkit-scrollbar-thumb {
+  background-color: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+}
