@@ -39,7 +39,7 @@ export const SearchSection = () => {
             placeholder="Type to search..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className={styles.input} 
+            className={`win95-inset ${styles.input}`}
           />
           <button type="submit" className={styles.button} disabled={loading}>
             {loading ? "Searching..." : "Find Now"}

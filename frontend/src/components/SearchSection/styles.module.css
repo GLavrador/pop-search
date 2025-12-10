@@ -24,12 +24,7 @@
 
 .input {
   flex: 1;
-  padding: 8px; 
-  border-top: 2px solid var(--win-shadow-dark);
-  border-left: 2px solid var(--win-shadow-dark);
-  border-right: 2px solid var(--win-light);
-  border-bottom: 2px solid var(--win-light);
-  outline: none;
+  padding: 8px;
   font-family: inherit;
 }
 
