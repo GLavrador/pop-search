@@ -49,3 +49,8 @@ input, textarea, button {
   border-radius: 0;
   font-family: inherit;
 }
+
+input:focus, textarea:focus, select:focus, button:focus {
+  outline: none;
+}
+
