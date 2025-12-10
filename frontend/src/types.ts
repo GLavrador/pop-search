@@ -20,6 +20,7 @@ export interface SearchResult {
   id: string;
   titulo_video: string;
   resumo: string;
+  url_original: string;
   similarity: number;
 }
 

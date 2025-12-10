@@ -7,7 +7,7 @@ interface VideoCardProps {
 
 export const VideoCard = ({ data }: VideoCardProps) => {
   const percentage = Math.round(data.similarity * 100);
-  const displayUrl = (data as any).url_original || data.id;
+  const displayUrl = data.url_original;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(displayUrl);

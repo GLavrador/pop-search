@@ -35,6 +35,7 @@ returns table (
   id uuid,
   titulo_video text,
   resumo text,
+  url_original text,
   similarity float
 )
 language plpgsql
@@ -45,6 +46,7 @@ begin
     videos.id,
     videos.titulo_video,
     videos.resumo,
+    videos.url_original,
     -- similaridade de cosseno para score
     1 - (videos.embedding <=> query_embedding) as similarity
   from videos

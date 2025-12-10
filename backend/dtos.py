@@ -29,4 +29,5 @@ class SearchResult(BaseModel):
     id: str
     titulo_video: str
     resumo: str
+    url_original: str
     similarity: float
