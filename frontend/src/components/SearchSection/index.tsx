@@ -22,7 +22,7 @@ export const SearchSection = () => {
       setResults(data);
     } catch (err) {
       console.error("[UI] Search error", err);
-      alert("Error performing search.");
+      alert("Error accessing database index.");
     } finally {
       setLoading(false);
     }
@@ -30,24 +30,28 @@ export const SearchSection = () => {
 
   return (
     <div className={styles.container}>
-      <form className={styles.searchBox} onSubmit={handleSearch}>
-        <input
-          type="text"
-          placeholder="Ask something"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className={styles.input}
-        />
-        <button type="submit" className={styles.button} disabled={loading}>
-          {loading ? "..." : "Search"}
-        </button>
+      <form className={styles.searchForm} onSubmit={handleSearch}>
+        <label className={styles.label}>Search Query:</label>
+        
+        <div className={styles.inputRow}>
+          <input
+            type="text"
+            placeholder="Type to search..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className={styles.input} 
+          />
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? "Searching..." : "Find Now"}
+          </button>
+        </div>
       </form>
 
-      <div className="results-list">
-        {loading && <p style={{ textAlign: 'center', color: '#666' }}>Searching semantic vector space...</p>}
+      <div className={styles.resultsList}>
+        {loading && <p style={{ textAlign: 'center', padding: 20 }}>Querying database...</p>}
         
         {!loading && hasSearched && results.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#888' }}>No relevant videos found.</p>
+          <p style={{ textAlign: 'center', color: 'red' }}>0 objects found.</p>
         )}
 
         {results.map((video) => (

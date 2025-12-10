@@ -1,40 +1,101 @@
 .card {
+  display: flex;
   background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  transition: box-shadow 0.2s;
+  border: 1px dotted #808080;
+  padding: 8px;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: #000080;
+  border-color: #000080;
+  cursor: default;
+}
+
+.card:hover .title, 
+.card:hover .summary, 
+.card:hover .score {
+  color: white;
+}
+
+.iconColumn {
+  font-size: 1.5rem;
+  padding-top: 2px;
+}
+
+.contentColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow: hidden;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.5rem;
+  align-items: center;
 }
 
 .title {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #2c3e50;
+  font-size: 1rem;
+  color: #0000EE;
+  text-decoration: underline;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
 }
 
 .score {
-  background: #e1f5fe;
-  color: #0288d1;
-  padding: 2px 8px;
-  border-radius: 12px;
+  font-family: 'Courier New', monospace;
   font-size: 0.8rem;
-  font-weight: bold;
+  color: #008000;
 }
 
 .summary {
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.85rem;
+  color: #333;
+  margin: 0;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: 2; 
+  line-clamp: 2;
+}
+
+.urlRow {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+  align-items: center;
+}
+
+.urlInput {
+  flex: 1;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid #999;
+  font-family: monospace;
+}
+
+.copyButton {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  background: var(--win-gray);
+  border: 1px solid #000;
+  border-top-color: #fff;
+  border-left-color: #fff;
+}
+
+.copyButton:active {
+  border: 1px solid #000;
+  border-bottom-color: #fff;
+  border-right-color: #fff;
 }
