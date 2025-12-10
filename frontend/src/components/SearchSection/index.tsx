@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { searchVideos } from "../../services/api";
 import type { SearchResult } from "../../types";
 import { VideoCard } from "../VideoCard";
+import { ProgressBar } from "../ProgressBar";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
@@ -9,6 +10,8 @@ export const SearchSection = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  
+  const abortRef = useRef<boolean>(false);
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -16,16 +19,27 @@ export const SearchSection = () => {
 
     setLoading(true);
     setHasSearched(true);
+    abortRef.current = false;
+
     try {
       console.log(`[UI] Searching for: ${query}`);
       const data = await searchVideos({ query });
+      
+      if (abortRef.current) return;
+
       setResults(data);
     } catch (err) {
+      if (abortRef.current) return;
       console.error("[UI] Search error", err);
       alert("Error accessing database index.");
     } finally {
-      setLoading(false);
+      if (!abortRef.current) setLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    abortRef.current = true;
+    setLoading(false);
   };
 
   return (
@@ -40,10 +54,26 @@ export const SearchSection = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={`win95-inset ${styles.input}`}
+            disabled={loading}
           />
-          <button type="submit" className={styles.button} disabled={loading}>
-            {loading ? "Searching..." : "Find Now"}
-          </button>
+          
+          {loading ? (
+             <div style={{ display: 'flex', gap: 5, minWidth: '140px' }}>
+               <ProgressBar />
+               <button 
+                 type="button" 
+                 onClick={handleCancel}
+                 className={styles.button}
+                 style={{ minWidth: 'auto', padding: '0 10px' }}
+               >
+                 Cancel
+               </button>
+             </div>
+          ) : (
+            <button type="submit" className={styles.button}>
+              Find Now
+            </button>
+          )}
         </div>
       </form>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import styles from './App.module.css';
 import './App.css';
 import { analyzeVideo, saveVideo } from './services/api';
@@ -6,6 +6,7 @@ import type { VideoMetadata } from './types';
 import { RetroWindow } from './components/RetroWindow';
 import { ReviewForm } from './components/ReviewForm';
 import { SearchSection } from './components/SearchSection';
+import { ProgressBar } from './components/ProgressBar';
 import axios from 'axios';
 
 type Tab = 'ingest' | 'search';
@@ -17,20 +18,31 @@ function App() {
   const [data, setData] = useState<VideoMetadata | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const abortRef = useRef<boolean>(false);
+
   const handleAnalyze = async () => { 
     if (!url) return;
 
     setLoading(true);
     setError(null);
     setData(null);
+    abortRef.current = false;
     
     console.log(`[UI] Starting analysis for URL: ${url}`);
     
     try {
       const result = await analyzeVideo(url);
+      
+      if (abortRef.current) {
+        console.log('[UI] Analysis cancelled by user. Ignoring result.');
+        return;
+      }
+
       console.log('[UI] Analysis received successfully', result);
       setData(result);
     } catch (err: any) {
+      if (abortRef.current) return;
+
       console.error('[UI] Error during analysis:', err);
       
       let errorMessage = 'Failed to analyze video. Please check backend.';
@@ -47,8 +59,15 @@ function App() {
 
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      if (!abortRef.current) {
+        setLoading(false);
+      }
     }
+  };
+
+  const handleCancel = () => {
+    abortRef.current = true;
+    setLoading(false);
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
@@ -104,14 +123,28 @@ function App() {
                         disabled={loading}
                         style={{ flex: 1, padding: 8 }}
                       />
-                      <button 
-                        className={`win95-border ${styles.actionButton}`}
-                        onClick={handleAnalyze} 
-                        disabled={loading}
-                        style={{ padding: '0 20px', cursor: 'pointer', fontWeight: 'bold' }}
-                      >
-                        {loading ? 'Reading...' : 'Run Analysis'}
-                      </button>
+                      
+                      {loading ? (
+                        <div style={{ display: 'flex', gap: 5, flex: 1, maxWidth: '200px' }}>
+                          <ProgressBar />
+                          <button 
+                             className="win95-border"
+                             onClick={handleCancel}
+                             style={{ fontWeight: 'bold', padding: '0 10px', cursor: 'pointer' }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          className={`win95-border ${styles.actionButton}`}
+                          onClick={handleAnalyze} 
+                          style={{ padding: '0 20px', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                          Run Analysis
+                        </button>
+                      )}
+
                     </div>
                   </div>
                 ) : null}
