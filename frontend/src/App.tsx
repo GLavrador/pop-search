@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import './App.css'; 
+import styles from './App.module.css';
+import './App.css';
 import { analyzeVideo, saveVideo } from './services/api';
 import type { VideoMetadata } from './types';
+import { RetroWindow } from './components/RetroWindow';
 import { ReviewForm } from './components/ReviewForm';
 import { SearchSection } from './components/SearchSection';
-import axios from 'axios'; 
+import axios from 'axios';
 
 type Tab = 'ingest' | 'search';
 
@@ -16,19 +18,19 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   const handleAnalyze = async () => { 
-      if (!url) return;
+    if (!url) return;
 
-      setLoading(true);
-      setError(null);
-      setData(null);
-
-      console.log(`[UI] Starting analysis for URL: ${url}`);
-      
-      try {
+    setLoading(true);
+    setError(null);
+    setData(null);
+    
+    console.log(`[UI] Starting analysis for URL: ${url}`);
+    
+    try {
       const result = await analyzeVideo(url);
       console.log('[UI] Analysis received successfully', result);
       setData(result);
-    } catch (err: any) { 
+    } catch (err: any) {
       console.error('[UI] Error during analysis:', err);
       
       let errorMessage = 'Failed to analyze video. Please check backend.';
@@ -42,7 +44,7 @@ function App() {
           errorMessage = `Error: ${err.response.data.detail}`;
         }
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -66,48 +68,59 @@ function App() {
   };
 
   return (
-    <div className="app-wrapper">
-      <nav style={{ padding: '1rem', background: '#333', color: 'white', marginBottom: '2rem' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', gap: '20px' }}>
-          <b style={{ marginRight: 'auto' }}>Pop Search</b>
-          <button 
-            onClick={() => setActiveTab('ingest')}
-            style={{ fontWeight: activeTab === 'ingest' ? 'bold' : 'normal', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
-          >
-            Add Video
-          </button>
-          <button 
-            onClick={() => setActiveTab('search')}
-            style={{ fontWeight: activeTab === 'search' ? 'bold' : 'normal', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
-          >
-            Search
-          </button>
-        </div>
-      </nav>
+    <div className={styles.appContainer}>      
+      <div className={`win95-border ${styles.navBar}`}>
+        <button 
+          onClick={() => setActiveTab('ingest')}
+          className={`${styles.navButton} ${activeTab === 'ingest' ? `win95-inset ${styles.active}` : 'win95-border'}`}
+        >
+          💿 Add Video.exe
+        </button>
+        <button 
+          onClick={() => setActiveTab('search')}
+          className={`${styles.navButton} ${activeTab === 'search' ? `win95-inset ${styles.active}` : 'win95-border'}`}
+        >
+          🔍 Search.exe
+        </button>
+      </div>
 
-      <div className="container">
+      <div className="content-area">
         {activeTab === 'ingest' ? (
-          <>
-            <h1>Video Ingestion</h1>
+          <RetroWindow title="Video Ingestion Wizard 1.0" icon="📀">
             {!data ? (
-              <div className="input-group">
-                <input 
-                  type="text" 
-                  placeholder="Paste Twitter/X URL here..." 
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  disabled={loading}
-                />
-                <button onClick={handleAnalyze} disabled={loading}>
-                  {loading ? 'Analyzing...' : 'Analyze'}
-                </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <label style={{fontWeight: 'bold'}}>Insert the URL:</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input 
+                    type="text" 
+                    className="win95-inset"
+                    placeholder="https://..." 
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    disabled={loading}
+                    style={{ flex: 1, padding: 8 }}
+                  />
+                  <button 
+                    className="win95-border" 
+                    onClick={handleAnalyze} 
+                    disabled={loading}
+                    style={{ padding: '0 20px', cursor: 'pointer', fontWeight: 'bold' }}
+                  >
+                    {loading ? 'Reading...' : 'Run'}
+                  </button>
+                </div>
               </div>
             ) : null}
 
-            {error && <p className="error">{error}</p>}
+            {error && (
+              <div className="win95-border" style={{ marginTop: 20, padding: 10, background: '#ffffcc', color: 'red', display: 'flex', gap: 10, alignItems: 'center' }}>
+                <span>⚠️</span>
+                <strong>{error}</strong>
+              </div>
+            )}
 
             {data && (
-              <div className="result-preview">
+              <div style={{ marginTop: 20 }}>
                 <ReviewForm 
                   initialData={data} 
                   onSave={handleSave} 
@@ -115,14 +128,17 @@ function App() {
                 />
               </div>
             )}
-          </>
+          </RetroWindow>
         ) : (
-          <>
-            <h1>Smart Search</h1>
-            <SearchSection />
-          </>
+          <RetroWindow title="Netscape Search Navigator" icon="🌐">
+             <SearchSection />
+          </RetroWindow>
         )}
       </div>
+      
+      <footer className={styles.footer}>
+        <p>© 1998 Pop Search Corp. - All rights reserved.</p>
+      </footer>
     </div>
   );
 }
