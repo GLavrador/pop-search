@@ -22,9 +22,16 @@ export const VideoCard = ({ data }: VideoCardProps) => {
       
       <div className={styles.contentColumn}>
         <div className={styles.header}>
-          <span className={styles.title} title={data.titulo_video}>
+          <a 
+            href={displayUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.title} 
+            title={data.titulo_video}
+          >
             {data.titulo_video}
-          </span>
+          </a>
+          
           <span className={styles.score}>
             MATCH: {percentage}%
           </span>
