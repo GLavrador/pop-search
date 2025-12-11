@@ -37,7 +37,7 @@ describe('ReviewForm Component', () => {
     const tagsInput = screen.getByDisplayValue('tag1');
     fireEvent.change(tagsInput, { target: { value: 'react, testing' } });
 
-    const saveButton = screen.getByText('Confirm & Save');
+    const saveButton = screen.getByText('Save');
     fireEvent.click(saveButton);
 
     await waitFor(() => {

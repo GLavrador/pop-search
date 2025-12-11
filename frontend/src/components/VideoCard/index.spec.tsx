@@ -6,7 +6,8 @@ const mockData: SearchResult = {
   id: '123',
   titulo_video: 'Test Video Title',
   resumo: 'This is a summary of the test video.',
-  similarity: 0.856
+  similarity: 0.856,
+  url_original: ''
 };
 
 describe('VideoCard Component', () => {
@@ -21,6 +22,6 @@ describe('VideoCard Component', () => {
   it('should display the similarity score as a percentage', () => {
     render(<VideoCard data={mockData} />);
     
-    expect(screen.getByText('86% Match')).toBeInTheDocument();
+    expect(screen.getByText(/MATCH:\s*86%/)).toBeInTheDocument();
   });
 });
