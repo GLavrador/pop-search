@@ -1,0 +1,65 @@
+.window {
+  margin-bottom: 20px;
+  background-color: var(--win-gray);
+  padding: 2px;
+}
+
+.titleBar {
+  background: linear-gradient(90deg, var(--win-blue-title), var(--win-blue-grad));
+  padding: 4px 4px 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 24px;
+}
+
+.titleText {
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.controls {
+  display: flex;
+  gap: 2px;
+}
+
+.controlButton {
+  width: 16px;
+  height: 14px;
+  padding: 0;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  font-family: sans-serif;
+  background: var(--win-gray);
+  border-top: 1px solid white;
+  border-left: 1px solid white;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  box-shadow: none; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; 
+  cursor: default;
+}
+
+.controlButton:active {
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
+.content {
+  padding: 16px;
+}

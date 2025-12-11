@@ -1,10 +1,13 @@
-import { useState } from 'react';
-import './App.css'; 
+import { useState, useRef } from 'react';
+import styles from './App.module.css';
+import './App.css';
 import { analyzeVideo, saveVideo } from './services/api';
 import type { VideoMetadata } from './types';
+import { RetroWindow } from './components/RetroWindow';
 import { ReviewForm } from './components/ReviewForm';
 import { SearchSection } from './components/SearchSection';
-import axios from 'axios'; 
+import { ProgressBar } from './components/ProgressBar';
+import axios from 'axios';
 
 type Tab = 'ingest' | 'search';
 
@@ -15,20 +18,31 @@ function App() {
   const [data, setData] = useState<VideoMetadata | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const abortRef = useRef<boolean>(false);
+
   const handleAnalyze = async () => { 
-      if (!url) return;
+    if (!url) return;
 
-      setLoading(true);
-      setError(null);
-      setData(null);
-
-      console.log(`[UI] Starting analysis for URL: ${url}`);
-      
-      try {
+    setLoading(true);
+    setError(null);
+    setData(null);
+    abortRef.current = false;
+    
+    console.log(`[UI] Starting analysis for URL: ${url}`);
+    
+    try {
       const result = await analyzeVideo(url);
+      
+      if (abortRef.current) {
+        console.log('[UI] Analysis cancelled by user. Ignoring result.');
+        return;
+      }
+
       console.log('[UI] Analysis received successfully', result);
       setData(result);
-    } catch (err: any) { 
+    } catch (err: any) {
+      if (abortRef.current) return;
+
       console.error('[UI] Error during analysis:', err);
       
       let errorMessage = 'Failed to analyze video. Please check backend.';
@@ -42,11 +56,18 @@ function App() {
           errorMessage = `Error: ${err.response.data.detail}`;
         }
       }
-      
+
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      if (!abortRef.current) {
+        setLoading(false);
+      }
     }
+  };
+
+  const handleCancel = () => {
+    abortRef.current = true;
+    setLoading(false);
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
@@ -66,63 +87,97 @@ function App() {
   };
 
   return (
-    <div className="app-wrapper">
-      <nav style={{ padding: '1rem', background: '#333', color: 'white', marginBottom: '2rem' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', gap: '20px' }}>
-          <b style={{ marginRight: 'auto' }}>Pop Search</b>
-          <button 
-            onClick={() => setActiveTab('ingest')}
-            style={{ fontWeight: activeTab === 'ingest' ? 'bold' : 'normal', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
-          >
-            Add Video
-          </button>
-          <button 
-            onClick={() => setActiveTab('search')}
-            style={{ fontWeight: activeTab === 'search' ? 'bold' : 'normal', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
-          >
-            Search
-          </button>
-        </div>
-      </nav>
+    <div className={styles.appContainer}>      
+      <RetroWindow title="Pop Search System" icon="💻">
+        <div className={styles.mainPanel}>
+          <div className={styles.navBar}>
+            <button 
+              onClick={() => setActiveTab('ingest')}
+              className={`win95-border ${styles.navButton} ${activeTab === 'ingest' ? `win95-inset ${styles.active}` : ''}`}
+            >
+              💿 Add-Video.exe
+            </button>
+            <button 
+              onClick={() => setActiveTab('search')}
+              className={`win95-border ${styles.navButton} ${activeTab === 'search' ? `win95-inset ${styles.active}` : ''}`}
+            >
+              🔍 Search.exe
+            </button>
+          </div>
 
-      <div className="container">
-        {activeTab === 'ingest' ? (
-          <>
-            <h1>Video Ingestion</h1>
-            {!data ? (
-              <div className="input-group">
-                <input 
-                  type="text" 
-                  placeholder="Paste Twitter/X URL here..." 
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  disabled={loading}
-                />
-                <button onClick={handleAnalyze} disabled={loading}>
-                  {loading ? 'Analyzing...' : 'Analyze'}
-                </button>
-              </div>
-            ) : null}
+          <hr className={styles.separator} />
 
-            {error && <p className="error">{error}</p>}
+          <div className={styles.contentArea}>
+            {activeTab === 'ingest' ? (
+              <>
+                {!data ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <label style={{fontWeight: 'bold'}}>Insert URL:</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input 
+                        type="text" 
+                        className="win95-inset"
+                        placeholder="https://..." 
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        disabled={loading}
+                        style={{ flex: 1, padding: 8 }}
+                      />
+                      
+                      {loading ? (
+                        <div style={{ display: 'flex', gap: 5, flex: 1, maxWidth: '200px' }}>
+                          <ProgressBar />
+                          <button 
+                             className="win95-border"
+                             onClick={handleCancel}
+                             style={{ fontWeight: 'bold', padding: '0 10px', cursor: 'pointer' }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          className={`win95-border ${styles.actionButton}`}
+                          onClick={handleAnalyze} 
+                          style={{ padding: '0 20px', cursor: 'pointer', fontWeight: 'bold' }}
+                        >
+                          Run Analysis
+                        </button>
+                      )}
 
-            {data && (
-              <div className="result-preview">
-                <ReviewForm 
-                  initialData={data} 
-                  onSave={handleSave} 
-                  onCancel={() => setData(null)} 
-                />
-              </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {error && (
+                  <div className="win95-border" style={{ marginTop: 20, padding: 10, background: '#ffffcc', color: 'red', display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span>⚠️</span>
+                    <strong>{error}</strong>
+                  </div>
+                )}
+
+                {data && (
+                  <div style={{ marginTop: 20 }}>
+                    <ReviewForm 
+                      initialData={data} 
+                      onSave={handleSave} 
+                      onCancel={() => setData(null)} 
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+
+              <SearchSection />
+
             )}
-          </>
-        ) : (
-          <>
-            <h1>Smart Search</h1>
-            <SearchSection />
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      </RetroWindow>
+
+      <footer className={styles.footer}>
+        <p>© 1998 Pop Search Corp. - All rights reserved.</p>
+      </footer>
     </div>
   );
 }

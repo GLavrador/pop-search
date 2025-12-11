@@ -1,38 +1,59 @@
 .container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
 }
 
-.searchBox {
+.searchForm {
   display: flex;
-  gap: 10px;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 10px; 
+  margin-bottom: 20px;
+  padding-bottom: 20px; 
+  border-bottom: 1px solid var(--win-shadow-dark);
+}
+
+.label {
+  font-weight: bold;
+  color: #000;
+  font-size: 1rem;
+}
+
+.inputRow {
+  display: flex;
+  gap: 8px; 
 }
 
 .input {
   flex: 1;
-  padding: 12px;
-  font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-}
-
-.input:focus {
-  border-color: #007bff;
-  outline: none;
+  padding: 8px;
+  font-family: inherit;
 }
 
 .button {
-  padding: 0 24px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  min-width: 140px;
+  padding: 0 10px;
+  background: var(--win-gray);
+  color: black;
+  font-weight: bold;
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
   cursor: pointer;
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
 }
 
-.button:hover {
-  background: #0056b3;
+.button:active {
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  transform: translateY(1px);
+}
+
+.resultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }

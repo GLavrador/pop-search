@@ -1,68 +1,56 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --win-gray: #c0c0c0;
+  --win-teal: #008080;
+  --win-dark: #000000;
+  --win-light: #ffffff;
+  --win-shadow-dark: #808080;
+  --win-shadow-light: #dfdfdf;
+  --win-blue-title: #000080;
+  --win-blue-grad: #1084d0;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  box-sizing: border-box;
+  border-radius: 0 !important; 
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
+  background-color: var(--win-teal);
+  font-family: "MS Sans Serif", "Tahoma", "Segoe UI", sans-serif;
+  -webkit-font-smoothing: none; 
+  color: var(--win-dark);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.win95-border {
+  background-color: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+  box-shadow: 1px 1px 0px 0px var(--win-shadow-light) inset, 
+              -1px -1px 0px 0px var(--win-shadow-dark) inset;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+.win95-inset {
+  background-color: var(--win-light);
+  border-top: 2px solid var(--win-shadow-dark);
+  border-left: 2px solid var(--win-shadow-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: inset 1px 1px 0px 0px var(--win-dark),
+              1px 1px 0px 0px var(--win-light);
+}
+
+input, textarea, button {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
   font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+input:focus, textarea:focus, select:focus, button:focus {
+  outline: none;
 }
+
