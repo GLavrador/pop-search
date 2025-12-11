@@ -10,12 +10,11 @@ client = TestClient(app)
 # decorator que substitui a função de embedding para não gastar da API
 @patch("services.embedding.embed_query")
 def test_search_videos_success(mock_embed, mock_supabase):
-    
     # 1. cenário (arrange)
     mock_embed.return_value = [0.1, 0.2, 0.3] 
     mock_response = MagicMock()
     mock_response.data = [
-        {"id": "123", "titulo_video": "Teste", "resumo": "Resumo", "similarity": 0.9}
+        {"id": "123", "titulo_video": "Teste", "resumo": "Resumo","url_original": "http://twitter.com/teste","similarity": 0.9}
     ]
     mock_supabase.rpc.return_value.execute.return_value = mock_response
 
@@ -32,6 +31,7 @@ def test_search_videos_success(mock_embed, mock_supabase):
     data = response.json()
     assert len(data) == 1
     assert data[0]["titulo_video"] == "Teste"
+    assert data[0]["url_original"] == "http://twitter.com/teste"
     
     # validar função de embedding com o texto certo
     mock_embed.assert_called_with("python tutorial")
