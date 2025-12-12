@@ -90,13 +90,3 @@
   border-right: 2px solid var(--win-dark);
   border-bottom: 2px solid var(--win-dark);
 }
-
-.actionButton {
-  min-width: 140px; 
-  padding: 0 10px; 
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
