@@ -8,12 +8,14 @@ interface UseVideoSearchReturn {
   results: SearchResult[];
   loading: boolean;
   hasSearched: boolean;
+  error: string | null; 
 }
 
 export const useVideoSearch = (): UseVideoSearchReturn => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const abortRef = useRef<boolean>(false);
 
@@ -22,6 +24,7 @@ export const useVideoSearch = (): UseVideoSearchReturn => {
 
     setLoading(true);
     setHasSearched(true);
+    setError(null);
     setResults([]); 
     abortRef.current = false;
 
@@ -32,10 +35,18 @@ export const useVideoSearch = (): UseVideoSearchReturn => {
       if (abortRef.current) return;
 
       setResults(data);
-    } catch (err) {
+    } catch (err: any) {
       if (abortRef.current) return;
       console.error("[UseVideoSearch] Search error", err);
-      alert("Error accessing database index.");
+      
+      let errorMessage = "Error accessing database index.";
+      if (err.response?.status === 504) {
+        errorMessage = "Search timed out.";
+      } else if (err.response?.data?.detail) {
+        errorMessage = `Error: ${err.response.data.detail}`;
+      }
+      
+      setError(errorMessage);
     } finally {
       if (!abortRef.current) setLoading(false);
     }
@@ -46,5 +57,5 @@ export const useVideoSearch = (): UseVideoSearchReturn => {
     setLoading(false);
   }, []);
 
-  return { search, cancel, results, loading, hasSearched };
+  return { search, cancel, results, loading, hasSearched, error };
 };
