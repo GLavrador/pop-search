@@ -3,8 +3,8 @@ import { useVideoAnalysis } from '../../hooks/useVideoAnalysis';
 import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
 import type { VideoMetadata } from '../../types';
-import { TaskProgress } from '../TaskProgress';
 import { ReviewForm } from '../ReviewForm';
+import { URLInputView } from './URLInputView';
 import styles from './styles.module.css';
 
 export const IngestSection = () => {
@@ -14,7 +14,7 @@ export const IngestSection = () => {
 
   useEffect(() => {
     if (data) {
-      setStatus('Analysis finished successfully. Please review data.', 5000);
+      setStatus('Analysis finished successfully. Please review data below.', 5000);
     }
   }, [data, setStatus]);
 
@@ -49,57 +49,36 @@ export const IngestSection = () => {
       }
   };
 
+  const handleCancelLoading = () => {
+    cancel();
+    setStatus("Analysis cancelled by user.", 3000);
+  };
+
+  const handleCancelReview = () => {
+    reset();
+    setStatus("Operation cancelled.");
+  };
+
   if (data) {
     return (
       <div className={styles.reviewContainer}>
         <ReviewForm 
           initialData={data} 
           onSave={handleSave} 
-          onCancel={() => {
-            reset();
-            setStatus("Operation cancelled.");
-          }} 
+          onCancel={handleCancelReview} 
         />
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <label className={styles.label}>Insert URL:</label>
-      
-      <div className={styles.inputRow}>
-        <input 
-          type="text" 
-          className="win95-inset win95-input"
-          placeholder="https://..." 
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          disabled={loading}
-        />
-        
-        {loading ? (
-          <TaskProgress onCancel={() => {
-            cancel();
-            setStatus("Analysis cancelled by user.", 3000);
-          }} />
-        ) : (
-          <button 
-            className="win95-btn"
-            style={{ minWidth: '140px' }}
-            onClick={handleAnalyze} 
-          >
-            Run Analysis
-          </button>
-        )}
-      </div>
-
-      {error && (
-        <div className="win95-border win95-error">
-          <span>⚠️</span>
-          <strong>{error}</strong>
-        </div>
-      )}
-    </div>
+    <URLInputView 
+      url={url}
+      onUrlChange={setUrl}
+      onAnalyze={handleAnalyze}
+      onCancel={handleCancelLoading}
+      loading={loading}
+      error={error}
+    />
   );
 };
