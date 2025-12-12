@@ -8,8 +8,8 @@ const api = axios.create({
   },
 });
 
-export const analyzeVideo = async (url: string): Promise<VideoMetadata> => {
-  const response = await api.post<VideoMetadata>('/analyze', { url });
+export const analyzeVideo = async (url: string, signal: AbortSignal): Promise<VideoMetadata> => {
+  const response = await api.post<VideoMetadata>('/analyze', { url }, { signal });
   return response.data;
 };
 

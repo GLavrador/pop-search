@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import axios from 'axios';
-import { analyzeVideo } from '../services/api';
+import { analyzeVideo } from '../services/api'; 
 import type { VideoMetadata } from '../types';
 
 interface UseVideoAnalysisReturn {
@@ -17,7 +17,7 @@ export const useVideoAnalysis = (): UseVideoAnalysisReturn => {
   const [data, setData] = useState<VideoMetadata | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  const abortRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const analyze = useCallback(async (url: string) => {
     if (!url) return;
@@ -25,47 +25,41 @@ export const useVideoAnalysis = (): UseVideoAnalysisReturn => {
     setLoading(true);
     setError(null);
     setData(null);
-    abortRef.current = false;
     
-    console.log(`[UseVideoAnalysis] Starting analysis for URL: ${url}`);
+    abortControllerRef.current = new AbortController();
     
     try {
-      const result = await analyzeVideo(url);
-      
-      if (abortRef.current) {
-        console.log('[UseVideoAnalysis] Analysis cancelled. Ignoring result.');
+      console.log(`[UseVideoAnalysis] Starting analysis for: ${url}`);
+      const result = await analyzeVideo(url, abortControllerRef.current.signal);
+
+      setData(result);
+
+    } catch (err: any) {
+      if (axios.isCancel(err) || err.name === 'AbortError') {
+        console.log('[UseVideoAnalysis] Request aborted by user.');
         return;
       }
 
-      console.log('[UseVideoAnalysis] Success', result);
-      setData(result);
-    } catch (err: any) {
-      if (abortRef.current) return;
-
       console.error('[UseVideoAnalysis] Error:', err);
       
-      let errorMessage = 'Failed to analyze video. Please check backend.';
-      
+      let errorMessage = 'Failed to analyze video.';
       if (axios.isAxiosError(err)) {
-        if (err.response?.status === 504) {
-          errorMessage = 'The AI is taking too long to respond (Timeout). Please try a shorter video (< 1 min).';
-        } else if (err.response?.status === 429) {
-          errorMessage = 'Rate Limit exceeded. Please wait a minute.';
-        } else if (err.response?.data?.detail) {
-          errorMessage = `Error: ${err.response.data.detail}`;
-        }
+        if (err.response?.status === 504) errorMessage = 'Server Timeout (504). Video might be too long.';
+        else if (err.response?.status === 429) errorMessage = 'Rate Limit Exceeded (429). Please wait.';
+        else if (err.response?.data?.detail) errorMessage = `Error: ${err.response.data.detail}`;
       }
-
+      
       setError(errorMessage);
     } finally {
-      if (!abortRef.current) {
-        setLoading(false);
-      }
+      setLoading(false);
+      abortControllerRef.current = null;
     }
   }, []);
 
   const cancel = useCallback(() => {
-    abortRef.current = true;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     setLoading(false);
   }, []);
 
