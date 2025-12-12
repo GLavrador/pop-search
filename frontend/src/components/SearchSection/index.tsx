@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useVideoSearch } from "../../hooks/useVideoSearch";
 import { useStatus } from "../../context/StatusContext";
 import { VideoCard } from "../VideoCard";
@@ -7,8 +7,25 @@ import styles from "./styles.module.css";
 
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
-  const { search, cancel, results, loading, hasSearched } = useVideoSearch();
+  const { search, cancel, results, loading, hasSearched, error } = useVideoSearch();
   const { setStatus } = useStatus();
+
+  useEffect(() => {
+    if (error) {
+      setStatus(`Search failed: ${error}`, 5000);
+    }
+  }, [error, setStatus]);
+
+  useEffect(() => {
+    if (!loading && hasSearched && !error) {
+      const count = results.length;
+      if (count === 0) {
+        setStatus("Search finished. No objects found.", 5000);
+      } else {
+        setStatus(`Search finished. Found ${count} object(s).`, 5000);
+      }
+    }
+  }, [loading, hasSearched, error, results.length, setStatus]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,8 +33,6 @@ export const SearchSection = () => {
     
     setStatus(`Searching database for: "${query}"...`);
     await search(query);
-  
-    setStatus("Ready");
   };
 
   const handleCancel = () => {
@@ -53,7 +68,14 @@ export const SearchSection = () => {
       <div className={styles.resultsList}>
         {loading && <p style={{ textAlign: 'center', padding: 20 }}>Querying database...</p>}
         
-        {!loading && hasSearched && results.length === 0 && (
+        {!loading && error && (
+          <div className="win95-border win95-error">
+            <span>⚠️</span>
+            <strong>{error}</strong>
+          </div>
+        )}
+
+        {!loading && !error && hasSearched && results.length === 0 && (
           <p style={{ textAlign: 'center', color: 'red' }}>0 objects found.</p>
         )}
 
