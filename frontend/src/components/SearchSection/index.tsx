@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useVideoSearch } from "../../hooks/useVideoSearch";
+import { useStatus } from "../../context/StatusContext";
 import { VideoCard } from "../VideoCard";
 import { TaskProgress } from "../TaskProgress";
 import styles from "./styles.module.css";
@@ -7,10 +8,21 @@ import styles from "./styles.module.css";
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
   const { search, cancel, results, loading, hasSearched } = useVideoSearch();
+  const { setStatus } = useStatus();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    search(query);
+    if (!query.trim()) return;
+    
+    setStatus(`Searching database for: "${query}"...`);
+    await search(query);
+  
+    setStatus("Ready");
+  };
+
+  const handleCancel = () => {
+    cancel();
+    setStatus("Search cancelled.");
   };
 
   return (
@@ -29,7 +41,7 @@ export const SearchSection = () => {
           />
           
           {loading ? (
-             <TaskProgress onCancel={cancel} />
+             <TaskProgress onCancel={handleCancel} />
           ) : (
             <button type="submit" className="win95-btn" style={{ minWidth: '140px' }}>
               Find Now
