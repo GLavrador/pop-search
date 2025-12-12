@@ -32,9 +32,7 @@ export const URLInputView = ({
           disabled={loading}
         />
         
-        {loading ? (
-          <TaskProgress onCancel={onCancel} />
-        ) : (
+        {!loading && (
           <button 
             className="win95-btn"
             style={{ minWidth: '140px' }}
@@ -44,6 +42,12 @@ export const URLInputView = ({
           </button>
         )}
       </div>
+
+      {loading && (
+        <div className={styles.progressRow}>
+          <TaskProgress onCancel={onCancel} />
+        </div>
+      )}
 
       {error && (
         <div className="win95-border win95-error">

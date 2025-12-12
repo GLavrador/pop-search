@@ -55,14 +55,18 @@ export const SearchSection = () => {
             disabled={loading}
           />
           
-          {loading ? (
-             <TaskProgress onCancel={handleCancel} />
-          ) : (
+          {!loading && (
             <button type="submit" className="win95-btn" style={{ minWidth: '140px' }}>
               Find Now
             </button>
           )}
         </div>
+
+        {loading && (
+           <div className={styles.progressRow}>
+             <TaskProgress onCancel={handleCancel} />
+           </div>
+        )}
       </form>
 
       <div className={styles.resultsList}>
