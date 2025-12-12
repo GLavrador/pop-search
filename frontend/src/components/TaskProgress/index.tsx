@@ -8,7 +8,7 @@ interface TaskProgressProps {
 export const TaskProgress = ({ onCancel }: TaskProgressProps) => {
   return (
     <div className={styles.container}>
-      <ProgressBar />
+      <ProgressBar loading={true} />
       <button 
         type="button" 
         onClick={onCancel}
