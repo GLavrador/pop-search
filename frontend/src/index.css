@@ -43,6 +43,62 @@ body {
               1px 1px 0px 0px var(--win-light);
 }
 
+.win95-btn {
+  background: var(--win-gray);
+  color: black;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 4px 12px;
+  cursor: pointer;
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.win95-btn:active {
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  padding: 5px 11px 3px 13px; 
+}
+
+.win95-btn:disabled {
+  color: var(--win-shadow-dark);
+  text-shadow: 1px 1px var(--win-light);
+  cursor: not-allowed;
+}
+
+.win95-input {
+  padding: 6px;
+  font-family: inherit;
+  width: 100%;
+  border: none;
+  outline: none;
+}
+
+.win95-input:disabled {
+  background-color: var(--win-gray);
+  color: var(--win-shadow-dark);
+}
+
+.win95-error {
+  margin-top: 20px;
+  padding: 10px;
+  background: #ffffcc;
+  color: red;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: bold;
+}
+
 input, textarea, button {
   appearance: none;
   -webkit-appearance: none;

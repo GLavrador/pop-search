@@ -24,24 +24,24 @@ export const SearchSection = () => {
             placeholder="Type to search..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className={`win95-inset ${styles.input}`}
+            className={`win95-inset win95-input`}
             disabled={loading}
           />
           
           {loading ? (
-             <div style={{ display: 'flex', gap: 5, minWidth: '140px' }}>
+             <div className={styles.loadingGroup}>
                <ProgressBar />
                <button 
                  type="button" 
                  onClick={cancel}
-                 className={styles.button}
-                 style={{ minWidth: 'auto', padding: '0 10px' }}
+                 className="win95-btn"
+                 style={{ minWidth: 'auto' }}
                >
                  Cancel
                </button>
              </div>
           ) : (
-            <button type="submit" className={styles.button}>
+            <button type="submit" className="win95-btn" style={{ minWidth: '140px' }}>
               Find Now
             </button>
           )}

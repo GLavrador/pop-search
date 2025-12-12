@@ -46,7 +46,7 @@ export const IngestSection = () => {
       <div className={styles.inputRow}>
         <input 
           type="text" 
-          className={`win95-inset ${styles.urlInput}`}
+          className="win95-inset win95-input"
           placeholder="https://..." 
           value={url}
           onChange={(e) => setUrl(e.target.value)}
@@ -57,7 +57,7 @@ export const IngestSection = () => {
           <div className={styles.loadingGroup}>
             <ProgressBar />
             <button 
-               className={`win95-border ${styles.cancelButton}`}
+               className="win95-btn"
                onClick={cancel}
             >
               Cancel
@@ -65,7 +65,8 @@ export const IngestSection = () => {
           </div>
         ) : (
           <button 
-            className={`win95-border ${styles.actionButton}`}
+            className="win95-btn"
+            style={{ minWidth: '140px' }}
             onClick={handleAnalyze} 
           >
             Run Analysis
@@ -74,7 +75,7 @@ export const IngestSection = () => {
       </div>
 
       {error && (
-        <div className={`win95-border ${styles.errorBox}`}>
+        <div className="win95-border win95-error">
           <span>⚠️</span>
           <strong>{error}</strong>
         </div>

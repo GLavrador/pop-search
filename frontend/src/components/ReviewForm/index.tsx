@@ -16,7 +16,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
 
   const onSubmit: SubmitHandler<VideoMetadata> = (data) => {
     const processedData = transformFormDataToMetadata(data);
-
+      
     console.log("[ReviewForm] Form submitted with processed data:", processedData);
     onSave(processedData);
   };
@@ -30,7 +30,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <label className={styles.label}>Suggested Title</label>
           <input 
             {...register("titulo_sugerido", { required: true })} 
-            className={`win95-inset ${styles.input}`} 
+            className="win95-inset win95-input" 
           />
         </div>
 
@@ -38,7 +38,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <label className={styles.label}>Summary</label>
           <textarea 
             {...register("resumo", { required: true })} 
-            className={`win95-inset ${styles.textarea}`} 
+            className={`win95-inset win95-input ${styles.textarea}`} 
           />
         </div>
 
@@ -46,9 +46,8 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <label className={styles.label}>Source URL (Read-only)</label>
           <input 
             {...register("url_original")} 
-            className={`win95-inset ${styles.input}`} 
+            className="win95-inset win95-input" 
             disabled 
-            style={{ color: '#666', background: '#ddd' }}
           />
         </div>
       </fieldset>
@@ -60,7 +59,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <label className={styles.label}>Context Description</label>
           <textarea 
             {...register("metadados_visuais.contexto")} 
-            className={`win95-inset ${styles.textarea}`}
+            className={`win95-inset win95-input ${styles.textarea}`}
           />
         </div>
 
@@ -68,7 +67,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <label className={styles.label}>Detected People (comma separated)</label>
           <input 
             {...register("metadados_visuais.pessoas")} 
-            className={`win95-inset ${styles.input}`}
+            className="win95-inset win95-input"
           />
         </div>
       </fieldset>
@@ -80,7 +79,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <label className={styles.label}>Transcription / Lyrics</label>
           <textarea 
             {...register("metadados_audio.transcricao_trecho")} 
-            className={`win95-inset ${styles.textarea}`}
+            className={`win95-inset win95-input ${styles.textarea}`}
           />
         </div>
 
@@ -89,7 +88,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
             <label className={styles.label}>Track Name</label>
             <input 
               {...register("metadados_audio.musica_identificada")} 
-              className={`win95-inset ${styles.input}`} 
+              className="win95-inset win95-input" 
             />
           </div>
 
@@ -97,7 +96,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
             <label className={styles.label}>Artist</label>
             <input 
               {...register("metadados_audio.artista")} 
-              className={`win95-inset ${styles.input}`} 
+              className="win95-inset win95-input" 
             />
           </div>
         </div>
@@ -108,7 +107,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
         <div className={styles.formGroup}>
           <input 
             {...register("tags_busca")} 
-            className={`win95-inset ${styles.input}`}
+            className="win95-inset win95-input"
             placeholder="tag1, tag2, tag3"
           />
         </div>
@@ -118,14 +117,13 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
         <button 
           type="button" 
           onClick={onCancel} 
-          className={`win95-border ${styles.button}`}
+          className="win95-btn"
         >
           Cancel
         </button>
         <button 
           type="submit" 
-          className={`win95-border ${styles.button}`}
-          style={{ fontWeight: 'bold' }}
+          className="win95-btn"
         >
           Save
         </button>
