@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVideoAnalysis } from '../../hooks/useVideoAnalysis';
 import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
@@ -12,16 +12,25 @@ export const IngestSection = () => {
   const { analyze, cancel, reset, loading, data, error } = useVideoAnalysis();
   const { setStatus } = useStatus();
 
+  useEffect(() => {
+    if (data) {
+      setStatus('Analysis finished successfully. Please review data.', 5000);
+    }
+  }, [data, setStatus]);
+
+  useEffect(() => {
+    if (error) {
+      setStatus('Analysis failed. Check the error box for details.', 5000);
+    }
+  }, [error, setStatus]);
+
   const handleAnalyze = async () => {
     if (!url) {
       setStatus('Error: Please enter a URL first.', 3000);
       return;
     }
     setStatus('Analyzing video... Please wait.');
-    
     await analyze(url);
-    
-    setStatus('Analysis finished. Please review data.');
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
