@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useVideoSearch } from "../../hooks/useVideoSearch";
 import { VideoCard } from "../VideoCard";
-import { ProgressBar } from "../ProgressBar";
+import { TaskProgress } from "../TaskProgress";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
@@ -29,17 +29,7 @@ export const SearchSection = () => {
           />
           
           {loading ? (
-             <div className={styles.loadingGroup}>
-               <ProgressBar />
-               <button 
-                 type="button" 
-                 onClick={cancel}
-                 className="win95-btn"
-                 style={{ minWidth: 'auto' }}
-               >
-                 Cancel
-               </button>
-             </div>
+             <TaskProgress onCancel={cancel} />
           ) : (
             <button type="submit" className="win95-btn" style={{ minWidth: '140px' }}>
               Find Now

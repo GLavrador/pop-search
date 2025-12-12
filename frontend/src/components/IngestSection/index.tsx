@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useVideoAnalysis } from '../../hooks/useVideoAnalysis';
 import { saveVideo } from '../../services/api';
 import type { VideoMetadata } from '../../types';
-import { ProgressBar } from '../ProgressBar';
+import { TaskProgress } from '../TaskProgress';
 import { ReviewForm } from '../ReviewForm';
 import styles from './styles.module.css';
 
@@ -54,15 +54,7 @@ export const IngestSection = () => {
         />
         
         {loading ? (
-          <div className={styles.loadingGroup}>
-            <ProgressBar />
-            <button 
-               className="win95-btn"
-               onClick={cancel}
-            >
-              Cancel
-            </button>
-          </div>
+          <TaskProgress onCancel={cancel} />
         ) : (
           <button 
             className="win95-btn"
