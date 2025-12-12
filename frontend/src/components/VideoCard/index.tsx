@@ -1,4 +1,5 @@
 import type { SearchResult } from "../../types";
+import { useStatus } from "../../context/StatusContext";
 import styles from "./styles.module.css";
 
 interface VideoCardProps {
@@ -6,12 +7,13 @@ interface VideoCardProps {
 }
 
 export const VideoCard = ({ data }: VideoCardProps) => {
+  const { setStatus } = useStatus();
   const percentage = Math.round(data.similarity * 100);
   const displayUrl = data.url_original;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(displayUrl);
-    alert("URL copied to clipboard!");
+    setStatus("URL copied to clipboard!", 2000);
   };
 
   return (
@@ -24,7 +26,7 @@ export const VideoCard = ({ data }: VideoCardProps) => {
         <div className={styles.header}>
           <a 
             href={displayUrl}
-            target="_blank"
+            target="_blank" 
             rel="noopener noreferrer"
             className={styles.title} 
             title={data.titulo_video}

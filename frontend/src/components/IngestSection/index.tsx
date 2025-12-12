@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVideoAnalysis } from '../../hooks/useVideoAnalysis';
+import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
 import type { VideoMetadata } from '../../types';
 import { TaskProgress } from '../TaskProgress';
@@ -9,21 +10,42 @@ import styles from './styles.module.css';
 export const IngestSection = () => {
   const [url, setUrl] = useState('');
   const { analyze, cancel, reset, loading, data, error } = useVideoAnalysis();
+  const { setStatus } = useStatus();
 
-  const handleAnalyze = () => {
-    analyze(url);
+  useEffect(() => {
+    if (data) {
+      setStatus('Analysis finished successfully. Please review data.', 5000);
+    }
+  }, [data, setStatus]);
+
+  useEffect(() => {
+    if (error) {
+      setStatus('Analysis failed. Check the error box for details.', 5000);
+    }
+  }, [error, setStatus]);
+
+  const handleAnalyze = async () => {
+    if (!url) {
+      setStatus('Error: Please enter a URL first.', 3000);
+      return;
+    }
+    setStatus('Analyzing video... Please wait.');
+    await analyze(url);
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
       try {
+        setStatus("Saving data to database...");
         console.log("[Ingest] Saving data...", finalData);
+        
         await saveVideo(finalData);
-        alert("Video saved successfully! 🎉");
+        
+        setStatus("Video saved successfully! Ready for next.", 5000);
         reset(); 
         setUrl('');
       } catch (err) {
         console.error("[Ingest] Save failed", err);
-        alert("Failed to save video. Check console for details.");
+        setStatus("Error: Failed to save video. Check console.", 5000);
       }
   };
 
@@ -33,7 +55,10 @@ export const IngestSection = () => {
         <ReviewForm 
           initialData={data} 
           onSave={handleSave} 
-          onCancel={reset} 
+          onCancel={() => {
+            reset();
+            setStatus("Operation cancelled.");
+          }} 
         />
       </div>
     );
@@ -54,7 +79,10 @@ export const IngestSection = () => {
         />
         
         {loading ? (
-          <TaskProgress onCancel={cancel} />
+          <TaskProgress onCancel={() => {
+            cancel();
+            setStatus("Analysis cancelled by user.", 3000);
+          }} />
         ) : (
           <button 
             className="win95-btn"
