@@ -22,34 +22,16 @@
   gap: 8px; 
 }
 
+.progressRow {
+  display: flex;
+  margin-top: 5px;
+  padding: 0px;
+}
+
 .input {
   flex: 1;
   padding: 8px;
   font-family: inherit;
-}
-
-.button {
-  min-width: 140px;
-  padding: 0 10px;
-  background: var(--win-gray);
-  color: black;
-  font-weight: bold;
-  border-top: 2px solid var(--win-light);
-  border-left: 2px solid var(--win-light);
-  border-right: 2px solid var(--win-dark);
-  border-bottom: 2px solid var(--win-dark);
-  cursor: pointer;
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-}
-
-.button:active {
-  border-top: 2px solid var(--win-dark);
-  border-left: 2px solid var(--win-dark);
-  border-right: 2px solid var(--win-light);
-  border-bottom: 2px solid var(--win-light);
-  transform: translateY(1px);
 }
 
 .resultsList {

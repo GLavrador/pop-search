@@ -1,5 +1,6 @@
-import { TaskProgress } from '../TaskProgress';
+import { useState, useEffect } from 'react';
 import styles from './styles.module.css';
+import { ProgressBar } from '../ProgressBar';
 
 interface URLInputViewProps {
   url: string;
@@ -16,8 +17,21 @@ export const URLInputView = ({
   onAnalyze, 
   onCancel, 
   loading, 
-  error 
+  error
 }: URLInputViewProps) => {
+  const [showProgress, setShowProgress] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      setShowProgress(true);
+    } else {
+      const timer = setTimeout(() => {
+        setShowProgress(false);
+      }, 500); 
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
   return (
     <div className={styles.container}>
       <label className={styles.label}>Insert URL:</label>
@@ -32,18 +46,33 @@ export const URLInputView = ({
           disabled={loading}
         />
         
-        {loading ? (
-          <TaskProgress onCancel={onCancel} />
-        ) : (
+        {!loading && (
           <button 
-            className="win95-btn"
-            style={{ minWidth: '140px' }}
+            className={`win95-btn ${styles.runButton}`}
             onClick={onAnalyze} 
           >
             Run Analysis
           </button>
         )}
       </div>
+
+      {showProgress && (
+        <div className={styles.progressRow}>
+          <div className={styles.progressContainer}>
+            <ProgressBar loading={loading} />
+            
+            {loading && (
+              <button 
+                type="button" 
+                onClick={onCancel}
+                className={`win95-btn ${styles.cancelButton}`}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="win95-border win95-error">
