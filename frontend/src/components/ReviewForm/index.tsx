@@ -1,5 +1,6 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import type { VideoMetadata } from "../../types";
+import { transformFormDataToMetadata } from "../../utils/transformers";
 import styles from "./styles.module.css";
 
 interface ReviewFormProps {
@@ -13,21 +14,8 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
     defaultValues: initialData,
   });
 
-  // onSubmit with arrays may need better approach
   const onSubmit: SubmitHandler<VideoMetadata> = (data) => {
-
-    const processedData = {
-      ...data,
-      metadados_visuais: {
-        ...data.metadados_visuais,
-        pessoas: typeof data.metadados_visuais.pessoas === 'string' 
-          ? (data.metadados_visuais.pessoas as string).split(',').map((s: string) => s.trim())
-          : data.metadados_visuais.pessoas, 
-      },
-      tags_busca: typeof data.tags_busca === 'string'
-        ? (data.tags_busca as string).split(',').map((s: string) => s.trim())
-        : data.tags_busca
-    };
+    const processedData = transformFormDataToMetadata(data);
 
     console.log("[ReviewForm] Form submitted with processed data:", processedData);
     onSave(processedData);
