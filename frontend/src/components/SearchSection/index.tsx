@@ -1,45 +1,16 @@
-import { useState, useRef } from "react";
-import { searchVideos } from "../../services/api";
-import type { SearchResult } from "../../types";
+import { useState } from "react";
+import { useVideoSearch } from "../../hooks/useVideoSearch";
 import { VideoCard } from "../VideoCard";
 import { ProgressBar } from "../ProgressBar";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  
-  const abortRef = useRef<boolean>(false);
+  const { search, cancel, results, loading, hasSearched } = useVideoSearch();
 
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!query.trim()) return;
-
-    setLoading(true);
-    setHasSearched(true);
-    abortRef.current = false;
-
-    try {
-      console.log(`[UI] Searching for: ${query}`);
-      const data = await searchVideos({ query });
-      
-      if (abortRef.current) return;
-
-      setResults(data);
-    } catch (err) {
-      if (abortRef.current) return;
-      console.error("[UI] Search error", err);
-      alert("Error accessing database index.");
-    } finally {
-      if (!abortRef.current) setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    abortRef.current = true;
-    setLoading(false);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    search(query);
   };
 
   return (
@@ -62,7 +33,7 @@ export const SearchSection = () => {
                <ProgressBar />
                <button 
                  type="button" 
-                 onClick={handleCancel}
+                 onClick={cancel}
                  className={styles.button}
                  style={{ minWidth: 'auto', padding: '0 10px' }}
                >
