@@ -63,3 +63,17 @@
 .content {
   padding: 16px;
 }
+
+@media (max-width: 768px) {
+  .window {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: visible; 
+  }
+  
+  .content {
+    flex: 1;
+    height: auto;
+  }
+}
