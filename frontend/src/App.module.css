@@ -30,7 +30,7 @@
   font-family: inherit;
   font-size: 1rem;
   cursor: pointer;
-  color: #000080 !important; 
+  color: var(--win-blue-title); 
   font-weight: bold;
   background-color: var(--win-gray);
   user-select: none;
@@ -89,4 +89,32 @@
   border-left: 2px solid var(--win-light);
   border-right: 2px solid var(--win-dark);
   border-bottom: 2px solid var(--win-dark);
+}
+
+@media (max-width: 768px) {
+  
+.appContainer > :global(.win95-border) {
+    width: 100%;
+  }
+  
+  .mainPanel {
+    width: 100%;
+    height: auto;
+  }
+
+  .contentArea {
+    max-height: none;
+    overflow: visible;
+    flex: 1;
+    padding: 5px;
+  }
+
+  .navBar {
+    gap: 10px;
+  }
+
+  .navButton {
+    flex: 1;
+    padding: 8px 100px;
+  }
 }

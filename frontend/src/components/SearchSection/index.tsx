@@ -40,6 +40,8 @@ export const SearchSection = () => {
     setStatus("Search cancelled.");
   };
 
+  const shouldShowSeparator = loading || hasSearched;
+
   return (
     <div className={styles.container}>
       <form className={styles.searchForm} onSubmit={handleSearch}>
@@ -63,11 +65,13 @@ export const SearchSection = () => {
         </div>
 
         {loading && (
-           <div className={styles.progressRow}>
-             <TaskProgress onCancel={handleCancel} />
-           </div>
+            <div className={styles.progressRow}>
+              <TaskProgress onCancel={handleCancel} />
+            </div>
         )}
       </form>
+
+      {shouldShowSeparator && <hr className={styles.separator} />}
 
       <div className={styles.resultsList}>
         {loading && <p style={{ textAlign: 'center', padding: 20 }}>Querying database...</p>}
