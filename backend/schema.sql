@@ -7,8 +7,10 @@ create table videos (
   created_at timestamp with time zone default now(),
   url_original text unique not null,
   titulo_video text,
+  descricao_completa text,
+  metadados_estruturados jsonb,
+  -- DEPRECATED: manter para compatibilidade com dados antigos
   resumo text,
-  -- armazenamento dos objetos aninhados como JSONB
   metadados_visuais jsonb, 
   metadados_audio jsonb,
   tags_busca text[], 
@@ -28,13 +30,14 @@ drop function if exists match_videos;
 create or replace function match_videos (
   query_embedding vector(768), -- vetor da consulta (mesma dimensão do modelo)
   match_threshold float,       -- grau mínimo de similaridade para retornar (0 a 1)
-  match_count int              -- limite de registros retornados
+  match_count int,             -- limite de registros retornados
   query_text text              -- para busca textual
 )
 returns table (
   id uuid,
   titulo_video text,
-  resumo text,
+  descricao_completa text,
+  resumo text,  -- para compatibilidade com dados antigos
   url_original text,
   similarity float
 )
@@ -45,6 +48,7 @@ begin
   select
     videos.id,
     videos.titulo_video,
+    videos.descricao_completa,
     videos.resumo,
     videos.url_original,
     -- similaridade de cosseno para score
@@ -54,9 +58,13 @@ begin
     -- condição 1: similaridade vetorial
     (1 - (videos.embedding <=> query_embedding) > match_threshold)
     OR 
-    -- condição 2: match exato de texto no título ou resumo
+    -- condição 2: match exato de texto no título
     (videos.titulo_video ILIKE '%' || query_text || '%')
     OR
+    -- condição 3: match no novo campo descricao_completa
+    (videos.descricao_completa ILIKE '%' || query_text || '%')
+    OR
+    -- condição 4: backward compatibility com resumo
     (videos.resumo ILIKE '%' || query_text || '%')
   order by similarity desc
   limit match_count;
