@@ -4,47 +4,70 @@ import type { VideoMetadata } from '../types';
 
 const baseMock: VideoMetadata = {
   titulo_sugerido: '',
-  resumo: '',
+  descricao_completa: '',
   url_original: '',
-  metadados_visuais: { pessoas: [], elementos_cenario: [], contexto: '' },
-  metadados_audio: { transcricao_trecho: '', musica_identificada: null, artista: null },
-  tags_busca: [],
-  sentimento: 'neutral'
+  metadados_estruturados: {
+    pessoas: [],
+    elementos_cenario: [],
+    audio: { transcricao: '', musica: null, artista: null },
+    tags_busca: []
+  }
 };
 
 describe('transformFormDataToMetadata', () => {
-  it('should split comma-separated strings into trimmed arrays', () => {
+  it('should split comma-separated tags_busca string into array', () => {
     const input = {
       ...baseMock,
-      metadados_visuais: { ...baseMock.metadados_visuais, pessoas: 'Alice, Bob, Charlie ' },
-      tags_busca: ' react,  testing '
-    } as unknown as VideoMetadata;
+      metadados_estruturados: {
+        ...baseMock.metadados_estruturados,
+        tags_busca: ' react,  testing ' as unknown as string[]
+      }
+    };
 
     const result = transformFormDataToMetadata(input);
 
-    expect(result.metadados_visuais.pessoas).toEqual(['Alice', 'Bob', 'Charlie']);
-    expect(result.tags_busca).toEqual(['react', 'testing']);
+    expect(result.metadados_estruturados.tags_busca).toEqual(['react', 'testing']);
   });
 
-  it('should remove empty strings caused by trailing commas', () => {
+  it('should split comma-separated elementos_cenario string into array', () => {
     const input = {
       ...baseMock,
-      tags_busca: 'tag1, tag2,, '
-    } as unknown as VideoMetadata;
+      metadados_estruturados: {
+        ...baseMock.metadados_estruturados,
+        elementos_cenario: 'mesa, cadeira, janela' as unknown as string[]
+      }
+    };
 
     const result = transformFormDataToMetadata(input);
 
-    expect(result.tags_busca).toEqual(['tag1', 'tag2']);
+    expect(result.metadados_estruturados.elementos_cenario).toEqual(['mesa', 'cadeira', 'janela']);
   });
 
   it('should handle already existing arrays (no change)', () => {
     const input = {
       ...baseMock,
-      tags_busca: ['tag1', 'tag2']
+      metadados_estruturados: {
+        ...baseMock.metadados_estruturados,
+        tags_busca: ['tag1', 'tag2']
+      }
     };
 
     const result = transformFormDataToMetadata(input);
 
-    expect(result.tags_busca).toEqual(['tag1', 'tag2']);
+    expect(result.metadados_estruturados.tags_busca).toEqual(['tag1', 'tag2']);
+  });
+
+  it('should remove empty strings caused by trailing commas', () => {
+    const input = {
+      ...baseMock,
+      metadados_estruturados: {
+        ...baseMock.metadados_estruturados,
+        tags_busca: 'tag1, tag2,, ' as unknown as string[]
+      }
+    };
+
+    const result = transformFormDataToMetadata(input);
+
+    expect(result.metadados_estruturados.tags_busca).toEqual(['tag1', 'tag2']);
   });
 });
