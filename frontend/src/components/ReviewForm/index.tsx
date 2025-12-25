@@ -35,10 +35,11 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Summary</label>
+          <label className={styles.label}>Full Description</label>
           <textarea 
-            {...register("resumo", { required: true })} 
-            className={`win95-inset win95-input ${styles.textarea}`} 
+            {...register("descricao_completa", { required: true })} 
+            className={`win95-inset win95-input ${styles.textarea}`}
+            rows={4}
           />
         </div>
 
@@ -53,21 +54,14 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
       </fieldset>
 
       <fieldset className={styles.groupFrame}>
-        <legend className={styles.legend}>Visual Analysis</legend>
+        <legend className={styles.legend}>Scene Elements</legend>
         
         <div className={styles.formGroup}>
-          <label className={styles.label}>Context Description</label>
-          <textarea 
-            {...register("metadados_visuais.contexto")} 
-            className={`win95-inset win95-input ${styles.textarea}`}
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Detected People (comma separated)</label>
+          <label className={styles.label}>Scene Elements (comma separated)</label>
           <input 
-            {...register("metadados_visuais.pessoas")} 
+            {...register("metadados_estruturados.elementos_cenario")} 
             className="win95-inset win95-input"
+            placeholder="mesa de cozinha, tigela azul, janela"
           />
         </div>
       </fieldset>
@@ -78,7 +72,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
         <div className={styles.formGroup}>
           <label className={styles.label}>Transcription / Lyrics</label>
           <textarea 
-            {...register("metadados_audio.transcricao_trecho")} 
+            {...register("metadados_estruturados.audio.transcricao")} 
             className={`win95-inset win95-input ${styles.textarea}`}
           />
         </div>
@@ -87,7 +81,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <div className={styles.formGroup}>
             <label className={styles.label}>Track Name</label>
             <input 
-              {...register("metadados_audio.musica_identificada")} 
+              {...register("metadados_estruturados.audio.musica")} 
               className="win95-inset win95-input" 
             />
           </div>
@@ -95,7 +89,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           <div className={styles.formGroup}>
             <label className={styles.label}>Artist</label>
             <input 
-              {...register("metadados_audio.artista")} 
+              {...register("metadados_estruturados.audio.artista")} 
               className="win95-inset win95-input" 
             />
           </div>
@@ -103,12 +97,12 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
       </fieldset>
 
       <fieldset className={styles.groupFrame}>
-        <legend className={styles.legend}>Index Tags</legend>
+        <legend className={styles.legend}>Search Tags</legend>
         <div className={styles.formGroup}>
           <input 
-            {...register("tags_busca")} 
+            {...register("metadados_estruturados.tags_busca")} 
             className="win95-inset win95-input"
-            placeholder="tag1, tag2, tag3"
+            placeholder="gato laranja, comendo ração, cozinha"
           />
         </div>
       </fieldset>
