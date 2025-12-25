@@ -14,7 +14,14 @@ def test_search_videos_success(mock_embed, mock_supabase):
     mock_embed.return_value = [0.1, 0.2, 0.3] 
     mock_response = MagicMock()
     mock_response.data = [
-        {"id": "123", "titulo_video": "Teste", "resumo": "Resumo","url_original": "http://twitter.com/teste","similarity": 0.9}
+        {
+            "id": "123", 
+            "titulo_video": "Teste", 
+            "descricao_completa": "Descrição completa do vídeo de teste",
+            "resumo": "Resumo",  # backward compatibility
+            "url_original": "http://twitter.com/teste",
+            "similarity": 0.9
+        }
     ]
     mock_supabase.rpc.return_value.execute.return_value = mock_response
 
