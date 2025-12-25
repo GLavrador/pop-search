@@ -13,13 +13,23 @@ EMBEDDING_MODEL = "models/text-embedding-004"
 def generate_searchable_text(data: VideoMetadataDTO) -> str:
     parts = [
         f"Title: {data.titulo_sugerido}",
-        f"Summary: {data.resumo}",
-        f"Visual Context: {data.metadados_visuais.contexto}",
-        f"Elements: {', '.join(data.metadados_visuais.elementos_cenario)}",
-        f"People: {', '.join(data.metadados_visuais.pessoas)}",
-        f"Audio Transcript: {data.metadados_audio.transcricao_trecho}",
-        f"Keywords: {', '.join(data.tags_busca)}"
+        f"Description: {data.descricao_completa}",
     ]
+    
+    meta = data.metadados_estruturados
+    
+    if meta.pessoas:
+        pessoas_text = ", ".join(p.descricao for p in meta.pessoas)
+        parts.append(f"People: {pessoas_text}")
+    
+    if meta.elementos_cenario:
+        parts.append(f"Elements: {', '.join(meta.elementos_cenario)}")
+    
+    if meta.audio and meta.audio.transcricao:
+        parts.append(f"Audio: {meta.audio.transcricao}")
+    
+    if meta.tags_busca:
+        parts.append(f"Keywords: {', '.join(meta.tags_busca)}")
     
     return "\n".join(parts)
 
