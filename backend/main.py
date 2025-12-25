@@ -90,10 +90,14 @@ async def save_video(metadata: VideoMetadataDTO):
 
     try:
         vector = create_embedding(metadata)
-        db_payload = metadata.model_dump()
-        if "titulo_sugerido" in db_payload:
-            db_payload["titulo_video"] = db_payload.pop("titulo_sugerido")
-        db_payload["embedding"] = vector
+        
+        db_payload = {
+            "titulo_video": metadata.titulo_sugerido,
+            "descricao_completa": metadata.descricao_completa,
+            "url_original": metadata.url_original,
+            "metadados_estruturados": metadata.metadados_estruturados.model_dump(),
+            "embedding": vector
+        }
         
         logger.info("Persisting to Supabase...")
         data, count = supabase.table("videos").insert(db_payload).execute()
