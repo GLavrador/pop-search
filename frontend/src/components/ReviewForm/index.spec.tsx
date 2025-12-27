@@ -5,20 +5,18 @@ import { vi } from 'vitest';
 
 const mockData: VideoMetadata = {
   titulo_sugerido: 'Original Title',
-  resumo: 'Original Summary',
+  descricao_completa: 'Original detailed description of the video content.',
   url_original: 'http://twitter.com/video',
-  metadados_visuais: {
-    pessoas: ['Person A'],
-    elementos_cenario: ['Tree'],
-    contexto: 'Outdoor',
-  },
-  metadados_audio: {
-    transcricao_trecho: 'Lalalala',
-    musica_identificada: null,
-    artista: null,
-  },
-  tags_busca: ['tag1'],
-  sentimento: 'neutral'
+  metadados_estruturados: {
+    pessoas: [{ descricao: 'Person A', papel: null }],
+    elementos_cenario: ['Tree', 'Building'],
+    audio: {
+      transcricao: 'Lalalala',
+      musica: null,
+      artista: null,
+    },
+    tags_busca: ['tag1', 'tag2']
+  }
 };
 
 describe('ReviewForm Component', () => {
@@ -26,7 +24,7 @@ describe('ReviewForm Component', () => {
     render(<ReviewForm initialData={mockData} onSave={() => {}} onCancel={() => {}} />);
     
     expect(screen.getByDisplayValue('Original Title')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('tag1')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('tag1,tag2')).toBeInTheDocument();
   });
 
   it('should convert comma-separated strings back to arrays on submit', async () => {
@@ -34,7 +32,7 @@ describe('ReviewForm Component', () => {
 
     render(<ReviewForm initialData={mockData} onSave={handleSaveMock} onCancel={() => {}} />);
 
-    const tagsInput = screen.getByDisplayValue('tag1');
+    const tagsInput = screen.getByDisplayValue('tag1,tag2');
     fireEvent.change(tagsInput, { target: { value: 'react, testing' } });
 
     const saveButton = screen.getByText('Save');
@@ -42,7 +40,9 @@ describe('ReviewForm Component', () => {
 
     await waitFor(() => {
       expect(handleSaveMock).toHaveBeenCalledWith(expect.objectContaining({
-        tags_busca: ['react', 'testing']
+        metadados_estruturados: expect.objectContaining({
+          tags_busca: ['react', 'testing']
+        })
       }));
     });
   });

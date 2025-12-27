@@ -1,25 +1,33 @@
+export interface Pessoa {
+  descricao: string;
+  papel: string | null;
+}
+
+export interface AudioInfo {
+  transcricao: string;
+  musica: string | null;
+  artista: string | null;
+}
+
+export interface MetadadosEstruturados {
+  pessoas: Pessoa[];
+  elementos_cenario: string[];
+  audio: AudioInfo;
+  tags_busca: string[];
+}
+
 export interface VideoMetadata {
   titulo_sugerido: string;
-  resumo: string;
-  url_original?: string; 
-  metadados_visuais: {
-    pessoas: string[];
-    elementos_cenario: string[];
-    contexto: string;
-  };
-  metadados_audio: {
-    transcricao_trecho: string;
-    musica_identificada: string | null;
-    artista: string | null;
-  };
-  tags_busca: string[];
-  sentimento: string;
+  descricao_completa: string;
+  url_original?: string;
+  metadados_estruturados: MetadadosEstruturados;
 }
 
 export interface SearchResult {
   id: string;
   titulo_video: string;
-  resumo: string;
+  descricao_completa?: string;
+  resumo?: string; // dados antigos
   url_original: string;
   similarity: number;
 }
