@@ -6,18 +6,24 @@ interface URLInputViewProps {
   url: string;
   onUrlChange: (url: string) => void;
   onAnalyze: () => void;
+  onOpenManualForm: () => void;
   onCancel: () => void;
   loading: boolean;
   error: string | null;
+  manualMode: boolean;
+  onManualModeChange: (value: boolean) => void;
 }
 
 export const URLInputView = ({ 
   url, 
   onUrlChange, 
   onAnalyze, 
+  onOpenManualForm,
   onCancel, 
   loading, 
-  error
+  error,
+  manualMode,
+  onManualModeChange
 }: URLInputViewProps) => {
   const [showProgress, setShowProgress] = useState(false);
 
@@ -46,7 +52,7 @@ export const URLInputView = ({
           disabled={loading}
         />
         
-        {!loading && (
+        {!loading && !manualMode && (
           <button 
             className={`win95-btn ${styles.runButton}`}
             onClick={onAnalyze} 
@@ -54,6 +60,29 @@ export const URLInputView = ({
             Run Analysis
           </button>
         )}
+
+        {!loading && manualMode && (
+          <button 
+            className={`win95-btn ${styles.runButton}`}
+            onClick={onOpenManualForm} 
+          >
+            Open Form
+          </button>
+        )}
+      </div>
+
+      <div className={styles.manualToggle}>
+        <input
+          type="checkbox"
+          id="manualModeCheckbox"
+          className={styles.manualCheckbox}
+          checked={manualMode}
+          onChange={(e) => onManualModeChange(e.target.checked)}
+          disabled={loading}
+        />
+        <label htmlFor="manualModeCheckbox" className={styles.manualLabel}>
+          Manual Input
+        </label>
       </div>
 
       {showProgress && (
