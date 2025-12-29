@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useVideoAnalysis } from '../../hooks/useVideoAnalysis';
+import { useVideoAnalysisMutation } from '../../hooks/useVideoAnalysisMutation';
 import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
 import type { VideoMetadata } from '../../types';
@@ -27,7 +27,7 @@ export const IngestSection = () => {
   const [url, setUrl] = useState('');
   const [manualMode, setManualMode] = useState(false);
   const [manualData, setManualData] = useState<VideoMetadata | null>(null);
-  const { analyze, cancel, reset, loading, data, error } = useVideoAnalysis();
+  const { analyze, reset, isLoading, data, error } = useVideoAnalysisMutation();
   const { setStatus } = useStatus();
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export const IngestSection = () => {
       return;
     }
     setStatus('Analyzing video... Please wait.');
-    await analyze(url);
+    analyze(url);
   };
 
   const handleOpenManualForm = () => {
@@ -78,7 +78,7 @@ export const IngestSection = () => {
   };
 
   const handleCancelLoading = () => {
-    cancel();
+    reset();
     setStatus("Analysis cancelled by user.", 3000);
   };
 
@@ -119,7 +119,7 @@ export const IngestSection = () => {
       onAnalyze={handleAnalyze}
       onOpenManualForm={handleOpenManualForm}
       onCancel={handleCancelLoading}
-      loading={loading}
+      loading={isLoading}
       error={error}
       manualMode={manualMode}
       onManualModeChange={setManualMode}
