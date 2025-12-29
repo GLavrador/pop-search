@@ -22,13 +22,16 @@ export const saveVideo = async (data: VideoMetadata): Promise<void> => {
   }
 };
 
-export const searchVideos = async ({ query, limit = 5, threshold = 0.25 }: SearchParams): Promise<SearchResult[]> => {
+export const searchVideos = async (
+  { query, limit = 5, threshold = 0.25 }: SearchParams,
+  signal?: AbortSignal
+): Promise<SearchResult[]> => {
   try {
-    const response = await api.post<SearchResult[]>('/search', { 
-      query, 
-      limit, 
-      threshold 
-    });
+    const response = await api.post<SearchResult[]>('/search', {
+      query,
+      limit,
+      threshold
+    }, { signal });
     return response.data;
   } catch (error) {
     console.error("Error searching videos:", error);

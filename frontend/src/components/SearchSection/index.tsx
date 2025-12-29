@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useVideoSearch } from "../../hooks/useVideoSearch";
+import { useVideoSearchQuery } from "../../hooks/useVideoSearchQuery";
 import { useStatus } from "../../context/StatusContext";
 import { VideoCard } from "../VideoCard";
 import { TaskProgress } from "../TaskProgress";
@@ -7,7 +7,7 @@ import styles from "./styles.module.css";
 
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
-  const { search, cancel, results, loading, hasSearched, error } = useVideoSearch();
+  const { search, results, isLoading, hasSearched, error } = useVideoSearchQuery();
   const { setStatus } = useStatus();
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export const SearchSection = () => {
   }, [error, setStatus]);
 
   useEffect(() => {
-    if (!loading && hasSearched && !error) {
+    if (!isLoading && hasSearched && !error) {
       const count = results.length;
       if (count === 0) {
         setStatus("Search finished. No objects found.", 5000);
@@ -25,22 +25,21 @@ export const SearchSection = () => {
         setStatus(`Search finished. Found ${count} object(s).`, 5000);
       }
     }
-  }, [loading, hasSearched, error, results.length, setStatus]);
+  }, [isLoading, hasSearched, error, results.length, setStatus]);
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
     
     setStatus(`Searching database for: "${query}"...`);
-    await search(query);
+    search(query);
   };
 
   const handleCancel = () => {
-    cancel();
     setStatus("Search cancelled.");
   };
 
-  const shouldShowSeparator = loading || hasSearched;
+  const shouldShowSeparator = isLoading || hasSearched;
 
   return (
     <div className={styles.container}>
@@ -54,17 +53,17 @@ export const SearchSection = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={`win95-inset win95-input`}
-            disabled={loading}
+            disabled={isLoading}
           />
           
-          {!loading && (
+          {!isLoading && (
             <button type="submit" className="win95-btn" style={{ minWidth: '140px' }}>
               Find Now
             </button>
           )}
         </div>
 
-        {loading && (
+        {isLoading && (
             <div className={styles.progressRow}>
               <TaskProgress onCancel={handleCancel} />
             </div>
@@ -74,16 +73,16 @@ export const SearchSection = () => {
       {shouldShowSeparator && <hr className={styles.separator} />}
 
       <div className={styles.resultsList}>
-        {loading && <p style={{ textAlign: 'center', padding: 20 }}>Querying database...</p>}
+        {isLoading && <p style={{ textAlign: 'center', padding: 20 }}>Querying database...</p>}
         
-        {!loading && error && (
+        {!isLoading && error && (
           <div className="win95-border win95-error">
             <span>⚠️</span>
             <strong>{error}</strong>
           </div>
         )}
 
-        {!loading && !error && hasSearched && results.length === 0 && (
+        {!isLoading && !error && hasSearched && results.length === 0 && (
           <p style={{ textAlign: 'center', color: 'red' }}>0 objects found.</p>
         )}
 
