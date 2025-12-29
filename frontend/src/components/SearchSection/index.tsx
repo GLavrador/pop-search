@@ -27,7 +27,7 @@ export const SearchSection = () => {
     }
   }, [isLoading, hasSearched, error, results.length, setStatus]);
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
     

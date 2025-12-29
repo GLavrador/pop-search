@@ -27,7 +27,7 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
     const getErrorMessage = (error: unknown): string => {
         if (!error) return '';
 
-        const err = error as any;
+        const err = error as { response?: { status?: number; data?: { detail?: string } } };
         if (err.response?.status === 504) return 'Search timed out.';
         if (err.response?.data?.detail) return `Error: ${err.response.data.detail}`;
         return 'Error accessing database index.';

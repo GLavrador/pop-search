@@ -42,7 +42,7 @@ export const IngestSection = () => {
     }
   }, [error, setStatus]);
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!url) {
       setStatus('Error: Please enter a URL first.', 3000);
       return;
