@@ -7,7 +7,7 @@ import styles from "./styles.module.css";
 
 interface ReviewFormProps {
   initialData: VideoMetadata;
-  onSave: (data: VideoMetadata) => void;
+  onSave: (data: VideoMetadata) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -30,9 +30,9 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
     resolver: zodResolver(videoMetadataFormSchema),
   });
 
-  const onSubmit: SubmitHandler<VideoMetadataForm> = (data) => {
+  const onSubmit: SubmitHandler<VideoMetadataForm> = async (data) => {
     const processedData = transformFormDataToMetadata(data);
-    onSave(processedData);
+    await onSave(processedData);
   };
 
   return (
