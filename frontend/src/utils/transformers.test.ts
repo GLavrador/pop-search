@@ -1,26 +1,26 @@
 import { describe, it, expect } from 'vitest';
 import { transformFormDataToMetadata } from './transformers';
-import type { VideoMetadata } from '../types';
+import type { VideoMetadataForm } from '../schemas/videoMetadata';
 
-const baseMock: VideoMetadata = {
-  titulo_sugerido: '',
-  descricao_completa: '',
-  url_original: '',
+const baseMock: VideoMetadataForm = {
+  titulo_sugerido: 'Test title with five words here',
+  descricao_completa: 'This is a test description that has more than twenty words so it passes the validation requirement for the form schema test',
+  url_original: 'https://example.com',
   metadados_estruturados: {
     pessoas: [],
-    elementos_cenario: [],
+    elementos_cenario: '',
     audio: { transcricao: '', musica: null, artista: null },
-    tags_busca: []
+    tags_busca: ''
   }
 };
 
 describe('transformFormDataToMetadata', () => {
   it('should split comma-separated tags_busca string into array', () => {
-    const input = {
+    const input: VideoMetadataForm = {
       ...baseMock,
       metadados_estruturados: {
         ...baseMock.metadados_estruturados,
-        tags_busca: ' react,  testing ' as unknown as string[]
+        tags_busca: ' react,  testing '
       }
     };
 
@@ -30,11 +30,11 @@ describe('transformFormDataToMetadata', () => {
   });
 
   it('should split comma-separated elementos_cenario string into array', () => {
-    const input = {
+    const input: VideoMetadataForm = {
       ...baseMock,
       metadados_estruturados: {
         ...baseMock.metadados_estruturados,
-        elementos_cenario: 'mesa, cadeira, janela' as unknown as string[]
+        elementos_cenario: 'mesa, cadeira, janela'
       }
     };
 
@@ -43,26 +43,26 @@ describe('transformFormDataToMetadata', () => {
     expect(result.metadados_estruturados.elementos_cenario).toEqual(['mesa', 'cadeira', 'janela']);
   });
 
-  it('should handle already existing arrays (no change)', () => {
-    const input = {
+  it('should handle empty string (returns empty array)', () => {
+    const input: VideoMetadataForm = {
       ...baseMock,
       metadados_estruturados: {
         ...baseMock.metadados_estruturados,
-        tags_busca: ['tag1', 'tag2']
+        tags_busca: ''
       }
     };
 
     const result = transformFormDataToMetadata(input);
 
-    expect(result.metadados_estruturados.tags_busca).toEqual(['tag1', 'tag2']);
+    expect(result.metadados_estruturados.tags_busca).toEqual([]);
   });
 
   it('should remove empty strings caused by trailing commas', () => {
-    const input = {
+    const input: VideoMetadataForm = {
       ...baseMock,
       metadados_estruturados: {
         ...baseMock.metadados_estruturados,
-        tags_busca: 'tag1, tag2,, ' as unknown as string[]
+        tags_busca: 'tag1, tag2,, '
       }
     };
 

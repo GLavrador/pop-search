@@ -1,5 +1,7 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import type { VideoMetadata } from "../../types";
+import { videoMetadataFormSchema, type VideoMetadataForm } from "../../schemas/videoMetadata";
 import { transformFormDataToMetadata } from "../../utils/transformers";
 import styles from "./styles.module.css";
 
@@ -9,15 +11,27 @@ interface ReviewFormProps {
   onCancel: () => void;
 }
 
+const toFormData = (data: VideoMetadata): VideoMetadataForm => ({
+  ...data,
+  metadados_estruturados: {
+    ...data.metadados_estruturados,
+    elementos_cenario: data.metadados_estruturados.elementos_cenario.join(', '),
+    tags_busca: data.metadados_estruturados.tags_busca.join(', '),
+  },
+});
+
 export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) => {
-  const { register, handleSubmit } = useForm<VideoMetadata>({
-    defaultValues: initialData,
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors, isSubmitting } 
+  } = useForm<VideoMetadataForm>({
+    defaultValues: toFormData(initialData),
+    resolver: zodResolver(videoMetadataFormSchema),
   });
 
-  const onSubmit: SubmitHandler<VideoMetadata> = (data) => {
+  const onSubmit: SubmitHandler<VideoMetadataForm> = (data) => {
     const processedData = transformFormDataToMetadata(data);
-      
-    console.log("[ReviewForm] Form submitted with processed data:", processedData);
     onSave(processedData);
   };
 
@@ -27,20 +41,32 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
         <legend className={styles.legend}>General Information</legend>
         
         <div className={styles.formGroup}>
-          <label className={styles.label}>Suggested Title</label>
+          <label className={styles.label}>
+            Suggested Title <span className={styles.required}>*</span>
+            <span className={styles.hint}>(min. 5 words)</span>
+          </label>
           <input 
-            {...register("titulo_sugerido", { required: true })} 
-            className="win95-inset win95-input" 
+            {...register("titulo_sugerido")} 
+            className={`win95-inset win95-input ${errors.titulo_sugerido ? styles.inputError : ''}`} 
           />
+          {errors.titulo_sugerido && (
+            <span className={styles.errorText}>{errors.titulo_sugerido.message}</span>
+          )}
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Full Description</label>
+          <label className={styles.label}>
+            Full Description <span className={styles.required}>*</span>
+            <span className={styles.hint}>(min. 20 words)</span>
+          </label>
           <textarea 
-            {...register("descricao_completa", { required: true })} 
-            className={`win95-inset win95-input ${styles.textarea}`}
+            {...register("descricao_completa")} 
+            className={`win95-inset win95-input ${styles.textarea} ${errors.descricao_completa ? styles.inputError : ''}`}
             rows={4}
           />
+          {errors.descricao_completa && (
+            <span className={styles.errorText}>{errors.descricao_completa.message}</span>
+          )}
         </div>
 
         <div className={styles.formGroup}>
@@ -77,7 +103,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className={styles.gridRow}>
           <div className={styles.formGroup}>
             <label className={styles.label}>Track Name</label>
             <input 
@@ -99,11 +125,18 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
       <fieldset className={styles.groupFrame}>
         <legend className={styles.legend}>Search Tags</legend>
         <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Tags <span className={styles.required}>*</span>
+            <span className={styles.hint}>(min. 7 tags, separated by comma)</span>
+          </label>
           <input 
             {...register("metadados_estruturados.tags_busca")} 
-            className="win95-inset win95-input"
-            placeholder="gato laranja, comendo ração, cozinha"
+            className={`win95-inset win95-input ${errors.metadados_estruturados?.tags_busca ? styles.inputError : ''}`}
+            placeholder="gato laranja, comendo ração, cozinha, animal, pet, fofo, viral"
           />
+          {errors.metadados_estruturados?.tags_busca && (
+            <span className={styles.errorText}>{errors.metadados_estruturados.tags_busca.message}</span>
+          )}
         </div>
       </fieldset>
 
@@ -112,14 +145,16 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
           type="button" 
           onClick={onCancel} 
           className="win95-btn"
+          disabled={isSubmitting}
         >
           Cancel
         </button>
         <button 
           type="submit" 
           className="win95-btn"
+          disabled={isSubmitting}
         >
-          Save
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>

@@ -22,7 +22,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
 }
 
 .navButton {
@@ -30,7 +30,7 @@
   font-family: inherit;
   font-size: 1rem;
   cursor: pointer;
-  color: var(--win-blue-title); 
+  color: var(--win-blue-title);
   font-weight: bold;
   background-color: var(--win-gray);
   user-select: none;
@@ -42,7 +42,7 @@
 }
 
 .active {
-  background-color: var(--win-shadow-light); 
+  background-color: var(--win-shadow-light);
 }
 
 .separator {
@@ -58,20 +58,20 @@
   margin-top: 20px;
   color: white;
   font-size: 0.8rem;
-  text-shadow: 1px 1px #000;
+  text-shadow: 1px 1px var(--win-dark);
   text-align: center;
 }
 
 .contentArea {
   padding: 10px;
   background-color: var(--win-gray);
-  max-height: 65vh; 
-  overflow-y: auto; 
+  max-height: 65vh;
+  overflow-y: auto;
   border-top: 2px solid var(--win-shadow-dark);
   border-left: 2px solid var(--win-shadow-dark);
   border-right: 2px solid var(--win-light);
   border-bottom: 2px solid var(--win-light);
-  box-shadow: inset 1px 1px 0px 0px #000; 
+  box-shadow: inset 1px 1px 0px 0px var(--win-dark);
 }
 
 .contentArea::-webkit-scrollbar {
@@ -79,8 +79,8 @@
 }
 
 .contentArea::-webkit-scrollbar-track {
-  background: #dfdfdf; 
-  border-left: 1px solid white; 
+  background: var(--win-shadow-light);
+  border-left: 1px solid white;
 }
 
 .contentArea::-webkit-scrollbar-thumb {
@@ -92,11 +92,11 @@
 }
 
 @media (max-width: 768px) {
-  
-.appContainer > :global(.win95-border) {
+
+  .appContainer> :global(.win95-border) {
     width: 100%;
   }
-  
+
   .mainPanel {
     width: 100%;
     height: auto;

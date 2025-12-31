@@ -1,7 +1,7 @@
 .card {
   display: flex;
-  background: #fff;
-  border: 1px dotted #808080;
+  background: var(--win-light);
+  border: 1px dotted var(--win-shadow-dark);
   padding: 8px;
   gap: 12px;
   align-items: flex-start;
@@ -15,8 +15,8 @@
   cursor: default;
 }
 
-.card:hover .title, 
-.card:hover .summary, 
+.card:hover .title,
+.card:hover .summary,
 .card:hover .score {
   color: white;
 }
@@ -32,7 +32,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 0; 
+  min-width: 0;
 }
 
 .header {
@@ -40,31 +40,31 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
 }
 
 .title {
   font-size: 1rem;
-  color: #0000EE;
+  color: var(--win-link);
   text-decoration: underline;
   font-weight: bold;
-  white-space: normal; 
+  white-space: normal;
   word-wrap: break-word;
-  flex: 1; 
+  flex: 1;
   min-width: 0;
 }
 
 .score {
   font-family: 'Courier New', monospace;
   font-size: 0.8rem;
-  color: #008000;
+  color: var(--win-success);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .summary {
   font-size: 0.85rem;
-  color: #333;
+  color: var(--win-text-dark);
   margin: 0;
   line-height: 1.2;
   white-space: normal;
@@ -83,11 +83,11 @@
   flex: 1;
   font-size: 0.75rem;
   padding: 2px 4px;
-  background: #f0f0f0;
-  color: #555;
-  border: 1px solid #999;
+  background: var(--win-tag-bg);
+  color: var(--win-text-secondary);
+  border: 1px solid var(--win-tag-border);
   font-family: monospace;
-  min-width: 0; 
+  min-width: 0;
 }
 
 .copyButton {
@@ -95,16 +95,16 @@
   font-size: 0.7rem;
   cursor: pointer;
   background: var(--win-gray);
-  border: 1px solid #000;
-  border-top-color: #fff;
-  border-left-color: #fff;
+  border: 1px solid var(--win-dark);
+  border-top-color: var(--win-light);
+  border-left-color: var(--win-light);
   flex-shrink: 0;
 }
 
 .copyButton:active {
-  border: 1px solid #000;
-  border-bottom-color: #fff;
-  border-right-color: #fff;
+  border: 1px solid var(--win-dark);
+  border-bottom-color: var(--win-light);
+  border-right-color: var(--win-light);
 }
 
 @media (max-width: 768px) {
@@ -119,7 +119,7 @@
   .mainPanel {
     width: 100%;
     max-width: none;
-    height: auto !important; 
+    height: auto !important;
     min-height: auto;
     display: flex;
     flex-direction: column;
@@ -127,22 +127,22 @@
 
   .contentArea {
     max-height: none;
-    height: auto; 
-    overflow: visible; 
+    height: auto;
+    overflow: visible;
     padding: 8px;
-    flex: 1; 
+    flex: 1;
   }
 
   .navButton {
-    flex: 1; 
-    min-width: 0; 
-    white-space: nowrap; 
-    font-size: 0.8rem; 
-    padding: 8px 4px; 
-    
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    padding: 8px 4px;
+
     justify-content: center;
   }
-  
+
   .navBar {
     gap: 5px;
   }

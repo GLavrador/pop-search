@@ -5,8 +5,8 @@
 .searchForm {
   display: flex;
   flex-direction: column;
-  gap: 10px; 
-  margin-bottom: 0; 
+  gap: 10px;
+  margin-bottom: 0;
 }
 
 .separator {
@@ -19,13 +19,13 @@
 
 .label {
   font-weight: bold;
-  color: #000;
+  color: var(--win-dark);
   font-size: 1rem;
 }
 
 .inputRow {
   display: flex;
-  gap: 8px; 
+  gap: 8px;
 }
 
 .progressRow {
