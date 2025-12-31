@@ -17,7 +17,6 @@ export const saveVideo = async (data: VideoMetadata): Promise<void> => {
   try {
     await api.post('/videos', data);
   } catch (error) {
-    console.error("Error saving video:", error);
     throw error;
   }
 };
@@ -34,7 +33,6 @@ export const searchVideos = async (
     }, { signal });
     return response.data;
   } catch (error) {
-    console.error("Error searching videos:", error);
     throw error;
   }
 };

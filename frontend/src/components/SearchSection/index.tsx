@@ -36,7 +36,7 @@ export const SearchSection = () => {
   };
 
   const handleCancel = () => {
-    setStatus("Search cancelled.");
+    setStatus("Search cancelled.", 3000);
   };
 
   const shouldShowSeparator = isLoading || hasSearched;

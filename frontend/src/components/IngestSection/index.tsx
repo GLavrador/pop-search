@@ -75,7 +75,6 @@ export const IngestSection = () => {
   const handleSave = async (finalData: VideoMetadata) => {
       try {
         setStatus("Saving data to database...");
-        console.log("[Ingest] Saving data...", finalData);
         
         await saveVideo(finalData);
         
@@ -83,9 +82,8 @@ export const IngestSection = () => {
         reset(); 
         setManualData(null);
         setUrl('');
-      } catch (err) {
-        console.error("[Ingest] Save failed", err);
-        setStatus("Error: Failed to save video. Check console.", 5000);
+      } catch {
+        setStatus("Error: Failed to save video. Please try again.", 5000);
       }
   };
 
@@ -97,7 +95,7 @@ export const IngestSection = () => {
   const handleCancelReview = () => {
     reset();
     setManualData(null);
-    setStatus("Operation cancelled.");
+    setStatus("Operation cancelled.", 3000);
   };
 
   if (data) {
