@@ -57,7 +57,7 @@ export const SearchSection = () => {
           />
           
           {!isLoading && (
-            <button type="submit" className="win95-btn" style={{ minWidth: '140px' }}>
+            <button type="submit" className={`win95-btn ${styles.submitButton}`}>
               Find Now
             </button>
           )}
@@ -73,7 +73,7 @@ export const SearchSection = () => {
       {shouldShowSeparator && <hr className={styles.separator} />}
 
       <div className={styles.resultsList}>
-        {isLoading && <p style={{ textAlign: 'center', padding: 20 }}>Querying database...</p>}
+        {isLoading && <p className={styles.loadingText}>Querying database...</p>}
         
         {!isLoading && error && (
           <div className="win95-border win95-error">
@@ -83,7 +83,7 @@ export const SearchSection = () => {
         )}
 
         {!isLoading && !error && hasSearched && results.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'red' }}>0 objects found.</p>
+          <p className={styles.noResultsText}>0 objects found.</p>
         )}
 
         {results.map((video) => (

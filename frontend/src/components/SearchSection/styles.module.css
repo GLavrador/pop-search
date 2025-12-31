@@ -45,3 +45,17 @@
   flex-direction: column;
   gap: 4px;
 }
+
+.submitButton {
+  min-width: 140px;
+}
+
+.loadingText {
+  text-align: center;
+  padding: 20px;
+}
+
+.noResultsText {
+  text-align: center;
+  color: var(--win-error-text);
+}
