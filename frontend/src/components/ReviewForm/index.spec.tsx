@@ -21,14 +21,14 @@ const mockData: VideoMetadata = {
 
 describe('ReviewForm Component', () => {
   it('should render initial values correctly', () => {
-    render(<ReviewForm initialData={mockData} onSave={() => {}} onCancel={() => {}} />);
+    render(<ReviewForm initialData={mockData} onSave={async () => {}} onCancel={() => {}} />);
     
     expect(screen.getByDisplayValue('Original Title With Five Words Here')).toBeInTheDocument();
     expect(screen.getByDisplayValue('tag1, tag2, tag3, tag4, tag5, tag6, tag7')).toBeInTheDocument();
   });
 
   it('should convert comma-separated strings back to arrays on submit', async () => {
-    const handleSaveMock = vi.fn();
+    const handleSaveMock = vi.fn().mockResolvedValue(undefined);
 
     render(<ReviewForm initialData={mockData} onSave={handleSaveMock} onCancel={() => {}} />);
 
