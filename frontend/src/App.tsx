@@ -1,21 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from './App.module.css';
 import './App.css';
 import { RetroWindow } from './components/RetroWindow';
 import { SearchSection } from './components/SearchSection';
 import { IngestSection } from './components/IngestSection';
-import { StatusProvider, useStatus } from './context/StatusContext';
+import { StatusProvider } from './context/StatusContext';
 import { StatusBar } from './components/StatusBar';
 
 type Tab = 'ingest' | 'search';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
-  const { setStatus } = useStatus();
 
-  useEffect(() => {
-    setStatus('Ready');
-  }, [activeTab, setStatus]);
 
   return (
     <div className={styles.appContainer}>      
@@ -39,11 +35,12 @@ function AppContent() {
           <hr className={styles.separator} />
 
           <div className={styles.contentArea}>
-            {activeTab === 'ingest' ? (
+            <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>
               <IngestSection />
-            ) : (
+            </div>
+            <div style={{ display: activeTab === 'search' ? 'block' : 'none' }}>
               <SearchSection />
-            )}
+            </div>
           </div>
           <StatusBar />
         </div>
