@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const videoUrlInputSchema = z.string()
+    .min(1, "Please enter a URL")
+    .url("Please enter a valid URL");
+
+export type VideoUrlInput = z.infer<typeof videoUrlInputSchema>;
 
 const countWords = (text: string): number =>
     text.trim().split(/\s+/).filter(Boolean).length;
@@ -53,7 +58,7 @@ const metadadosFormSchema = z.object({
     pessoas: z.array(pessoaSchema),
     elementos_cenario: z.string(),
     audio: audioInfoSchema,
-    tags_busca: z.string()        
+    tags_busca: z.string()
         .refine(
             (text) => text.split(',').map(s => s.trim()).filter(Boolean).length >= 7,
             "Minimum of 7 required tags (separated by commas)"
