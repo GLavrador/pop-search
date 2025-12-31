@@ -24,7 +24,7 @@ button {
 }
 
 .result-preview {
-  background: #000000;
+  background: var(--win-dark);
   padding: 20px;
   border-radius: 8px;
   overflow-x: auto;
@@ -32,6 +32,6 @@ button {
 }
 
 .error {
-  color: red;
+  color: var(--win-error-text);
   font-weight: bold;
 }

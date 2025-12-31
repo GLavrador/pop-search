@@ -62,7 +62,7 @@
   height: 13px;
   min-width: 13px;
   min-height: 13px;
-  background-color: #fff;
+  background-color: var(--win-light);
   border-top: 2px solid var(--win-shadow-dark);
   border-left: 2px solid var(--win-shadow-dark);
   border-right: 2px solid var(--win-light);
