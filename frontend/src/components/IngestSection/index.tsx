@@ -5,7 +5,17 @@ import { saveVideo } from '../../services/api';
 import type { VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
 import { URLInputView } from './URLInputView';
+import { videoUrlInputSchema } from '../../schemas/videoMetadata';
 import styles from './styles.module.css';
+
+const validateUrl = (url: string): { success: boolean; error?: string } => {
+  const result = videoUrlInputSchema.safeParse(url);
+  if (result.success) {
+    return { success: true };
+  }
+  const errorMessage = result.error.issues[0]?.message || 'Invalid URL';
+  return { success: false, error: errorMessage };
+};
 
 const createEmptyMetadata = (url: string): VideoMetadata => ({
   titulo_sugerido: '',
@@ -43,8 +53,9 @@ export const IngestSection = () => {
   }, [error, setStatus]);
 
   const handleAnalyze = () => {
-    if (!url) {
-      setStatus('Error: Please enter a URL first.', 3000);
+    const validation = validateUrl(url);
+    if (!validation.success) {
+      setStatus(`Error: ${validation.error}`, 3000);
       return;
     }
     setStatus('Analyzing video... Please wait.');
@@ -52,8 +63,9 @@ export const IngestSection = () => {
   };
 
   const handleOpenManualForm = () => {
-    if (!url) {
-      setStatus('Error: Please enter a URL first.', 3000);
+    const validation = validateUrl(url);
+    if (!validation.success) {
+      setStatus(`Error: ${validation.error}`, 3000);
       return;
     }
     setManualData(createEmptyMetadata(url));
