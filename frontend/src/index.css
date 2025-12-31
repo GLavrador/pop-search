@@ -7,11 +7,22 @@
   --win-shadow-light: #dfdfdf;
   --win-blue-title: #000080;
   --win-blue-grad: #1084d0;
+  --win-error-border: #c45c4c;
+  --win-error-bg: #fff8f6;
+  --win-error-text: #b84a3a;
+  --win-link: #0000EE;
+  --win-success: #008000;
+  --win-text-muted: #666;
+  --win-text-secondary: #555;
+  --win-text-dark: #333;
+  --win-warning-bg: #ffffcc;
+  --win-tag-bg: #f0f0f0;
+  --win-tag-border: #999;
 }
 
 * {
   box-sizing: border-box;
-  border-radius: 0 !important; 
+  border-radius: 0 !important;
 }
 
 body {
@@ -19,7 +30,7 @@ body {
   padding: 0;
   background-color: var(--win-teal);
   font-family: "MS Sans Serif", "Tahoma", "Segoe UI", sans-serif;
-  -webkit-font-smoothing: none; 
+  -webkit-font-smoothing: none;
   color: var(--win-dark);
 }
 
@@ -29,8 +40,8 @@ body {
   border-left: 2px solid var(--win-light);
   border-right: 2px solid var(--win-dark);
   border-bottom: 2px solid var(--win-dark);
-  box-shadow: 1px 1px 0px 0px var(--win-shadow-light) inset, 
-              -1px -1px 0px 0px var(--win-shadow-dark) inset;
+  box-shadow: 1px 1px 0px 0px var(--win-shadow-light) inset,
+    -1px -1px 0px 0px var(--win-shadow-dark) inset;
 }
 
 .win95-inset {
@@ -40,7 +51,7 @@ body {
   border-right: 2px solid var(--win-light);
   border-bottom: 2px solid var(--win-light);
   box-shadow: inset 1px 1px 0px 0px var(--win-dark),
-              1px 1px 0px 0px var(--win-light);
+    1px 1px 0px 0px var(--win-light);
 }
 
 .win95-btn {
@@ -66,7 +77,7 @@ body {
   border-left: 2px solid var(--win-dark);
   border-right: 2px solid var(--win-light);
   border-bottom: 2px solid var(--win-light);
-  padding: 5px 11px 3px 13px; 
+  padding: 5px 11px 3px 13px;
 }
 
 .win95-btn:disabled {
@@ -91,22 +102,26 @@ body {
 .win95-error {
   margin-top: 20px;
   padding: 10px;
-  background: #ffffcc;
-  color: red;
+  background: var(--win-warning-bg);
+  color: var(--win-error-text);
   display: flex;
   gap: 10px;
   align-items: center;
   font-weight: bold;
 }
 
-input, textarea, button {
+input,
+textarea,
+button {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 0;
   font-family: inherit;
 }
 
-input:focus, textarea:focus, select:focus, button:focus {
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
   outline: none;
 }
-
