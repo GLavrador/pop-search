@@ -95,7 +95,7 @@ export const IngestSection = () => {
   const handleCancelReview = () => {
     reset();
     setManualData(null);
-    setStatus("Operation cancelled.");
+    setStatus("Operation cancelled.", 3000);
   };
 
   if (data) {
