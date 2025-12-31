@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useRef, useEffect, type ReactNode, useCallback } from 'react';
 
 interface StatusContextType {
   status: string;
@@ -9,12 +9,28 @@ const StatusContext = createContext<StatusContextType | undefined>(undefined);
 
 export const StatusProvider = ({ children }: { children: ReactNode }) => {
   const [status, setStatusState] = useState('Ready');
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const setStatus = useCallback((message: string, duration?: number) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
     setStatusState(message);
+    
     if (duration) {
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setStatusState('Ready');
+        timeoutRef.current = null;
       }, duration);
     }
   }, []);
