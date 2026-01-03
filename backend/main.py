@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel 
 from contextlib import asynccontextmanager
 from services.embedding import create_embedding
@@ -25,11 +26,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Pop Search API",
-    version="0.1.0",
+    version="1.0.0",
+    description="API para indexação e busca de vídeos usando IA multimodal",
     lifespan=lifespan
 )
 
-app = FastAPI(title="Pop Search API", version="0.1.0", lifespan=lifespan)
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
