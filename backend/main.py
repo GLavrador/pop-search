@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel 
+from pydantic import BaseModel, field_validator
 from contextlib import asynccontextmanager
 from services.embedding import create_embedding
 from dtos import VideoMetadataDTO, SearchRequest, SearchResult
@@ -8,6 +8,7 @@ from db import supabase
 from services.ai import analyze_video_content
 from services.downloader import download_video
 from core.logger import configure_logging, get_logger
+from core.exceptions import InvalidURLError, validate_video_url
 import shutil
 import os
 from slowapi import _rate_limit_exceeded_handler
@@ -45,12 +46,19 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 class VideoAnalysisRequest(BaseModel):
     url: str
+    
+    @field_validator('url')
+    @classmethod
+    def validate_url_domain(cls, v: str) -> str:
+        if not validate_video_url(v):
+            raise ValueError('URL must be from twitter.com, x.com, youtube.com, or youtu.be')
+        return v
 
 @app.get("/")
 async def health_check():
     return {
         "status": "ok",
-        "version": "0.1.0"
+        "version": "1.0.0"
     }
 
 @app.post("/analyze")
@@ -83,8 +91,11 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
         raise he
 
     except Exception as e:
-        logger.exception("Error processing video flow")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Error processing video flow: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An internal error occurred while processing the video. Please try again."
+        )
         
     finally:
         if video_path and os.path.exists(video_path):
@@ -121,8 +132,11 @@ async def save_video(metadata: VideoMetadataDTO):
         }
 
     except Exception as e:
-        logger.exception("Failed to save video")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Failed to save video: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An internal error occurred while saving the video. Please try again."
+        )
     
 @app.post("/search", response_model=list[SearchResult])
 @limiter.limit("20/minute")
@@ -150,5 +164,8 @@ async def search_videos(request: Request, search_request: SearchRequest):
         return results
 
     except Exception as e:
-        logger.exception("Search failed")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"Search failed: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail="An internal error occurred during search. Please try again."
+        )
