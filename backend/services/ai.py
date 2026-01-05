@@ -1,36 +1,13 @@
-import os
 import json
 import asyncio
 import time
-import google.generativeai as genai
-from dotenv import load_dotenv
 from core.logger import get_logger
+from core.gemini import get_genai, get_generation_model
 
 logger = get_logger("services.ai")
 
-load_dotenv()
-
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
-    logger.critical("GEMINI_API_KEY missing in environment variables")
-    raise ValueError("GEMINI_API_KEY not found in .env")
-
-genai.configure(api_key=API_KEY)
-
-MODEL_NAME = "gemini-2.5-flash"
-
-generation_config = {
-  "temperature": 0.2,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_output_tokens": 65536,
-  "response_mime_type": "application/json",
-}
-
-model = genai.GenerativeModel(
-  model_name=MODEL_NAME,
-  generation_config=generation_config,
-)
+genai = get_genai()
+model = get_generation_model()
 
 SYSTEM_PROMPT = """
 Você é um analista de vídeos especialista em extração de metadados para indexação e busca.

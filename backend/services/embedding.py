@@ -1,14 +1,10 @@
-import os
-import google.generativeai as genai
 from core.logger import get_logger
+from core.gemini import get_genai, EMBEDDING_MODEL
 from dtos import VideoMetadataDTO
 
 logger = get_logger("services.embedding")
 
-if not genai.configure and os.getenv("GEMINI_API_KEY"):
-     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-EMBEDDING_MODEL = "models/text-embedding-004"
+genai = get_genai()
 
 def generate_searchable_text(data: VideoMetadataDTO) -> str:
     parts = [
