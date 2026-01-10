@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 from contextlib import asynccontextmanager
-from services.embedding import create_embedding
+from services.embedding import create_embedding, embed_query
 from dtos import VideoMetadataDTO, SearchRequest, SearchResult
 from db import supabase
 from services.ai import analyze_video_content
@@ -11,6 +11,7 @@ from core.logger import configure_logging, get_logger
 from core.exceptions import InvalidURLError, validate_video_url
 import shutil
 import os
+import asyncio
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded 
 from core.limiter import limiter 
@@ -69,7 +70,8 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
     video_path = None
 
     try:
-        video_path = download_video(body.url)
+        loop = asyncio.get_event_loop()
+        video_path = await loop.run_in_executor(None, download_video, body.url)
         
         analysis_result = await analyze_video_content(video_path)
         
@@ -110,7 +112,8 @@ async def save_video(metadata: VideoMetadataDTO):
         raise HTTPException(status_code=400, detail="url_original is required for saving")
 
     try:
-        vector = create_embedding(metadata)
+        loop = asyncio.get_event_loop()
+        vector = await loop.run_in_executor(None, create_embedding, metadata)
         
         db_payload = {
             "titulo_video": metadata.titulo_sugerido,
@@ -144,9 +147,8 @@ async def search_videos(request: Request, search_request: SearchRequest):
     logger.info(f"Search requested: '{search_request.query}'")
     
     try:
-        from services.embedding import embed_query 
-        
-        query_vector = embed_query(search_request.query)
+        loop = asyncio.get_event_loop()
+        query_vector = await loop.run_in_executor(None, embed_query, search_request.query)
         
         rpc_params = {
             "query_embedding": query_vector,
