@@ -4,8 +4,8 @@ from main import app
 
 client = TestClient(app)
 
-@patch("main.supabase")
-@patch("main.embed_query")
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
 def test_search_videos_success(mock_embed, mock_supabase):
     mock_embed.return_value = [0.1, 0.2, 0.3] 
     mock_response = MagicMock()

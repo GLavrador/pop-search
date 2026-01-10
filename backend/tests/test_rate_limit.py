@@ -4,8 +4,8 @@ from main import app
 
 client = TestClient(app)
 
-@patch("main.embed_query")
-@patch("main.supabase")
+@patch("routers.search.embed_query")
+@patch("routers.search.supabase")
 def test_search_rate_limit(mock_supabase, mock_embed):
     mock_embed.return_value = [0.1] * 768
     mock_supabase.rpc.return_value.execute.return_value.data = []

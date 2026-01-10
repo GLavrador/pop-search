@@ -26,25 +26,25 @@ class TestURLValidation:
         assert validate_video_url("https://notx.com/video") is False
         
     def test_analyze_rejects_invalid_url(self):
-        response = client.post("/analyze", json={"url": "https://malicious.com/video"})
+        response = client.post("/videos/analyze", json={"url": "https://malicious.com/video"})
         assert response.status_code == 422
         assert "URL must be from" in response.text
 
 
 class TestErrorHandling:    
-    @patch("main.download_video")
+    @patch("routers.videos.download_video")
     def test_analyze_hides_internal_errors(self, mock_download):
         mock_download.side_effect = Exception("Sensitive database error: connection failed to postgres:5432")
         
-        response = client.post("/analyze", json={"url": "https://twitter.com/user/status/123"})
+        response = client.post("/videos/analyze", json={"url": "https://twitter.com/user/status/123"})
         
         assert response.status_code == 500
         assert "postgres" not in response.text
         assert "database" not in response.text.lower()
         assert "internal error" in response.text.lower()
     
-    @patch("main.supabase")
-    @patch("main.embed_query")
+    @patch("routers.search.supabase")
+    @patch("routers.search.embed_query")
     def test_search_hides_internal_errors(self, mock_embed, mock_supabase):
 
         mock_embed.side_effect = Exception("API key invalid: sk-abc123")
