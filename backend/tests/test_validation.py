@@ -44,7 +44,7 @@ class TestErrorHandling:
         assert "internal error" in response.text.lower()
     
     @patch("main.supabase")
-    @patch("services.embedding.embed_query")
+    @patch("main.embed_query")
     def test_search_hides_internal_errors(self, mock_embed, mock_supabase):
 
         mock_embed.side_effect = Exception("API key invalid: sk-abc123")

@@ -4,7 +4,7 @@ from main import app
 
 client = TestClient(app)
 
-@patch("services.embedding.embed_query")
+@patch("main.embed_query")
 @patch("main.supabase")
 def test_search_rate_limit(mock_supabase, mock_embed):
     mock_embed.return_value = [0.1] * 768
