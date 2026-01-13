@@ -71,7 +71,8 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
 
 
 @router.post("")
-async def save_video(metadata: VideoMetadataDTO):
+@limiter.limit("10/minute")
+async def save_video(request: Request, metadata: VideoMetadataDTO):
     logger.info(f"Save request received for video: {metadata.titulo_sugerido}")
     
     if not metadata.url_original:
