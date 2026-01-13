@@ -98,14 +98,13 @@ class TestSearchableTextGeneration:
         """Test text generation with only required fields."""
         dto = VideoMetadataDTO(
             titulo_sugerido="Vídeo simples",
-            descricao_completa="Um vídeo qualquer.",
+            descricao_completa="Um vídeo qualquer com uma legenda qualquer que cumpra uns requisitos quaisquer de uma aplicação qualquer de uma pessoa qualquer em um lugar qualquer.",
             metadados_estruturados=MetadadosEstruturados()
         )
         
         text = generate_searchable_text(dto)
         
         assert "Title: Vídeo simples" in text
-        assert "Description: Um vídeo qualquer." in text
-        # Empty fields should not appear
+        assert "Description: Um vídeo qualquer com uma legenda qualquer que cumpra uns requisitos quaisquer de uma aplicação qualquer de uma pessoa qualquer em um lugar qualquer." in text
         assert "People:" not in text
         assert "Elements:" not in text
