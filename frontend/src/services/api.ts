@@ -9,7 +9,7 @@ const api = axios.create({
 });
 
 export const analyzeVideo = async (url: string, signal: AbortSignal): Promise<VideoMetadata> => {
-  const response = await api.post<VideoMetadata>('/analyze', { url }, { signal });
+  const response = await api.post<VideoMetadata>('/videos/analyze', { url }, { signal });
   return response.data;
 };
 
