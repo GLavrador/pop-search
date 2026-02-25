@@ -90,3 +90,43 @@
   cursor: pointer;
   user-select: none;
 }
+
+.optionsContainer {
+  padding: 16px;
+  background-color: var(--win-gray);
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionsTitle {
+  font-weight: bold;
+}
+
+.optionsDescription {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkboxOption {
+  margin-top: 0;
+}
+
+.checkboxOptionLabel {
+  font-size: 14px;
+}
+
+.runAnalysisActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}

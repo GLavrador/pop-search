@@ -13,7 +13,6 @@ export interface MetadadosEstruturados {
   pessoas: Pessoa[];
   elementos_cenario: string[];
   audio: AudioInfo;
-  tags_busca: string[];
 }
 
 export interface VideoMetadata {

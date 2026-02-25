@@ -28,8 +28,7 @@ const createEmptyMetadata = (url: string): VideoMetadata => ({
       transcricao: '',
       musica: null,
       artista: null,
-    },
-    tags_busca: []
+    }
   }
 });
 
@@ -39,6 +38,8 @@ export const IngestSection = () => {
   const [manualData, setManualData] = useState<VideoMetadata | null>(null);
   const { analyze, reset, isLoading, data, error } = useVideoAnalysisMutation();
   const { setStatus } = useStatus();
+
+  const [analyticsOptions, setAnalyticsOptions] = useState({ analyzeScenes: false, analyzeAudio: false });
 
   useEffect(() => {
     if (data) {
@@ -52,37 +53,37 @@ export const IngestSection = () => {
     }
   }, [error, setStatus]);
 
-  const handleAnalyze = () => {
+  const performValidation = (): boolean => {
     const validation = validateUrl(url);
     if (!validation.success) {
       setStatus(`Error: ${validation.error}`, 3000);
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const handleAnalyze = (options: { analyzeScenes: boolean; analyzeAudio: boolean }) => {
+    if (!performValidation()) return;
+    setAnalyticsOptions(options);
     setStatus('Analyzing video... Please wait.');
-    analyze(url);
+    analyze(url, options);
   };
 
   const handleOpenManualForm = () => {
-    const validation = validateUrl(url);
-    if (!validation.success) {
-      setStatus(`Error: ${validation.error}`, 3000);
-      return;
-    }
+    if (!performValidation()) return;
     setManualData(createEmptyMetadata(url));
+    setAnalyticsOptions({ analyzeScenes: true, analyzeAudio: true }); // By default show all in manual mode
     setStatus('Manual mode: Fill in the video details below.');
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
       try {
         setStatus("Saving data to database...");
-        
         await saveVideo(finalData);
-        
         setStatus("Video saved successfully! Ready for next.", 5000);
-        reset(); 
-        setManualData(null);
-        setUrl('');
-      } catch {
+        handleCancelReview();
+      } catch (err: unknown) {
+        console.error("Failed to save video to database:", err);
         setStatus("Error: Failed to save video. Please try again.", 5000);
       }
   };
@@ -95,28 +96,21 @@ export const IngestSection = () => {
   const handleCancelReview = () => {
     reset();
     setManualData(null);
-    setStatus("Operation cancelled.", 3000);
+    setUrl('');
+    setStatus("Ready for next video.", 3000);
   };
 
-  if (data) {
-    return (
-      <div className={styles.reviewContainer}>
-        <ReviewForm 
-          initialData={data} 
-          onSave={handleSave} 
-          onCancel={handleCancelReview} 
-        />
-      </div>
-    );
-  }
+  const formDataToReview = data || manualData;
 
-  if (manualData) {
+  if (formDataToReview) {
     return (
       <div className={styles.reviewContainer}>
         <ReviewForm 
-          initialData={manualData} 
+          initialData={formDataToReview} 
           onSave={handleSave} 
           onCancel={handleCancelReview} 
+          showScenes={analyticsOptions.analyzeScenes}
+          showAudio={analyticsOptions.analyzeAudio}
         />
       </div>
     );

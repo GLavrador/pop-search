@@ -19,6 +19,8 @@ router = APIRouter(prefix="/videos", tags=["Videos"])
 
 class VideoAnalysisRequest(BaseModel):
     url: str
+    analyze_scenes: bool = False
+    analyze_audio: bool = False
     
     @field_validator('url')
     @classmethod
@@ -31,21 +33,29 @@ class VideoAnalysisRequest(BaseModel):
 @router.post("/analyze")
 @limiter.limit("5/minute")
 async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
-    logger.info(f"Analysis requested for URL: {body.url}")
+    logger.info(f"Analysis requested for URL: {body.url} (Scenes: {body.analyze_scenes}, Audio: {body.analyze_audio})")
     video_path = None
 
     try:
         loop = asyncio.get_event_loop()
         video_path = await loop.run_in_executor(None, download_video, body.url)
         
-        analysis_result = await analyze_video_content(video_path)
+        analysis_result = await analyze_video_content(video_path, body.analyze_scenes, body.analyze_audio)
         
         if not analysis_result:
             raise HTTPException(status_code=500, detail="Failed to analyze video content")
+            
+        if "metadados_estruturados" not in analysis_result:
+            analysis_result["metadados_estruturados"] = {}
         
         analysis_result["url_original"] = body.url
         
-        return analysis_result
+        try:
+            dto = VideoMetadataDTO(**analysis_result)
+            return dto.model_dump()
+        except ValueError as e:
+            logger.error(f"Validation error parsing AI output: {e}\nRaw output: {analysis_result}")
+            raise HTTPException(status_code=500, detail="Internal AI schema validation failed")
     
     except AsyncTimeoutError:
         logger.error("Request timed out waiting for AI")

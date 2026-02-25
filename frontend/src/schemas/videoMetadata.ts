@@ -25,8 +25,6 @@ const metadadosEstruturadosSchema = z.object({
     pessoas: z.array(pessoaSchema),
     elementos_cenario: z.array(z.string()),
     audio: audioInfoSchema,
-    tags_busca: z.array(z.string())
-        .min(7, "Minimum 7 tags"),
 });
 
 export const videoMetadataSchema = z.object({
@@ -58,11 +56,6 @@ const metadadosFormSchema = z.object({
     pessoas: z.array(pessoaSchema),
     elementos_cenario: z.string(),
     audio: audioInfoSchema,
-    tags_busca: z.string()
-        .refine(
-            (text) => text.split(',').map(s => s.trim()).filter(Boolean).length >= 7,
-            "Minimum of 7 required tags (separated by commas)"
-        ),
 });
 
 export const videoMetadataFormSchema = z.object({

@@ -3,7 +3,7 @@ import { analyzeVideo } from '../services/api';
 import type { VideoMetadata } from '../types';
 
 interface UseVideoAnalysisMutationReturn {
-    analyze: (url: string) => void;
+    analyze: (url: string, options: { analyzeScenes: boolean; analyzeAudio: boolean }) => void;
     reset: () => void;
     isLoading: boolean;
     data: VideoMetadata | undefined;
@@ -12,9 +12,9 @@ interface UseVideoAnalysisMutationReturn {
 
 export const useVideoAnalysisMutation = (): UseVideoAnalysisMutationReturn => {
     const mutation = useMutation({
-        mutationFn: async (url: string) => {
+        mutationFn: async ({ url, options }: { url: string; options: { analyzeScenes: boolean; analyzeAudio: boolean } }) => {
             const controller = new AbortController();
-            return analyzeVideo(url, controller.signal);
+            return analyzeVideo(url, options, controller.signal);
         },
     });
 
@@ -29,7 +29,7 @@ export const useVideoAnalysisMutation = (): UseVideoAnalysisMutationReturn => {
     };
 
     return {
-        analyze: mutation.mutate,
+        analyze: (url, options) => mutation.mutate({ url, options }),
         reset: mutation.reset,
         isLoading: mutation.isPending,
         data: mutation.data,

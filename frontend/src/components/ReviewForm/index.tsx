@@ -9,6 +9,8 @@ interface ReviewFormProps {
   initialData: VideoMetadata;
   onSave: (data: VideoMetadata) => Promise<void>;
   onCancel: () => void;
+  showScenes?: boolean;
+  showAudio?: boolean;
 }
 
 const toFormData = (data: VideoMetadata): VideoMetadataForm => ({
@@ -16,11 +18,10 @@ const toFormData = (data: VideoMetadata): VideoMetadataForm => ({
   metadados_estruturados: {
     ...data.metadados_estruturados,
     elementos_cenario: data.metadados_estruturados.elementos_cenario.join(', '),
-    tags_busca: data.metadados_estruturados.tags_busca.join(', '),
   },
 });
 
-export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) => {
+export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, showAudio = true }: ReviewFormProps) => {
   const { 
     register, 
     handleSubmit, 
@@ -79,21 +80,24 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
         </div>
       </fieldset>
 
-      <fieldset className={styles.groupFrame}>
-        <legend className={styles.legend}>Scene Elements</legend>
-        
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Scene Elements (comma separated)</label>
-          <input 
-            {...register("metadados_estruturados.elementos_cenario")} 
-            className="win95-inset win95-input"
-            placeholder="mesa de cozinha, tigela azul, janela"
-          />
-        </div>
-      </fieldset>
+      {showScenes && (
+        <fieldset className={styles.groupFrame}>
+          <legend className={styles.legend}>Scene Elements</legend>
+          
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Scene Elements (comma separated)</label>
+            <input 
+              {...register("metadados_estruturados.elementos_cenario")} 
+              className="win95-inset win95-input"
+              placeholder="mesa de cozinha, tigela azul, janela"
+            />
+          </div>
+        </fieldset>
+      )}
 
-      <fieldset className={styles.groupFrame}>
-        <legend className={styles.legend}>Audio Analysis</legend>
+      {showAudio && (
+        <fieldset className={styles.groupFrame}>
+          <legend className={styles.legend}>Audio Analysis</legend>
         
         <div className={styles.formGroup}>
           <label className={styles.label}>Transcription / Lyrics</label>
@@ -120,25 +124,8 @@ export const ReviewForm = ({ initialData, onSave, onCancel }: ReviewFormProps) =
             />
           </div>
         </div>
-      </fieldset>
-
-      <fieldset className={styles.groupFrame}>
-        <legend className={styles.legend}>Search Tags</legend>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>
-            Tags <span className={styles.required}>*</span>
-            <span className={styles.hint}>(min. 7 tags, separated by comma)</span>
-          </label>
-          <input 
-            {...register("metadados_estruturados.tags_busca")} 
-            className={`win95-inset win95-input ${errors.metadados_estruturados?.tags_busca ? styles.inputError : ''}`}
-            placeholder="gato laranja, comendo ração, cozinha, animal, pet, fofo, viral"
-          />
-          {errors.metadados_estruturados?.tags_busca && (
-            <span className={styles.errorText}>{errors.metadados_estruturados.tags_busca.message}</span>
-          )}
-        </div>
-      </fieldset>
+        </fieldset>
+      )}
 
       <div className={styles.actions}>
         <button 

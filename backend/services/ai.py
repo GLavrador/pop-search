@@ -9,57 +9,38 @@ logger = get_logger("services.ai")
 genai = get_genai()
 model = get_generation_model()
 
-SYSTEM_PROMPT = """
-Você é um analista de vídeos especialista em extração de metadados para indexação e busca.
+def get_system_prompt(analyze_scenes: bool, analyze_audio: bool) -> str:
+    prompt_parts = [
+        "Você é um especialista em análise de vídeos.",
+        "Sua tarefa é retornar EXATAMENTE um JSON na estrutura solicitada.",
+        "- Seja descritivo e objetivo.",
+        "- NÃO invente músicas ou artistas."
+    ]
 
-## SUAS PERSONALIDADES:
-1. DETETIVE VISUAL: Descreva EXATAMENTE o que você vê - pessoas, objetos, cenários, ações; identifique celebridades.
-2. ESTENÓGRAFA DE ÁUDIO: Transcreva falas e identifique músicas com precisão.
+    prompt_parts.append("- Detalhe características físicas de PESSOAS e liste OBJETOS do cenário." if analyze_scenes else "- Ignore os detalhes das pessoas e objetos no cenário.")
+    prompt_parts.append("- Transcreva as falas relevantes do áudio." if analyze_audio else "- Ignore o áudio do vídeo.")
 
-## REGRAS CRÍTICAS DE QUALIDADE:
+    prompt_parts.append("\n## SCHEMA DO JSON DE SAÍDA:\n{")
+    prompt_parts.append('  "titulo_sugerido": "Título (max 15 palavras)",')
+    prompt_parts.append('  "descricao_completa": "Descrição detalhada (mínimo 2 frases)",')
+    prompt_parts.append('  "metadados_estruturados": {')
 
-### PROIBIDO: 
-1. (termos genéricos que NÃO ajudam na busca):
-  - "meme", "viral", "engraçado", "fofo", "interessante", "legal"
-  - "pessoa fazendo algo", "vídeo de X", "cena de Y"
-2. ALUCINAR:
-  - não retorne ações não vistas no vídeo. Se não tiver certeza, retorne APENAS o que tem segurança.
+    meta_keys = []
+    if analyze_scenes:
+        meta_keys.append('    "pessoas": [{"descricao": "Descrição física detalhada", "papel": "Papel ou null"}],\n    "elementos_cenario": ["objeto 1"]')
+    if analyze_audio:
+        meta_keys.append('    "audio": {\n      "transcricao": "Falas transcritas",\n      "musica": null,\n      "artista": null\n    }')
 
-### OBRIGATÓRIO (descrições específicas e buscáveis):
-- Cores, formatos, materiais: "gato laranja de pelo curto", "mesa de madeira clara"
-- Ações: "sentado comendo ração", "dançando em palco iluminado"  
-- Localização: "cozinha residencial", "estúdio de gravação", "praia com areia branca"
-- Características físicas: "homem de barba grisalha usando óculos", "mulher loira de vestido vermelho"
+    if meta_keys:
+        prompt_parts.append(",\n".join(meta_keys))
 
-### PARA MÚSICAS:
-- Se não tiver certeza ABSOLUTA da música, retorne null. NÃO ALUCINE.
-- Transcreva trechos marcantes da letra quando houver.
-
-## FORMATO DE RESPOSTA (JSON estrito):
-{
-  "titulo_sugerido": "Título descritivo e específico (máximo 15 palavras)",
-  "descricao_completa": "Descrição detalhada e específica do que acontece no vídeo. Inclua: ações visíveis, ambiente, objetos, cores, iluminação, sons. MÍNIMO 2 frases. EVITE termos genéricos.",
-  "metadados_estruturados": {
-    "pessoas": [
-      {
-        "descricao": "Descrição física detalhada: aparência, roupas, ações",
-        "papel": "Função no vídeo se identificável (apresentador, cantor, entrevistado, etc) ou null"
-      }
-    ],
-    "elementos_cenario": ["objeto1 com cor/material", "localização", "outros elementos visíveis"],
-    "audio": {
-      "transcricao": "Texto falado ou cantado mais relevante (ou string vazia)",
-      "musica": "Nome da música APENAS se tiver certeza (ou null)",
-      "artista": "Nome do artista APENAS se tiver certeza (ou null)"
-    },
-    "tags_busca": ["5-15 palavras-chave ESPECÍFICAS para busca textual - inclua nomes, objetos, ações, cores"]
-  }
-}
-"""
+    prompt_parts.append("  }\n}")
+    
+    return "\n".join(prompt_parts)
 
 TIMEOUT = 60 
 
-async def analyze_video_content(video_path: str):
+async def analyze_video_content(video_path: str, analyze_scenes: bool = False, analyze_audio: bool = False):
     try:
         logger.info(f"Starting upload to Gemini: {video_path}")
         
@@ -85,8 +66,10 @@ async def analyze_video_content(video_path: str):
 
         logger.info(f"Video active. Sending prompt (Timeout: {TIMEOUT}s)...")
         
+        system_prompt = get_system_prompt(analyze_scenes, analyze_audio)
+        
         response = await asyncio.wait_for(
-            model.generate_content_async([SYSTEM_PROMPT, video_file]),
+            model.generate_content_async([system_prompt, video_file]),
             timeout=TIMEOUT
         )
         

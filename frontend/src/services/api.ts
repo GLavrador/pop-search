@@ -8,31 +8,31 @@ const api = axios.create({
   },
 });
 
-export const analyzeVideo = async (url: string, signal: AbortSignal): Promise<VideoMetadata> => {
-  const response = await api.post<VideoMetadata>('/videos/analyze', { url }, { signal });
+export const analyzeVideo = async (
+  url: string,
+  options: { analyzeScenes: boolean; analyzeAudio: boolean },
+  signal: AbortSignal
+): Promise<VideoMetadata> => {
+  const response = await api.post<VideoMetadata>('/videos/analyze', {
+    url,
+    analyze_scenes: options.analyzeScenes,
+    analyze_audio: options.analyzeAudio
+  }, { signal });
   return response.data;
 };
 
 export const saveVideo = async (data: VideoMetadata): Promise<void> => {
-  try {
-    await api.post('/videos', data);
-  } catch (error) {
-    throw error;
-  }
+  await api.post('/videos', data);
 };
 
 export const searchVideos = async (
   { query, limit = 5, threshold = 0.25 }: SearchParams,
   signal?: AbortSignal
 ): Promise<SearchResult[]> => {
-  try {
-    const response = await api.post<SearchResult[]>('/search', {
-      query,
-      limit,
-      threshold
-    }, { signal });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post<SearchResult[]>('/search', {
+    query,
+    limit,
+    threshold
+  }, { signal });
+  return response.data;
 };

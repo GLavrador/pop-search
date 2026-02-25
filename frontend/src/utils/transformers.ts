@@ -8,10 +8,6 @@ export const transformFormDataToMetadata = (formData: VideoMetadataForm): VideoM
     ...formData,
     metadados_estruturados: {
       ...meta,
-      tags_busca: meta.tags_busca
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean),
       elementos_cenario: meta.elementos_cenario
         .split(',')
         .map(s => s.trim())
