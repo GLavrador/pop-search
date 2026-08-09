@@ -34,7 +34,8 @@ def create_embedding(data: VideoMetadataDTO) -> list[float]:
         result = genai.embed_content(
             model=EMBEDDING_MODEL,
             content=text_payload,
-            task_type="retrieval_document" 
+            task_type="retrieval_document",
+            output_dimensionality=768
         )
         
         embedding = result['embedding']
@@ -51,7 +52,8 @@ def embed_query(text: str) -> list[float]:
         result = genai.embed_content(
             model=EMBEDDING_MODEL,
             content=text,
-            task_type="retrieval_query" 
+            task_type="retrieval_query",
+            output_dimensionality=768
         )
         return result['embedding']
     except Exception as e:
