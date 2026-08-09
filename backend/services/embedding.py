@@ -24,9 +24,6 @@ def generate_searchable_text(data: VideoMetadataDTO) -> str:
     if meta.audio and meta.audio.transcricao:
         parts.append(f"Audio: {meta.audio.transcricao}")
     
-    if meta.tags_busca:
-        parts.append(f"Keywords: {', '.join(meta.tags_busca)}")
-    
     return "\n".join(parts)
 
 def create_embedding(data: VideoMetadataDTO) -> list[float]:

@@ -49,7 +49,6 @@ class TestMetadataStructure:
         meta = MetadadosEstruturados()
         assert meta.pessoas == []
         assert meta.elementos_cenario == []
-        assert meta.tags_busca == []
     
     def test_video_metadata_dto_complete(self):
         """Test complete VideoMetadataDTO structure."""
@@ -60,13 +59,11 @@ class TestMetadataStructure:
             metadados_estruturados=MetadadosEstruturados(
                 pessoas=[],
                 elementos_cenario=["mesa de cozinha", "tigela azul"],
-                audio=AudioInfo(transcricao=""),
-                tags_busca=["gato laranja", "ração", "cozinha"]
+                audio=AudioInfo(transcricao="")
             )
         )
         assert dto.titulo_sugerido == "Gato laranja comendo ração em tigela azul"
         assert len(dto.metadados_estruturados.elementos_cenario) == 2
-        assert len(dto.metadados_estruturados.tags_busca) == 3
 
 
 class TestSearchableTextGeneration:
@@ -80,8 +77,7 @@ class TestSearchableTextGeneration:
             metadados_estruturados=MetadadosEstruturados(
                 pessoas=[Pessoa(descricao="Mulher filmando", papel="dona")],
                 elementos_cenario=["mesa", "tigela"],
-                audio=AudioInfo(transcricao="Olha ele comendo!"),
-                tags_busca=["gato", "ração", "cozinha"]
+                audio=AudioInfo(transcricao="Olha ele comendo!")
             )
         )
         
@@ -92,7 +88,6 @@ class TestSearchableTextGeneration:
         assert "People: Mulher filmando" in text
         assert "Elements: mesa, tigela" in text
         assert "Audio: Olha ele comendo!" in text
-        assert "Keywords: gato, ração, cozinha" in text
     
     def test_generate_with_minimal_metadata(self):
         """Test text generation with only required fields."""
