@@ -19,10 +19,12 @@ export const SearchSection = () => {
   }, [error, setStatus]);
 
   useEffect(() => {
-    // If the user has searched before, changing the threshold will automatically re-run the search (with 1 second debounce)
     if (hasSearched && query.trim()) {
       const handler = setTimeout(() => {
-        search(query, threshold);
+        const isNewSearch = search(query, threshold);
+        if (isNewSearch) {
+          setStatus(`Searching database for: "${query}"...`);
+        }
       }, 1000);
       return () => clearTimeout(handler);
     }
@@ -43,8 +45,13 @@ export const SearchSection = () => {
     e.preventDefault();
     if (!query.trim()) return;
     
-    setStatus(`Searching database for: "${query}"...`);
-    search(query, threshold);
+    const isNewSearch = search(query, threshold);
+    if (isNewSearch) {
+      setStatus(`Searching database for: "${query}"...`);
+    } else {
+      const count = results.length;
+      setStatus(count === 0 ? "Search finished. No objects found." : `Search finished. Found ${count} object(s).`, 3000);
+    }
   };
 
   const handleCancel = () => {

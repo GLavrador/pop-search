@@ -4,7 +4,7 @@ import { searchVideos } from '../services/api';
 import type { SearchResult } from '../types';
 
 interface UseVideoSearchQueryReturn {
-    search: (query: string, threshold: number) => void;
+    search: (query: string, threshold: number) => boolean;
     results: SearchResult[];
     isLoading: boolean;
     hasSearched: boolean;
@@ -34,10 +34,14 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
         return 'Error accessing database index.';
     };
 
-    const search = (newQuery: string, threshold: number) => {
-        if (!newQuery.trim()) return;
+    const search = (newQuery: string, threshold: number): boolean => {
+        if (!newQuery.trim()) return false;    
+        if (searchQuery?.query === newQuery && searchQuery?.threshold === threshold) {
+            return false;
+        }
         setHasSearched(true);
         setSearchQuery({ query: newQuery, threshold });
+        return true;
     };
 
     return {
