@@ -1,7 +1,25 @@
 -- 1. enable the pgvector extension for embedding support
 create extension if not exists vector;
 
--- 2. main table
+-- 2. accent-insensitive Portuguese text search
+--
+-- The stock 'portuguese' configuration does not strip accents, so "musica"
+-- would not find "música". Accents must be normalised on BOTH sides of the
+-- comparison, which is why this belongs in a text search configuration rather
+-- than in application code: the same rules then apply to the indexed document
+-- and to the query, automatically.
+--
+-- to_tsvector(regconfig, text) stays IMMUTABLE with a custom configuration,
+-- which is what allows the generated fts column below to use it.
+create extension if not exists unaccent;
+
+create text search configuration portuguese_unaccent (copy = portuguese);
+
+alter text search configuration portuguese_unaccent
+  alter mapping for hword, hword_part, word
+  with unaccent, portuguese_stem;
+
+-- 3. main table
 create table videos (
   id uuid primary key default gen_random_uuid(),
   created_at timestamp with time zone default now(),
@@ -16,15 +34,15 @@ create table videos (
   -- Weights: A = title, B = description, C = structured metadata.
   fts tsvector generated always as (
     setweight(
-      to_tsvector('portuguese', coalesce(titulo_video, '')),
+      to_tsvector('portuguese_unaccent', coalesce(titulo_video, '')),
       'A'
     ) ||
     setweight(
-      to_tsvector('portuguese', coalesce(descricao_completa, '')),
+      to_tsvector('portuguese_unaccent', coalesce(descricao_completa, '')),
       'B'
     ) ||
     setweight(
-      to_tsvector('portuguese',
+      to_tsvector('portuguese_unaccent',
         coalesce(metadados_estruturados -> 'audio' ->> 'transcricao', '') || ' ' ||
         coalesce(metadados_estruturados -> 'audio' ->> 'musica', '')     || ' ' ||
         coalesce(metadados_estruturados -> 'audio' ->> 'artista', '')    || ' ' ||
@@ -38,10 +56,10 @@ create table videos (
   ) stored
 );
 
--- 3. HNSW index for fast vector search
+-- 4. HNSW index for fast vector search
 create index on videos using hnsw (embedding vector_cosine_ops);
 
--- 4. GIN index for the full-text branch
+-- 5. GIN index for the full-text branch
 create index videos_fts_idx on videos using gin (fts);
 
 
@@ -103,15 +121,15 @@ as $$
   text_hits as (
     select
       v.id,
-      ts_rank_cd(v.fts, websearch_to_tsquery('portuguese', query_text)) as text_rank,
+      ts_rank_cd(v.fts, websearch_to_tsquery('portuguese_unaccent', query_text)) as text_rank,
       row_number() over (
-        order by ts_rank_cd(v.fts, websearch_to_tsquery('portuguese', query_text)) desc
+        order by ts_rank_cd(v.fts, websearch_to_tsquery('portuguese_unaccent', query_text)) desc
       ) as rank
     from videos v
     -- websearch_to_tsquery supports quoted phrases, OR and -term, never raises
     -- on malformed input, and avoids the ILIKE wildcard problem where a "%"
     -- typed by the user would match every row.
-    where v.fts @@ websearch_to_tsquery('portuguese', query_text)
+    where v.fts @@ websearch_to_tsquery('portuguese_unaccent', query_text)
     limit case
       when search_mode in ('hybrid', 'text')
       then least(greatest(match_count, 1) * 4, 200)
