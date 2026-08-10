@@ -26,7 +26,7 @@ export const PrecisionPresets = ({ threshold, onThresholdChange, disabled }: Pre
               aria-pressed={isActive}
               disabled={disabled}
               onClick={() => onThresholdChange(preset.threshold)}
-              className={`win95-btn ${styles.presetButton} ${isActive ? styles.presetButtonPressed : ''}`}
+              className={`win95-btn ${styles.presetButton} ${isActive ? 'win95-btn-pressed' : ''}`}
             >
               {preset.label}
             </button>
