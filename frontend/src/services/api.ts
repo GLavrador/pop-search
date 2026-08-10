@@ -26,7 +26,7 @@ export const saveVideo = async (data: VideoMetadata): Promise<void> => {
 };
 
 export const searchVideos = async (
-  { query, limit = 5, threshold = 0.25 }: SearchParams,
+  { query, limit = 5, threshold = 0.70 }: SearchParams,
   signal?: AbortSignal
 ): Promise<SearchResult[]> => {
   const response = await api.post<SearchResult[]>('/search', {

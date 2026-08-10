@@ -9,7 +9,7 @@ load_dotenv()
 
 _configured = False
 
-EMBEDDING_MODEL = "models/text-embedding-004"
+EMBEDDING_MODEL = "models/gemini-embedding-001"
 GENERATION_MODEL = "gemini-2.5-flash"
 
 GENERATION_CONFIG = {

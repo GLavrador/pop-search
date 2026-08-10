@@ -29,7 +29,8 @@ async def search_videos(request: Request, search_request: SearchRequest):
         logger.debug(f"Executing RPC match_videos with query: {search_request.query}")
         
         response = supabase.rpc("match_videos", rpc_params).execute()
-        results = response.data
+        # Filter explicitly in python to respect threshold even if SQL matched by text
+        results = [r for r in response.data if r.get('similarity', 0) >= search_request.threshold]
         
         logger.info(f"Search returned {len(results)} results")
         return results

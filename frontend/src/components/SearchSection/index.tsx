@@ -3,10 +3,12 @@ import { useVideoSearchQuery } from "../../hooks/useVideoSearchQuery";
 import { useStatus } from "../../context/StatusContext";
 import { VideoCard } from "../VideoCard";
 import { TaskProgress } from "../TaskProgress";
+import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
+  const [threshold, setThreshold] = useState(0.70);
   const { search, results, isLoading, hasSearched, error } = useVideoSearchQuery();
   const { setStatus } = useStatus();
 
@@ -15,6 +17,18 @@ export const SearchSection = () => {
       setStatus(`Search failed: ${error}`, 5000);
     }
   }, [error, setStatus]);
+
+  useEffect(() => {
+    if (hasSearched && query.trim()) {
+      const handler = setTimeout(() => {
+        const isNewSearch = search(query, threshold);
+        if (isNewSearch) {
+          setStatus(`Searching database for: "${query}"...`);
+        }
+      }, 1000);
+      return () => clearTimeout(handler);
+    }
+  }, [threshold]);
 
   useEffect(() => {
     if (!isLoading && hasSearched && !error) {
@@ -31,8 +45,13 @@ export const SearchSection = () => {
     e.preventDefault();
     if (!query.trim()) return;
     
-    setStatus(`Searching database for: "${query}"...`);
-    search(query);
+    const isNewSearch = search(query, threshold);
+    if (isNewSearch) {
+      setStatus(`Searching database for: "${query}"...`);
+    } else {
+      const count = results.length;
+      setStatus(count === 0 ? "Search finished. No objects found." : `Search finished. Found ${count} object(s).`, 3000);
+    }
   };
 
   const handleCancel = () => {
@@ -44,7 +63,11 @@ export const SearchSection = () => {
   return (
     <div className={styles.container}>
       <form className={styles.searchForm} onSubmit={handleSearch}>
-        <label className={styles.label}>Search Query:</label>
+        <AdvancedSearchOptions 
+          threshold={threshold} 
+          onThresholdChange={setThreshold} 
+          labelClassName={styles.label} 
+        />
         
         <div className={styles.inputRow}>
           <input
@@ -83,7 +106,11 @@ export const SearchSection = () => {
         )}
 
         {!isLoading && !error && hasSearched && results.length === 0 && (
-          <p className={styles.noResultsText}>0 objects found.</p>
+          <div className="win95-border" style={{ padding: '4px 8px', backgroundColor: '#ffffe1', marginTop: '5px', display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.95em' }}>
+              <strong>0 found.</strong> No matches above <strong>{Math.round(threshold * 100)}%</strong> threshold. Try lowering the slider.
+            </span>
+          </div>
         )}
 
         {results.map((video) => (
