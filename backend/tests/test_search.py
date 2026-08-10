@@ -75,6 +75,31 @@ def test_text_only_match_is_not_filtered_out(mock_embed, mock_supabase):
 
 @patch("routers.search.supabase")
 @patch("routers.search.embed_query")
+def test_negative_similarity_is_accepted(mock_embed, mock_supabase):
+    """Cosine similarity ranges over [-1, 1]. SearchResult used to validate it
+    as ge=0.0, so a row whose embedding points away from the query would fail
+    response validation and surface as a 500 instead of a result."""
+    mock_embed.return_value = [0.1, 0.2, 0.3]
+    _mock_rpc(mock_supabase, [
+        {
+            "id": "neg",
+            "titulo_video": "Vídeo com embedding oposto",
+            "descricao_completa": "Conteúdo sem relação semântica com a busca",
+            "url_original": "http://twitter.com/oposto",
+            "similarity": -0.42,
+            "text_rank": 0.61,
+            "score": 0.0196,
+        }
+    ])
+
+    response = client.post("/search", json={"query": "teste"})
+
+    assert response.status_code == 200
+    assert response.json()[0]["similarity"] == -0.42
+
+
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
 def test_search_forwards_mode_to_rpc(mock_embed, mock_supabase):
     mock_embed.return_value = [0.1, 0.2, 0.3]
     _mock_rpc(mock_supabase, [])
