@@ -32,3 +32,17 @@
   font-style: italic;
   color: var(--win-dark);
 }
+
+.presetButtonPressed {
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  padding: 5px 11px 3px 13px;
+  background-image: 
+    linear-gradient(45deg, var(--win-light) 25%, transparent 25%, transparent 75%, var(--win-light) 75%),
+    linear-gradient(45deg, var(--win-light) 25%, transparent 25%, transparent 75%, var(--win-light) 75%);
+  background-color: var(--win-gray);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
+}
