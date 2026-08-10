@@ -11,6 +11,19 @@ const MODE_HELP =
   'Chooses how a video qualifies as a match: by meaning, by the literal words ' +
   'you typed, or both.';
 
+/*
+ * These operators are already supported by websearch_to_tsquery in the RPC;
+ * nothing here is new behaviour. They were simply undiscoverable. The first row
+ * documents the default, which is the non-obvious one: extra words narrow the
+ * search rather than widening it.
+ */
+const SEARCH_SYNTAX = [
+  { example: 'baleia bebê', meaning: 'Both words required. Every extra word narrows the search.' },
+  { example: '"baleia assassina"', meaning: 'That exact phrase, in that order.' },
+  { example: 'baleia -orca', meaning: 'Contains the first, excludes the second.' },
+  { example: 'baleia or golfinho', meaning: 'Either word is enough.' },
+] as const;
+
 interface AdvancedSearchOptionsProps {
   threshold: number;
   onThresholdChange: (val: number) => void;
@@ -106,6 +119,19 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
                 literal, so nothing is scored by similarity.
               </p>
             )}
+          </fieldset>
+
+          <fieldset className={styles.group}>
+            <legend className={styles.legend}>Search Syntax</legend>
+
+            <dl className={styles.syntaxList}>
+              {SEARCH_SYNTAX.map(({ example, meaning }) => (
+                <div key={example} className={styles.syntaxRow}>
+                  <dt className={styles.syntaxExample}>{example}</dt>
+                  <dd className={styles.syntaxMeaning}>{meaning}</dd>
+                </div>
+              ))}
+            </dl>
           </fieldset>
 
           <fieldset className={styles.group}>

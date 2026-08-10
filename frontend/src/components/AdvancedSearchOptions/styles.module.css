@@ -173,6 +173,39 @@
   opacity: 1;
 }
 
+.syntaxList {
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.syntaxRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.syntaxExample {
+  flex-shrink: 0;
+  width: 148px;
+  padding: 1px 4px;
+  background: var(--win-tag-bg);
+  border: 1px solid var(--win-tag-border);
+  font-family: 'Courier New', monospace;
+  font-size: 0.78em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.syntaxMeaning {
+  margin: 0;
+  font-size: 0.78em;
+  line-height: 1.3;
+  color: var(--win-text-secondary);
+}
+
 .row {
   display: flex;
   justify-content: space-between;
