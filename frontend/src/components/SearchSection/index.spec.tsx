@@ -60,7 +60,41 @@ describe('SearchSection Component', () => {
     const button = screen.getByText('Find Now');
     fireEvent.click(button);
     
-    expect(mockSearch).toHaveBeenCalledWith('test query', 0.7);
+    expect(mockSearch).toHaveBeenCalledWith('test query', 0.6, 5);
+  });
+
+  it('should use the threshold of the selected precision preset', () => {
+    const mockSearch = vi.fn();
+    vi.mocked(useVideoSearchQuery).mockReturnValue({
+      search: mockSearch,
+      results: [],
+      isLoading: false,
+      hasSearched: false,
+      error: null,
+    });
+
+    renderWithProviders(<SearchSection />);
+
+    fireEvent.change(screen.getByPlaceholderText('Type to search...'), {
+      target: { value: 'test query' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Broad' }));
+    fireEvent.click(screen.getByText('Find Now'));
+
+    expect(mockSearch).toHaveBeenCalledWith('test query', 0.45, 5);
+  });
+
+  it('should mark the default preset as active on first render', () => {
+    renderWithProviders(<SearchSection />);
+
+    expect(screen.getByRole('button', { name: 'Balanced' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: 'Broad' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('should not call search when query is empty', () => {

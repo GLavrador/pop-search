@@ -40,7 +40,7 @@ export const VideoCard = ({ data }: VideoCardProps) => {
         </div>
         
         <p className={styles.summary}>
-          {data.descricao_completa || data.resumo || 'No description available'}
+          {data.descricao_completa || 'No description available'}
         </p>
 
         <div className={styles.urlRow}>

@@ -48,14 +48,3 @@ def get_generation_model():
         model_name=GENERATION_MODEL,
         generation_config=GENERATION_CONFIG,
     )
-
-
-def create_embedding(text: str, task_type: str = "retrieval_document") -> list[float]:
-
-    _ensure_configured()
-    result = genai.embed_content(
-        model=EMBEDDING_MODEL,
-        content=text,
-        task_type=task_type
-    )
-    return result['embedding']

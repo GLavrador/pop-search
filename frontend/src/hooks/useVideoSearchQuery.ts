@@ -4,7 +4,7 @@ import { searchVideos } from '../services/api';
 import type { SearchResult } from '../types';
 
 interface UseVideoSearchQueryReturn {
-    search: (query: string, threshold: number) => boolean;
+    search: (query: string, threshold: number, limit: number) => boolean;
     results: SearchResult[];
     isLoading: boolean;
     hasSearched: boolean;
@@ -12,14 +12,14 @@ interface UseVideoSearchQueryReturn {
 }
 
 export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
-    const [searchQuery, setSearchQuery] = useState<{ query: string; threshold: number } | null>(null);
+    const [searchQuery, setSearchQuery] = useState<{ query: string; threshold: number; limit: number } | null>(null);
     const [hasSearched, setHasSearched] = useState(false);
 
     const query = useQuery({
         queryKey: ['videoSearch', searchQuery],
         queryFn: ({ signal }) => {
             if (!searchQuery) return [];
-            return searchVideos({ query: searchQuery.query, threshold: searchQuery.threshold }, signal);
+            return searchVideos({ query: searchQuery.query, threshold: searchQuery.threshold, limit: searchQuery.limit }, signal);
         },
         enabled: !!searchQuery,
         refetchOnWindowFocus: false,
@@ -36,13 +36,13 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
         return 'Error accessing database index.';
     };
 
-    const search = (newQuery: string, threshold: number): boolean => {
+    const search = (newQuery: string, threshold: number, limit: number): boolean => {
         if (!newQuery.trim()) return false;    
-        if (searchQuery?.query === newQuery && searchQuery?.threshold === threshold) {
+        if (searchQuery?.query === newQuery && searchQuery?.threshold === threshold && searchQuery?.limit === limit) {
             return false;
         }
         setHasSearched(true);
-        setSearchQuery({ query: newQuery, threshold });
+        setSearchQuery({ query: newQuery, threshold, limit });
         return true;
     };
 

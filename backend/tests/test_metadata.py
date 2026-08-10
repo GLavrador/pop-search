@@ -6,7 +6,7 @@ from dtos import (
     MetadadosEstruturados, 
     VideoMetadataDTO
 )
-from services.embedding import generate_searchable_text
+from services.embedding import MAX_EMBEDDING_CHARS, generate_searchable_text
 
 
 class TestMetadataStructure:
@@ -103,3 +103,66 @@ class TestSearchableTextGeneration:
         assert "Description: Um vídeo qualquer com uma legenda qualquer que cumpra uns requisitos quaisquer de uma aplicação qualquer de uma pessoa qualquer em um lugar qualquer." in text
         assert "People:" not in text
         assert "Elements:" not in text
+
+
+class TestSearchableTextTruncation:
+    """The embedding model rejects inputs over 2048 tokens, so the payload
+    must stay bounded no matter how verbose the AI output was."""
+
+    @staticmethod
+    def _maxed_out_dto() -> VideoMetadataDTO:
+        """A DTO pushed to the largest payload the validators still allow."""
+        return VideoMetadataDTO(
+            titulo_sugerido="T" * 200,
+            descricao_completa="D" * 5000,
+            metadados_estruturados=MetadadosEstruturados(
+                pessoas=[Pessoa(descricao="P" * 500) for _ in range(20)],
+                # elementos_cenario caps the list length but not each entry
+                elementos_cenario=["E" * 1000 for _ in range(50)],
+                audio=AudioInfo(transcricao="A" * 5000),
+            ),
+        )
+
+    def test_worst_case_payload_stays_within_budget(self):
+        text = generate_searchable_text(self._maxed_out_dto())
+
+        assert len(text) <= MAX_EMBEDDING_CHARS
+
+    def test_every_section_survives_truncation(self):
+        """Truncation must shrink sections, never drop them: losing the title
+        or description entirely would gut the retrieval signal."""
+        text = generate_searchable_text(self._maxed_out_dto())
+
+        assert "Title:" in text
+        assert "Description:" in text
+        assert "People:" in text
+        assert "Elements:" in text
+        assert "Audio:" in text
+
+    def test_long_transcript_does_not_starve_description(self):
+        dto = VideoMetadataDTO(
+            titulo_sugerido="Entrevista longa",
+            descricao_completa="Uma descrição relevante que precisa sobreviver. " * 10,
+            metadados_estruturados=MetadadosEstruturados(
+                audio=AudioInfo(transcricao="bla " * 1200),
+            ),
+        )
+
+        text = generate_searchable_text(dto)
+
+        assert len(text) <= MAX_EMBEDDING_CHARS
+        assert "Uma descrição relevante que precisa sobreviver." in text
+
+    def test_short_content_is_left_untouched(self):
+        dto = VideoMetadataDTO(
+            titulo_sugerido="Gato laranja comendo ração",
+            descricao_completa="Gato de pelo curto comendo em cozinha.",
+            metadados_estruturados=MetadadosEstruturados(
+                audio=AudioInfo(transcricao="Olha ele comendo!"),
+            ),
+        )
+
+        text = generate_searchable_text(dto)
+
+        assert "Description: Gato de pelo curto comendo em cozinha." in text
+        assert "Audio: Olha ele comendo!" in text

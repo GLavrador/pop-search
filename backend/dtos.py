@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 
 class Pessoa(BaseModel):
@@ -40,6 +40,9 @@ class VideoMetadataDTO(BaseModel):
     metadados_estruturados: MetadadosEstruturados
 
 
+SearchMode = Literal["hybrid", "semantic", "text"]
+
+
 class SearchRequest(BaseModel):
     query: str = Field(
         ..., 
@@ -48,14 +51,18 @@ class SearchRequest(BaseModel):
         description="Search query text"
     )
     limit: int = Field(5, ge=1, le=50, description="Maximum results to return")
-    threshold: float = Field(0.5, ge=0.0, le=1.0, description="Similarity threshold")
+    threshold: float = Field(0.60, ge=0.0, le=1.0, description="Similarity threshold. Applies to the vector branch only.")
+    mode: SearchMode = Field("hybrid", description="hybrid = vector + full-text fused via RRF; semantic = vector only; text = full-text only",)
 
 
 class SearchResult(BaseModel):
     id: str
     titulo_video: str
     descricao_completa: Optional[str] = None
-    resumo: Optional[str] = None  # Backward compatibility
     url_original: str
-    similarity: float = Field(..., ge=0.0, le=1.0)
+    # Cosine similarity lives in [-1, 1]. It is 0.0 for results that came in
+    # through the full-text branch alone
+    similarity: float = Field(..., ge=-1.0, le=1.0)
+    text_rank: float = Field(0.0, description="ts_rank_cd score, 0.0 if no text match")
+    score: float = Field(0.0, description="Fused RRF score used for ordering")
 

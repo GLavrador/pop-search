@@ -1,13 +1,17 @@
 import {useState} from 'react';
+import { findPresetByThreshold } from '../../constants/searchPresets';
 
 interface AdvancedSearchOptionsProps {
   threshold: number;
   onThresholdChange: (val: number) => void;
+  limit: number;
+  onLimitChange: (val: number) => void;
   labelClassName?: string;
 }
 
-export const AdvancedSearchOptions = ({ threshold, onThresholdChange, labelClassName }: AdvancedSearchOptionsProps) => {
+export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onLimitChange, labelClassName }: AdvancedSearchOptionsProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const activePreset = findPresetByThreshold(threshold);
 
   return (
     <>
@@ -28,9 +32,12 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, labelClass
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label className={labelClassName} style={{ marginBottom: 0, fontSize: '0.9em' }}>
               Match Threshold: <span style={{ fontWeight: 'bold' }}>{Math.round(threshold * 100)}%</span>
+              <span style={{ fontWeight: 'normal', fontStyle: 'italic' }}>
+                {activePreset ? ` (${activePreset.label})` : ' (Custom)'}
+              </span>
             </label>
-            <span 
-              title="Determines how strict the semantic matching should be. Higher values return fewer, more precise results. Lower values return more results, but they may be less relevant." 
+            <span
+              title="Controls how strict the semantic (meaning-based) matching is. Higher values return fewer but more precise results. It does not affect exact text matches: a video containing the searched term in its title, description or transcript shows up at any threshold."
               style={{ cursor: 'help', display: 'inline-block', backgroundColor: '#000080', color: 'white', borderRadius: '50%', width: '16px', height: '16px', textAlign: 'center', lineHeight: '16px', fontSize: '0.75em', fontWeight: 'bold' }}
             >
               i
@@ -46,6 +53,21 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, labelClass
             className="win95-slider"
             style={{ width: '100%', marginTop: '6px', height: '15px' }}
           />
+          <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label className={labelClassName} style={{ marginBottom: 0, fontSize: '0.9em' }}>
+              Max Results:
+            </label>
+            <select 
+              className="win95-inset win95-input" 
+              value={limit} 
+              onChange={(e) => onLimitChange(Number(e.target.value))}
+              style={{ padding: '2px', fontSize: '0.9em', width: '80px', height: '24px' }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
+          </div>
         </div>
       )}
     </>
