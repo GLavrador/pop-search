@@ -1,28 +1,37 @@
 import {useState} from 'react';
 import { findPresetByThreshold } from '../../constants/searchPresets';
+import { SEARCH_MODES, findSearchMode, type SearchMode } from '../../constants/searchModes';
 import styles from './styles.module.css';
 
 const THRESHOLD_HELP =
   'Controls how strict the semantic (meaning-based) matching is. Higher values ' +
   'return fewer but more precise results.';
 
+const MODE_HELP =
+  'Chooses how a video qualifies as a match: by meaning, by the literal words ' +
+  'you typed, or both.';
+
 interface AdvancedSearchOptionsProps {
   threshold: number;
   onThresholdChange: (val: number) => void;
   limit: number;
   onLimitChange: (val: number) => void;
+  mode: SearchMode;
+  onModeChange: (mode: SearchMode) => void;
   labelClassName?: string;
 }
 
-export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onLimitChange, labelClassName }: AdvancedSearchOptionsProps) => {
+export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onLimitChange, mode, onModeChange, labelClassName }: AdvancedSearchOptionsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const activePreset = findPresetByThreshold(threshold);
+  const activeMode = findSearchMode(mode);
+  const thresholdApplies = activeMode.usesThreshold;
 
   return (
     <>
       <div className={styles.header}>
         <label className={`${labelClassName ?? ''} ${styles.headerLabel}`}>Search Query:</label>
-        <button 
+        <button
           type="button"
           className={`win95-btn ${styles.toggleButton}`}
           aria-expanded={isOpen}
@@ -35,6 +44,32 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
       {isOpen && (
         <div className={`win95-border ${styles.panel}`}>
           <fieldset className={styles.group}>
+            <legend className={styles.legend}>Search Mode</legend>
+
+            <div className={styles.groupHeader}>
+              <span className={styles.modeHint}>{activeMode.hint}</span>
+              <span className={styles.help} title={MODE_HELP}>
+                i
+              </span>
+            </div>
+
+            <div className={styles.modeButtons} role="group" aria-label="Search mode">
+              {SEARCH_MODES.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  title={option.hint}
+                  aria-pressed={option.id === mode}
+                  onClick={() => onModeChange(option.id)}
+                  className={`win95-btn ${styles.modeButton} ${option.id === mode ? 'win95-btn-pressed' : ''}`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className={styles.group} disabled={!thresholdApplies}>
             <legend className={styles.legend}>Match Threshold</legend>
 
             <div className={styles.groupHeader}>
@@ -64,6 +99,13 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
               <span>More results</span>
               <span>Fewer, stricter</span>
             </div>
+
+            {!thresholdApplies && (
+              <p className={styles.disabledNote}>
+                Not used in <strong>{activeMode.label}</strong> mode: matching is
+                literal, so nothing is scored by similarity.
+              </p>
+            )}
           </fieldset>
 
           <fieldset className={styles.group}>

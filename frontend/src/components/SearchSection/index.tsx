@@ -6,12 +6,15 @@ import { TaskProgress } from "../TaskProgress";
 import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
 import { PrecisionPresets } from "../PrecisionPresets";
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from "../../constants/searchPresets";
+import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from "../../constants/searchModes";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
+  const [mode, setMode] = useState<SearchMode>(DEFAULT_SEARCH_MODE);
+  const thresholdApplies = findSearchMode(mode).usesThreshold;
   const { search, results, isLoading, hasSearched, error } = useVideoSearchQuery();
   const { setStatus } = useStatus();
 
@@ -24,14 +27,14 @@ export const SearchSection = () => {
   useEffect(() => {
     if (hasSearched && query.trim()) {
       const handler = setTimeout(() => {
-        const isNewSearch = search(query, threshold, limit);
+        const isNewSearch = search(query, threshold, limit, mode);
         if (isNewSearch) {
           setStatus(`Searching database for: "${query}"...`);
         }
       }, 1000);
       return () => clearTimeout(handler);
     }
-  }, [threshold, limit]);
+  }, [threshold, limit, mode]);
 
   useEffect(() => {
     if (!isLoading && hasSearched && !error) {
@@ -48,7 +51,7 @@ export const SearchSection = () => {
     e.preventDefault();
     if (!query.trim()) return;
     
-    const isNewSearch = search(query, threshold, limit);
+    const isNewSearch = search(query, threshold, limit, mode);
     if (isNewSearch) {
       setStatus(`Searching database for: "${query}"...`);
     } else {
@@ -71,13 +74,15 @@ export const SearchSection = () => {
           onThresholdChange={setThreshold}
           limit={limit}
           onLimitChange={setLimit}
+          mode={mode}
+          onModeChange={setMode}
           labelClassName={styles.label}
         />
 
         <PrecisionPresets
           threshold={threshold}
           onThresholdChange={setThreshold}
-          disabled={isLoading}
+          disabled={isLoading || !thresholdApplies}
         />
 
         <div className={styles.inputRow}>
@@ -119,9 +124,19 @@ export const SearchSection = () => {
         {!isLoading && !error && hasSearched && results.length === 0 && (
           <div className="win95-border" style={{ padding: '4px 8px', backgroundColor: '#ffffe1', marginTop: '5px', display: 'flex', alignItems: 'center' }}>
             <span style={{ fontSize: '0.95em' }}>
-              <strong>0 found.</strong> No semantic match above{' '}
-              <strong>{Math.round(threshold * 100)}%</strong> and no exact term found.
-              Try the <strong>Broad</strong> precision or different keywords.
+              <strong>0 found.</strong>{' '}
+              {thresholdApplies ? (
+                <>
+                  No semantic match above{' '}
+                  <strong>{Math.round(threshold * 100)}%</strong> and no exact term found.
+                  Try the <strong>Broad</strong> precision or different keywords.
+                </>
+              ) : (
+                <>
+                  No video contains every word you typed. Try fewer words, or switch
+                  to <strong>Hybrid</strong> mode to match by meaning too.
+                </>
+              )}
             </span>
           </div>
         )}

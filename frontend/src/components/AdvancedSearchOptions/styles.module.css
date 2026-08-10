@@ -135,6 +135,44 @@
   color: var(--win-text-secondary);
 }
 
+.modeButtons {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.modeButton {
+  flex: 1;
+  padding: 3px 10px;
+  font-size: 0.85em;
+  min-width: 0;
+}
+
+.modeHint {
+  font-size: 0.8em;
+  color: var(--win-text-secondary);
+  line-height: 1.3;
+}
+
+/*
+ * A disabled fieldset natively disables every control inside it, so the slider
+ * stops responding without any extra wiring. The dimming is only the visual
+ * half of that.
+ */
+.group:disabled .slider,
+.group:disabled .value,
+.group:disabled .scale {
+  opacity: 0.45;
+}
+
+.disabledNote {
+  margin: 8px 0 0;
+  font-size: 0.78em;
+  line-height: 1.35;
+  color: var(--win-text-secondary);
+  opacity: 1;
+}
+
 .row {
   display: flex;
   justify-content: space-between;
