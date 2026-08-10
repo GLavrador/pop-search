@@ -3,10 +3,12 @@ import {useState} from 'react';
 interface AdvancedSearchOptionsProps {
   threshold: number;
   onThresholdChange: (val: number) => void;
+  limit: number;
+  onLimitChange: (val: number) => void;
   labelClassName?: string;
 }
 
-export const AdvancedSearchOptions = ({ threshold, onThresholdChange, labelClassName }: AdvancedSearchOptionsProps) => {
+export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onLimitChange, labelClassName }: AdvancedSearchOptionsProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -46,6 +48,21 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, labelClass
             className="win95-slider"
             style={{ width: '100%', marginTop: '6px', height: '15px' }}
           />
+          <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label className={labelClassName} style={{ marginBottom: 0, fontSize: '0.9em' }}>
+              Max Results:
+            </label>
+            <select 
+              className="win95-inset win95-input" 
+              value={limit} 
+              onChange={(e) => onLimitChange(Number(e.target.value))}
+              style={{ padding: '2px', fontSize: '0.9em', width: '80px', height: '24px' }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
+          </div>
         </div>
       )}
     </>

@@ -60,7 +60,7 @@ describe('SearchSection Component', () => {
     const button = screen.getByText('Find Now');
     fireEvent.click(button);
     
-    expect(mockSearch).toHaveBeenCalledWith('test query', 0.7);
+    expect(mockSearch).toHaveBeenCalledWith('test query', 0.7, 5);
   });
 
   it('should not call search when query is empty', () => {

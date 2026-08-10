@@ -9,6 +9,7 @@ import styles from "./styles.module.css";
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
   const [threshold, setThreshold] = useState(0.70);
+  const [limit, setLimit] = useState(5);
   const { search, results, isLoading, hasSearched, error } = useVideoSearchQuery();
   const { setStatus } = useStatus();
 
@@ -21,14 +22,14 @@ export const SearchSection = () => {
   useEffect(() => {
     if (hasSearched && query.trim()) {
       const handler = setTimeout(() => {
-        const isNewSearch = search(query, threshold);
+        const isNewSearch = search(query, threshold, limit);
         if (isNewSearch) {
           setStatus(`Searching database for: "${query}"...`);
         }
       }, 1000);
       return () => clearTimeout(handler);
     }
-  }, [threshold]);
+  }, [threshold, limit]);
 
   useEffect(() => {
     if (!isLoading && hasSearched && !error) {
@@ -45,7 +46,7 @@ export const SearchSection = () => {
     e.preventDefault();
     if (!query.trim()) return;
     
-    const isNewSearch = search(query, threshold);
+    const isNewSearch = search(query, threshold, limit);
     if (isNewSearch) {
       setStatus(`Searching database for: "${query}"...`);
     } else {
@@ -65,7 +66,9 @@ export const SearchSection = () => {
       <form className={styles.searchForm} onSubmit={handleSearch}>
         <AdvancedSearchOptions 
           threshold={threshold} 
-          onThresholdChange={setThreshold} 
+          onThresholdChange={setThreshold}
+          limit={limit}
+          onLimitChange={setLimit}
           labelClassName={styles.label} 
         />
         
