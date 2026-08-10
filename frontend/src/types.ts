@@ -28,7 +28,12 @@ export interface SearchResult {
   descricao_completa?: string;
   resumo?: string; // dados antigos
   url_original: string;
+  /** Cosine similarity in [-1, 1]. 0 when the result came from full-text alone. */
   similarity: number;
+  /** ts_rank_cd from the lexical branch. 0 when there was no text match. */
+  text_rank?: number;
+  /** Fused RRF score used for ordering. */
+  score?: number;
 }
 
 export interface SearchParams {
