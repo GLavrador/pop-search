@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import { findPresetByThreshold } from '../../constants/searchPresets';
 
 interface AdvancedSearchOptionsProps {
   threshold: number;
@@ -10,6 +11,7 @@ interface AdvancedSearchOptionsProps {
 
 export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onLimitChange, labelClassName }: AdvancedSearchOptionsProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const activePreset = findPresetByThreshold(threshold);
 
   return (
     <>
@@ -30,9 +32,12 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label className={labelClassName} style={{ marginBottom: 0, fontSize: '0.9em' }}>
               Match Threshold: <span style={{ fontWeight: 'bold' }}>{Math.round(threshold * 100)}%</span>
+              <span style={{ fontWeight: 'normal', fontStyle: 'italic' }}>
+                {activePreset ? ` (${activePreset.label})` : ' (Custom)'}
+              </span>
             </label>
-            <span 
-              title="Determines how strict the semantic matching should be. Higher values return fewer, more precise results. Lower values return more results, but they may be less relevant." 
+            <span
+              title="Controls how strict the semantic (meaning-based) matching is. Higher values return fewer but more precise results. It does not affect exact text matches: a video containing the searched term in its title, description or transcript shows up at any threshold."
               style={{ cursor: 'help', display: 'inline-block', backgroundColor: '#000080', color: 'white', borderRadius: '50%', width: '16px', height: '16px', textAlign: 'center', lineHeight: '16px', fontSize: '0.75em', fontWeight: 'bold' }}
             >
               i

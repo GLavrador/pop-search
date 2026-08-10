@@ -4,12 +4,14 @@ import { useStatus } from "../../context/StatusContext";
 import { VideoCard } from "../VideoCard";
 import { TaskProgress } from "../TaskProgress";
 import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
+import { PrecisionPresets } from "../PrecisionPresets";
+import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from "../../constants/searchPresets";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
-  const [threshold, setThreshold] = useState(0.70);
-  const [limit, setLimit] = useState(5);
+  const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
+  const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const { search, results, isLoading, hasSearched, error } = useVideoSearchQuery();
   const { setStatus } = useStatus();
 
@@ -69,9 +71,15 @@ export const SearchSection = () => {
           onThresholdChange={setThreshold}
           limit={limit}
           onLimitChange={setLimit}
-          labelClassName={styles.label} 
+          labelClassName={styles.label}
         />
-        
+
+        <PrecisionPresets
+          threshold={threshold}
+          onThresholdChange={setThreshold}
+          disabled={isLoading}
+        />
+
         <div className={styles.inputRow}>
           <input
             type="text"
@@ -111,7 +119,9 @@ export const SearchSection = () => {
         {!isLoading && !error && hasSearched && results.length === 0 && (
           <div className="win95-border" style={{ padding: '4px 8px', backgroundColor: '#ffffe1', marginTop: '5px', display: 'flex', alignItems: 'center' }}>
             <span style={{ fontSize: '0.95em' }}>
-              <strong>0 found.</strong> No matches above <strong>{Math.round(threshold * 100)}%</strong> threshold. Try lowering the slider.
+              <strong>0 found.</strong> No semantic match above{' '}
+              <strong>{Math.round(threshold * 100)}%</strong> and no exact term found.
+              Try the <strong>Broad</strong> precision or different keywords.
             </span>
           </div>
         )}
