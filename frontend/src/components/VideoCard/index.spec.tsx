@@ -13,7 +13,7 @@ vi.mock('../../context/StatusContext', () => ({
 const mockData: SearchResult = {
   id: '123',
   titulo_video: 'Test Video Title',
-  resumo: 'This is a summary of the test video.',
+  descricao_completa: 'This is a summary of the test video.',
   similarity: 0.856,
   url_original: 'http://example.com'
 };

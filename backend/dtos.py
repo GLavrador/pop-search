@@ -59,7 +59,6 @@ class SearchResult(BaseModel):
     id: str
     titulo_video: str
     descricao_completa: Optional[str] = None
-    resumo: Optional[str] = None  # Backward compatibility
     url_original: str
     # Cosine similarity lives in [-1, 1]. It is 0.0 for results that came in
     # through the full-text branch alone

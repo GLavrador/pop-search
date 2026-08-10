@@ -21,7 +21,6 @@ def test_search_videos_success(mock_embed, mock_supabase):
             "id": "123",
             "titulo_video": "Teste",
             "descricao_completa": "Descrição completa do vídeo de teste",
-            "resumo": "Resumo",
             "url_original": "http://twitter.com/teste",
             "similarity": 0.9,
             "text_rank": 0.0,
@@ -56,7 +55,6 @@ def test_text_only_match_is_not_filtered_out(mock_embed, mock_supabase):
             "id": "abc",
             "titulo_video": "Show da banda",
             "descricao_completa": "Uma descrição qualquer sem relação semântica",
-            "resumo": None,
             "url_original": "http://twitter.com/show",
             # Came in through the full-text branch alone: zero similarity,
             # which sits below the requested threshold.

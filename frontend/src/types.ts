@@ -26,7 +26,6 @@ export interface SearchResult {
   id: string;
   titulo_video: string;
   descricao_completa?: string;
-  resumo?: string; // dados antigos
   url_original: string;
   /** Cosine similarity in [-1, 1]. 0 when the result came from full-text alone. */
   similarity: number;
