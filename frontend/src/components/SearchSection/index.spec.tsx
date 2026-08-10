@@ -60,7 +60,7 @@ describe('SearchSection Component', () => {
     const button = screen.getByText('Find Now');
     fireEvent.click(button);
     
-    expect(mockSearch).toHaveBeenCalledWith('test query');
+    expect(mockSearch).toHaveBeenCalledWith('test query', 0.7);
   });
 
   it('should not call search when query is empty', () => {
@@ -92,7 +92,7 @@ describe('SearchSection Component', () => {
 
     renderWithProviders(<SearchSection />);
     
-    expect(screen.getByText('0 objects found.')).toBeInTheDocument();
+    expect(screen.getByText('0 found.')).toBeInTheDocument();
   });
 
   it('should show error message when error occurs', () => {

@@ -9,52 +9,39 @@ const baseMock: VideoMetadataForm = {
   metadados_estruturados: {
     pessoas: [],
     elementos_cenario: '',
-    audio: { transcricao: '', musica: null, artista: null },
-    tags_busca: ''
+    audio: { transcricao: '', musica: null, artista: null }
   }
 };
 
 describe('transformFormDataToMetadata', () => {
-  it('should split comma-separated tags_busca string into array', () => {
-    const input: VideoMetadataForm = {
-      ...baseMock,
-      metadados_estruturados: {
-        ...baseMock.metadados_estruturados,
-        tags_busca: ' react,  testing '
-      }
-    };
-
-    const result = transformFormDataToMetadata(input);
-
-    expect(result.metadados_estruturados.tags_busca).toEqual(['react', 'testing']);
-  });
-
   it('should split comma-separated elementos_cenario string into array', () => {
     const input: VideoMetadataForm = {
       ...baseMock,
       metadados_estruturados: {
         ...baseMock.metadados_estruturados,
-        elementos_cenario: 'mesa, cadeira, janela'
+        elementos_cenario: ' react,  testing '
       }
     };
 
     const result = transformFormDataToMetadata(input);
 
-    expect(result.metadados_estruturados.elementos_cenario).toEqual(['mesa', 'cadeira', 'janela']);
+    expect(result.metadados_estruturados.elementos_cenario).toEqual(['react', 'testing']);
   });
+
+
 
   it('should handle empty string (returns empty array)', () => {
     const input: VideoMetadataForm = {
       ...baseMock,
       metadados_estruturados: {
         ...baseMock.metadados_estruturados,
-        tags_busca: ''
+        elementos_cenario: ''
       }
     };
 
     const result = transformFormDataToMetadata(input);
 
-    expect(result.metadados_estruturados.tags_busca).toEqual([]);
+    expect(result.metadados_estruturados.elementos_cenario).toEqual([]);
   });
 
   it('should remove empty strings caused by trailing commas', () => {
@@ -62,12 +49,12 @@ describe('transformFormDataToMetadata', () => {
       ...baseMock,
       metadados_estruturados: {
         ...baseMock.metadados_estruturados,
-        tags_busca: 'tag1, tag2,, '
+        elementos_cenario: 'tag1, tag2,, '
       }
     };
 
     const result = transformFormDataToMetadata(input);
 
-    expect(result.metadados_estruturados.tags_busca).toEqual(['tag1', 'tag2']);
+    expect(result.metadados_estruturados.elementos_cenario).toEqual(['tag1', 'tag2']);
   });
 });

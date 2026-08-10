@@ -14,8 +14,7 @@ const mockData: VideoMetadata = {
       transcricao: 'Lalalala',
       musica: null,
       artista: null,
-    },
-    tags_busca: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7']
+    }
   }
 };
 
@@ -24,7 +23,7 @@ describe('ReviewForm Component', () => {
     render(<ReviewForm initialData={mockData} onSave={async () => {}} onCancel={() => {}} />);
     
     expect(screen.getByDisplayValue('Original Title With Five Words Here')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('tag1, tag2, tag3, tag4, tag5, tag6, tag7')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Tree, Building')).toBeInTheDocument();
   });
 
   it('should convert comma-separated strings back to arrays on submit', async () => {
@@ -32,8 +31,8 @@ describe('ReviewForm Component', () => {
 
     render(<ReviewForm initialData={mockData} onSave={handleSaveMock} onCancel={() => {}} />);
 
-    const tagsInput = screen.getByDisplayValue('tag1, tag2, tag3, tag4, tag5, tag6, tag7');
-    fireEvent.change(tagsInput, { target: { value: 'react, testing, validation, zod, form, hooks, typescript' } });
+    const tagsInput = screen.getByDisplayValue('Tree, Building');
+    fireEvent.change(tagsInput, { target: { value: 'Tree, Building, Car, Road' } });
 
     const saveButton = screen.getByText('Save');
     fireEvent.click(saveButton);
@@ -41,7 +40,7 @@ describe('ReviewForm Component', () => {
     await waitFor(() => {
       expect(handleSaveMock).toHaveBeenCalledWith(expect.objectContaining({
         metadados_estruturados: expect.objectContaining({
-          tags_busca: ['react', 'testing', 'validation', 'zod', 'form', 'hooks', 'typescript']
+          elementos_cenario: ['Tree', 'Building', 'Car', 'Road']
         })
       }));
     });
