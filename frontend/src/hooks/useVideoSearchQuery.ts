@@ -22,6 +22,8 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
             return searchVideos({ query: searchQuery.query, threshold: searchQuery.threshold }, signal);
         },
         enabled: !!searchQuery,
+        refetchOnWindowFocus: false,
+        retry: false,
     });
 
     const getErrorMessage = (error: unknown): string => {
