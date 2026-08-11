@@ -42,5 +42,6 @@ def quota_available():
     """Within quota by default, and never touching the real database."""
     with patch("routers.videos.get_quota", new=AsyncMock(return_value=TEST_QUOTA)), \
          patch("routers.videos.record_event", new=AsyncMock()), \
-         patch("routers.me.get_quota", new=AsyncMock(return_value=TEST_QUOTA)):
+         patch("routers.me.get_quota", new=AsyncMock(return_value=TEST_QUOTA)), \
+         patch("routers.me.is_admin", new=AsyncMock(return_value=False)):
         yield

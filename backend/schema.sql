@@ -24,7 +24,8 @@ create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null,
   created_at timestamptz not null default now(),
-  monthly_analysis_limit int not null default 20
+  monthly_analysis_limit int not null default 20,
+  is_admin boolean not null default false
 );
 
 -- security definer: the signup context cannot write to public.profiles.
