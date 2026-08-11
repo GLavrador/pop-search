@@ -6,7 +6,7 @@ from core.logger import configure_logging, get_logger
 from core.limiter import limiter
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from routers import health_router, videos_router, search_router
+from routers import health_router, videos_router, search_router, me_router
 
 configure_logging()
 logger = get_logger("main")
@@ -39,3 +39,4 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(health_router)
 app.include_router(videos_router)
 app.include_router(search_router)
+app.include_router(me_router)
