@@ -19,7 +19,7 @@ genai = get_genai()
 model = get_generation_model()
 
 PROCESSING_TIMEOUT = 60
-GENERATION_TIMEOUT = 60
+GENERATION_TIMEOUT = 150
 USABLE_FINISH_REASONS = {"STOP", "MAX_TOKENS"}
 
 
