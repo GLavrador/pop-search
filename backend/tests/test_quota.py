@@ -168,6 +168,39 @@ class TestQuotaEndpoint:
         assert client.get("/me/quota").status_code == 401
 
 
+class TestProfileLookup:
+
+    def _supabase_with(self, profile_rows, count=0):
+        mock = patch("services.usage.supabase").start()
+        table = mock.table.return_value
+        table.select.return_value.eq.return_value.limit.return_value.execute.return_value.data = profile_rows
+        counted = table.select.return_value.eq.return_value.eq.return_value.gte.return_value
+        counted.execute.return_value.count = count
+        return mock
+
+    def teardown_method(self):
+        patch.stopall()
+
+    def test_uses_the_limit_stored_on_the_profile(self):
+        self._supabase_with([{"monthly_analysis_limit": 5}], count=2)
+
+        quota = usage._fetch_quota(TEST_USER_ID)
+
+        assert quota.limit == 5
+        assert quota.used == 2
+
+    def test_warns_when_the_profile_is_missing(self):
+        """A user with no profile means the signup trigger failed. Falling back
+        quietly would hide that and hand out the default allowance."""
+        self._supabase_with([])
+
+        with patch("services.usage.logger") as mock_logger:
+            quota = usage._fetch_quota(TEST_USER_ID)
+
+        assert quota.limit == usage.DEFAULT_MONTHLY_LIMIT
+        mock_logger.warning.assert_called_once()
+
+
 class TestRecordEventResilience:
 
     @pytest.mark.asyncio

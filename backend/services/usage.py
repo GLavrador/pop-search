@@ -46,7 +46,14 @@ def _fetch_quota(user_id: str) -> Quota:
         .execute()
     )
     rows = profile.data or []
-    limit = rows[0]["monthly_analysis_limit"] if rows else DEFAULT_MONTHLY_LIMIT
+
+    if rows:
+        limit = rows[0]["monthly_analysis_limit"]
+    else:
+        # The signup trigger should make this impossible, so reaching here means
+        # it failed and the user is silently on the default allowance.
+        logger.warning(f"No profile for {user_id}; falling back to the default limit")
+        limit = DEFAULT_MONTHLY_LIMIT
 
     counted = (
         supabase.table("usage_events")
