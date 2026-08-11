@@ -1,9 +1,14 @@
 import { useQuotaQuery } from '../../hooks/useQuotaQuery';
 import styles from './styles.module.css';
 
+// Rendered in UTC because the window is counted in UTC on the server. In local
+// time, midnight on the 1st reads as the 31st, telling the user the quota
+// renews before the month is over.
 const formatDate = (value: string): string => {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString();
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleDateString(undefined, { timeZone: 'UTC' });
 };
 
 export const QuotaMeter = () => {

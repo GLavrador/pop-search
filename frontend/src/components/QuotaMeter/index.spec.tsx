@@ -48,6 +48,15 @@ describe('QuotaMeter', () => {
     expect(screen.getByText(/add videos manually/)).toBeInTheDocument();
   });
 
+  it('should show the reset date in UTC, not shifted by the local zone', () => {
+    // Midnight UTC on the 1st is the previous evening in the Americas, which
+    // would tell the user the quota renews before the month is over.
+    render(<QuotaMeter />);
+
+    expect(screen.getByText(/renews on/)).toHaveTextContent('2026');
+    expect(screen.queryByText(/31/)).not.toBeInTheDocument();
+  });
+
   it('should render nothing when there is no quota to show', () => {
     mockUseQuotaQuery.mockReturnValue({ quota: null, isLoading: false });
 
