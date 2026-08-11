@@ -63,6 +63,26 @@ def get_system_prompt(analyze_scenes: bool, analyze_audio: bool) -> str:
     return "\n".join(prompt_parts)
 
 
+def _log_token_usage(response) -> None:
+    """Record what the call actually cost.
+
+    Logged at INFO rather than DEBUG because this is accounting data, not
+    debugging: it is the only place the real cost of an analysis is visible,
+    and it is the raw material for per-user metering later.
+    """
+    usage = getattr(response, "usage_metadata", None)
+
+    if usage is None:
+        logger.warning("Gemini response carried no usage_metadata; cost not recorded")
+        return
+
+    logger.info(
+        f"Gemini token usage: prompt={getattr(usage, 'prompt_token_count', '?')} "
+        f"output={getattr(usage, 'candidates_token_count', '?')} "
+        f"total={getattr(usage, 'total_token_count', '?')}"
+    )
+
+
 def _extract_json(response) -> dict:
     """Read the model output, refusing to touch .text when it would raise."""
     if not response.candidates:
@@ -112,7 +132,9 @@ async def analyze_video_content(video_path: str, analyze_scenes: bool = False, a
             model.generate_content_async([system_prompt, video_file]),
             timeout=GENERATION_TIMEOUT
         )
-        
+    
+        _log_token_usage(response)
+
         result = _extract_json(response)
         logger.info("Analysis received successfully")
         return result

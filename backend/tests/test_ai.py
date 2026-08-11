@@ -1,6 +1,7 @@
-"""Tests for the prompt contract and the blocked-response handling."""
+"""Tests for the prompt contract, blocked responses and cost accounting."""
+import asyncio
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from core.exceptions import ContentBlockedError
 from dtos import (
@@ -9,7 +10,12 @@ from dtos import (
     MAX_TITULO_CHARS,
     MAX_TRANSCRICAO_CHARS,
 )
-from services.ai import get_system_prompt, _extract_json
+from services.ai import (
+    analyze_video_content,
+    get_system_prompt,
+    _extract_json,
+    _log_token_usage,
+)
 
 
 class TestSystemPrompt:
@@ -84,3 +90,58 @@ class TestExtractJson:
         the broad except, turning a content filter into a generic 500."""
         with pytest.raises(ContentBlockedError):
             _extract_json(_ResponseThatRaisesOnText("RECITATION"))
+
+
+class TestTokenUsageLogging:
+    """These numbers are what per-user metering will be built on, so they have
+    to be emitted for every call and they have to be complete."""
+
+    def test_logs_the_counts_reported_by_gemini(self):
+        response = _response()
+        response.usage_metadata.prompt_token_count = 8123
+        response.usage_metadata.candidates_token_count = 250
+        response.usage_metadata.total_token_count = 8373
+
+        with patch("services.ai.logger") as mock_logger:
+            _log_token_usage(response)
+
+        message = mock_logger.info.call_args[0][0]
+        assert "prompt=8123" in message
+        assert "output=250" in message
+        assert "total=8373" in message
+
+    def test_warns_instead_of_crashing_when_usage_is_missing(self):
+        response = MagicMock()
+        response.usage_metadata = None
+
+        with patch("services.ai.logger") as mock_logger:
+            _log_token_usage(response)
+
+        mock_logger.warning.assert_called_once()
+        mock_logger.info.assert_not_called()
+
+    def test_records_the_cost_even_when_the_content_is_blocked(self):
+        """A blocked video still burned its input tokens. Recording the cost
+        only on success would make per-user accounting under-count silently."""
+        uploaded = MagicMock()
+        uploaded.state.name = "ACTIVE"
+
+        blocked = _response(finish_reason="SAFETY")
+        blocked.usage_metadata.prompt_token_count = 8000
+        blocked.usage_metadata.candidates_token_count = 0
+        blocked.usage_metadata.total_token_count = 8000
+
+        async def _generate(*_args, **_kwargs):
+            return blocked
+
+        with patch("services.ai.genai") as mock_genai, \
+             patch("services.ai.model") as mock_model, \
+             patch("services.ai.logger") as mock_logger:
+            mock_genai.upload_file.return_value = uploaded
+            mock_model.generate_content_async = _generate
+
+            with pytest.raises(ContentBlockedError):
+                asyncio.run(analyze_video_content("fake.mp4"))
+
+        logged = " ".join(str(call) for call in mock_logger.info.call_args_list)
+        assert "prompt=8000" in logged
