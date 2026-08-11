@@ -9,7 +9,7 @@ from dtos import VideoMetadataDTO
 from db import supabase
 from core.logger import get_logger
 from core.limiter import limiter
-from core.exceptions import validate_video_url
+from core.exceptions import validate_video_url, ALLOWED_DOMAINS, ContentBlockedError
 from asyncio import TimeoutError as AsyncTimeoutError
 
 logger = get_logger("routers.videos")
@@ -26,7 +26,7 @@ class VideoAnalysisRequest(BaseModel):
     @classmethod
     def validate_url_domain(cls, v: str) -> str:
         if not validate_video_url(v):
-            raise ValueError('URL must be from twitter.com, x.com, youtube.com, or youtu.be')
+            raise ValueError(f"URL must be from {' or '.join(ALLOWED_DOMAINS)}")
         return v
 
 
@@ -62,6 +62,13 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
         raise HTTPException(
             status_code=504, 
             detail="The AI service took too long to respond. Please try again later."
+        )
+
+    except ContentBlockedError as e:
+        logger.warning(f"Analysis blocked for {body.url}: {e.reason}")
+        raise HTTPException(
+            status_code=422,
+            detail="The AI declined to describe this video, usually because of its content. Nothing is wrong with the link."
         )
 
     except HTTPException as he:

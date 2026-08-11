@@ -1,21 +1,28 @@
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional
 
+MAX_TITULO_CHARS = 200
+MAX_DESCRICAO_CHARS = 5000
+MAX_PESSOAS = 20
+MAX_PESSOA_DESCRICAO_CHARS = 500
+MAX_ELEMENTOS_CENARIO = 50
+MAX_TRANSCRICAO_CHARS = 5000
+
 
 class Pessoa(BaseModel):
-    descricao: str = Field(..., min_length=3, max_length=500, description="Physical description")
+    descricao: str = Field(..., min_length=3, max_length=MAX_PESSOA_DESCRICAO_CHARS, description="Physical description")
     papel: Optional[str] = Field(None, max_length=100, description="Role in video if identifiable")
 
 
 class AudioInfo(BaseModel):
-    transcricao: str = Field("", max_length=5000, description="Transcribed speech or lyrics")
+    transcricao: str = Field("", max_length=MAX_TRANSCRICAO_CHARS, description="Transcribed speech or lyrics")
     musica: Optional[str] = Field(None, max_length=200, description="Song name if identified")
     artista: Optional[str] = Field(None, max_length=200, description="Artist name if identified")
 
 
 class MetadadosEstruturados(BaseModel):
-    pessoas: List[Pessoa] = Field(default_factory=list, max_length=20)
-    elementos_cenario: List[str] = Field(default_factory=list, max_length=50)
+    pessoas: List[Pessoa] = Field(default_factory=list, max_length=MAX_PESSOAS)
+    elementos_cenario: List[str] = Field(default_factory=list, max_length=MAX_ELEMENTOS_CENARIO)
     audio: AudioInfo = Field(default_factory=AudioInfo)
 
 
@@ -23,13 +30,13 @@ class VideoMetadataDTO(BaseModel):
     titulo_sugerido: str = Field(
         ..., 
         min_length=5, 
-        max_length=200, 
+        max_length=MAX_TITULO_CHARS,
         description="Descriptive title for the video"
     )
     descricao_completa: str = Field(
         ..., 
         min_length=20, 
-        max_length=5000, 
+        max_length=MAX_DESCRICAO_CHARS,
         description="Complete detailed description"
     )
     url_original: Optional[str] = Field(
