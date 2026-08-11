@@ -78,6 +78,38 @@ class UserUsageRow(BaseModel):
     limit: int
 
 
+class FailureReason(BaseModel):
+    reason: str
+    count: int
+
+
+class DailyPoint(BaseModel):
+    date: str
+    analyses: int
+    tokens: int
+
+
+class AdminStatsReport(BaseModel):
+    range_days: int
+    analyses: int
+    saves: int
+    tokens: int
+    avg_tokens: int
+    median_tokens: int
+    min_tokens: int
+    max_tokens: int
+    measured: int
+    failures: int
+    failure_rate: float
+    tokens_wasted: int
+    failures_by_reason: List[FailureReason]
+    daily: List[DailyPoint]
+    analyses_today: int
+    daily_limit: int
+    projected_tokens_at_limit: int
+    per_user: List["UserUsageRow"]
+
+
 class ProjectUsageReport(BaseModel):
     rows: List[UserUsageRow]
     analyses_today: int

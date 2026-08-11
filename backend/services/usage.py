@@ -1,7 +1,8 @@
 import asyncio
 import os
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from statistics import mean, median
 from typing import Optional
 
 from dotenv import load_dotenv
@@ -202,6 +203,97 @@ def _fetch_all_usage() -> list[UserUsage]:
 async def get_all_usage() -> list[UserUsage]:
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, _fetch_all_usage)
+
+
+@dataclass
+class AdminStats:
+    range_days: int
+    analyses: int
+    saves: int
+    tokens: int
+    avg_tokens: int
+    median_tokens: int
+    min_tokens: int
+    max_tokens: int
+    measured: int
+    failures: int
+    failure_rate: float
+    tokens_wasted: int
+    failures_by_reason: list[dict]
+    daily: list[dict]
+    analyses_today: int
+    daily_limit: int
+    projected_tokens_at_limit: int
+
+
+# A month of this project's events is small; if the archive ever outgrows this,
+# the aggregation belongs in a SQL view rather than in Python.
+MAX_EVENTS_SCANNED = 5000
+
+
+def _fetch_admin_stats(days: int) -> AdminStats:
+    since = _day_start() - timedelta(days=days - 1)
+
+    events = (
+        supabase.table("usage_events")
+        .select("kind, succeeded, failure_reason, total_tokens, created_at")
+        .gte("created_at", since.isoformat())
+        .order("created_at", desc=True)
+        .limit(MAX_EVENTS_SCANNED)
+        .execute()
+    ).data or []
+
+    analyses = [e for e in events if e.get("kind") == "analysis"]
+    saves = [e for e in events if e.get("kind") == "save"]
+
+    # Only analyses that reported a cost: a refused call records zero, and
+    # averaging those in would understate what an analysis really costs.
+    measured = [e["total_tokens"] for e in analyses if (e.get("total_tokens") or 0) > 0]
+
+    failed = [e for e in analyses if not e.get("succeeded")]
+    reasons: dict[str, int] = {}
+    for event in failed:
+        reason = event.get("failure_reason") or "unknown"
+        reasons[reason] = reasons.get(reason, 0) + 1
+
+    by_day: dict[str, dict] = {}
+    for event in analyses:
+        day = str(event.get("created_at", ""))[:10]
+        entry = by_day.setdefault(day, {"date": day, "analyses": 0, "tokens": 0})
+        entry["analyses"] += 1
+        entry["tokens"] += event.get("total_tokens") or 0
+
+    today = _day_start().date().isoformat()
+    avg = round(mean(measured)) if measured else 0
+
+    return AdminStats(
+        range_days=days,
+        analyses=len(analyses),
+        saves=len(saves),
+        tokens=sum((e.get("total_tokens") or 0) for e in events),
+        avg_tokens=avg,
+        median_tokens=round(median(measured)) if measured else 0,
+        min_tokens=min(measured) if measured else 0,
+        max_tokens=max(measured) if measured else 0,
+        measured=len(measured),
+        failures=len(failed),
+        failure_rate=round(len(failed) / len(analyses), 4) if analyses else 0.0,
+        tokens_wasted=sum((e.get("total_tokens") or 0) for e in failed),
+        failures_by_reason=sorted(
+            [{"reason": r, "count": c} for r, c in reasons.items()],
+            key=lambda item: item["count"],
+            reverse=True,
+        ),
+        daily=sorted(by_day.values(), key=lambda item: item["date"]),
+        analyses_today=by_day.get(today, {}).get("analyses", 0),
+        daily_limit=DAILY_ANALYSIS_LIMIT,
+        projected_tokens_at_limit=avg * DAILY_ANALYSIS_LIMIT,
+    )
+
+
+async def get_admin_stats(days: int) -> AdminStats:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _fetch_admin_stats, days)
 
 
 async def record_event(
