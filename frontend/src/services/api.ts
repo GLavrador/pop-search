@@ -6,6 +6,7 @@ import type {
   MyVideo,
   QuotaStatus,
   ProjectUsageReport,
+  AdminStatsReport,
 } from '../types';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
@@ -59,6 +60,14 @@ export const getIsAdmin = async (signal?: AbortSignal): Promise<boolean> => {
 
 export const getAllUsage = async (signal?: AbortSignal): Promise<ProjectUsageReport> => {
   const response = await api.get<ProjectUsageReport>('/me/all-usage', { signal });
+  return response.data;
+};
+
+export const getAdminStats = async (
+  days: number,
+  signal?: AbortSignal,
+): Promise<AdminStatsReport> => {
+  const response = await api.get<AdminStatsReport>('/me/admin/stats', { params: { days }, signal });
   return response.data;
 };
 

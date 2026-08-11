@@ -1,0 +1,138 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.ranges {
+  display: flex;
+  gap: 4px;
+}
+
+.rangeButton {
+  padding: 3px 10px;
+  font-size: 0.8em;
+  min-width: 64px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--win-light);
+  border-top: 2px solid var(--win-shadow-dark);
+  border-left: 2px solid var(--win-shadow-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+}
+
+.cardLabel {
+  font-size: 0.72rem;
+  color: var(--win-text-secondary);
+  text-transform: uppercase;
+}
+
+.cardValue {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.cardHint {
+  font-size: 0.7rem;
+  color: var(--win-text-secondary);
+}
+
+.alert .cardValue {
+  color: var(--win-error-text);
+}
+
+.group {
+  border: 1px solid var(--win-shadow-dark);
+  box-shadow: 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-light);
+  padding: 6px 12px 12px;
+  margin: 0;
+  min-width: 0;
+}
+
+.legend {
+  padding: 0 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.table th,
+.table td {
+  padding: 3px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--win-tag-border);
+  white-space: nowrap;
+}
+
+.table th {
+  background: var(--win-tag-bg);
+  font-weight: bold;
+}
+
+.number {
+  font-family: 'Courier New', monospace;
+  text-align: right;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 90px;
+  padding-top: 6px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 4px;
+  background: var(--win-blue-title);
+  cursor: help;
+}
+
+.note {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--win-text-secondary);
+}
+
+.empty {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--win-text-secondary);
+}

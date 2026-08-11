@@ -10,13 +10,16 @@ import { useAuth } from './context/authContext';
 import { AuthPanel } from './components/AuthPanel';
 import { MyVideos } from './components/MyVideos';
 import { DemoTour } from './components/DemoTour';
+import { AdminDashboard } from './components/AdminDashboard';
+import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { StatusBar } from './components/StatusBar';
 
-type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo';
+type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
   const { isAuthenticated, displayName } = useAuth();
+  const { isAdmin } = useAdminStatsQuery(30);
 
 
   return (
@@ -48,6 +51,14 @@ function AppContent() {
                 className={`win95-border ${styles.navButton} ${activeTab === 'library' ? `win95-inset ${styles.active}` : ''}`}
               >
                 📁 My-Videos.exe
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => setActiveTab('admin')}
+                className={`win95-border ${styles.navButton} ${activeTab === 'admin' ? `win95-inset ${styles.active}` : ''}`}
+              >
+                📊 Stats.exe
               </button>
             )}
             <button
@@ -101,6 +112,11 @@ function AppContent() {
             <div style={{ display: activeTab === 'demo' ? 'block' : 'none' }}>
               <DemoTour />
             </div>
+            {isAdmin && activeTab === 'admin' && (
+              <div>
+                <AdminDashboard />
+              </div>
+            )}
             <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
               <AuthPanel />
             </div>
