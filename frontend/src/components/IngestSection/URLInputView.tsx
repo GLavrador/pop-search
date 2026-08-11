@@ -27,8 +27,8 @@ export const URLInputView = ({
 }: URLInputViewProps) => {
   const [showProgress, setShowProgress] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
-  const [analyzeScenes, setAnalyzeScenes] = useState(false);
-  const [analyzeAudio, setAnalyzeAudio] = useState(false);
+  const [analyzeScenes, setAnalyzeScenes] = useState(true);
+  const [analyzeAudio, setAnalyzeAudio] = useState(true);
 
   useEffect(() => {
     if (loading) {

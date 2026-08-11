@@ -46,6 +46,30 @@ class TestURLValidation:
         assert "youtu.be" not in message.lower()
 
 
+class TestAnalysisDefaults:
+
+    @patch("routers.videos.analyze_video_content")
+    @patch("routers.videos.download_video")
+    def test_omitting_the_flags_requests_a_full_analysis(self, mock_download, mock_analyze):
+        """A request without flags must still produce a searchable video: with
+        them off, the structured metadata feeding the search index is never
+        generated at all."""
+        mock_download.return_value = "does-not-exist.mp4"
+        mock_analyze.return_value = {
+            "titulo_sugerido": "Um titulo valido",
+            "descricao_completa": "Uma descricao suficientemente longa para validar",
+            "metadados_estruturados": {},
+        }
+
+        response = client.post(
+            "/videos/analyze", json={"url": "https://twitter.com/user/status/123"}
+        )
+
+        assert response.status_code == 200
+        _path, analyze_scenes, analyze_audio = mock_analyze.call_args[0]
+        assert analyze_scenes is True
+        assert analyze_audio is True
+
 class TestErrorHandling:    
     @patch("routers.videos.download_video")
     def test_analyze_hides_internal_errors(self, mock_download):

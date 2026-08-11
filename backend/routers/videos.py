@@ -19,8 +19,8 @@ router = APIRouter(prefix="/videos", tags=["Videos"])
 
 class VideoAnalysisRequest(BaseModel):
     url: str
-    analyze_scenes: bool = False
-    analyze_audio: bool = False
+    analyze_scenes: bool = True
+    analyze_audio: bool = True
     
     @field_validator('url')
     @classmethod
