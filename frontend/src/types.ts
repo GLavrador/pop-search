@@ -53,6 +53,12 @@ export interface UserUsageRow {
   limit: number;
 }
 
+export interface ProjectUsageReport {
+  rows: UserUsageRow[];
+  analyses_today: number;
+  daily_limit: number;
+}
+
 export interface MyVideo {
   id: string;
   titulo_video?: string;

@@ -1,14 +1,24 @@
 import asyncio
+import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
+from dotenv import load_dotenv
+
 from core.logger import get_logger
 from db import supabase
+
+load_dotenv()
 
 logger = get_logger("services.usage")
 
 DEFAULT_MONTHLY_LIMIT = 20
+
+# Per-user limits divide a pie whose size nobody measured. This is the size.
+# Calibrate it against the real ceiling in Google Cloud Console, under
+# Generative Language API quotas, divided by your average tokens per analysis.
+DAILY_ANALYSIS_LIMIT = int(os.getenv("DAILY_ANALYSIS_LIMIT", "100"))
 
 
 @dataclass
@@ -89,6 +99,41 @@ def _fetch_quota(user_id: str) -> Quota:
 async def get_quota(user_id: str) -> Quota:
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, _fetch_quota, user_id)
+
+
+@dataclass
+class ProjectUsage:
+    analyses_today: int
+    daily_limit: int
+
+    @property
+    def is_exhausted(self) -> bool:
+        return self.analyses_today >= self.daily_limit
+
+
+def _day_start(now: Optional[datetime] = None) -> datetime:
+    now = now or datetime.now(timezone.utc)
+    return now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def _fetch_project_usage() -> ProjectUsage:
+    counted = (
+        supabase.table("usage_events")
+        .select("id", count="exact")
+        .eq("kind", "analysis")
+        .gte("created_at", _day_start().isoformat())
+        .execute()
+    )
+
+    return ProjectUsage(
+        analyses_today=counted.count or 0,
+        daily_limit=DAILY_ANALYSIS_LIMIT,
+    )
+
+
+async def get_project_usage() -> ProjectUsage:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _fetch_project_usage)
 
 
 @dataclass

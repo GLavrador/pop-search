@@ -46,6 +46,21 @@
   text-align: right;
 }
 
+.ceiling {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.ceilingHit {
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  background: var(--win-warning-bg);
+  color: var(--win-error-text);
+}
+
 .note {
   margin: 8px 0 0;
   font-size: 0.75rem;

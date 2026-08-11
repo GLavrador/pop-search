@@ -6,7 +6,9 @@ from typing import Optional
 
 from core.logger import get_logger
 from core.gemini import get_genai, get_generation_model
-from core.exceptions import ContentBlockedError
+from google.api_core.exceptions import ResourceExhausted
+
+from core.exceptions import ContentBlockedError, ServiceQuotaExhaustedError
 from dtos import (
     MAX_DESCRICAO_CHARS,
     MAX_ELEMENTOS_CENARIO,
@@ -158,6 +160,10 @@ async def analyze_video_content(
         result = _extract_json(response)
         logger.info("Analysis received successfully")
         return result
+
+    except ResourceExhausted as e:
+        logger.error(f"Gemini quota exhausted for the project: {e}")
+        raise ServiceQuotaExhaustedError(str(e))
 
     except (asyncio.TimeoutError, ContentBlockedError) as e:
         logger.error(f"{type(e).__name__} in AI Service: {e}")

@@ -2,7 +2,7 @@ import { useAdminUsageQuery } from '../../hooks/useAdminUsageQuery';
 import styles from './styles.module.css';
 
 export const AdminUsage = () => {
-  const { isAdmin, rows, isLoading } = useAdminUsageQuery();
+  const { isAdmin, rows, analysesToday, dailyLimit, isLoading } = useAdminUsageQuery();
 
   if (!isAdmin) {
     return null;
@@ -48,6 +48,13 @@ export const AdminUsage = () => {
               </tfoot>
             </table>
           </div>
+          <p className={dailyLimit > 0 && analysesToday >= dailyLimit ? styles.ceilingHit : styles.ceiling}>
+            Today: {analysesToday} of {dailyLimit} analyses across the whole
+            project.
+            {dailyLimit > 0 && analysesToday >= dailyLimit
+              ? ' The ceiling is reached, so nobody can analyse until tomorrow.'
+              : ''}
+          </p>
           <p className={styles.note}>
             Tokens are what count against the Google AI quota. Analyses are what
             each account is limited by.

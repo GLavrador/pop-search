@@ -78,6 +78,12 @@ class UserUsageRow(BaseModel):
     limit: int
 
 
+class ProjectUsageReport(BaseModel):
+    rows: List[UserUsageRow]
+    analyses_today: int
+    daily_limit: int
+
+
 class MyVideo(BaseModel):
     id: str
     titulo_video: Optional[str] = None

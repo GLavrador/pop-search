@@ -42,8 +42,22 @@ class TestAccess:
              patch("routers.me.get_all_usage", new=AsyncMock(return_value=SUMMARY)):
             body = client.get("/me/all-usage").json()
 
-        assert [row["display_name"] for row in body] == ['Ana', 'Bruno']
-        assert body[0]["tokens"] == 32000
+        assert [row["display_name"] for row in body["rows"]] == ['Ana', 'Bruno']
+        assert body["rows"][0]["tokens"] == 32000
+
+    def test_reports_how_much_of_the_daily_ceiling_is_gone(self):
+        """The per-user rows do not say whether the project itself is close to
+        the wall, which is the number that decides whether anyone can analyse."""
+        from services.usage import ProjectUsage
+
+        with patch("routers.me.is_admin", new=AsyncMock(return_value=True)), \
+             patch("routers.me.get_all_usage", new=AsyncMock(return_value=SUMMARY)), \
+             patch("routers.me.get_project_usage",
+                   new=AsyncMock(return_value=ProjectUsage(analyses_today=37, daily_limit=100))):
+            body = client.get("/me/all-usage").json()
+
+        assert body["analyses_today"] == 37
+        assert body["daily_limit"] == 100
 
     def test_reports_whether_the_caller_is_an_admin(self):
         assert client.get("/me/is-admin").json() == {"is_admin": False}

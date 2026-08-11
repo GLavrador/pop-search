@@ -5,10 +5,11 @@ import pytest
 from core.auth import current_user
 from core.limiter import limiter
 from main import app
-from services.usage import Quota
+from services.usage import ProjectUsage, Quota
 
 TEST_USER_ID = "00000000-0000-4000-8000-000000000001"
 TEST_QUOTA = Quota(used=0, limit=20, resets_at="2026-09-01T00:00:00+00:00")
+TEST_PROJECT = ProjectUsage(analyses_today=0, daily_limit=100)
 
 
 @pytest.fixture(autouse=True)
@@ -42,6 +43,7 @@ def quota_available():
     """Within quota by default, and never touching the real database."""
     with patch("routers.videos.get_quota", new=AsyncMock(return_value=TEST_QUOTA)), \
          patch("routers.videos.record_event", new=AsyncMock()), \
+         patch("routers.videos.get_project_usage", new=AsyncMock(return_value=TEST_PROJECT)), \
          patch("routers.me.get_quota", new=AsyncMock(return_value=TEST_QUOTA)), \
          patch("routers.me.is_admin", new=AsyncMock(return_value=False)):
         yield

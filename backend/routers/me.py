@@ -6,8 +6,8 @@ from core.auth import CurrentUser
 from core.limiter import limiter
 from core.logger import get_logger
 from db import supabase
-from dtos import MyVideo, QuotaStatus, UserUsageRow
-from services.usage import get_all_usage, get_quota, is_admin
+from dtos import MyVideo, ProjectUsageReport, QuotaStatus, UserUsageRow
+from services.usage import get_all_usage, get_project_usage, get_quota, is_admin
 
 logger = get_logger("routers.me")
 
@@ -42,7 +42,7 @@ async def read_is_admin(request: Request, user_id: str = CurrentUser):
     return {"is_admin": await is_admin(user_id)}
 
 
-@router.get("/all-usage", response_model=list[UserUsageRow])
+@router.get("/all-usage", response_model=ProjectUsageReport)
 @limiter.limit("30/minute")
 async def read_all_usage(request: Request, user_id: str = CurrentUser):
     if not await is_admin(user_id):
@@ -50,16 +50,21 @@ async def read_all_usage(request: Request, user_id: str = CurrentUser):
         raise HTTPException(status_code=404, detail="Not found")
 
     try:
-        return [
-            UserUsageRow(
-                user_id=row.user_id,
-                display_name=row.display_name,
-                analyses=row.analyses,
-                tokens=row.tokens,
-                limit=row.limit,
-            )
-            for row in await get_all_usage()
-        ]
+        project = await get_project_usage()
+        return ProjectUsageReport(
+            rows=[
+                UserUsageRow(
+                    user_id=row.user_id,
+                    display_name=row.display_name,
+                    analyses=row.analyses,
+                    tokens=row.tokens,
+                    limit=row.limit,
+                )
+                for row in await get_all_usage()
+            ],
+            analyses_today=project.analyses_today,
+            daily_limit=project.daily_limit,
+        )
     except Exception as e:
         logger.exception(f"Failed to aggregate usage: {e}")
         raise HTTPException(

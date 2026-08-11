@@ -9,9 +9,14 @@ from dtos import VideoMetadataDTO
 from db import supabase
 from core.logger import get_logger
 from core.limiter import limiter
-from core.exceptions import validate_video_url, ALLOWED_DOMAINS, ContentBlockedError
+from core.exceptions import (
+    validate_video_url,
+    ALLOWED_DOMAINS,
+    ContentBlockedError,
+    ServiceQuotaExhaustedError,
+)
 from core.auth import CurrentUser
-from services.usage import get_quota, record_event
+from services.usage import get_project_usage, get_quota, record_event
 from asyncio import TimeoutError as AsyncTimeoutError
 
 logger = get_logger("routers.videos")
@@ -43,6 +48,16 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest, user_id
         raise HTTPException(
             status_code=429,
             detail=f"You have used all {quota.limit} analyses for this month. Your quota renews on {quota.resets_at[:10]}.",
+        )
+
+    # Checked after the personal quota so a user at their own limit is told
+    # that, which is the actionable message, rather than blaming the project.
+    project = await get_project_usage()
+    if project.is_exhausted:
+        logger.warning(f"Daily project limit reached: {project.analyses_today}/{project.daily_limit}")
+        raise HTTPException(
+            status_code=503,
+            detail="The archive has reached its analysis limit for today. Nothing was taken from your quota. Try again tomorrow.",
         )
 
     video_path = None
@@ -86,6 +101,15 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest, user_id
         raise HTTPException(
             status_code=504,
             detail="The AI service took too long to respond. Please try again later."
+        )
+
+    except ServiceQuotaExhaustedError:
+        # Google refused before processing anything, so no tokens were spent and
+        # the user keeps their analysis.
+        charged = False
+        raise HTTPException(
+            status_code=503,
+            detail="The AI service is out of capacity right now. Nothing was taken from your quota. Try again later.",
         )
 
     except ContentBlockedError as e:
