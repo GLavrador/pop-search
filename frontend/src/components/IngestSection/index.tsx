@@ -4,6 +4,7 @@ import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
 import type { VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
+import { QuotaMeter } from '../QuotaMeter';
 import { URLInputView } from './URLInputView';
 import { videoUrlInputSchema } from '../../schemas/videoMetadata';
 import styles from './styles.module.css';
@@ -117,16 +118,19 @@ export const IngestSection = () => {
   }
 
   return (
-    <URLInputView 
-      url={url}
-      onUrlChange={setUrl}
-      onAnalyze={handleAnalyze}
-      onOpenManualForm={handleOpenManualForm}
-      onCancel={handleCancelLoading}
-      loading={isLoading}
-      error={error}
-      manualMode={manualMode}
-      onManualModeChange={setManualMode}
-    />
+    <div className={styles.ingestContainer}>
+      <QuotaMeter />
+      <URLInputView
+        url={url}
+        onUrlChange={setUrl}
+        onAnalyze={handleAnalyze}
+        onOpenManualForm={handleOpenManualForm}
+        onCancel={handleCancelLoading}
+        loading={isLoading}
+        error={error}
+        manualMode={manualMode}
+        onManualModeChange={setManualMode}
+      />
+    </div>
   );
 };

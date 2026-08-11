@@ -37,6 +37,13 @@ export interface SearchResult {
   score?: number;
 }
 
+export interface QuotaStatus {
+  used: number;
+  limit: number;
+  remaining: number;
+  resets_at: string;
+}
+
 export interface MyVideo {
   id: string;
   titulo_video?: string;
