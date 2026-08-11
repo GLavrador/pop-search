@@ -1,0 +1,146 @@
+.tour {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.counter {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.tabName {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: var(--win-text-secondary);
+}
+
+.track {
+  display: flex;
+  gap: 4px;
+}
+
+.pip {
+  flex: 1;
+  height: 6px;
+  background: var(--win-light);
+  border-top: 1px solid var(--win-shadow-dark);
+  border-left: 1px solid var(--win-shadow-dark);
+}
+
+.pipDone {
+  background: var(--win-blue-title);
+}
+
+.panel {
+  padding: 14px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.body p {
+  margin: 0;
+}
+
+.body code {
+  padding: 0 3px;
+  background: var(--win-tag-bg);
+  border: 1px solid var(--win-tag-border);
+  font-size: 0.85em;
+}
+
+.reassure {
+  padding: 8px;
+  background: var(--win-warning-bg);
+  font-weight: bold;
+}
+
+.definitions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.definitions dt {
+  font-weight: bold;
+}
+
+.definitions dd {
+  margin: 0 0 0 14px;
+}
+
+.list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actions button {
+  flex: 1;
+}
+
+.demoBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--win-gray);
+  border: 1px dotted var(--win-shadow-dark);
+}
+
+.demoLabel {
+  margin: 0;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--win-text-secondary);
+}
+
+.searchRow {
+  display: flex;
+  gap: 8px;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.savedNotice {
+  padding: 10px;
+  background: var(--win-warning-bg);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
