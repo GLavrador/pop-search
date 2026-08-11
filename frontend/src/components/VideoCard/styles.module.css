@@ -55,11 +55,29 @@
 }
 
 .score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: 'Courier New', monospace;
   font-size: 0.8rem;
   color: var(--win-success);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.origin {
+  padding: 0 4px;
+  background: var(--win-tag-bg);
+  border: 1px solid var(--win-tag-border);
+  color: var(--win-text-secondary);
+  font-size: 0.7rem;
+  cursor: help;
+}
+
+.card:hover .origin {
+  background: var(--win-blue-title);
+  border-color: var(--win-light);
+  color: var(--win-light);
 }
 
 .summary {
