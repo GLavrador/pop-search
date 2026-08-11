@@ -16,6 +16,7 @@ class Quota:
     used: int
     limit: int
     resets_at: str
+    tokens_this_month: int = 0
 
     @property
     def remaining(self) -> int:
@@ -55,19 +56,33 @@ def _fetch_quota(user_id: str) -> Quota:
         logger.warning(f"No profile for {user_id}; falling back to the default limit")
         limit = DEFAULT_MONTHLY_LIMIT
 
+    since = _month_start().isoformat()
+
     counted = (
         supabase.table("usage_events")
         .select("id", count="exact")
         .eq("user_id", user_id)
         .eq("kind", "analysis")
-        .gte("created_at", _month_start().isoformat())
+        .gte("created_at", since)
         .execute()
     )
+
+    # Summed here rather than in SQL because PostgREST has no aggregate for it
+    # without a view, and a month of one user's rows is a handful.
+    spent = (
+        supabase.table("usage_events")
+        .select("total_tokens")
+        .eq("user_id", user_id)
+        .gte("created_at", since)
+        .execute()
+    )
+    tokens = sum((row.get("total_tokens") or 0) for row in (spent.data or []))
 
     return Quota(
         used=counted.count or 0,
         limit=limit,
         resets_at=_next_month_start().isoformat(),
+        tokens_this_month=tokens,
     )
 
 
@@ -76,11 +91,82 @@ async def get_quota(user_id: str) -> Quota:
     return await loop.run_in_executor(None, _fetch_quota, user_id)
 
 
+@dataclass
+class UserUsage:
+    user_id: str
+    display_name: str
+    analyses: int
+    tokens: int
+    limit: int
+
+
+def _fetch_is_admin(user_id: str) -> bool:
+    response = (
+        supabase.table("profiles")
+        .select("is_admin")
+        .eq("id", user_id)
+        .limit(1)
+        .execute()
+    )
+    rows = response.data or []
+    return bool(rows and rows[0].get("is_admin"))
+
+
+async def is_admin(user_id: str) -> bool:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _fetch_is_admin, user_id)
+
+
+def _fetch_all_usage() -> list[UserUsage]:
+    profiles = (
+        supabase.table("profiles")
+        .select("id, display_name, monthly_analysis_limit")
+        .execute()
+    )
+
+    events = (
+        supabase.table("usage_events")
+        .select("user_id, kind, total_tokens")
+        .gte("created_at", _month_start().isoformat())
+        .execute()
+    )
+
+    analyses: dict[str, int] = {}
+    tokens: dict[str, int] = {}
+
+    for row in events.data or []:
+        owner = row["user_id"]
+        tokens[owner] = tokens.get(owner, 0) + (row.get("total_tokens") or 0)
+        if row.get("kind") == "analysis":
+            analyses[owner] = analyses.get(owner, 0) + 1
+
+    summary = [
+        UserUsage(
+            user_id=profile["id"],
+            display_name=profile["display_name"],
+            analyses=analyses.get(profile["id"], 0),
+            tokens=tokens.get(profile["id"], 0),
+            limit=profile["monthly_analysis_limit"],
+        )
+        for profile in (profiles.data or [])
+    ]
+
+    return sorted(summary, key=lambda item: item.tokens, reverse=True)
+
+
+async def get_all_usage() -> list[UserUsage]:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _fetch_all_usage)
+
+
 async def record_event(
     user_id: str,
     kind: str,
     succeeded: bool = True,
     failure_reason: Optional[str] = None,
+    prompt_tokens: Optional[int] = None,
+    output_tokens: Optional[int] = None,
+    total_tokens: Optional[int] = None,
 ) -> None:
     """Never raises: losing an accounting row must not fail a request that
     already succeeded."""
@@ -89,6 +175,9 @@ async def record_event(
         "kind": kind,
         "succeeded": succeeded,
         "failure_reason": failure_reason,
+        "prompt_tokens": prompt_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": total_tokens,
     }
 
     def insert():

@@ -13,6 +13,7 @@ const quota = (overrides = {}) => ({
   limit: 20,
   remaining: 13,
   resets_at: '2026-09-01T00:00:00+00:00',
+  tokens_this_month: 0,
   ...overrides,
 });
 
@@ -55,6 +56,23 @@ describe('QuotaMeter', () => {
 
     expect(screen.getByText(/renews on/)).toHaveTextContent('2026');
     expect(screen.queryByText(/31/)).not.toBeInTheDocument();
+  });
+
+  it('should report the tokens spent once there are any', () => {
+    mockUseQuotaQuery.mockReturnValue({
+      quota: quota({ tokens_this_month: 48213 }),
+      isLoading: false,
+    });
+
+    render(<QuotaMeter />);
+
+    expect(screen.getByText(/48,213 AI tokens used|48\.213 AI tokens used/)).toBeInTheDocument();
+  });
+
+  it('should stay quiet about tokens before any analysis', () => {
+    render(<QuotaMeter />);
+
+    expect(screen.queryByText(/AI tokens used/)).not.toBeInTheDocument();
   });
 
   it('should render nothing when there is no quota to show', () => {

@@ -46,6 +46,12 @@ export const QuotaMeter = () => {
         />
       </div>
 
+      {quota.tokens_this_month > 0 && (
+        <span className={styles.note}>
+          {quota.tokens_this_month.toLocaleString()} AI tokens used
+        </span>
+      )}
+
       {isExhausted ? (
         <span className={styles.warning}>
           Limit reached. Renews on {formatDate(quota.resets_at)}. You can still

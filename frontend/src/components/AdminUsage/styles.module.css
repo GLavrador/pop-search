@@ -1,0 +1,54 @@
+.group {
+  border: 1px solid var(--win-shadow-dark);
+  box-shadow: 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-light);
+  padding: 6px 12px 12px;
+  margin: 0;
+  min-width: 0;
+}
+
+.legend {
+  padding: 0 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.table th,
+.table td {
+  padding: 3px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--win-tag-border);
+  white-space: nowrap;
+}
+
+.table th {
+  font-weight: bold;
+  background: var(--win-tag-bg);
+}
+
+.table tfoot td {
+  font-weight: bold;
+  border-top: 2px solid var(--win-shadow-dark);
+  border-bottom: none;
+}
+
+.number {
+  font-family: 'Courier New', monospace;
+  text-align: right;
+}
+
+.note {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--win-text-secondary);
+}

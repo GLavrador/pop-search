@@ -1,5 +1,12 @@
 import axios from 'axios';
-import type { VideoMetadata, SearchParams, SearchResult, MyVideo, QuotaStatus } from '../types';
+import type {
+  VideoMetadata,
+  SearchParams,
+  SearchResult,
+  MyVideo,
+  QuotaStatus,
+  UserUsageRow,
+} from '../types';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
 import { supabase } from '../lib/supabase';
@@ -42,6 +49,16 @@ export const saveVideo = async (data: VideoMetadata): Promise<void> => {
 
 export const getMyQuota = async (signal?: AbortSignal): Promise<QuotaStatus> => {
   const response = await api.get<QuotaStatus>('/me/quota', { signal });
+  return response.data;
+};
+
+export const getIsAdmin = async (signal?: AbortSignal): Promise<boolean> => {
+  const response = await api.get<{ is_admin: boolean }>('/me/is-admin', { signal });
+  return response.data.is_admin;
+};
+
+export const getAllUsage = async (signal?: AbortSignal): Promise<UserUsageRow[]> => {
+  const response = await api.get<UserUsageRow[]>('/me/all-usage', { signal });
   return response.data;
 };
 
