@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from main import app
-from core.exceptions import validate_video_url, ALLOWED_DOMAINS
+from core.exceptions import validate_video_url, ALLOWED_DOMAINS, ContentBlockedError
 
 client = TestClient(app)
 
@@ -30,6 +30,21 @@ class TestURLValidation:
         assert response.status_code == 422
         assert "URL must be from" in response.text
 
+    def test_rejection_message_only_advertises_supported_domains(self):
+        """Regression: the message used to name youtube.com and youtu.be, which
+        validate_video_url has never accepted, so a rejected user was told the
+        link they pasted was supported."""
+        response = client.post("/videos/analyze", json={"url": "https://youtube.com/watch?v=abc123"})
+
+        assert response.status_code == 422
+
+        message = response.json()["detail"][0]["msg"]
+
+        for domain in ALLOWED_DOMAINS:
+            assert domain in message
+        assert "youtube" not in message.lower()
+        assert "youtu.be" not in message.lower()
+
 
 class TestErrorHandling:    
     @patch("routers.videos.download_video")
@@ -43,6 +58,22 @@ class TestErrorHandling:
         assert "database" not in response.text.lower()
         assert "internal error" in response.text.lower()
     
+    @patch("routers.videos.analyze_video_content")
+    @patch("routers.videos.download_video")
+    def test_blocked_content_is_reported_as_such(self, mock_download, mock_analyze):
+        """A safety filter is not an internal error: the link is fine and the
+        user can tell the difference, so it must not collapse into a 500."""
+        mock_download.return_value = "does-not-exist.mp4"
+        mock_analyze.side_effect = ContentBlockedError("SAFETY")
+
+        response = client.post(
+            "/videos/analyze", json={"url": "https://twitter.com/user/status/123"}
+        )
+
+        assert response.status_code == 422
+        assert "declined to describe" in response.text
+        assert "SAFETY" not in response.text
+
     @patch("routers.search.supabase")
     @patch("routers.search.embed_query")
     def test_search_hides_internal_errors(self, mock_embed, mock_supabase):
