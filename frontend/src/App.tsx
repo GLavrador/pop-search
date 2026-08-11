@@ -5,12 +5,16 @@ import { RetroWindow } from './components/RetroWindow';
 import { SearchSection } from './components/SearchSection';
 import { IngestSection } from './components/IngestSection';
 import { StatusProvider } from './context/StatusContext';
+import { AuthProvider } from './context/AuthProvider';
+import { useAuth } from './context/authContext';
+import { AuthPanel } from './components/AuthPanel';
 import { StatusBar } from './components/StatusBar';
 
-type Tab = 'ingest' | 'search';
+type Tab = 'ingest' | 'search' | 'account';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
+  const { isAuthenticated, displayName } = useAuth();
 
 
   return (
@@ -30,6 +34,12 @@ function AppContent() {
             >
               🔍 Search.exe
             </button>
+            <button
+              onClick={() => setActiveTab('account')}
+              className={`win95-border ${styles.navButton} ${activeTab === 'account' ? `win95-inset ${styles.active}` : ''}`}
+            >
+              {isAuthenticated ? `👤 ${displayName}` : '🔑 Sign In'}
+            </button>
           </div>
 
           <hr className={styles.separator} />
@@ -40,6 +50,9 @@ function AppContent() {
             </div>
             <div style={{ display: activeTab === 'search' ? 'block' : 'none' }}>
               <SearchSection />
+            </div>
+            <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
+              <AuthPanel />
             </div>
           </div>
           <StatusBar />
@@ -55,9 +68,11 @@ function AppContent() {
 
 function App() {
   return (
-    <StatusProvider>
-      <AppContent />
-    </StatusProvider>
+    <AuthProvider>
+      <StatusProvider>
+        <AppContent />
+      </StatusProvider>
+    </AuthProvider>
   );
 }
 
