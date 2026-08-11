@@ -1,7 +1,6 @@
 import os
 import uuid
 import yt_dlp
-from contextlib import contextmanager
 from core.logger import get_logger
 
 logger = get_logger("services.downloader")
@@ -63,17 +62,3 @@ def _cleanup_partial_downloads(video_id: str) -> None:
                 logger.debug(f"Cleaned up partial download: {file_path}")
     except Exception as e:
         logger.warning(f"Failed to clean up partial downloads: {e}")
-
-@contextmanager
-def temp_video_download(url: str):
-    video_path = None
-    try:
-        video_path = download_video(url)
-        yield video_path
-    finally:
-        if video_path and os.path.exists(video_path):
-            try:
-                os.remove(video_path)
-                logger.debug(f"Cleaned up temp file: {video_path}")
-            except Exception as e:
-                logger.warning(f"Failed to cleanup temp file {video_path}: {e}")
