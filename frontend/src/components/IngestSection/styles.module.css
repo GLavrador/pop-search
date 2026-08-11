@@ -4,6 +4,12 @@
   gap: 10px;
 }
 
+.ingestContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .reviewContainer {
   margin-top: 20px;
 }

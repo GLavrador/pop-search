@@ -1,0 +1,55 @@
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--win-gray);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: bold;
+}
+
+.count {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+}
+
+.track {
+  height: 14px;
+  background: var(--win-light);
+  border-top: 2px solid var(--win-shadow-dark);
+  border-left: 2px solid var(--win-shadow-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  padding: 2px;
+}
+
+.fill {
+  height: 100%;
+  background: var(--win-blue-title);
+  transition: width 0.2s;
+}
+
+.exhausted .fill {
+  background: var(--win-error-text);
+}
+
+.note {
+  font-size: 0.75rem;
+  color: var(--win-text-secondary);
+}
+
+.warning {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--win-error-text);
+}

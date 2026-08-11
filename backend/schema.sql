@@ -51,7 +51,25 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
--- 4. main table
+-- 4. usage accounting
+--
+-- Written whenever Gemini was actually called, including failures: the tokens
+-- were spent either way.
+create table usage_events (
+  id bigserial primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  kind text not null check (kind in ('analysis', 'save')),
+  succeeded boolean not null default true,
+  failure_reason text,
+  prompt_tokens int,
+  output_tokens int,
+  total_tokens int,
+  created_at timestamptz not null default now()
+);
+
+create index usage_events_user_month_idx on usage_events (user_id, created_at desc);
+
+-- 5. main table
 create table videos (
   id uuid primary key default gen_random_uuid(),
   created_at timestamp with time zone default now(),
@@ -89,20 +107,26 @@ create table videos (
   ) stored
 );
 
--- 5. HNSW index for fast vector search
+-- 6. HNSW index for fast vector search
 create index on videos using hnsw (embedding vector_cosine_ops);
 
--- 6. GIN index for the full-text branch
+-- 7. GIN index for the full-text branch
 create index videos_fts_idx on videos using gin (fts);
 
 create index videos_user_id_idx on videos (user_id);
 
--- 7. Row Level Security
+-- 8. Row Level Security
 alter table profiles enable row level security;
 
 create policy "profiles: owner can read"
   on profiles for select
   using (auth.uid() = id);
+
+alter table usage_events enable row level security;
+
+create policy "usage_events: owner can read"
+  on usage_events for select
+  using (auth.uid() = user_id);
 
 alter table videos enable row level security;
 
