@@ -1,23 +1,17 @@
-class AppError(Exception):
-    def __init__(self, message: str, status_code: int = 500):
-        self.message = message
-        self.status_code = status_code
-        super().__init__(self.message)
+from urllib.parse import urlparse
 
 
-class VideoDownloadError(AppError):
-    def __init__(self, message: str = "Failed to download video"):
-        super().__init__(message, status_code=400)
+class ContentBlockedError(Exception):
+    """Gemini returned no usable candidate for the video.
 
+    Usually a safety filter. It is worth distinguishing from a generic failure
+    because the user can act on it: nothing about the request was wrong, the
+    video itself is what the model refused to describe.
+    """
 
-class VideoAnalysisError(AppError):
-    def __init__(self, message: str = "Failed to analyze video"):
-        super().__init__(message, status_code=500)
-
-
-class InvalidURLError(AppError):
-    def __init__(self, message: str = "Invalid or unsupported URL"):
-        super().__init__(message, status_code=400)
+    def __init__(self, reason: str = "UNKNOWN"):
+        self.reason = reason
+        super().__init__(f"Gemini returned no usable content (reason: {reason})")
 
 
 ALLOWED_DOMAINS = [
@@ -27,8 +21,6 @@ ALLOWED_DOMAINS = [
 
 
 def validate_video_url(url: str) -> bool:
-    from urllib.parse import urlparse
-    
     try:
         parsed = urlparse(url)
         hostname = parsed.hostname or ""
