@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { DemoSearch } from './DemoSearch';
 import { DemoUpload } from './DemoUpload';
 import styles from './styles.module.css';
 
@@ -26,7 +27,7 @@ const STEPS: Step[] = [
           runs against.
         </p>
         <p className={styles.reassure}>
-          This tour changes nothing and calls no AI. Take as long as you like.
+          Nothing here is saved, and no AI is called. Take as long as you like.
         </p>
       </>
     ),
@@ -66,6 +67,7 @@ const STEPS: Step[] = [
           Each result carries a badge saying whether it matched by meaning, by
           words, or by both.
         </p>
+        <DemoSearch />
       </>
     ),
   },
@@ -80,6 +82,35 @@ const STEPS: Step[] = [
           time. Try the whole flow below with a real example.
         </p>
         <DemoUpload />
+      </>
+    ),
+  },
+  {
+    id: 'manual',
+    tab: '💿 Add-Video.exe → Manual Input',
+    title: 'Adding without the AI',
+    body: (
+      <>
+        <p>
+          Tick <strong>Manual Input</strong> on the add screen and you get the
+          same review form, empty, to fill in yourself. No video is downloaded
+          and no AI is called.
+        </p>
+        <p>Two reasons to use it:</p>
+        <ul className={styles.list}>
+          <li>
+            <strong>You ran out of analyses.</strong> Manual entries do not count
+            against the monthly limit, so the archive stays open to you.
+          </li>
+          <li>
+            <strong>You describe it better.</strong> A joke or a reference the AI
+            misses is exactly what makes a video findable later.
+          </li>
+        </ul>
+        <p className={styles.hint}>
+          Manually added videos are searchable like any other: the description
+          you write is what the search reads.
+        </p>
       </>
     ),
   },

@@ -127,6 +127,17 @@
   color: var(--win-text-secondary);
 }
 
+.searchRow {
+  display: flex;
+  gap: 8px;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .savedNotice {
   padding: 10px;
   background: var(--win-warning-bg);

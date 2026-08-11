@@ -1,9 +1,25 @@
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import { DemoTour } from './index';
-import { DEMO_VIDEO } from '../../constants/demoVideo';
+import { StatusProvider } from '../../context/StatusContext';
+import { DEMO_VIDEO, DEMO_SEARCH_RESULTS } from '../../constants/demoVideo';
+
+const TOTAL_STEPS = 6;
+
+// VideoCard, reused by the search example, reads the status bar context.
+const renderTour = () =>
+  render(
+    <StatusProvider>
+      <DemoTour />
+    </StatusProvider>,
+  );
 
 const next = () => fireEvent.click(screen.getByText('Next ▶'));
+
+const goToStep = (index: number) => {
+  renderTour();
+  for (let i = 0; i < index; i += 1) next();
+};
 
 describe('DemoTour', () => {
   afterEach(() => {
@@ -11,62 +27,86 @@ describe('DemoTour', () => {
   });
 
   it('should start at the first step with Back unavailable', () => {
-    render(<DemoTour />);
+    renderTour();
 
-    expect(screen.getByText('Step 1 of 5')).toBeInTheDocument();
+    expect(screen.getByText(`Step 1 of ${TOTAL_STEPS}`)).toBeInTheDocument();
     expect(screen.getByText('◀ Back')).toBeDisabled();
   });
 
   it('should walk through every tab of the app', () => {
-    render(<DemoTour />);
+    renderTour();
 
-    const seen = [screen.getByText(/Welcome/).textContent];
-    for (let i = 0; i < 4; i += 1) {
-      next();
-      seen.push(document.querySelector('h2')?.textContent ?? '');
-    }
+    for (let i = 0; i < TOTAL_STEPS - 1; i += 1) next();
 
-    expect(screen.getByText('Step 5 of 5')).toBeInTheDocument();
-    expect(seen).toHaveLength(5);
+    expect(screen.getByText(`Step ${TOTAL_STEPS} of ${TOTAL_STEPS}`)).toBeInTheDocument();
   });
 
   it('should offer to start over on the last step', () => {
-    render(<DemoTour />);
-    for (let i = 0; i < 4; i += 1) next();
-
-    expect(screen.getByText('↺ Start over')).toBeInTheDocument();
+    goToStep(TOTAL_STEPS - 1);
 
     fireEvent.click(screen.getByText('↺ Start over'));
-    expect(screen.getByText('Step 1 of 5')).toBeInTheDocument();
+
+    expect(screen.getByText(`Step 1 of ${TOTAL_STEPS}`)).toBeInTheDocument();
   });
 
-  it('should tell visitors up front that nothing is changed', () => {
-    render(<DemoTour />);
+  it('should promise up front that nothing is stored and nothing is billed', () => {
+    renderTour();
 
-    expect(screen.getByText(/changes nothing and calls no AI/)).toBeInTheDocument();
+    expect(screen.getByText(/Nothing here is saved, and no AI is called/)).toBeInTheDocument();
+  });
+
+  it('should cover manual entry as the way around the limit', () => {
+    goToStep(3);
+
+    expect(screen.getByText('Adding without the AI')).toBeInTheDocument();
+    expect(screen.getByText(/do not count against the monthly limit/)).toBeInTheDocument();
+  });
+});
+
+describe('DemoTour search example', () => {
+  it('should only show results once the search is run', () => {
+    goToStep(1);
+
+    expect(screen.queryByText(DEMO_SEARCH_RESULTS[0].titulo_video)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Find Now'));
+
+    expect(screen.getByText(DEMO_SEARCH_RESULTS[0].titulo_video)).toBeInTheDocument();
+  });
+
+  it('should demonstrate all three match origins in one search', () => {
+    goToStep(1);
+    fireEvent.click(screen.getByText('Find Now'));
+
+    expect(screen.getByText('meaning + words')).toBeInTheDocument();
+    expect(screen.getByText('meaning')).toBeInTheDocument();
+    expect(screen.getByText('words')).toBeInTheDocument();
   });
 });
 
 describe('DemoTour upload walkthrough', () => {
-  const goToUploadStep = () => {
-    render(<DemoTour />);
-    next();
-    next();
-  };
+  const goToUpload = () => goToStep(2);
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
+  const runAnalysis = async () => {
+    fireEvent.click(screen.getByText('Run Analysis'));
+    await act(async () => {
+      vi.advanceTimersByTime(3000);
+    });
+  };
+
   it('should show the example link before anything runs', () => {
-    goToUploadStep();
+    goToUpload();
 
     expect(screen.getByLabelText('Example video URL')).toHaveValue(DEMO_VIDEO.url_original);
   });
 
   it('should move through analysing and into the review form', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    goToUploadStep();
+    goToUpload();
 
     fireEvent.click(screen.getByText('Run Analysis'));
     expect(screen.getByText(/the AI watches the video/)).toBeInTheDocument();
@@ -82,11 +122,8 @@ describe('DemoTour upload walkthrough', () => {
 
   it('should prefill the review form with the captured analysis', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    goToUploadStep();
-    fireEvent.click(screen.getByText('Run Analysis'));
-    await act(async () => {
-      vi.advanceTimersByTime(3000);
-    });
+    goToUpload();
+    await runAnalysis();
 
     await waitFor(() =>
       expect(screen.getByDisplayValue(DEMO_VIDEO.titulo_sugerido)).toBeInTheDocument(),
@@ -101,11 +138,8 @@ describe('DemoTour upload walkthrough', () => {
 
   it('should make clear that saving did nothing', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    goToUploadStep();
-    fireEvent.click(screen.getByText('Run Analysis'));
-    await act(async () => {
-      vi.advanceTimersByTime(3000);
-    });
+    goToUpload();
+    await runAnalysis();
     await waitFor(() => expect(screen.getByText('Save')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Save'));
