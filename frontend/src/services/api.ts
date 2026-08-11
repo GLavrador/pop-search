@@ -9,6 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+const ANALYZE_TIMEOUT_MS = 240_000;
 
 export const analyzeVideo = async (
   url: string,
@@ -19,7 +20,7 @@ export const analyzeVideo = async (
     url,
     analyze_scenes: options.analyzeScenes,
     analyze_audio: options.analyzeAudio
-  }, { signal });
+  }, { signal, timeout: ANALYZE_TIMEOUT_MS });
   return response.data;
 };
 

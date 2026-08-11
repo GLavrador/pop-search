@@ -39,7 +39,7 @@ export const IngestSection = () => {
   const { analyze, reset, isLoading, data, error } = useVideoAnalysisMutation();
   const { setStatus } = useStatus();
 
-  const [analyticsOptions, setAnalyticsOptions] = useState({ analyzeScenes: false, analyzeAudio: false });
+  const [analyticsOptions, setAnalyticsOptions] = useState({ analyzeScenes: true, analyzeAudio: true });
 
   useEffect(() => {
     if (data) {
