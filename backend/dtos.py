@@ -62,6 +62,13 @@ class SearchRequest(BaseModel):
     mode: SearchMode = Field("hybrid", description="hybrid = vector + full-text fused via RRF; semantic = vector only; text = full-text only",)
 
 
+class QuotaStatus(BaseModel):
+    used: int
+    limit: int
+    remaining: int
+    resets_at: str
+
+
 class MyVideo(BaseModel):
     id: str
     titulo_video: Optional[str] = None
