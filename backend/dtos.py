@@ -67,6 +67,15 @@ class QuotaStatus(BaseModel):
     limit: int
     remaining: int
     resets_at: str
+    tokens_this_month: int = 0
+
+
+class UserUsageRow(BaseModel):
+    user_id: str
+    display_name: str
+    analyses: int
+    tokens: int
+    limit: int
 
 
 class MyVideo(BaseModel):

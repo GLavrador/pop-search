@@ -42,6 +42,15 @@ export interface QuotaStatus {
   limit: number;
   remaining: number;
   resets_at: string;
+  tokens_this_month: number;
+}
+
+export interface UserUsageRow {
+  user_id: string;
+  display_name: string;
+  analyses: number;
+  tokens: number;
+  limit: number;
 }
 
 export interface MyVideo {
