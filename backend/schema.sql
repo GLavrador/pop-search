@@ -55,6 +55,7 @@ create trigger on_auth_user_created
 create table videos (
   id uuid primary key default gen_random_uuid(),
   created_at timestamp with time zone default now(),
+  user_id uuid references auth.users(id) on delete set null,
   url_original text unique not null,
   titulo_video text,
   descricao_completa text,
@@ -93,6 +94,8 @@ create index on videos using hnsw (embedding vector_cosine_ops);
 
 -- 6. GIN index for the full-text branch
 create index videos_fts_idx on videos using gin (fts);
+
+create index videos_user_id_idx on videos (user_id);
 
 -- 7. Row Level Security
 alter table profiles enable row level security;

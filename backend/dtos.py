@@ -62,6 +62,14 @@ class SearchRequest(BaseModel):
     mode: SearchMode = Field("hybrid", description="hybrid = vector + full-text fused via RRF; semantic = vector only; text = full-text only",)
 
 
+class MyVideo(BaseModel):
+    id: str
+    titulo_video: Optional[str] = None
+    descricao_completa: Optional[str] = None
+    url_original: str
+    created_at: str
+
+
 class SearchResult(BaseModel):
     id: str
     titulo_video: str

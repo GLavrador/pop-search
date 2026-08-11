@@ -37,6 +37,14 @@ export interface SearchResult {
   score?: number;
 }
 
+export interface MyVideo {
+  id: string;
+  titulo_video?: string;
+  descricao_completa?: string;
+  url_original: string;
+  created_at: string;
+}
+
 export interface SearchParams {
   query: string;
   limit?: number;

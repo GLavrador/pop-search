@@ -1,0 +1,90 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.count {
+  font-size: 0.82rem;
+  color: var(--win-text-secondary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  background: var(--win-light);
+  border: 1px dotted var(--win-shadow-dark);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.link {
+  font-weight: bold;
+  color: var(--win-link);
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.description {
+  font-size: 0.8rem;
+  color: var(--win-text-dark);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.date {
+  flex-shrink: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: var(--win-text-secondary);
+  white-space: nowrap;
+}
+
+.message {
+  padding: 10px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  background: var(--win-warning-bg);
+}
+
+.error {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: var(--win-warning-bg);
+  color: var(--win-error-text);
+}

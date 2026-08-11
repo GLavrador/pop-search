@@ -10,6 +10,7 @@ from db import supabase
 from core.logger import get_logger
 from core.limiter import limiter
 from core.exceptions import validate_video_url, ALLOWED_DOMAINS, ContentBlockedError
+from core.auth import CurrentUser
 from asyncio import TimeoutError as AsyncTimeoutError
 
 logger = get_logger("routers.videos")
@@ -32,8 +33,8 @@ class VideoAnalysisRequest(BaseModel):
 
 @router.post("/analyze")
 @limiter.limit("5/minute")
-async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
-    logger.info(f"Analysis requested for URL: {body.url} (Scenes: {body.analyze_scenes}, Audio: {body.analyze_audio})")
+async def analyze_from_url(request: Request, body: VideoAnalysisRequest, user_id: str = CurrentUser):
+    logger.info(f"Analysis requested by {user_id} for URL: {body.url} (Scenes: {body.analyze_scenes}, Audio: {body.analyze_audio})")
     video_path = None
 
     try:
@@ -89,8 +90,8 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest):
 
 @router.post("")
 @limiter.limit("10/minute")
-async def save_video(request: Request, metadata: VideoMetadataDTO):
-    logger.info(f"Save request received for video: {metadata.titulo_sugerido}")
+async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str = CurrentUser):
+    logger.info(f"Save request from {user_id} for video: {metadata.titulo_sugerido}")
     
     if not metadata.url_original:
         raise HTTPException(status_code=400, detail="url_original is required for saving")
@@ -100,6 +101,7 @@ async def save_video(request: Request, metadata: VideoMetadataDTO):
         vector = await loop.run_in_executor(None, create_embedding, metadata)
         
         db_payload = {
+            "user_id": user_id,
             "titulo_video": metadata.titulo_sugerido,
             "descricao_completa": metadata.descricao_completa,
             "url_original": metadata.url_original,

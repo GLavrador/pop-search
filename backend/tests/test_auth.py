@@ -4,9 +4,13 @@ import time
 import jwt
 import pytest
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 from unittest.mock import patch
 
 from core import auth
+from main import app
+
+client = TestClient(app)
 
 SECRET = "a-test-secret-that-is-not-the-real-one"
 
@@ -101,6 +105,36 @@ class TestCurrentUser:
 
         assert "signature" not in exc.value.detail.lower()
         assert "decode" not in exc.value.detail.lower()
+
+
+class TestRouteProtection:
+    """Contributing costs the project's Gemini quota; searching does not."""
+
+    def test_analyze_requires_a_session(self, anonymous):
+        response = client.post(
+            "/videos/analyze", json={"url": "https://twitter.com/user/status/123"}
+        )
+        assert response.status_code == 401
+
+    def test_saving_requires_a_session(self, anonymous):
+        response = client.post("/videos", json={
+            "titulo_sugerido": "Um titulo valido",
+            "descricao_completa": "Uma descricao suficientemente longa para validar",
+            "url_original": "https://twitter.com/user/status/123",
+            "metadados_estruturados": {},
+        })
+        assert response.status_code == 401
+
+    def test_listing_my_videos_requires_a_session(self, anonymous):
+        assert client.get("/me/videos").status_code == 401
+
+    @patch("routers.search.supabase")
+    @patch("routers.search.embed_query")
+    def test_search_stays_open_to_visitors(self, mock_embed, mock_supabase, anonymous):
+        mock_embed.return_value = [0.1, 0.2, 0.3]
+        mock_supabase.rpc.return_value.execute.return_value.data = []
+
+        assert client.post("/search", json={"query": "capivara"}).status_code == 200
 
 
 class TestCurrentUserOptional:

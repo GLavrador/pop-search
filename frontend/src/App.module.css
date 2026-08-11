@@ -45,6 +45,21 @@
   background-color: var(--win-shadow-light);
 }
 
+.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  background: var(--win-warning-bg);
+}
+
+.gate p {
+  margin: 0;
+}
+
 .separator {
   margin: 0;
   border: 0;

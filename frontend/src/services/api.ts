@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { VideoMetadata, SearchParams, SearchResult } from '../types';
+import type { VideoMetadata, SearchParams, SearchResult, MyVideo } from '../types';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
 import { supabase } from '../lib/supabase';
@@ -38,6 +38,11 @@ export const analyzeVideo = async (
 
 export const saveVideo = async (data: VideoMetadata): Promise<void> => {
   await api.post('/videos', data);
+};
+
+export const getMyVideos = async (signal?: AbortSignal): Promise<MyVideo[]> => {
+  const response = await api.get<MyVideo[]>('/me/videos', { signal });
+  return response.data;
 };
 
 export const searchVideos = async (
