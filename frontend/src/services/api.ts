@@ -2,12 +2,24 @@ import axios from 'axios';
 import type { VideoMetadata, SearchParams, SearchResult } from '../types';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
+import { supabase } from '../lib/supabase';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+api.interceptors.request.use(async (config) => {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
 });
 const ANALYZE_TIMEOUT_MS = 240_000;
 
