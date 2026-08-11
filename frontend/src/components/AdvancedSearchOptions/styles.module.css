@@ -1,0 +1,241 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.headerLabel {
+  margin-bottom: 0;
+}
+
+.toggleButton {
+  padding: 2px 8px;
+  font-size: 0.85em;
+  min-width: 0;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px;
+  margin: 8px 0 10px;
+  background-color: var(--win-gray);
+}
+
+.group {
+  border: 1px solid var(--win-shadow-dark);
+  box-shadow: 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-light);
+  padding: 6px 12px 12px;
+  margin: 0;
+  min-width: 0;
+}
+
+.legend {
+  padding: 0 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--win-dark);
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.value {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.presetName {
+  font-weight: normal;
+  font-style: italic;
+}
+
+.help {
+  cursor: help;
+  flex-shrink: 0;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: var(--win-blue-title);
+  color: var(--win-light);
+  text-align: center;
+  line-height: 16px;
+  font-size: 0.75em;
+  font-weight: bold;
+}
+
+.slider {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 22px;
+  margin: 2px 0 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-shadow-dark);
+  border-left: 1px solid var(--win-shadow-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 20px;
+  margin-top: -9px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+}
+
+.slider::-moz-range-track {
+  height: 4px;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-shadow-dark);
+  border-left: 1px solid var(--win-shadow-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+}
+
+.slider::-moz-range-thumb {
+  width: 12px;
+  height: 20px;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+}
+
+.slider:focus-visible {
+  outline: 1px dotted var(--win-dark);
+  outline-offset: 2px;
+}
+
+.scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+  font-size: 0.75em;
+  color: var(--win-text-secondary);
+}
+
+.modeButtons {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.modeButton {
+  flex: 1;
+  padding: 3px 10px;
+  font-size: 0.85em;
+  min-width: 0;
+}
+
+.modeHint {
+  font-size: 0.8em;
+  color: var(--win-text-secondary);
+  line-height: 1.3;
+}
+
+/*
+ * A disabled fieldset natively disables every control inside it, so the slider
+ * stops responding without any extra wiring. The dimming is only the visual
+ * half of that.
+ */
+.group:disabled .slider,
+.group:disabled .value,
+.group:disabled .scale {
+  opacity: 0.45;
+}
+
+.disabledNote {
+  margin: 8px 0 0;
+  font-size: 0.78em;
+  line-height: 1.35;
+  color: var(--win-text-secondary);
+  opacity: 1;
+}
+
+.syntaxScope {
+  margin: 2px 0 0;
+  font-size: 0.78em;
+  line-height: 1.35;
+  color: var(--win-text-secondary);
+}
+
+.syntaxUnavailable {
+  margin: 2px 0 0;
+  font-size: 0.78em;
+  line-height: 1.35;
+  color: var(--win-error-text);
+}
+
+.syntaxList {
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.syntaxRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.syntaxExample {
+  flex-shrink: 0;
+  width: 148px;
+  padding: 1px 4px;
+  background: var(--win-tag-bg);
+  border: 1px solid var(--win-tag-border);
+  font-family: 'Courier New', monospace;
+  font-size: 0.78em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.syntaxMeaning {
+  margin: 0;
+  font-size: 0.78em;
+  line-height: 1.3;
+  color: var(--win-text-secondary);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.rowLabel {
+  margin-bottom: 0;
+  font-size: 0.9em;
+  font-weight: normal;
+}
+
+.select {
+  padding: 2px;
+  font-size: 0.9em;
+  width: 80px;
+  height: 24px;
+}

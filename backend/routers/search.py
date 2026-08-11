@@ -10,14 +10,21 @@ logger = get_logger("routers.search")
 
 router = APIRouter(tags=["Search"])
 
+EMBEDDING_DIMENSIONS = 768
+ZERO_VECTOR = [0.0] * EMBEDDING_DIMENSIONS
+
 @router.post("/search", response_model=list[SearchResult])
 @limiter.limit("20/minute")
 async def search_videos(request: Request, search_request: SearchRequest):
     logger.info(f"Search requested: '{search_request.query}' (mode: {search_request.mode})")
 
     try:
-        loop = asyncio.get_event_loop()
-        query_vector = await loop.run_in_executor(None, embed_query, search_request.query)
+        if search_request.mode == "text":
+            query_vector = ZERO_VECTOR
+            logger.debug("Text mode: skipping embedding generation")
+        else:
+            loop = asyncio.get_event_loop()
+            query_vector = await loop.run_in_executor(None, embed_query, search_request.query)
         
         rpc_params = {
             "query_embedding": query_vector,

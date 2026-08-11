@@ -6,10 +6,20 @@ interface VideoCardProps {
   data: SearchResult;
 }
 
+const getMatchOrigin = (similarity: number, textRank: number) => {
+  const byMeaning = similarity > 0;
+  const byWords = textRank > 0;
+
+  if (byMeaning && byWords) return { label: 'meaning + words', title: 'Matched both semantically and by the exact terms you typed.' };
+  if (byWords) return { label: 'words', title: 'Matched because the video contains the terms you typed.' };
+  return { label: 'meaning', title: 'Matched by meaning. Your exact words may not appear in this video.' };
+};
+
 export const VideoCard = ({ data }: VideoCardProps) => {
   const { setStatus } = useStatus();
   const percentage = Math.round(data.similarity * 100);
   const displayUrl = data.url_original;
+  const origin = getMatchOrigin(data.similarity, data.text_rank ?? 0);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(displayUrl);
@@ -35,6 +45,9 @@ export const VideoCard = ({ data }: VideoCardProps) => {
           </a>
           
           <span className={styles.score}>
+            <span className={styles.origin} title={origin.title}>
+              {origin.label}
+            </span>
             MATCH: {percentage}%
           </span>
         </div>

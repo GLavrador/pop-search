@@ -2,9 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { searchVideos } from '../services/api';
 import type { SearchResult } from '../types';
+import type { SearchMode } from '../constants/searchModes';
+
+interface SearchArgs {
+    query: string;
+    threshold: number;
+    limit: number;
+    mode: SearchMode;
+}
 
 interface UseVideoSearchQueryReturn {
-    search: (query: string, threshold: number, limit: number) => boolean;
+    search: (query: string, threshold: number, limit: number, mode: SearchMode) => boolean;
     results: SearchResult[];
     isLoading: boolean;
     hasSearched: boolean;
@@ -12,14 +20,14 @@ interface UseVideoSearchQueryReturn {
 }
 
 export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
-    const [searchQuery, setSearchQuery] = useState<{ query: string; threshold: number; limit: number } | null>(null);
+    const [searchQuery, setSearchQuery] = useState<SearchArgs | null>(null);
     const [hasSearched, setHasSearched] = useState(false);
 
     const query = useQuery({
         queryKey: ['videoSearch', searchQuery],
         queryFn: ({ signal }) => {
             if (!searchQuery) return [];
-            return searchVideos({ query: searchQuery.query, threshold: searchQuery.threshold, limit: searchQuery.limit }, signal);
+            return searchVideos(searchQuery, signal);
         },
         enabled: !!searchQuery,
         refetchOnWindowFocus: false,
@@ -36,13 +44,13 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
         return 'Error accessing database index.';
     };
 
-    const search = (newQuery: string, threshold: number, limit: number): boolean => {
-        if (!newQuery.trim()) return false;    
-        if (searchQuery?.query === newQuery && searchQuery?.threshold === threshold && searchQuery?.limit === limit) {
+    const search = (newQuery: string, threshold: number, limit: number, mode: SearchMode): boolean => {
+        if (!newQuery.trim()) return false;
+        if (searchQuery?.query === newQuery && searchQuery?.threshold === threshold && searchQuery?.limit === limit && searchQuery?.mode === mode) {
             return false;
         }
         setHasSearched(true);
-        setSearchQuery({ query: newQuery, threshold, limit });
+        setSearchQuery({ query: newQuery, threshold, limit, mode });
         return true;
     };
 

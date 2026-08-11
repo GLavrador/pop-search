@@ -1,3 +1,5 @@
+import type { SearchMode } from './constants/searchModes';
+
 export interface Pessoa {
   descricao: string;
   papel: string | null;
@@ -39,4 +41,5 @@ export interface SearchParams {
   query: string;
   limit?: number;
   threshold?: number;
+  mode?: SearchMode;
 }

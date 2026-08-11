@@ -124,6 +124,40 @@ def test_search_defaults_to_hybrid_mode(mock_embed, mock_supabase):
     assert rpc_params["search_mode"] == "hybrid"
 
 
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
+def test_text_mode_skips_embedding_generation(mock_embed, mock_supabase):
+    """In text mode the RPC caps the vector branch with LIMIT 0, so paying for
+    an embedding on every search would be pure waste."""
+    _mock_rpc(mock_supabase, [])
+
+    response = client.post("/search", json={"query": "capivara", "mode": "text"})
+
+    assert response.status_code == 200
+    mock_embed.assert_not_called()
+
+    _, rpc_params = mock_supabase.rpc.call_args[0]
+    assert rpc_params["search_mode"] == "text"
+    # The signature still demands a vector(768); anything shorter is rejected
+    # by Postgres before the LIMIT 0 ever applies.
+    assert len(rpc_params["query_embedding"]) == 768
+    assert set(rpc_params["query_embedding"]) == {0.0}
+
+
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
+def test_non_text_modes_still_embed(mock_embed, mock_supabase):
+    mock_embed.return_value = [0.1, 0.2, 0.3]
+    _mock_rpc(mock_supabase, [])
+
+    for mode in ("hybrid", "semantic"):
+        mock_embed.reset_mock()
+        response = client.post("/search", json={"query": "capivara", "mode": mode})
+
+        assert response.status_code == 200
+        mock_embed.assert_called_once_with("capivara")
+
+
 def test_search_rejects_unknown_mode():
     response = client.post("/search", json={"query": "teste", "mode": "magica"})
     assert response.status_code == 422
