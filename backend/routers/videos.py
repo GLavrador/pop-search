@@ -3,7 +3,7 @@ import asyncio
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, field_validator
 from services.embedding import create_embedding
-from services.ai import analyze_video_content
+from services.ai import analyze_video_content, TokenUsage
 from services.downloader import download_video
 from dtos import VideoMetadataDTO
 from db import supabase
@@ -51,13 +51,16 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest, user_id
     charged = False
     succeeded = False
     failure_reason = None
+    tokens = TokenUsage()
 
     try:
         loop = asyncio.get_event_loop()
         video_path = await loop.run_in_executor(None, download_video, body.url)
 
         charged = True
-        analysis_result = await analyze_video_content(video_path, body.analyze_scenes, body.analyze_audio)
+        analysis_result = await analyze_video_content(
+            video_path, body.analyze_scenes, body.analyze_audio, tokens
+        )
 
         if not analysis_result:
             failure_reason = "no_result"
@@ -106,7 +109,10 @@ async def analyze_from_url(request: Request, body: VideoAnalysisRequest, user_id
 
     finally:
         if charged:
-            await record_event(user_id, "analysis", succeeded, failure_reason)
+            await record_event(
+                user_id, "analysis", succeeded, failure_reason,
+                tokens.prompt, tokens.output, tokens.total,
+            )
 
         if video_path and os.path.exists(video_path):
             os.remove(video_path)

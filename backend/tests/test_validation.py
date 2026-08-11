@@ -66,7 +66,7 @@ class TestAnalysisDefaults:
         )
 
         assert response.status_code == 200
-        _path, analyze_scenes, analyze_audio = mock_analyze.call_args[0]
+        _path, analyze_scenes, analyze_audio, _tokens = mock_analyze.call_args[0]
         assert analyze_scenes is True
         assert analyze_audio is True
 

@@ -1,6 +1,9 @@
 import json
 import asyncio
 import time
+from dataclasses import dataclass
+from typing import Optional
+
 from core.logger import get_logger
 from core.gemini import get_genai, get_generation_model
 from core.exceptions import ContentBlockedError
@@ -63,7 +66,14 @@ def get_system_prompt(analyze_scenes: bool, analyze_audio: bool) -> str:
     return "\n".join(prompt_parts)
 
 
-def _log_token_usage(response) -> None:
+@dataclass
+class TokenUsage:
+    prompt: int = 0
+    output: int = 0
+    total: int = 0
+
+
+def _log_token_usage(response, sink: Optional[TokenUsage] = None) -> None:
     """Record what the call actually cost.
 
     Logged at INFO rather than DEBUG because this is accounting data, not
@@ -76,11 +86,14 @@ def _log_token_usage(response) -> None:
         logger.warning("Gemini response carried no usage_metadata; cost not recorded")
         return
 
-    logger.info(
-        f"Gemini token usage: prompt={getattr(usage, 'prompt_token_count', '?')} "
-        f"output={getattr(usage, 'candidates_token_count', '?')} "
-        f"total={getattr(usage, 'total_token_count', '?')}"
-    )
+    prompt = getattr(usage, "prompt_token_count", 0) or 0
+    output = getattr(usage, "candidates_token_count", 0) or 0
+    total = getattr(usage, "total_token_count", 0) or 0
+
+    if sink is not None:
+        sink.prompt, sink.output, sink.total = prompt, output, total
+
+    logger.info(f"Gemini token usage: prompt={prompt} output={output} total={total}")
 
 
 def _extract_json(response) -> dict:
@@ -98,7 +111,14 @@ def _extract_json(response) -> dict:
     return json.loads(response.text)
 
 
-async def analyze_video_content(video_path: str, analyze_scenes: bool = False, analyze_audio: bool = False):
+async def analyze_video_content(
+    video_path: str,
+    analyze_scenes: bool = False,
+    analyze_audio: bool = False,
+    usage: Optional[TokenUsage] = None,
+):
+    """`usage` is filled in place rather than returned, so the caller still gets
+    the cost when the analysis raises."""
     video_file = None
 
     try:
@@ -133,7 +153,7 @@ async def analyze_video_content(video_path: str, analyze_scenes: bool = False, a
             timeout=GENERATION_TIMEOUT
         )
     
-        _log_token_usage(response)
+        _log_token_usage(response, usage)
 
         result = _extract_json(response)
         logger.info("Analysis received successfully")

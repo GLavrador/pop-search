@@ -83,7 +83,7 @@ class TestUsageRecording:
             response = client.post("/videos/analyze", json=ANALYZE_BODY)
 
         assert response.status_code == 200
-        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", True, None)
+        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", True, None, 0, 0, 0)
 
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
@@ -97,7 +97,7 @@ class TestUsageRecording:
             response = client.post("/videos/analyze", json=ANALYZE_BODY)
 
         assert response.status_code == 422
-        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "blocked:SAFETY")
+        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "blocked:SAFETY", 0, 0, 0)
 
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
@@ -112,7 +112,51 @@ class TestUsageRecording:
             response = client.post("/videos/analyze", json=ANALYZE_BODY)
 
         assert response.status_code == 504
-        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "timeout")
+        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "timeout", 0, 0, 0)
+
+    @patch("routers.videos.analyze_video_content")
+    @patch("routers.videos.download_video")
+    def test_stores_the_tokens_the_analysis_reported(self, mock_download, mock_analyze):
+        mock_download.return_value = "does-not-exist.mp4"
+
+        async def fill_usage(_path, _scenes, _audio, usage):
+            usage.prompt, usage.output, usage.total = 8451, 609, 10890
+            return {
+                "titulo_sugerido": "Um titulo valido",
+                "descricao_completa": "Uma descricao suficientemente longa para validar",
+                "metadados_estruturados": {},
+            }
+
+        mock_analyze.side_effect = fill_usage
+        recorder = AsyncMock()
+
+        with patch("routers.videos.record_event", new=recorder):
+            client.post("/videos/analyze", json=ANALYZE_BODY)
+
+        recorder.assert_awaited_once_with(
+            TEST_USER_ID, "analysis", True, None, 8451, 609, 10890
+        )
+
+    @patch("routers.videos.analyze_video_content")
+    @patch("routers.videos.download_video")
+    def test_stores_the_tokens_of_a_failed_analysis(self, mock_download, mock_analyze):
+        """The whole reason usage is filled in place: a blocked video still
+        burned its input tokens, and a return value never arrives."""
+        mock_download.return_value = "does-not-exist.mp4"
+
+        async def burn_then_fail(_path, _scenes, _audio, usage):
+            usage.prompt, usage.output, usage.total = 8000, 0, 8523
+            raise ContentBlockedError("SAFETY")
+
+        mock_analyze.side_effect = burn_then_fail
+        recorder = AsyncMock()
+
+        with patch("routers.videos.record_event", new=recorder):
+            client.post("/videos/analyze", json=ANALYZE_BODY)
+
+        recorder.assert_awaited_once_with(
+            TEST_USER_ID, "analysis", False, "blocked:SAFETY", 8000, 0, 8523
+        )
 
     @patch("routers.videos.download_video")
     def test_does_not_charge_when_the_download_fails(self, mock_download):
@@ -152,7 +196,9 @@ class TestUsageRecording:
 class TestQuotaEndpoint:
 
     def test_reports_the_current_window(self):
-        quota = Quota(used=7, limit=20, resets_at="2026-09-01T00:00:00+00:00")
+        quota = Quota(
+            used=7, limit=20, resets_at="2026-09-01T00:00:00+00:00", tokens_this_month=48213
+        )
 
         with patch("routers.me.get_quota", new=AsyncMock(return_value=quota)):
             body = client.get("/me/quota").json()
@@ -162,6 +208,7 @@ class TestQuotaEndpoint:
             "limit": 20,
             "remaining": 13,
             "resets_at": "2026-09-01T00:00:00+00:00",
+            "tokens_this_month": 48213,
         }
 
     def test_requires_a_session(self, anonymous):
@@ -170,12 +217,14 @@ class TestQuotaEndpoint:
 
 class TestProfileLookup:
 
-    def _supabase_with(self, profile_rows, count=0):
+    def _supabase_with(self, profile_rows, count=0, token_rows=None):
         mock = patch("services.usage.supabase").start()
         table = mock.table.return_value
         table.select.return_value.eq.return_value.limit.return_value.execute.return_value.data = profile_rows
         counted = table.select.return_value.eq.return_value.eq.return_value.gte.return_value
         counted.execute.return_value.count = count
+        summed = table.select.return_value.eq.return_value.gte.return_value
+        summed.execute.return_value.data = token_rows or []
         return mock
 
     def teardown_method(self):
@@ -188,6 +237,18 @@ class TestProfileLookup:
 
         assert quota.limit == 5
         assert quota.used == 2
+
+    def test_sums_the_tokens_spent_this_month(self):
+        self._supabase_with(
+            [{"monthly_analysis_limit": 20}],
+            count=3,
+            token_rows=[{"total_tokens": 8000}, {"total_tokens": 4104}, {"total_tokens": None}],
+        )
+
+        quota = usage._fetch_quota(TEST_USER_ID)
+
+        # The None comes from a save, which spends an embedding we do not measure.
+        assert quota.tokens_this_month == 12104
 
     def test_warns_when_the_profile_is_missing(self):
         """A user with no profile means the signup trigger failed. Falling back
