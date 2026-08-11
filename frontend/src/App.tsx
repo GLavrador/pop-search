@@ -9,9 +9,10 @@ import { AuthProvider } from './context/AuthProvider';
 import { useAuth } from './context/authContext';
 import { AuthPanel } from './components/AuthPanel';
 import { MyVideos } from './components/MyVideos';
+import { DemoTour } from './components/DemoTour';
 import { StatusBar } from './components/StatusBar';
 
-type Tab = 'ingest' | 'search' | 'library' | 'account';
+type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
@@ -34,6 +35,12 @@ function AppContent() {
               className={`win95-border ${styles.navButton} ${activeTab === 'search' ? `win95-inset ${styles.active}` : ''}`}
             >
               🔍 Search.exe
+            </button>
+            <button
+              onClick={() => setActiveTab('demo')}
+              className={`win95-border ${styles.navButton} ${activeTab === 'demo' ? `win95-inset ${styles.active}` : ''}`}
+            >
+              🎓 Tour.exe
             </button>
             {isAuthenticated && (
               <button
@@ -64,13 +71,22 @@ function AppContent() {
                     Indexing a video runs it through the AI, so it is limited to
                     signed-in users. Searching the archive stays open to everyone.
                   </p>
-                  <button
-                    type="button"
-                    className="win95-btn"
-                    onClick={() => setActiveTab('account')}
-                  >
-                    Sign In
-                  </button>
+                  <div className={styles.gateActions}>
+                    <button
+                      type="button"
+                      className="win95-btn"
+                      onClick={() => setActiveTab('account')}
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      type="button"
+                      className="win95-btn"
+                      onClick={() => setActiveTab('demo')}
+                    >
+                      🎓 Take the tour instead
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -82,6 +98,9 @@ function AppContent() {
                 <MyVideos />
               </div>
             )}
+            <div style={{ display: activeTab === 'demo' ? 'block' : 'none' }}>
+              <DemoTour />
+            </div>
             <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
               <AuthPanel />
             </div>
