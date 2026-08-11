@@ -19,7 +19,39 @@ alter text search configuration portuguese_unaccent
   alter mapping for hword, hword_part, word
   with unaccent, portuguese_stem;
 
--- 3. main table
+-- 3. user profiles
+create table profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  display_name text not null,
+  created_at timestamptz not null default now(),
+  monthly_analysis_limit int not null default 20
+);
+
+-- security definer: the signup context cannot write to public.profiles.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, display_name)
+  values (
+    new.id,
+    coalesce(
+      nullif(new.raw_user_meta_data ->> 'display_name', ''),
+      split_part(new.email, '@', 1)
+    )
+  );
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- 4. main table
 create table videos (
   id uuid primary key default gen_random_uuid(),
   created_at timestamp with time zone default now(),
@@ -56,11 +88,27 @@ create table videos (
   ) stored
 );
 
--- 4. HNSW index for fast vector search
+-- 5. HNSW index for fast vector search
 create index on videos using hnsw (embedding vector_cosine_ops);
 
--- 5. GIN index for the full-text branch
+-- 6. GIN index for the full-text branch
 create index videos_fts_idx on videos using gin (fts);
+
+-- 7. Row Level Security
+alter table profiles enable row level security;
+
+create policy "profiles: owner can read"
+  on profiles for select
+  using (auth.uid() = id);
+
+alter table videos enable row level security;
+
+create policy "videos: public read"
+  on videos for select
+  using (true);
+
+-- No write policy on purpose: it forces every insert through the backend,
+-- where the quota is enforced. Only service_role can write.
 
 
 -- Hybrid search: vector + full-text combined via Reciprocal Rank Fusion.
