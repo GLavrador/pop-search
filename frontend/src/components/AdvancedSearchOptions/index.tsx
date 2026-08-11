@@ -124,14 +124,22 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
           <fieldset className={styles.group}>
             <legend className={styles.legend}>Search Syntax</legend>
 
-            <dl className={styles.syntaxList}>
-              {SEARCH_SYNTAX.map(({ example, meaning }) => (
-                <div key={example} className={styles.syntaxRow}>
-                  <dt className={styles.syntaxExample}>{example}</dt>
-                  <dd className={styles.syntaxMeaning}>{meaning}</dd>
-                </div>
-              ))}
-            </dl>
+            <p
+              className={activeMode.supportsOperators ? styles.syntaxScope : styles.syntaxUnavailable}
+            >
+              {activeMode.operatorScope}
+            </p>
+
+            {activeMode.supportsOperators && (
+              <dl className={styles.syntaxList}>
+                {SEARCH_SYNTAX.map(({ example, meaning }) => (
+                  <div key={example} className={styles.syntaxRow}>
+                    <dt className={styles.syntaxExample}>{example}</dt>
+                    <dd className={styles.syntaxMeaning}>{meaning}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </fieldset>
 
           <fieldset className={styles.group}>

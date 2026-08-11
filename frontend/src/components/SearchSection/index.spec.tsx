@@ -111,6 +111,22 @@ describe('SearchSection Component', () => {
     expect(screen.getByRole('slider', { name: 'Match threshold' })).toBeDisabled();
   });
 
+  it('should scope the syntax help to the active mode', () => {
+    renderWithProviders(<SearchSection />);
+    fireEvent.click(screen.getByRole('button', { name: '▼ Advanced' }));
+
+    expect(screen.getByText(/steer the exact-terms half/)).toBeInTheDocument();
+    expect(screen.getByText('baleia -orca')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exact' }));
+    expect(screen.getByText('These control the entire search.')).toBeInTheDocument();
+    expect(screen.getByText('baleia -orca')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Semantic' }));
+    expect(screen.getByText(/read as ordinary characters/)).toBeInTheDocument();
+    expect(screen.queryByText('baleia -orca')).not.toBeInTheDocument();
+  });
+
   it('should keep the threshold controls live in Semantic mode', () => {
     renderWithProviders(<SearchSection />);
 
