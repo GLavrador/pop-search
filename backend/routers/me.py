@@ -6,8 +6,14 @@ from core.auth import CurrentUser
 from core.limiter import limiter
 from core.logger import get_logger
 from db import supabase
-from dtos import MyVideo, ProjectUsageReport, QuotaStatus, UserUsageRow
-from services.usage import get_all_usage, get_project_usage, get_quota, is_admin
+from dtos import AdminStatsReport, MyVideo, ProjectUsageReport, QuotaStatus, UserUsageRow
+from services.usage import (
+    get_admin_stats,
+    get_all_usage,
+    get_project_usage,
+    get_quota,
+    is_admin,
+)
 
 logger = get_logger("routers.me")
 
@@ -70,6 +76,46 @@ async def read_all_usage(request: Request, user_id: str = CurrentUser):
         raise HTTPException(
             status_code=500,
             detail="An internal error occurred while loading usage. Please try again.",
+        )
+
+
+ALLOWED_RANGES = (7, 30, 90)
+
+
+@router.get("/admin/stats", response_model=AdminStatsReport)
+@limiter.limit("30/minute")
+async def read_admin_stats(request: Request, days: int = 30, user_id: str = CurrentUser):
+    if not await is_admin(user_id):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    if days not in ALLOWED_RANGES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"days must be one of {', '.join(str(r) for r in ALLOWED_RANGES)}",
+        )
+
+    try:
+        stats = await get_admin_stats(days)
+        per_user = await get_all_usage()
+
+        return AdminStatsReport(
+            **stats.__dict__,
+            per_user=[
+                UserUsageRow(
+                    user_id=row.user_id,
+                    display_name=row.display_name,
+                    analyses=row.analyses,
+                    tokens=row.tokens,
+                    limit=row.limit,
+                )
+                for row in per_user
+            ],
+        )
+    except Exception as e:
+        logger.exception(f"Failed to build admin stats: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while loading statistics. Please try again.",
         )
 
 

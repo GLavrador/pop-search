@@ -2,7 +2,6 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useStatus } from '../../context/StatusContext';
 import { QuotaMeter } from '../QuotaMeter';
-import { AdminUsage } from '../AdminUsage';
 import styles from './styles.module.css';
 
 type Mode = 'signIn' | 'signUp';
@@ -38,7 +37,6 @@ export const AuthPanel = () => {
           </button>
         </div>
         <QuotaMeter />
-        <AdminUsage />
       </div>
     );
   }

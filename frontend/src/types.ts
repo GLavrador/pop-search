@@ -53,6 +53,38 @@ export interface UserUsageRow {
   limit: number;
 }
 
+export interface FailureReason {
+  reason: string;
+  count: number;
+}
+
+export interface DailyPoint {
+  date: string;
+  analyses: number;
+  tokens: number;
+}
+
+export interface AdminStatsReport {
+  range_days: number;
+  analyses: number;
+  saves: number;
+  tokens: number;
+  avg_tokens: number;
+  median_tokens: number;
+  min_tokens: number;
+  max_tokens: number;
+  measured: number;
+  failures: number;
+  failure_rate: number;
+  tokens_wasted: number;
+  failures_by_reason: FailureReason[];
+  daily: DailyPoint[];
+  analyses_today: number;
+  daily_limit: number;
+  projected_tokens_at_limit: number;
+  per_user: UserUsageRow[];
+}
+
 export interface ProjectUsageReport {
   rows: UserUsageRow[];
   analyses_today: number;
