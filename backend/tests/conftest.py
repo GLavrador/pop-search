@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -45,5 +45,26 @@ def quota_available():
          patch("routers.videos.record_event", new=AsyncMock()), \
          patch("routers.videos.get_project_usage", new=AsyncMock(return_value=TEST_PROJECT)), \
          patch("routers.me.get_quota", new=AsyncMock(return_value=TEST_QUOTA)), \
+         patch("routers.me.get_project_usage", new=AsyncMock(return_value=TEST_PROJECT)), \
          patch("routers.me.is_admin", new=AsyncMock(return_value=False)):
+        yield
+
+
+@pytest.fixture(autouse=True)
+def no_real_database():
+    """An unmocked query passes locally, where credentials work, and fails in CI,
+    where they are fake. This makes it fail where the mistake was made."""
+    def refuse(*args, **kwargs):
+        raise AssertionError(
+            "This test reached Supabase for real. Patch the module's `supabase` "
+            "or the service function it calls."
+        )
+
+    guard = MagicMock()
+    guard.table.side_effect = refuse
+
+    with patch("services.usage.supabase", guard), \
+         patch("routers.me.supabase", guard), \
+         patch("routers.videos.supabase", guard), \
+         patch("routers.search.supabase", guard):
         yield
