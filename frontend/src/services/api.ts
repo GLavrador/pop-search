@@ -5,7 +5,7 @@ import type {
   SearchResult,
   MyVideo,
   QuotaStatus,
-  UserUsageRow,
+  ProjectUsageReport,
 } from '../types';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
@@ -57,8 +57,8 @@ export const getIsAdmin = async (signal?: AbortSignal): Promise<boolean> => {
   return response.data.is_admin;
 };
 
-export const getAllUsage = async (signal?: AbortSignal): Promise<UserUsageRow[]> => {
-  const response = await api.get<UserUsageRow[]>('/me/all-usage', { signal });
+export const getAllUsage = async (signal?: AbortSignal): Promise<ProjectUsageReport> => {
+  const response = await api.get<ProjectUsageReport>('/me/all-usage', { signal });
   return response.data;
 };
 

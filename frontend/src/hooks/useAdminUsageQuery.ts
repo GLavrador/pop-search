@@ -6,6 +6,8 @@ import type { UserUsageRow } from '../types';
 interface UseAdminUsageQueryReturn {
     isAdmin: boolean;
     rows: UserUsageRow[];
+    analysesToday: number;
+    dailyLimit: number;
     isLoading: boolean;
 }
 
@@ -29,7 +31,9 @@ export const useAdminUsageQuery = (): UseAdminUsageQueryReturn => {
 
     return {
         isAdmin: adminQuery.data === true,
-        rows: usageQuery.data ?? [],
+        rows: usageQuery.data?.rows ?? [],
+        analysesToday: usageQuery.data?.analyses_today ?? 0,
+        dailyLimit: usageQuery.data?.daily_limit ?? 0,
         isLoading: adminQuery.isFetching || usageQuery.isFetching,
     };
 };

@@ -14,6 +14,14 @@ class ContentBlockedError(Exception):
         super().__init__(f"Gemini returned no usable content (reason: {reason})")
 
 
+class ServiceQuotaExhaustedError(Exception):
+    """Google refused the call because the project ran out of quota.
+
+    Distinct from every other failure because nothing was spent: the user must
+    not be charged an analysis for it.
+    """
+
+
 ALLOWED_DOMAINS = [
     "twitter.com",
     "x.com", 
