@@ -133,12 +133,17 @@
     padding: 5px;
   }
 
+  .appContainer {
+    padding: 10px;
+    padding-bottom: 40px;
+  }
+
   .navBar {
-    gap: 10px;
+    gap: 8px;
   }
 
   .navButton {
-    flex: 1;
-    padding: 8px 100px;
+    flex: 1 1 100%;
+    padding: 10px 12px;
   }
 }

@@ -91,11 +91,34 @@
     height: auto;
     display: flex;
     flex-direction: column;
-    overflow: visible; 
+    overflow: visible;
   }
-  
+
   .content {
     flex: 1;
     height: auto;
+  }
+
+  .titleBar {
+    min-height: 30px;
+    padding: 5px 5px 5px 8px;
+  }
+
+  .controls {
+    gap: 4px;
+  }
+
+  .controlButton {
+    position: relative;
+    width: 24px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  /* Touch target only: the drawn button stays the size the title bar needs. */
+  .controlButton::after {
+    content: '';
+    position: absolute;
+    inset: -7px -2px;
   }
 }
