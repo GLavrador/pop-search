@@ -35,6 +35,7 @@ function AppContent() {
   const [windowState, setWindowState] = useState<WindowState>('open');
   const [shakeKey, setShakeKey] = useState(0);
   const closeClicks = useRef(0);
+  const pendingCat = useRef<string | null>(null);
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
@@ -51,13 +52,18 @@ function AppContent() {
 
     closeClicks.current += 1;
 
+    if (closeClicks.current === 1) {
+      pendingCat.current = randomCat();
+      new Image().src = pendingCat.current;
+    }
+
     if (closeClicks.current < CLICKS_TO_CLOSE) {
       setShakeKey((key) => key + 1);
       return;
     }
 
     setCat({
-      image: randomCat(),
+      image: pendingCat.current ?? randomCat(),
       phrase: t.closed.phrases[Math.floor(Math.random() * t.closed.phrases.length)],
     });
     setWindowState('closing');
@@ -65,6 +71,7 @@ function AppContent() {
 
   const handleOpen = () => {
     closeClicks.current = 0;
+    pendingCat.current = null;
     setCat(null);
     setWindowState('open');
   };
