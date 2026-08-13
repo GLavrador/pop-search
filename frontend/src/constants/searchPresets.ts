@@ -1,8 +1,8 @@
+export type PresetId = 'broad' | 'balanced' | 'precise';
+
 export interface PrecisionPreset {
-  id: 'broad' | 'balanced' | 'precise';
-  label: string;
+  id: PresetId;
   threshold: number;
-  hint: string;
 }
 
 /**
@@ -15,24 +15,9 @@ export interface PrecisionPreset {
  * matches show up regardless of the selected preset.
  */
 export const PRECISION_PRESETS: readonly PrecisionPreset[] = [
-  {
-    id: 'broad',
-    label: 'Broad',
-    threshold: 0.45,
-    hint: "More results, including loose connections. Useful when you can't recall the exact wording.",
-  },
-  {
-    id: 'balanced',
-    label: 'Balanced',
-    threshold: 0.6,
-    hint: 'Balances coverage and relevance. Recommended for most searches.',
-  },
-  {
-    id: 'precise',
-    label: 'Precise',
-    threshold: 0.75,
-    hint: 'Strong matches only. Fewer results, all closely related to the query.',
-  },
+  { id: 'broad', threshold: 0.45 },
+  { id: 'balanced', threshold: 0.6 },
+  { id: 'precise', threshold: 0.75 },
 ] as const;
 
 export const DEFAULT_THRESHOLD = 0.6;
