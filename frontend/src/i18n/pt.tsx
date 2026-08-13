@@ -27,6 +27,29 @@ export const pt: Dictionary = {
     recycleBin: 'Lixeira',
   },
 
+  closed: {
+    phrases: [
+      'Programa encerrado. Quem manda agora é o gato.',
+      'Erro fatal: gato detectado.',
+      'Você fechou. O gato abriu.',
+      'Esta máquina foi desligada por um gato.',
+      'Parabéns, você achou o gato.',
+      'Agora é seguro fazer carinho no gato.',
+      'Sistema offline. O gato dormiu no teclado.',
+      'Acesso negado. Apenas o gato tem privilégios de administrador agora.',
+      'O gato caçou o mouse. Aplicação encerrada.',
+      'Erro 404: Ração não encontrada.',
+      'Sessão encerrada. O gato ronronou e quer atenção.',
+      'Busca interrompida. O gato derrubou o servidor.',
+      'Tudo certo por aqui. Pode ir limpar a caixa de areia.',
+      'O sistema caiu. Não deixem gatos fazer deploy.',
+      'Asdhfjkçasldkjf... desculpe, o gato pisou no teclado.',
+      'Processo finalizado. Mas tudo bem, o gato ainda tem 6 vidas.',
+    ],
+    hint: 'Abra o Pop Search na área de trabalho para voltar.',
+    catAlt: 'Um gato',
+  },
+
   gate: {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',
