@@ -1,10 +1,19 @@
 import { z } from 'zod';
 
-export const videoUrlInputSchema = z.string()
-    .min(1, "Please enter a URL")
-    .url("Please enter a valid URL");
+export interface ValidationMessages {
+    urlRequired: string;
+    urlInvalid: string;
+    invalidUrl: string;
+    titleRequired: string;
+    titleWords: string;
+    descriptionRequired: string;
+    descriptionWords: string;
+}
 
-export type VideoUrlInput = z.infer<typeof videoUrlInputSchema>;
+export const createVideoUrlInputSchema = (messages: ValidationMessages) =>
+    z.string()
+        .min(1, messages.urlRequired)
+        .url(messages.urlInvalid);
 
 const countWords = (text: string): number =>
     text.trim().split(/\s+/).filter(Boolean).length;
@@ -27,30 +36,30 @@ const metadadosEstruturadosSchema = z.object({
     audio: audioInfoSchema,
 });
 
-export const videoMetadataSchema = z.object({
+export const createVideoMetadataSchema = (messages: ValidationMessages) => z.object({
     titulo_sugerido: z.string()
-        .min(1, "Title is required")
+        .min(1, messages.titleRequired)
         .refine(
             (text) => countWords(text) >= 5,
-            "The title must have at least 5 words"
+            messages.titleWords
         ),
 
     descricao_completa: z.string()
-        .min(1, "Description is required")
+        .min(1, messages.descriptionRequired)
         .refine(
             (text) => countWords(text) >= 20,
-            "The description must be at least 20 words long"
+            messages.descriptionWords
         ),
 
     url_original: z.string()
-        .url("Invalid URL")
+        .url(messages.invalidUrl)
         .optional()
         .or(z.literal('')),
 
     metadados_estruturados: metadadosEstruturadosSchema,
 });
 
-export type VideoMetadataValidated = z.infer<typeof videoMetadataSchema>;
+export type VideoMetadataValidated = z.infer<ReturnType<typeof createVideoMetadataSchema>>;
 
 const metadadosFormSchema = z.object({
     pessoas: z.array(pessoaSchema),
@@ -58,19 +67,19 @@ const metadadosFormSchema = z.object({
     audio: audioInfoSchema,
 });
 
-export const videoMetadataFormSchema = z.object({
+export const createVideoMetadataFormSchema = (messages: ValidationMessages) => z.object({
     titulo_sugerido: z.string()
-        .min(1, "Title is required")
+        .min(1, messages.titleRequired)
         .refine(
             (text) => countWords(text) >= 5,
-            "Title must have at least 5 words"
+            messages.titleWords
         ),
 
     descricao_completa: z.string()
-        .min(1, "Description is required")
+        .min(1, messages.descriptionRequired)
         .refine(
             (text) => countWords(text) >= 20,
-            "Description must be at least 20 words long"
+            messages.descriptionWords
         ),
 
     url_original: z.string().optional(),
@@ -78,4 +87,4 @@ export const videoMetadataFormSchema = z.object({
     metadados_estruturados: metadadosFormSchema,
 });
 
-export type VideoMetadataForm = z.infer<typeof videoMetadataFormSchema>;
+export type VideoMetadataForm = z.infer<ReturnType<typeof createVideoMetadataFormSchema>>;
