@@ -58,8 +58,11 @@
   overflow-wrap: anywhere;
 }
 
+/* A row across the top, so the closed window art never covers an icon. */
 @media (max-width: 768px) {
   .desktop {
+    flex-direction: row;
+    align-items: flex-start;
     padding: 6px;
     gap: 2px;
   }

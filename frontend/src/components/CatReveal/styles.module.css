@@ -59,6 +59,14 @@
   50% { transform: rotate(1.6deg); }
 }
 
+/* Sits below the icon row, which on a short screen the centred art would reach. */
+@media (max-width: 768px) {
+  .reveal {
+    top: calc(50% + 26px);
+    width: min(74vw, 260px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .frame {
