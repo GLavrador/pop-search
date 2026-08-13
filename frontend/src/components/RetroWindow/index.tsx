@@ -9,8 +9,10 @@ interface RetroWindowProps {
   children: ReactNode;
   icon?: string;
   state?: WindowState;
+  maximized?: boolean;
   shakeKey?: number;
   onMinimize?: () => void;
+  onMaximize?: () => void;
   onClose?: () => void;
 }
 
@@ -30,8 +32,10 @@ export const RetroWindow = ({
   children,
   icon = '🌐',
   state = 'open',
+  maximized = false,
   shakeKey = 0,
   onMinimize,
+  onMaximize,
   onClose,
 }: RetroWindowProps) => {
   const { t } = useI18n();
@@ -54,6 +58,7 @@ export const RetroWindow = ({
         state === 'minimized' ? styles.minimized : '',
         state === 'closing' ? styles.closing : '',
         state === 'closed' ? styles.closed : '',
+        maximized ? styles.maximized : '',
       ].join(' ')}
       aria-hidden={hidden}
     >
@@ -70,7 +75,13 @@ export const RetroWindow = ({
           >
             _
           </button>
-          <button className={styles.controlButton} aria-label={t.window.maximize}>□</button>
+          <button
+            className={styles.controlButton}
+            aria-label={maximized ? t.window.restore : t.window.maximize}
+            onClick={onMaximize}
+          >
+            {maximized ? '❐' : '□'}
+          </button>
           <button
             className={styles.controlButton}
             aria-label={t.window.close}

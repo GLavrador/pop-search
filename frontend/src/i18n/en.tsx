@@ -14,6 +14,7 @@ export const en = {
     title: 'Pop Search System',
     minimize: 'Minimize',
     maximize: 'Maximize',
+    restore: 'Restore',
     close: 'Close',
   },
 

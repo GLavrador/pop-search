@@ -20,6 +20,27 @@
   min-height: clamp(200px, 30vw, 400px);
 }
 
+.mainPanelMax {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.contentAreaMax {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentAreaMax > div {
+  flex: 1;
+  min-height: 0;
+}
+
 .navBar {
   padding-bottom: 5px;
   display: flex;
@@ -131,6 +152,14 @@
     overflow: visible;
     flex: 1;
     padding: 5px;
+  }
+
+  .contentAreaMax {
+    overflow-y: auto;
+  }
+
+  .mainPanelMax {
+    height: 100%;
   }
 
   .appContainer {

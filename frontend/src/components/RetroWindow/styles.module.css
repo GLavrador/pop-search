@@ -21,6 +21,21 @@
   pointer-events: none;
 }
 
+.maximized {
+  position: fixed;
+  inset: 14px 14px 44px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.maximized .content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .closed {
   opacity: 0;
   visibility: hidden;
@@ -143,5 +158,10 @@
     content: '';
     position: absolute;
     inset: -7px -2px;
+  }
+
+  .maximized {
+    inset: 0;
+    z-index: 200;
   }
 }

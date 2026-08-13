@@ -15,6 +15,7 @@ export const pt: Dictionary = {
     title: 'Pop Search System',
     minimize: 'Minimizar',
     maximize: 'Maximizar',
+    restore: 'Restaurar',
     close: 'Fechar',
   },
 

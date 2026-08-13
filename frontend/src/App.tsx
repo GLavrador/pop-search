@@ -33,6 +33,7 @@ type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
   const [windowState, setWindowState] = useState<WindowState>('open');
+  const [isMaximized, setIsMaximized] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
   const closeClicks = useRef(0);
   const pendingCat = useRef<string | null>(null);
@@ -89,11 +90,13 @@ function AppContent() {
         title={t.window.title}
         icon={WINDOW_ICON}
         state={windowState}
+        maximized={isMaximized}
         shakeKey={shakeKey}
         onMinimize={() => setWindowState('minimized')}
+        onMaximize={() => setIsMaximized((value) => !value)}
         onClose={handleClose}
       >
-        <div className={styles.mainPanel}>
+        <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
           <div className={styles.navBar}>
             <button
               onClick={() => setActiveTab('ingest')}
@@ -139,7 +142,7 @@ function AppContent() {
 
           <hr className={styles.separator} />
 
-          <div className={styles.contentArea}>
+          <div className={`${styles.contentArea} ${isMaximized ? styles.contentAreaMax : ''}`}>
             <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>
               {isAuthenticated ? (
                 <IngestSection />
