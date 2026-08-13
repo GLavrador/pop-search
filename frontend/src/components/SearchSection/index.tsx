@@ -7,6 +7,7 @@ import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
 import { PrecisionPresets } from "../PrecisionPresets";
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from "../../constants/searchPresets";
 import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from "../../constants/searchModes";
+import { useI18n } from "../../i18n/languageContext";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
@@ -17,19 +18,20 @@ export const SearchSection = () => {
   const thresholdApplies = findSearchMode(mode).usesThreshold;
   const { search, results, isLoading, hasSearched, error } = useVideoSearchQuery();
   const { setStatus } = useStatus();
+  const { t } = useI18n();
 
   useEffect(() => {
     if (error) {
-      setStatus(`Search failed: ${error}`, 5000);
+      setStatus(t.search.status.failed(error), 5000);
     }
-  }, [error, setStatus]);
+  }, [error, setStatus, t.search.status]);
 
   useEffect(() => {
     if (hasSearched && query.trim()) {
       const handler = setTimeout(() => {
         const isNewSearch = search(query, threshold, limit, mode);
         if (isNewSearch) {
-          setStatus(`Searching database for: "${query}"...`);
+          setStatus(t.search.status.running(query));
         }
       }, 1000);
       return () => clearTimeout(handler);
@@ -40,28 +42,28 @@ export const SearchSection = () => {
     if (!isLoading && hasSearched && !error) {
       const count = results.length;
       if (count === 0) {
-        setStatus("Search finished. No objects found.", 5000);
+        setStatus(t.search.status.none, 5000);
       } else {
-        setStatus(`Search finished. Found ${count} object(s).`, 5000);
+        setStatus(t.search.status.found(count), 5000);
       }
     }
-  }, [isLoading, hasSearched, error, results.length, setStatus]);
+  }, [isLoading, hasSearched, error, results.length, setStatus, t.search.status]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    
+
     const isNewSearch = search(query, threshold, limit, mode);
     if (isNewSearch) {
-      setStatus(`Searching database for: "${query}"...`);
+      setStatus(t.search.status.running(query));
     } else {
       const count = results.length;
-      setStatus(count === 0 ? "Search finished. No objects found." : `Search finished. Found ${count} object(s).`, 3000);
+      setStatus(count === 0 ? t.search.status.none : t.search.status.found(count), 3000);
     }
   };
 
   const handleCancel = () => {
-    setStatus("Search cancelled.", 3000);
+    setStatus(t.search.status.cancelled, 3000);
   };
 
   const shouldShowSeparator = isLoading || hasSearched;
@@ -69,8 +71,8 @@ export const SearchSection = () => {
   return (
     <div className={styles.container}>
       <form className={styles.searchForm} onSubmit={handleSearch}>
-        <AdvancedSearchOptions 
-          threshold={threshold} 
+        <AdvancedSearchOptions
+          threshold={threshold}
           onThresholdChange={setThreshold}
           limit={limit}
           onLimitChange={setLimit}
@@ -88,16 +90,16 @@ export const SearchSection = () => {
         <div className={styles.inputRow}>
           <input
             type="text"
-            placeholder="Type to search..."
+            placeholder={t.search.placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={`win95-inset win95-input`}
             disabled={isLoading}
           />
-          
+
           {!isLoading && (
             <button type="submit" className={`win95-btn ${styles.submitButton}`}>
-              Find Now
+              {t.search.submit}
             </button>
           )}
         </div>
@@ -112,8 +114,8 @@ export const SearchSection = () => {
       {shouldShowSeparator && <hr className={styles.separator} />}
 
       <div className={styles.resultsList}>
-        {isLoading && <p className={styles.loadingText}>Querying database...</p>}
-        
+        {isLoading && <p className={styles.loadingText}>{t.search.loading}</p>}
+
         {!isLoading && error && (
           <div className="win95-border win95-error">
             <span>⚠️</span>
@@ -124,19 +126,10 @@ export const SearchSection = () => {
         {!isLoading && !error && hasSearched && results.length === 0 && (
           <div className="win95-border" style={{ padding: '4px 8px', backgroundColor: '#ffffe1', marginTop: '5px', display: 'flex', alignItems: 'center' }}>
             <span style={{ fontSize: '0.95em' }}>
-              <strong>0 found.</strong>{' '}
-              {thresholdApplies ? (
-                <>
-                  No semantic match above{' '}
-                  <strong>{Math.round(threshold * 100)}%</strong> and no exact term found.
-                  Try the <strong>Broad</strong> precision or different keywords.
-                </>
-              ) : (
-                <>
-                  No video contains every word you typed. Try fewer words, or switch
-                  to <strong>Hybrid</strong> mode to match by meaning too.
-                </>
-              )}
+              <strong>{t.search.emptyTitle}</strong>{' '}
+              {thresholdApplies
+                ? t.search.emptyWithThreshold(Math.round(threshold * 100))
+                : t.search.emptyLiteral}
             </span>
           </div>
         )}

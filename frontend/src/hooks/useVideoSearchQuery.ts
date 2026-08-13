@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { searchVideos } from '../services/api';
+import { useI18n } from '../i18n/languageContext';
 import type { SearchResult } from '../types';
 import type { SearchMode } from '../constants/searchModes';
 
@@ -22,6 +23,7 @@ interface UseVideoSearchQueryReturn {
 export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
     const [searchQuery, setSearchQuery] = useState<SearchArgs | null>(null);
     const [hasSearched, setHasSearched] = useState(false);
+    const { t } = useI18n();
 
     const query = useQuery({
         queryKey: ['videoSearch', searchQuery],
@@ -38,10 +40,10 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
         if (!error) return '';
 
         const err = error as { response?: { status?: number; data?: { detail?: string } } };
-        if (err.response?.status === 429) return 'Too many searches! Please wait a minute and try again.';
-        if (err.response?.status === 504) return 'Search timed out.';
-        if (err.response?.data?.detail) return `Error: ${err.response.data.detail}`;
-        return 'Error accessing database index.';
+        if (err.response?.status === 429) return t.search.errors.rateLimited;
+        if (err.response?.status === 504) return t.search.errors.timeout;
+        if (err.response?.data?.detail) return t.search.errors.detail(err.response.data.detail);
+        return t.search.errors.generic;
     };
 
     const search = (newQuery: string, threshold: number, limit: number, mode: SearchMode): boolean => {

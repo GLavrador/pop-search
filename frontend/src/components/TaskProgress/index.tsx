@@ -1,4 +1,5 @@
 import { ProgressBar } from '../ProgressBar';
+import { useI18n } from '../../i18n/languageContext';
 import styles from './styles.module.css';
 
 interface TaskProgressProps {
@@ -6,15 +7,17 @@ interface TaskProgressProps {
 }
 
 export const TaskProgress = ({ onCancel }: TaskProgressProps) => {
+  const { t } = useI18n();
+
   return (
     <div className={styles.container}>
       <ProgressBar loading={true} />
-      <button 
-        type="button" 
+      <button
+        type="button"
         onClick={onCancel}
         className="win95-btn"
       >
-        Cancel
+        {t.common.cancel}
       </button>
     </div>
   );
