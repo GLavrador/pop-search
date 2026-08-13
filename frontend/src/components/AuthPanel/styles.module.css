@@ -76,6 +76,15 @@
   background: var(--win-warning-bg);
 }
 
+.divider {
+  width: 100%;
+  margin: 2px 0;
+  border: 0;
+  height: 2px;
+  border-top: 1px solid var(--win-shadow-dark);
+  border-bottom: 1px solid var(--win-light);
+}
+
 .session {
   display: flex;
   align-items: center;
