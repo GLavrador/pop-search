@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ProgressBar } from '../ProgressBar';
 import { ReviewForm } from '../ReviewForm';
 import { DEMO_VIDEO } from '../../constants/demoVideo';
+import { useI18n } from '../../i18n/languageContext';
 import styles from './styles.module.css';
 
 type Stage = 'url' | 'analyzing' | 'review' | 'saved';
@@ -10,6 +11,7 @@ const FAKE_ANALYSIS_MS = 2200;
 
 export const DemoUpload = () => {
   const [stage, setStage] = useState<Stage>('url');
+  const { t } = useI18n();
 
   const startAnalysis = () => {
     setStage('analyzing');
@@ -19,21 +21,17 @@ export const DemoUpload = () => {
   if (stage === 'url') {
     return (
       <div className={styles.demoBox}>
-        <p className={styles.demoLabel}>Step 1 — paste a link</p>
+        <p className={styles.demoLabel}>{t.tour.demoUpload.step1}</p>
         <input
           type="text"
           readOnly
           value={DEMO_VIDEO.url_original}
           className="win95-inset win95-input"
-          aria-label="Example video URL"
+          aria-label={t.tour.demoUpload.urlLabel}
         />
-        <p className={styles.hint}>
-          Only twitter.com and x.com links are accepted. Scene and audio
-          analysis are on by default, which is what fills the searchable
-          metadata below.
-        </p>
+        <p className={styles.hint}>{t.tour.demoUpload.step1Hint}</p>
         <button type="button" className="win95-btn" onClick={startAnalysis}>
-          Run Analysis
+          {t.tour.demoUpload.runAnalysis}
         </button>
       </div>
     );
@@ -42,12 +40,9 @@ export const DemoUpload = () => {
   if (stage === 'analyzing') {
     return (
       <div className={styles.demoBox}>
-        <p className={styles.demoLabel}>Step 2 — the AI watches the video</p>
+        <p className={styles.demoLabel}>{t.tour.demoUpload.step2}</p>
         <ProgressBar loading />
-        <p className={styles.hint}>
-          The real thing downloads the video, sends it to Gemini and waits for a
-          description. This tour skips that and uses a result captured earlier.
-        </p>
+        <p className={styles.hint}>{t.tour.demoUpload.step2Hint}</p>
       </div>
     );
   }
@@ -55,14 +50,10 @@ export const DemoUpload = () => {
   if (stage === 'saved') {
     return (
       <div className={styles.demoBox}>
-        <p className={styles.demoLabel}>Step 4 — indexed</p>
-        <div className={styles.savedNotice}>
-          <strong>Nothing was saved.</strong> In the real app this video would
-          now be in the archive and findable by anyone, and it would count as one
-          of your monthly analyses.
-        </div>
+        <p className={styles.demoLabel}>{t.tour.demoUpload.step4}</p>
+        <div className={styles.savedNotice}>{t.tour.demoUpload.savedNotice}</div>
         <button type="button" className="win95-btn" onClick={() => setStage('url')}>
-          Run it again
+          {t.tour.demoUpload.again}
         </button>
       </div>
     );
@@ -70,11 +61,8 @@ export const DemoUpload = () => {
 
   return (
     <div className={styles.demoBox}>
-      <p className={styles.demoLabel}>Step 3 — you review what the AI wrote</p>
-      <p className={styles.hint}>
-        Every field is editable. This is the human check before anything is
-        indexed, and it is the same form the real flow uses.
-      </p>
+      <p className={styles.demoLabel}>{t.tour.demoUpload.step3}</p>
+      <p className={styles.hint}>{t.tour.demoUpload.step3Hint}</p>
       <ReviewForm
         initialData={DEMO_VIDEO}
         onSave={async () => setStage('saved')}
