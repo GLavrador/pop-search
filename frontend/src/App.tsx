@@ -25,6 +25,7 @@ type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
+  const [isMinimized, setIsMinimized] = useState(false);
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const { t } = useI18n();
@@ -32,7 +33,12 @@ function AppContent() {
 
   return (
     <div className={styles.appContainer}>
-      <RetroWindow title={t.window.title} icon={WINDOW_ICON}>
+      <RetroWindow
+        title={t.window.title}
+        icon={WINDOW_ICON}
+        minimized={isMinimized}
+        onMinimize={() => setIsMinimized(true)}
+      >
         <div className={styles.mainPanel}>
           <div className={styles.navBar}>
             <button
@@ -135,7 +141,12 @@ function AppContent() {
       </footer>
 
       <Taskbar>
-        <TaskButton icon={WINDOW_ICON} label={t.window.title} active />
+        <TaskButton
+          icon={WINDOW_ICON}
+          label={t.window.title}
+          active={!isMinimized}
+          onClick={() => setIsMinimized((value) => !value)}
+        />
       </Taskbar>
     </div>
   );

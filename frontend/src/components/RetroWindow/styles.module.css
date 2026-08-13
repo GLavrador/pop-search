@@ -2,6 +2,26 @@
   margin-bottom: 20px;
   background-color: var(--win-gray);
   padding: 2px;
+  transform-origin: bottom left;
+  transition: transform 240ms ease-in, opacity 200ms ease-in, visibility 0s linear 0s;
+}
+
+.minimized {
+  transform: translate(-15%, 45%) scale(0.12);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 240ms ease-in, opacity 200ms ease-in, visibility 0s linear 240ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window {
+    transition: none;
+  }
+
+  .minimized {
+    transition: none;
+  }
 }
 
 .titleBar {
