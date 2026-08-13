@@ -13,6 +13,9 @@ import { DemoTour } from './components/DemoTour';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { StatusBar } from './components/StatusBar';
+import { LanguageProvider } from './i18n/LanguageProvider';
+import { useI18n } from './i18n/languageContext';
+import { TAB_LABELS } from './constants/tabs';
 
 type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
@@ -20,37 +23,38 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
+  const { t } = useI18n();
 
 
   return (
-    <div className={styles.appContainer}>      
-      <RetroWindow title="Pop Search System" icon="💻">
+    <div className={styles.appContainer}>
+      <RetroWindow title={t.window.title} icon="💻">
         <div className={styles.mainPanel}>
           <div className={styles.navBar}>
-            <button 
+            <button
               onClick={() => setActiveTab('ingest')}
               className={`win95-border ${styles.navButton} ${activeTab === 'ingest' ? `win95-inset ${styles.active}` : ''}`}
             >
-              💿 Add-Video.exe
+              {TAB_LABELS.ingest}
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('search')}
               className={`win95-border ${styles.navButton} ${activeTab === 'search' ? `win95-inset ${styles.active}` : ''}`}
             >
-              🔍 Search.exe
+              {TAB_LABELS.search}
             </button>
             <button
               onClick={() => setActiveTab('demo')}
               className={`win95-border ${styles.navButton} ${activeTab === 'demo' ? `win95-inset ${styles.active}` : ''}`}
             >
-              🎓 Tour.exe
+              {TAB_LABELS.tour}
             </button>
             {isAuthenticated && (
               <button
                 onClick={() => setActiveTab('library')}
                 className={`win95-border ${styles.navButton} ${activeTab === 'library' ? `win95-inset ${styles.active}` : ''}`}
               >
-                📁 My-Videos.exe
+                {TAB_LABELS.myVideos}
               </button>
             )}
             {isAdmin && (
@@ -58,14 +62,14 @@ function AppContent() {
                 onClick={() => setActiveTab('admin')}
                 className={`win95-border ${styles.navButton} ${activeTab === 'admin' ? `win95-inset ${styles.active}` : ''}`}
               >
-                📊 Stats.exe
+                {TAB_LABELS.stats}
               </button>
             )}
             <button
               onClick={() => setActiveTab('account')}
               className={`win95-border ${styles.navButton} ${activeTab === 'account' ? `win95-inset ${styles.active}` : ''}`}
             >
-              {isAuthenticated ? `👤 ${displayName}` : '🔑 Sign In'}
+              {isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn}
             </button>
           </div>
 
@@ -77,25 +81,22 @@ function AppContent() {
                 <IngestSection />
               ) : (
                 <div className={styles.gate}>
-                  <p><strong>An account is required to add videos.</strong></p>
-                  <p>
-                    Indexing a video runs it through the AI, so it is limited to
-                    signed-in users. Searching the archive stays open to everyone.
-                  </p>
+                  <p><strong>{t.gate.title}</strong></p>
+                  <p>{t.gate.body}</p>
                   <div className={styles.gateActions}>
                     <button
                       type="button"
                       className="win95-btn"
                       onClick={() => setActiveTab('account')}
                     >
-                      Sign In
+                      {t.gate.signIn}
                     </button>
                     <button
                       type="button"
                       className="win95-btn"
                       onClick={() => setActiveTab('demo')}
                     >
-                      🎓 Take the tour instead
+                      {t.gate.takeTour}
                     </button>
                   </div>
                 </div>
@@ -126,7 +127,7 @@ function AppContent() {
       </RetroWindow>
 
       <footer className={styles.footer}>
-        <p>© 1998 Pop Search Corp. - All rights reserved.</p>
+        <p>{t.footer}</p>
       </footer>
     </div>
   );
@@ -134,11 +135,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <StatusProvider>
-        <AppContent />
-      </StatusProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <StatusProvider>
+          <AppContent />
+        </StatusProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
