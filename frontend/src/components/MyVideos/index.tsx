@@ -1,16 +1,18 @@
 import { useMyVideosQuery } from '../../hooks/useMyVideosQuery';
+import { useI18n } from '../../i18n/languageContext';
 import styles from './styles.module.css';
 
-const formatDate = (value: string): string => {
+const formatDate = (value: string, locale: string): string => {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString();
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(locale);
 };
 
 export const MyVideos = () => {
   const { videos, isLoading, error } = useMyVideosQuery();
+  const { t, locale } = useI18n();
 
   if (isLoading) {
-    return <p className={styles.message}>Loading your videos...</p>;
+    return <p className={styles.message}>{t.myVideos.loading}</p>;
   }
 
   if (error) {
@@ -23,19 +25,14 @@ export const MyVideos = () => {
   }
 
   if (videos.length === 0) {
-    return (
-      <div className={styles.message}>
-        You have not added any videos yet. Use <strong>Add-Video.exe</strong> to
-        index your first one.
-      </div>
-    );
+    return <div className={styles.message}>{t.myVideos.empty}</div>;
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <p className={styles.title}>My Videos</p>
-        <span className={styles.count}>{videos.length} indexed</span>
+        <p className={styles.title}>{t.myVideos.title}</p>
+        <span className={styles.count}>{t.myVideos.count(videos.length)}</span>
       </div>
 
       <div className={styles.list}>
@@ -55,7 +52,7 @@ export const MyVideos = () => {
                 <p className={styles.description}>{video.descricao_completa}</p>
               )}
             </div>
-            <span className={styles.date}>{formatDate(video.created_at)}</span>
+            <span className={styles.date}>{formatDate(video.created_at, locale)}</span>
           </div>
         ))}
       </div>
