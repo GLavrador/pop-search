@@ -17,6 +17,9 @@ import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
 import { TAB_LABELS } from './constants/tabs';
 import { Taskbar } from './components/Taskbar';
+import { TaskButton } from './components/Taskbar/TaskButton';
+
+const WINDOW_ICON = '💻';
 
 type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
@@ -29,7 +32,7 @@ function AppContent() {
 
   return (
     <div className={styles.appContainer}>
-      <RetroWindow title={t.window.title} icon="💻">
+      <RetroWindow title={t.window.title} icon={WINDOW_ICON}>
         <div className={styles.mainPanel}>
           <div className={styles.navBar}>
             <button
@@ -131,7 +134,9 @@ function AppContent() {
         <p>{t.footer}</p>
       </footer>
 
-      <Taskbar />
+      <Taskbar>
+        <TaskButton icon={WINDOW_ICON} label={t.window.title} active />
+      </Taskbar>
     </div>
   );
 }
