@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css';
 import './App.css';
 import { RetroWindow } from './components/RetroWindow';
@@ -19,29 +19,72 @@ import { TAB_LABELS } from './constants/tabs';
 import { Taskbar } from './components/Taskbar';
 import { TaskButton } from './components/Taskbar/TaskButton';
 import { Desktop } from './components/Desktop';
+import { CatReveal } from './components/CatReveal';
+import { randomCat } from './constants/cats';
+import type { WindowState } from './components/RetroWindow';
 
 const WINDOW_ICON = '💻';
 const APP_NAME = 'Pop Search';
+const CLICKS_TO_CLOSE = 5;
+const CLOSING_MS = 320;
 
 type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [windowState, setWindowState] = useState<WindowState>('open');
+  const [shakeKey, setShakeKey] = useState(0);
+  const closeClicks = useRef(0);
+  const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const { t } = useI18n();
 
+  useEffect(() => {
+    if (windowState !== 'closing') return;
+    const id = setTimeout(() => setWindowState('closed'), CLOSING_MS);
+    return () => clearTimeout(id);
+  }, [windowState]);
+
+  const handleClose = () => {
+    if (windowState !== 'open') return;
+
+    closeClicks.current += 1;
+
+    if (closeClicks.current < CLICKS_TO_CLOSE) {
+      setShakeKey((key) => key + 1);
+      return;
+    }
+
+    setCat({
+      image: randomCat(),
+      phrase: t.closed.phrases[Math.floor(Math.random() * t.closed.phrases.length)],
+    });
+    setWindowState('closing');
+  };
+
+  const handleOpen = () => {
+    closeClicks.current = 0;
+    setCat(null);
+    setWindowState('open');
+  };
+
+  const isClosed = windowState === 'closed';
+
 
   return (
     <div className={styles.appContainer}>
-      <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} />
+      <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} onOpenApp={handleOpen} />
+
+      {isClosed && cat && <CatReveal image={cat.image} phrase={cat.phrase} />}
 
       <RetroWindow
         title={t.window.title}
         icon={WINDOW_ICON}
-        minimized={isMinimized}
-        onMinimize={() => setIsMinimized(true)}
+        state={windowState}
+        shakeKey={shakeKey}
+        onMinimize={() => setWindowState('minimized')}
+        onClose={handleClose}
       >
         <div className={styles.mainPanel}>
           <div className={styles.navBar}>
@@ -145,12 +188,16 @@ function AppContent() {
       </footer>
 
       <Taskbar>
-        <TaskButton
-          icon={WINDOW_ICON}
-          label={t.window.title}
-          active={!isMinimized}
-          onClick={() => setIsMinimized((value) => !value)}
-        />
+        {windowState !== 'closing' && !isClosed && (
+          <TaskButton
+            icon={WINDOW_ICON}
+            label={t.window.title}
+            active={windowState === 'open'}
+            onClick={() =>
+              setWindowState((state) => (state === 'minimized' ? 'open' : 'minimized'))
+            }
+          />
+        )}
       </Taskbar>
     </div>
   );

@@ -16,6 +16,25 @@
   transition: transform 240ms ease-in, opacity 200ms ease-in, visibility 0s linear 240ms;
 }
 
+.closing {
+  animation: crtOff 320ms ease-in both;
+  pointer-events: none;
+}
+
+.closed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.02);
+  transition: none;
+}
+
+@keyframes crtOff {
+  0% { transform: scale(1); opacity: 1; }
+  55% { transform: scaleX(1) scaleY(0.012); opacity: 1; }
+  100% { transform: scaleX(0.02) scaleY(0.012); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .window {
     transition: none;
@@ -23,6 +42,10 @@
 
   .minimized {
     transition: none;
+  }
+
+  .closing {
+    animation-duration: 1ms;
   }
 }
 
