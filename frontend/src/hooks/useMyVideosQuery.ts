@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMyVideos } from '../services/api';
 import { useAuth } from '../context/authContext';
+import { useI18n } from '../i18n/languageContext';
 import type { MyVideo } from '../types';
 
 interface UseMyVideosQueryReturn {
@@ -11,6 +12,7 @@ interface UseMyVideosQueryReturn {
 
 export const useMyVideosQuery = (): UseMyVideosQueryReturn => {
     const { isAuthenticated, session } = useAuth();
+    const { t } = useI18n();
 
     const query = useQuery({
         // Keyed by user so switching accounts cannot show the previous library.
@@ -23,9 +25,9 @@ export const useMyVideosQuery = (): UseMyVideosQueryReturn => {
 
     const getErrorMessage = (error: unknown): string => {
         const err = error as { response?: { status?: number } };
-        if (err.response?.status === 401) return 'Your session expired. Sign in again.';
-        if (err.response?.status === 429) return 'Too many requests. Wait a minute and try again.';
-        return 'Could not load your videos.';
+        if (err.response?.status === 401) return t.myVideos.errors.expired;
+        if (err.response?.status === 429) return t.myVideos.errors.rateLimited;
+        return t.myVideos.errors.generic;
     };
 
     return {

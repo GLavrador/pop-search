@@ -1,22 +1,24 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { useI18n } from '../i18n/languageContext';
 import { AuthContext, type AuthContextType } from './authContext';
+import type { Dictionary } from '../i18n/en';
 
-const toFriendlyError = (message: string): string => {
+const toFriendlyError = (message: string, errors: Dictionary['auth']['errors']): string => {
   const normalized = message.toLowerCase();
 
   if (normalized.includes('invalid login credentials')) {
-    return 'Wrong e-mail or password.';
+    return errors.invalidCredentials;
   }
   if (normalized.includes('already registered') || normalized.includes('already been registered')) {
-    return 'That e-mail already has an account. Try signing in.';
+    return errors.emailTaken;
   }
   if (normalized.includes('password should be')) {
-    return 'Password is too short. Use at least 6 characters.';
+    return errors.passwordTooShort;
   }
   if (normalized.includes('email not confirmed')) {
-    return 'Confirm your e-mail before signing in. Check your inbox.';
+    return errors.emailNotConfirmed;
   }
   return message;
 };
@@ -24,6 +26,7 @@ const toFriendlyError = (message: string): string => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useI18n();
 
   useEffect(() => {
     let active = true;
@@ -56,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     signIn: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      return { error: error ? toFriendlyError(error.message) : null };
+      return { error: error ? toFriendlyError(error.message, t.auth.errors) : null };
     },
 
     signUp: async (email, password, displayName) => {
@@ -65,13 +68,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: { data: { display_name: displayName } },
       });
-      return { error: error ? toFriendlyError(error.message) : null };
+      return { error: error ? toFriendlyError(error.message, t.auth.errors) : null };
     },
 
     signOut: async () => {
       await supabase.auth.signOut();
     },
-  }), [session, isLoading]);
+  }), [session, isLoading, t]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

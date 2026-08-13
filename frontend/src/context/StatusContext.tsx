@@ -1,14 +1,14 @@
 import { createContext, useContext, useState, useRef, useEffect, type ReactNode, useCallback } from 'react';
 
 interface StatusContextType {
-  status: string;
+  status: string | null;
   setStatus: (message: string, duration?: number) => void;
 }
 
 const StatusContext = createContext<StatusContextType | undefined>(undefined);
 
 export const StatusProvider = ({ children }: { children: ReactNode }) => {
-  const [status, setStatusState] = useState('Ready');
+  const [status, setStatusState] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export const StatusProvider = ({ children }: { children: ReactNode }) => {
     
     if (duration) {
       timeoutRef.current = setTimeout(() => {
-        setStatusState('Ready');
+        setStatusState(null);
         timeoutRef.current = null;
       }, duration);
     }

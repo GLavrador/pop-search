@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { RANGE_OPTIONS, useAdminStatsQuery } from '../../hooks/useAdminStatsQuery';
+import { useI18n } from '../../i18n/languageContext';
 import styles from './styles.module.css';
-
-const n = (value: number) => value.toLocaleString();
 
 interface CardProps {
   label: string;
@@ -22,9 +21,12 @@ const Card = ({ label, value, hint, alert }: CardProps) => (
 export const AdminDashboard = () => {
   const [days, setDays] = useState<number>(30);
   const { isAdmin, stats, isLoading, error } = useAdminStatsQuery(days);
+  const { t, locale } = useI18n();
+
+  const n = (value: number) => value.toLocaleString(locale);
 
   if (!isAdmin) {
-    return <p className={styles.empty}>This page is for administrators.</p>;
+    return <p className={styles.empty}>{t.admin.notAdmin}</p>;
   }
 
   if (error) {
@@ -32,7 +34,7 @@ export const AdminDashboard = () => {
   }
 
   if (!stats) {
-    return <p className={styles.empty}>{isLoading ? 'Loading statistics...' : 'No data yet.'}</p>;
+    return <p className={styles.empty}>{isLoading ? t.admin.loading : t.admin.noData}</p>;
   }
 
   const ceilingHit = stats.daily_limit > 0 && stats.analyses_today >= stats.daily_limit;
@@ -41,8 +43,8 @@ export const AdminDashboard = () => {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Project statistics</h2>
-        <div className={styles.ranges} role="group" aria-label="Time range">
+        <h2 className={styles.title}>{t.admin.title}</h2>
+        <div className={styles.ranges} role="group" aria-label={t.admin.rangeLabel}>
           {RANGE_OPTIONS.map((option) => (
             <button
               key={option}
@@ -51,7 +53,7 @@ export const AdminDashboard = () => {
               onClick={() => setDays(option)}
               className={`win95-btn ${styles.rangeButton} ${days === option ? 'win95-btn-pressed' : ''}`}
             >
-              {option} days
+              {t.admin.range(option)}
             </button>
           ))}
         </div>
@@ -59,43 +61,43 @@ export const AdminDashboard = () => {
 
       <div className={styles.cards}>
         <Card
-          label="Avg per analysis"
+          label={t.admin.avgLabel}
           value={n(stats.avg_tokens)}
-          hint={`median ${n(stats.median_tokens)} · ${stats.measured} measured`}
+          hint={t.admin.avgHint(n(stats.median_tokens), stats.measured)}
         />
         <Card
-          label="Cheapest / priciest"
+          label={t.admin.extremesLabel}
           value={`${n(stats.min_tokens)} / ${n(stats.max_tokens)}`}
-          hint="tokens, one analysis"
+          hint={t.admin.extremesHint}
         />
         <Card
-          label="Analyses"
+          label={t.admin.analysesLabel}
           value={n(stats.analyses)}
-          hint={`${n(stats.saves)} saves · ${n(stats.tokens)} tokens total`}
+          hint={t.admin.analysesHint(n(stats.saves), n(stats.tokens))}
         />
         <Card
-          label="Failure rate"
+          label={t.admin.failureLabel}
           value={`${(stats.failure_rate * 100).toFixed(1)}%`}
-          hint={`${n(stats.tokens_wasted)} tokens spent for nothing`}
+          hint={t.admin.failureHint(n(stats.tokens_wasted))}
           alert={stats.failure_rate > 0.1}
         />
         <Card
-          label="Today"
+          label={t.admin.todayLabel}
           value={`${stats.analyses_today} / ${stats.daily_limit}`}
-          hint={ceilingHit ? 'ceiling reached, nobody can analyse' : 'against the daily ceiling'}
+          hint={ceilingHit ? t.admin.ceilingHit : t.admin.againstCeiling}
           alert={ceilingHit}
         />
         <Card
-          label="A full day would cost"
+          label={t.admin.projectedLabel}
           value={n(stats.projected_tokens_at_limit)}
-          hint="tokens, at the ceiling and current average"
+          hint={t.admin.projectedHint}
         />
       </div>
 
       <fieldset className={styles.group}>
-        <legend className={styles.legend}>Analyses per day</legend>
+        <legend className={styles.legend}>{t.admin.perDayLegend}</legend>
         {stats.daily.length === 0 ? (
-          <p className={styles.empty}>Nothing in this range.</p>
+          <p className={styles.empty}>{t.admin.perDayEmpty}</p>
         ) : (
           <div className={styles.bars}>
             {stats.daily.map((point) => (
@@ -103,28 +105,25 @@ export const AdminDashboard = () => {
                 key={point.date}
                 className={styles.bar}
                 style={{ height: `${(point.analyses / busiestDay) * 100}%` }}
-                title={`${point.date}: ${point.analyses} analyses, ${n(point.tokens)} tokens`}
+                title={t.admin.barTitle(point.date, point.analyses, n(point.tokens))}
               />
             ))}
           </div>
         )}
-        <p className={styles.note}>
-          Hover a bar for the exact day. Use this to see whether the ceiling is
-          set anywhere near real demand.
-        </p>
+        <p className={styles.note}>{t.admin.perDayNote}</p>
       </fieldset>
 
       <fieldset className={styles.group}>
-        <legend className={styles.legend}>Why analyses failed</legend>
+        <legend className={styles.legend}>{t.admin.failuresLegend}</legend>
         {stats.failures_by_reason.length === 0 ? (
-          <p className={styles.empty}>No failures in this range.</p>
+          <p className={styles.empty}>{t.admin.failuresEmpty}</p>
         ) : (
           <div className={styles.scroll}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Reason</th>
-                  <th>Count</th>
+                  <th>{t.admin.reason}</th>
+                  <th>{t.admin.count}</th>
                 </tr>
               </thead>
               <tbody>
@@ -138,21 +137,18 @@ export const AdminDashboard = () => {
             </table>
           </div>
         )}
-        <p className={styles.note}>
-          Every failure here still cost tokens. A reason that repeats is worth
-          fixing before raising anyone's limit.
-        </p>
+        <p className={styles.note}>{t.admin.failuresNote}</p>
       </fieldset>
 
       <fieldset className={styles.group}>
-        <legend className={styles.legend}>Consumption per account, this month</legend>
+        <legend className={styles.legend}>{t.admin.perUserLegend}</legend>
         <div className={styles.scroll}>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>User</th>
-                <th>Analyses</th>
-                <th>Tokens</th>
+                <th>{t.admin.user}</th>
+                <th>{t.admin.analysesLabel}</th>
+                <th>{t.admin.tokens}</th>
               </tr>
             </thead>
             <tbody>
@@ -168,10 +164,7 @@ export const AdminDashboard = () => {
             </tbody>
           </table>
         </div>
-        <p className={styles.note}>
-          Tokens are what count against the Google AI quota. Analyses are what
-          each account is limited by.
-        </p>
+        <p className={styles.note}>{t.admin.perUserNote}</p>
       </fieldset>
     </div>
   );

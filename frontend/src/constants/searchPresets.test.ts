@@ -13,7 +13,7 @@ describe('findPresetByThreshold', () => {
   });
 
   it('should resolve the default threshold to Balanced', () => {
-    expect(findPresetByThreshold(DEFAULT_THRESHOLD)?.label).toBe('Balanced');
+    expect(findPresetByThreshold(DEFAULT_THRESHOLD)?.id).toBe('balanced');
   });
 
   it('should tolerate floating point drift', () => {

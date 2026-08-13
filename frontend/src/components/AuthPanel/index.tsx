@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useStatus } from '../../context/StatusContext';
+import { useI18n } from '../../i18n/languageContext';
 import { QuotaMeter } from '../QuotaMeter';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import styles from './styles.module.css';
 
 type Mode = 'signIn' | 'signUp';
@@ -9,6 +11,7 @@ type Mode = 'signIn' | 'signUp';
 export const AuthPanel = () => {
   const { isAuthenticated, displayName, signIn, signUp, signOut } = useAuth();
   const { setStatus } = useStatus();
+  const { t } = useI18n();
 
   const [mode, setMode] = useState<Mode>('signIn');
   const [email, setEmail] = useState('');
@@ -23,20 +26,22 @@ export const AuthPanel = () => {
       <div className={`win95-border ${styles.panel}`}>
         <div className={styles.session}>
           <span className={styles.who}>
-            Signed in as <span className={styles.name}>{displayName}</span>
+            {t.auth.signedInAs} <span className={styles.name}>{displayName}</span>
           </span>
           <button
             type="button"
             className="win95-btn"
             onClick={async () => {
               await signOut();
-              setStatus('Signed out.', 3000);
+              setStatus(t.auth.signedOut, 3000);
             }}
           >
-            Sign Out
+            {t.auth.signOut}
           </button>
         </div>
         <QuotaMeter />
+        <hr className={styles.divider} />
+        <LanguageSwitcher />
       </div>
     );
   }
@@ -60,28 +65,25 @@ export const AuthPanel = () => {
     }
 
     if (mode === 'signUp') {
-      setNotice('Account created. If confirmation is required, check your inbox before signing in.');
+      setNotice(t.auth.created);
       setMode('signIn');
       setPassword('');
       return;
     }
 
-    setStatus('Signed in.', 3000);
+    setStatus(t.auth.signedIn, 3000);
   };
 
   const isSignUp = mode === 'signUp';
 
   return (
     <form className={`win95-border ${styles.panel}`} onSubmit={handleSubmit}>
-      <p className={styles.title}>{isSignUp ? 'Create Account' : 'Sign In'}</p>
-      <p className={styles.subtitle}>
-        Searching is open to everyone. An account is what lets you add videos to
-        the archive.
-      </p>
+      <p className={styles.title}>{isSignUp ? t.auth.createAccount : t.auth.signIn}</p>
+      <p className={styles.subtitle}>{t.auth.subtitle}</p>
 
       {isSignUp && (
         <div className={styles.field}>
-          <label className={styles.label} htmlFor="auth-name">Display name</label>
+          <label className={styles.label} htmlFor="auth-name">{t.auth.displayName}</label>
           <input
             id="auth-name"
             type="text"
@@ -95,7 +97,7 @@ export const AuthPanel = () => {
       )}
 
       <div className={styles.field}>
-        <label className={styles.label} htmlFor="auth-email">E-mail</label>
+        <label className={styles.label} htmlFor="auth-email">{t.auth.email}</label>
         <input
           id="auth-email"
           type="email"
@@ -109,7 +111,7 @@ export const AuthPanel = () => {
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label} htmlFor="auth-password">Password</label>
+        <label className={styles.label} htmlFor="auth-password">{t.auth.password}</label>
         <input
           id="auth-password"
           type="password"
@@ -134,7 +136,7 @@ export const AuthPanel = () => {
 
       <div className={styles.actions}>
         <button type="submit" className={`win95-btn ${styles.submit}`} disabled={isBusy}>
-          {isBusy ? 'Working...' : isSignUp ? 'Create Account' : 'Sign In'}
+          {isBusy ? t.auth.working : isSignUp ? t.auth.createAccount : t.auth.signIn}
         </button>
       </div>
 
@@ -148,8 +150,11 @@ export const AuthPanel = () => {
           setNotice(null);
         }}
       >
-        {isSignUp ? 'Already have an account? Sign in' : "No account yet? Create one"}
+        {isSignUp ? t.auth.toSignIn : t.auth.toSignUp}
       </button>
+
+      <hr className={styles.divider} />
+      <LanguageSwitcher />
     </form>
   );
 };

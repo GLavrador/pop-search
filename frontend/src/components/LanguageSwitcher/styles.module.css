@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.button {
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  min-width: 60px;
+}

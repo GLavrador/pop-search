@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { analyzeVideo } from '../services/api';
+import { useI18n } from '../i18n/languageContext';
 import type { VideoMetadata } from '../types';
 
 interface UseVideoAnalysisMutationReturn {
@@ -12,6 +13,7 @@ interface UseVideoAnalysisMutationReturn {
 
 export const useVideoAnalysisMutation = (): UseVideoAnalysisMutationReturn => {
     const queryClient = useQueryClient();
+    const { t } = useI18n();
 
     const mutation = useMutation({
         mutationFn: async ({ url, options }: { url: string; options: { analyzeScenes: boolean; analyzeAudio: boolean } }) => {
@@ -33,10 +35,10 @@ export const useVideoAnalysisMutation = (): UseVideoAnalysisMutationReturn => {
         // monthly quota, and only the server knows which one it was.
         if (err.response?.data?.detail) return err.response.data.detail;
 
-        if (err.response?.status === 504) return 'Server Timeout (504). Video might be too long.';
-        if (err.response?.status === 429) return 'Too many requests. Please wait a moment.';
-        if (err.response?.status === 401) return 'Sign in to analyze videos.';
-        return 'Failed to analyze video.';
+        if (err.response?.status === 504) return t.ingest.errors.timeout;
+        if (err.response?.status === 429) return t.ingest.errors.rateLimited;
+        if (err.response?.status === 401) return t.ingest.errors.unauthorized;
+        return t.ingest.errors.generic;
     };
 
     return {
