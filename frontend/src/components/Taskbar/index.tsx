@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
-import { StartFlag } from './StartFlag';
+import logo from '../../assets/windows-98-logo.png';
 import styles from './styles.module.css';
 
 const CLOCK_TICK_MS = 20_000;
@@ -23,7 +23,7 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
   return (
     <div className={styles.taskbar}>
       <button type="button" className={styles.start}>
-        <StartFlag />
+        <img src={logo} alt="" className={styles.logo} />
         {t.taskbar.start}
       </button>
 
