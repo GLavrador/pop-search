@@ -21,6 +21,11 @@ export const en = {
     start: 'Start',
   },
 
+  desktop: {
+    myComputer: 'My Computer',
+    recycleBin: 'Recycle Bin',
+  },
+
   gate: {
     title: 'An account is required to add videos.',
     body: 'Indexing a video runs it through the AI, so it is limited to signed-in users. Searching the archive stays open to everyone.',

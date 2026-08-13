@@ -18,8 +18,10 @@ import { useI18n } from './i18n/languageContext';
 import { TAB_LABELS } from './constants/tabs';
 import { Taskbar } from './components/Taskbar';
 import { TaskButton } from './components/Taskbar/TaskButton';
+import { Desktop } from './components/Desktop';
 
 const WINDOW_ICON = '💻';
+const APP_NAME = 'Pop Search';
 
 type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
@@ -33,6 +35,8 @@ function AppContent() {
 
   return (
     <div className={styles.appContainer}>
+      <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} />
+
       <RetroWindow
         title={t.window.title}
         icon={WINDOW_ICON}

@@ -1,4 +1,6 @@
 .window {
+  position: relative;
+  z-index: 1;
   margin-bottom: 20px;
   background-color: var(--win-gray);
   padding: 2px;
