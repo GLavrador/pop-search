@@ -18,6 +18,10 @@ export const pt: Dictionary = {
     close: 'Fechar',
   },
 
+  taskbar: {
+    start: 'Iniciar',
+  },
+
   gate: {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',

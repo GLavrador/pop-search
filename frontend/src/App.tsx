@@ -16,6 +16,7 @@ import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
 import { TAB_LABELS } from './constants/tabs';
+import { Taskbar } from './components/Taskbar';
 
 type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
@@ -129,6 +130,8 @@ function AppContent() {
       <footer className={styles.footer}>
         <p>{t.footer}</p>
       </footer>
+
+      <Taskbar />
     </div>
   );
 }
