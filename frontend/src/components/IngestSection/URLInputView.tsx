@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useI18n } from '../../i18n/languageContext';
 import styles from './styles.module.css';
 import { ProgressBar } from '../ProgressBar';
 
@@ -14,13 +15,13 @@ interface URLInputViewProps {
   onManualModeChange: (value: boolean) => void;
 }
 
-export const URLInputView = ({ 
-  url, 
-  onUrlChange, 
-  onAnalyze, 
+export const URLInputView = ({
+  url,
+  onUrlChange,
+  onAnalyze,
   onOpenManualForm,
-  onCancel, 
-  loading, 
+  onCancel,
+  loading,
   error,
   manualMode,
   onManualModeChange
@@ -29,6 +30,7 @@ export const URLInputView = ({
   const [step, setStep] = useState<1 | 2>(1);
   const [analyzeScenes, setAnalyzeScenes] = useState(true);
   const [analyzeAudio, setAnalyzeAudio] = useState(true);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (loading) {
@@ -36,7 +38,7 @@ export const URLInputView = ({
     } else {
       const timer = setTimeout(() => {
         setShowProgress(false);
-      }, 500); 
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [loading]);
@@ -55,33 +57,33 @@ export const URLInputView = ({
     <div className={styles.container}>
       {step === 1 ? (
         <>
-          <label className={styles.label}>Insert URL:</label>
+          <label className={styles.label}>{t.ingest.urlLabel}</label>
           <div className={styles.inputRow}>
-            <input 
-              type="text" 
+            <input
+              type="text"
               className="win95-inset win95-input"
-              placeholder="https://..." 
+              placeholder={t.ingest.urlPlaceholder}
               value={url}
               onChange={(e) => onUrlChange(e.target.value)}
               disabled={loading}
             />
-            
+
             {!loading && !manualMode && (
-              <button 
+              <button
                 className={`win95-btn ${styles.runButton}`}
-                onClick={handleNext} 
+                onClick={handleNext}
                 disabled={!url.trim()}
               >
-                Next
+                {t.ingest.next}
               </button>
             )}
 
             {!loading && manualMode && (
-              <button 
+              <button
                 className={`win95-btn ${styles.runButton}`}
-                onClick={onOpenManualForm} 
+                onClick={onOpenManualForm}
               >
-                Open Form
+                {t.ingest.openForm}
               </button>
             )}
           </div>
@@ -96,28 +98,28 @@ export const URLInputView = ({
               disabled={loading}
             />
             <label htmlFor="manualModeCheckbox" className={styles.manualLabel}>
-              Manual Input
+              {t.ingest.manualInput}
             </label>
           </div>
         </>
       ) : (
         <div className={`win95-border ${styles.optionsContainer}`}>
-          <div className={styles.optionsTitle}>Analysis Options</div>
+          <div className={styles.optionsTitle}>{t.ingest.optionsTitle}</div>
           <div className={styles.optionsDescription}>
-            By default, the AI returns a suggested title and a description for the video. Select additional fields below if needed.
+            {t.ingest.optionsDescription}
           </div>
-          
+
           <div className={styles.checkboxGroup}>
             {[
-              { id: 'scenesCheckbox', label: 'Scenes elements', state: analyzeScenes, setter: setAnalyzeScenes },
-              { id: 'audioCheckbox', label: 'Audio transcription', state: analyzeAudio, setter: setAnalyzeAudio }
+              { id: 'scenesCheckbox', label: t.ingest.scenes, state: analyzeScenes, setter: setAnalyzeScenes },
+              { id: 'audioCheckbox', label: t.ingest.audio, state: analyzeAudio, setter: setAnalyzeAudio }
             ].map(({ id, label, state, setter }) => (
               <div key={id} className={`${styles.manualToggle} ${styles.checkboxOption}`}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   id={id}
                   className={styles.manualCheckbox}
-                  checked={state} 
+                  checked={state}
                   onChange={(e) => setter(e.target.checked)}
                   disabled={loading}
                 />
@@ -129,19 +131,19 @@ export const URLInputView = ({
           </div>
 
           <div className={styles.runAnalysisActions}>
-            <button 
+            <button
               className="win95-btn"
               onClick={() => setStep(1)}
               disabled={loading}
             >
-              Back
+              {t.common.back}
             </button>
-            <button 
+            <button
               className={`win95-btn ${styles.runButton}`}
               onClick={handleRunAnalysis}
               disabled={loading}
             >
-              Run Analysis
+              {t.ingest.runAnalysis}
             </button>
           </div>
         </div>
@@ -151,14 +153,14 @@ export const URLInputView = ({
         <div className={styles.progressRow}>
           <div className={styles.progressContainer}>
             <ProgressBar loading={loading} />
-            
+
             {loading && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={onCancel}
                 className={`win95-btn ${styles.cancelButton}`}
               >
-                Cancel
+                {t.common.cancel}
               </button>
             )}
           </div>
