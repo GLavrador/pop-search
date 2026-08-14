@@ -67,7 +67,7 @@ export const DemoTour = () => {
         ))}
       </div>
 
-      <div className={`win95-border ${styles.panel}`}>
+      <div className={styles.panel}>
         <h2 className={styles.title}>{step.title}</h2>
         <div className={styles.body}>{bodyFor()}</div>
       </div>
