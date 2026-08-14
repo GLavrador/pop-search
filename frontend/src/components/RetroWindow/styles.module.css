@@ -1,7 +1,67 @@
 .window {
+  position: relative;
+  z-index: 1;
   margin-bottom: 20px;
   background-color: var(--win-gray);
   padding: 2px;
+  transform-origin: bottom left;
+  transition: transform 240ms ease-in, opacity 200ms ease-in, visibility 0s linear 0s;
+}
+
+.minimized {
+  transform: translate(-15%, 45%) scale(0.12);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 240ms ease-in, opacity 200ms ease-in, visibility 0s linear 240ms;
+}
+
+.closing {
+  animation: crtOff 320ms ease-in both;
+  pointer-events: none;
+}
+
+.maximized {
+  position: fixed;
+  inset: 14px 14px 44px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.maximized .content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.closed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.02);
+  transition: none;
+}
+
+@keyframes crtOff {
+  0% { transform: scale(1); opacity: 1; }
+  55% { transform: scaleX(1) scaleY(0.012); opacity: 1; }
+  100% { transform: scaleX(0.02) scaleY(0.012); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window {
+    transition: none;
+  }
+
+  .minimized {
+    transition: none;
+  }
+
+  .closing {
+    animation-duration: 1ms;
+  }
 }
 
 .titleBar {
@@ -69,11 +129,39 @@
     height: auto;
     display: flex;
     flex-direction: column;
-    overflow: visible; 
+    overflow: visible;
   }
-  
+
   .content {
     flex: 1;
     height: auto;
+  }
+
+  .titleBar {
+    min-height: 30px;
+    padding: 5px 5px 5px 8px;
+  }
+
+  .controls {
+    gap: 4px;
+  }
+
+  .controlButton {
+    position: relative;
+    width: 24px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  /* Touch target only: the drawn button stays the size the title bar needs. */
+  .controlButton::after {
+    content: '';
+    position: absolute;
+    inset: -7px -2px;
+  }
+
+  .maximized {
+    inset: 0;
+    z-index: 200;
   }
 }

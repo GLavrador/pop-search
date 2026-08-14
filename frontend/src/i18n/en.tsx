@@ -14,7 +14,40 @@ export const en = {
     title: 'Pop Search System',
     minimize: 'Minimize',
     maximize: 'Maximize',
+    restore: 'Restore',
     close: 'Close',
+  },
+
+  taskbar: {
+    start: 'Start',
+  },
+
+  desktop: {
+    myComputer: 'My Computer',
+    recycleBin: 'Recycle Bin',
+  },
+
+  closed: {
+    phrases: [
+      'Program terminated. The cat is in charge now.',
+      'Fatal error: cat detected.',
+      'You closed it. The cat opened.',
+      'This machine has been shut down by a cat.',
+      'Congratulations, you found the cat.',
+      'It is safe to pet the cat now.',
+      'System offline. The cat fell asleep on the keyboard.',
+      'Access denied. Only the cat has admin privileges now.',
+      'The cat caught the mouse. Application terminated.',
+      'Error 404: Cat food not found.',
+      'Session ended. The cat purred and wants attention.',
+      'Search aborted. The cat knocked over the server.',
+      'Everything is fine here. You may go clean the litter box.',
+      'The system crashed. Do not let cats deploy.',
+      'Asdhfjkçasldkjf... sorry, the cat stepped on the keyboard.',
+      'Process terminated. But it is fine, the cat still has 6 lives.',
+    ],
+    hint: 'Open Pop Search on the desktop to come back.',
+    catAlt: 'A cat',
   },
 
   gate: {
