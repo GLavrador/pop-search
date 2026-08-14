@@ -37,7 +37,7 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
       </div>
 
       {isOpen && (
-        <div className={`win95-border ${styles.panel}`}>
+        <div className={styles.panel}>
           <fieldset className={styles.group}>
             <legend className={styles.legend}>{t.advanced.modeLegend}</legend>
 
