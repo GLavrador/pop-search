@@ -54,11 +54,13 @@ describe('signing in without a reload', () => {
 
   const renderApp = () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    return render(
+    const resetQueries = vi.spyOn(queryClient, 'resetQueries');
+    render(
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>,
     );
+    return { resetQueries };
   };
 
   const signIn = () => {
@@ -80,15 +82,27 @@ describe('signing in without a reload', () => {
     expect(getIsAdmin).toHaveBeenCalled();
   });
 
-  it('should still reach the stats tab when the first admin check is refused', async () => {
-    getIsAdmin.mockRejectedValueOnce({ response: { status: 401 } }).mockResolvedValue(true);
-
-    renderApp();
+  it('should drop what was cached under the previous identity', async () => {
+    const { resetQueries } = renderApp();
     await waitFor(() => expect(screen.getByText('🔑 Sign In')).toBeInTheDocument());
+    expect(resetQueries).not.toHaveBeenCalled();
 
     signIn();
+    await waitFor(() => expect(resetQueries).toHaveBeenCalledTimes(1));
 
-    await waitFor(() => expect(screen.getByText('📊 Stats.exe')).toBeInTheDocument(), { timeout: 3000 });
-    expect(getIsAdmin.mock.calls.length).toBeGreaterThan(1);
+    act(() => {
+      const listener = mockOnAuthStateChange.mock.calls[0][0] as (e: string, s: Session | null) => void;
+      listener('SIGNED_OUT', null);
+    });
+    await waitFor(() => expect(resetQueries).toHaveBeenCalledTimes(2));
+  });
+
+  it('should not reset on a load that starts already signed in', async () => {
+    mockGetSession.mockResolvedValue({ data: { session: session() } });
+
+    const { resetQueries } = renderApp();
+
+    await waitFor(() => expect(screen.getByText('📁 My-Videos.exe')).toBeInTheDocument());
+    expect(resetQueries).not.toHaveBeenCalled();
   });
 });
