@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import styles from './App.module.css';
 import './App.css';
 import { RetroWindow } from './components/RetroWindow';
@@ -12,6 +12,7 @@ import { MyVideos } from './components/MyVideos';
 import { DemoTour } from './components/DemoTour';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
+import { useIdentityReset } from './hooks/useIdentityReset';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
@@ -41,6 +42,7 @@ function AppContent() {
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
+  useIdentityReset();
   const { t } = useI18n();
 
   useEffect(() => {
