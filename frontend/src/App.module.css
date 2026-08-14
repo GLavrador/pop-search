@@ -13,7 +13,7 @@
 .mainPanel {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 0;
   width: 80vw;
   height: 30vh;
   max-width: 800px;
@@ -41,32 +41,47 @@
   min-height: 0;
 }
 
-.navBar {
-  padding-bottom: 5px;
+
+
+
+.tabStrip {
+  position: relative;
+  z-index: 2;
   display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1px;
+  margin-bottom: -2px;
+  padding: 2px 2px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
 }
 
-.navButton {
-  padding: 6px 14px;
+.tabStrip::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex: 0 0 auto;
+  padding: 4px 11px 6px;
   font-family: inherit;
-  font-size: 1rem;
-  cursor: pointer;
-  color: var(--win-blue-title);
+  font-size: 0.82rem;
   font-weight: bold;
-  background-color: var(--win-gray);
+  color: var(--win-text-dark);
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: none;
+  white-space: nowrap;
+  cursor: pointer;
   user-select: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 120px;
-  justify-content: center;
 }
 
-.active {
-  background-color: var(--win-shadow-light);
+.tabActive {
+  padding: 7px 13px 8px;
+  color: var(--win-blue-title);
+  box-shadow: 1px 0 0 0 var(--win-shadow-dark);
 }
 
 .gate {
@@ -90,14 +105,6 @@
   flex-wrap: wrap;
 }
 
-.separator {
-  margin: 0;
-  border: 0;
-  height: 2px;
-  width: 100%;
-  border-bottom: 2px solid var(--win-light);
-  border-top: 2px solid var(--win-shadow-dark);
-}
 
 .footer {
   margin-top: 20px;
@@ -108,15 +115,17 @@
 }
 
 .contentArea {
+  margin-bottom: 6px;
   padding: 10px;
   background-color: var(--win-gray);
   max-height: 65vh;
   overflow-y: auto;
-  border-top: 2px solid var(--win-shadow-dark);
-  border-left: 2px solid var(--win-shadow-dark);
-  border-right: 2px solid var(--win-light);
-  border-bottom: 2px solid var(--win-light);
-  box-shadow: inset 1px 1px 0px 0px var(--win-dark);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+  box-shadow: 1px 1px 0 0 var(--win-shadow-light) inset,
+    -1px -1px 0 0 var(--win-shadow-dark) inset;
 }
 
 .contentArea::-webkit-scrollbar {
@@ -167,12 +176,12 @@
     padding-bottom: 40px;
   }
 
-  .navBar {
-    gap: 8px;
+  .tab {
+    padding: 6px 10px 8px;
+    font-size: 0.8rem;
   }
 
-  .navButton {
-    flex: 1 1 100%;
-    padding: 10px 12px;
+  .tabActive {
+    padding: 8px 12px 10px;
   }
 }

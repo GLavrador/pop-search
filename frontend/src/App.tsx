@@ -79,6 +79,15 @@ function AppContent() {
 
   const isClosed = windowState === 'closed';
 
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'ingest', label: TAB_LABELS.ingest },
+    { id: 'search', label: TAB_LABELS.search },
+    { id: 'demo', label: TAB_LABELS.tour },
+    ...(isAuthenticated ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos }] : []),
+    ...(isAdmin ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats }] : []),
+    { id: 'account', label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn },
+  ];
+
 
   return (
     <div className={styles.appContainer}>
@@ -97,50 +106,20 @@ function AppContent() {
         onClose={handleClose}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
-          <div className={styles.navBar}>
-            <button
-              onClick={() => setActiveTab('ingest')}
-              className={`win95-border ${styles.navButton} ${activeTab === 'ingest' ? `win95-inset ${styles.active}` : ''}`}
-            >
-              {TAB_LABELS.ingest}
-            </button>
-            <button
-              onClick={() => setActiveTab('search')}
-              className={`win95-border ${styles.navButton} ${activeTab === 'search' ? `win95-inset ${styles.active}` : ''}`}
-            >
-              {TAB_LABELS.search}
-            </button>
-            <button
-              onClick={() => setActiveTab('demo')}
-              className={`win95-border ${styles.navButton} ${activeTab === 'demo' ? `win95-inset ${styles.active}` : ''}`}
-            >
-              {TAB_LABELS.tour}
-            </button>
-            {isAuthenticated && (
+          <div className={styles.tabStrip} role="tablist">
+            {tabs.map(({ id, label }) => (
               <button
-                onClick={() => setActiveTab('library')}
-                className={`win95-border ${styles.navButton} ${activeTab === 'library' ? `win95-inset ${styles.active}` : ''}`}
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === id}
+                onClick={() => setActiveTab(id)}
+                className={`${styles.tab} ${activeTab === id ? styles.tabActive : ''}`}
               >
-                {TAB_LABELS.myVideos}
+                {label}
               </button>
-            )}
-            {isAdmin && (
-              <button
-                onClick={() => setActiveTab('admin')}
-                className={`win95-border ${styles.navButton} ${activeTab === 'admin' ? `win95-inset ${styles.active}` : ''}`}
-              >
-                {TAB_LABELS.stats}
-              </button>
-            )}
-            <button
-              onClick={() => setActiveTab('account')}
-              className={`win95-border ${styles.navButton} ${activeTab === 'account' ? `win95-inset ${styles.active}` : ''}`}
-            >
-              {isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn}
-            </button>
+            ))}
           </div>
-
-          <hr className={styles.separator} />
 
           <div className={`${styles.contentArea} ${isMaximized ? styles.contentAreaMax : ''}`}>
             <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>
