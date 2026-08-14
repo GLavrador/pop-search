@@ -19,6 +19,7 @@ import { TAB_LABELS } from './constants/tabs';
 import { Taskbar } from './components/Taskbar';
 import { TaskButton } from './components/Taskbar/TaskButton';
 import { Desktop } from './components/Desktop';
+import { TabStrip } from './components/TabStrip';
 import { CatReveal } from './components/CatReveal';
 import { randomCat } from './constants/cats';
 import type { WindowState } from './components/RetroWindow';
@@ -106,20 +107,7 @@ function AppContent() {
         onClose={handleClose}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
-          <div className={styles.tabStrip} role="tablist">
-            {tabs.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === id}
-                onClick={() => setActiveTab(id)}
-                className={`${styles.tab} ${activeTab === id ? styles.tabActive : ''}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <TabStrip tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
 
           <div className={`${styles.contentArea} ${isMaximized ? styles.contentAreaMax : ''}`}>
             <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>

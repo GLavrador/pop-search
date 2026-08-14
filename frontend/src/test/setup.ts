@@ -1,3 +1,11 @@
 import '@testing-library/jest-dom';
 import.meta.env.VITE_SUPABASE_URL ??= 'http://localhost:54321';
 import.meta.env.VITE_SUPABASE_ANON_KEY ??= 'test-anon-key';
+
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;

@@ -44,45 +44,9 @@
 
 
 
-.tabStrip {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: flex-end;
-  gap: 1px;
-  margin-bottom: -2px;
-  padding: 2px 2px 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-}
 
-.tabStrip::-webkit-scrollbar {
-  display: none;
-}
 
-.tab {
-  flex: 0 0 auto;
-  padding: 4px 11px 6px;
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: bold;
-  color: var(--win-text-dark);
-  background: var(--win-gray);
-  border-top: 2px solid var(--win-light);
-  border-left: 2px solid var(--win-light);
-  border-right: 2px solid var(--win-dark);
-  border-bottom: none;
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
-}
 
-.tabActive {
-  padding: 7px 13px 8px;
-  color: var(--win-blue-title);
-  box-shadow: 1px 0 0 0 var(--win-shadow-dark);
-}
 
 .gate {
   display: flex;
@@ -176,12 +140,5 @@
     padding-bottom: 40px;
   }
 
-  .tab {
-    padding: 6px 10px 8px;
-    font-size: 0.8rem;
-  }
 
-  .tabActive {
-    padding: 8px 12px 10px;
-  }
 }
