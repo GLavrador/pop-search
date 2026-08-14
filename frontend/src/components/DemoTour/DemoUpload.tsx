@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ProgressBar } from '../ProgressBar';
 import { ReviewForm } from '../ReviewForm';
 import { DEMO_VIDEO } from '../../constants/demoVideo';
@@ -13,9 +13,20 @@ export const DemoUpload = () => {
   const [stage, setStage] = useState<Stage>('url');
   const { t } = useI18n();
 
+  const timer = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (timer.current) window.clearTimeout(timer.current);
+  }, []);
+
   const startAnalysis = () => {
     setStage('analyzing');
-    window.setTimeout(() => setStage('review'), FAKE_ANALYSIS_MS);
+    timer.current = window.setTimeout(() => setStage('review'), FAKE_ANALYSIS_MS);
+  };
+
+  const cancelAnalysis = () => {
+    if (timer.current) window.clearTimeout(timer.current);
+    setStage('url');
   };
 
   if (stage === 'url') {
@@ -41,7 +52,12 @@ export const DemoUpload = () => {
     return (
       <div className={styles.demoBox}>
         <p className={styles.demoLabel}>{t.tour.demoUpload.step2}</p>
-        <ProgressBar loading />
+        <div className={styles.progressRow}>
+          <ProgressBar loading />
+          <button type="button" className={`win95-btn ${styles.cancelButton}`} onClick={cancelAnalysis}>
+            {t.common.cancel}
+          </button>
+        </div>
         <p className={styles.hint}>{t.tour.demoUpload.step2Hint}</p>
       </div>
     );

@@ -5,10 +5,6 @@
   min-height: 100%;
 }
 
-.panel {
-  flex: 1;
-}
-
 .header {
   display: flex;
   justify-content: space-between;
@@ -45,12 +41,22 @@
 }
 
 .panel {
-  padding: 14px;
+  flex: 1;
+  padding: 16px 18px;
+  background: var(--win-light);
+  border-top: 2px solid var(--win-shadow-dark);
+  border-left: 2px solid var(--win-shadow-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 0 var(--win-dark);
 }
 
 .title {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
+  padding-bottom: 6px;
   font-size: 1.05rem;
+  color: var(--win-blue-title);
+  border-bottom: 1px solid var(--win-shadow-light);
 }
 
 .body {
@@ -121,9 +127,25 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px;
+  margin: 2px 0;
+  padding: 12px;
   background: var(--win-gray);
-  border: 1px dotted var(--win-shadow-dark);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-shadow-dark);
+  border-bottom: 2px solid var(--win-shadow-dark);
+}
+
+.progressRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 5px;
+  padding: 4px;
+}
+
+.cancelButton {
+  min-width: 80px;
 }
 
 .demoLabel {

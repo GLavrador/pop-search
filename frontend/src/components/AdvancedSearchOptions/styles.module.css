@@ -18,25 +18,42 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 12px;
+  gap: 6px;
+  padding: 5px;
   margin: 8px 0 10px;
-  background-color: var(--win-gray);
+  background: var(--win-light);
+  border-top: 2px solid var(--win-shadow-dark);
+  border-left: 2px solid var(--win-shadow-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 0 var(--win-dark);
 }
 
 .group {
-  border: 1px solid var(--win-shadow-dark);
-  box-shadow: 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-light);
-  padding: 6px 12px 12px;
   margin: 0;
   min-width: 0;
+  padding: 8px 12px 12px;
+  overflow: hidden;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-shadow-dark);
+  border-bottom: 2px solid var(--win-shadow-dark);
 }
 
 .legend {
-  padding: 0 4px;
-  font-size: 0.8rem;
+  float: left;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 0 0 4px;
+  font-size: 0.88rem;
   font-weight: bold;
-  color: var(--win-dark);
+  color: var(--win-blue-title);
+  border-bottom: 1px solid var(--win-shadow-dark);
+}
+
+.legend + * {
+  clear: both;
 }
 
 .groupHeader {
@@ -204,7 +221,7 @@
   flex-shrink: 0;
   width: 148px;
   padding: 1px 4px;
-  background: var(--win-tag-bg);
+  background: var(--win-light);
   border: 1px solid var(--win-tag-border);
   font-family: 'Courier New', monospace;
   font-size: 0.78em;
