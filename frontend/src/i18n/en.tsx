@@ -265,6 +265,27 @@ export const en = {
     descriptionWords: 'Description must be at least 20 words long',
   },
 
+  assistant: {
+    label: 'Assistant',
+    close: 'Dismiss the assistant',
+    tips: {
+      welcome:
+        'Hello! I am the Pop Search assistant. Type something and I will tell you what the archive did with your search.',
+      operatorsIgnored:
+        'I spotted quotes or operators in your text. Semantic mode reads them as ordinary characters, which changes what your sentence means. Switch to Hybrid or Exact to use them.',
+      thresholdTooHigh: (percent: number) =>
+        `Nothing came back with the threshold at ${percent}%. It only tightens the meaning half of the search, never the words half. Try the Broad precision.`,
+      textTooRestrictive:
+        'Nothing came back. Loose words are combined with AND, so every extra word closes the net further. Use fewer words, or "a or b".',
+      nothingFound:
+        'Nothing came back. The archive is still small, so this subject may simply not live here yet.',
+      onlyText:
+        'Worth noticing: every one of these arrived through the exact words. Not one matched by meaning.',
+      onlySemantic:
+        'None of these contain your words literally. They were all found by what they show.',
+    },
+  },
+
   auth: {
     signedInAs: 'Signed in as',
     signOut: 'Sign Out',

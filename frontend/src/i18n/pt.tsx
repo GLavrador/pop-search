@@ -278,6 +278,27 @@ export const pt: Dictionary = {
     descriptionWords: 'A descrição precisa ter pelo menos 20 palavras',
   },
 
+  assistant: {
+    label: 'Assistente',
+    close: 'Dispensar o assistente',
+    tips: {
+      welcome:
+        'Olá! Eu sou o assistente do Pop Search. Digite alguma coisa e eu te conto o que o acervo fez com a sua busca.',
+      operatorsIgnored:
+        'Vi aspas ou operadores no seu texto. No modo Semântica eles viram caracteres comuns e mudam o sentido da frase. Troque para Híbrida ou Exata para usá-los.',
+      thresholdTooHigh: (percent: number) =>
+        `Nada voltou com o limiar em ${percent}%. Ele só aperta a metade por significado, nunca a de palavras. Tente a precisão Ampla.`,
+      textTooRestrictive:
+        'Nada voltou. Palavras soltas são combinadas com E, então cada palavra a mais fecha o cerco. Use menos palavras, ou "a or b".',
+      nothingFound:
+        'Nada voltou. O acervo ainda é pequeno, então pode ser que esse assunto simplesmente não more aqui.',
+      onlyText:
+        'Vale reparar: todos estes chegaram pelas palavras exatas. Nenhum casou por significado.',
+      onlySemantic:
+        'Nenhum destes contém as suas palavras literalmente. Todos foram achados pelo que mostram.',
+    },
+  },
+
   auth: {
     signedInAs: 'Conectado como',
     signOut: 'Sair',
