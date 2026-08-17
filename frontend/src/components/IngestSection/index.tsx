@@ -6,6 +6,7 @@ import type { VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
 import { QuotaMeter } from '../QuotaMeter';
 import { URLInputView } from './URLInputView';
+import { IngestAssistant } from '../IngestAssistant';
 import { createVideoUrlInputSchema } from '../../schemas/videoMetadata';
 import { useI18n } from '../../i18n/languageContext';
 import styles from './styles.module.css';
@@ -97,9 +98,18 @@ export const IngestSection = () => {
 
   const formDataToReview = data || manualData;
 
+  const assistantState = {
+    url,
+    manualMode,
+    isAnalyzing: isLoading,
+    hasError: !!error,
+    reviewing: !!formDataToReview,
+  };
+
   if (formDataToReview) {
     return (
       <div className={styles.reviewContainer}>
+        <IngestAssistant {...assistantState} />
         <ReviewForm
           initialData={formDataToReview}
           onSave={handleSave}
@@ -114,6 +124,7 @@ export const IngestSection = () => {
   return (
     <div className={styles.ingestContainer}>
       <QuotaMeter />
+      <IngestAssistant {...assistantState} />
       <URLInputView
         url={url}
         onUrlChange={setUrl}
