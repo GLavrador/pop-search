@@ -4,6 +4,12 @@ Acervo de vídeos do Twitter/X indexados por IA multimodal, com busca híbrida
 (significado + palavras) e validação humana antes de qualquer coisa entrar no
 índice.
 
+**[Ver funcionando](https://pop-search-ochre.vercel.app)** - buscar é aberto,
+contribuir exige conta.
+
+> A primeira busca pode levar até um minuto. O backend hiberna após 15 minutos
+> sem uso no plano gratuito e precisa acordar. As seguintes são instantâneas.
+
 ## Sumário
 
 - [Visão geral](#visão-geral)
