@@ -13,6 +13,7 @@ import { DemoTour } from './components/DemoTour';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { useIdentityReset } from './hooks/useIdentityReset';
+import { useBackendWarmup } from './hooks/useBackendWarmup';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
@@ -43,6 +44,7 @@ function AppContent() {
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   useIdentityReset();
+  useBackendWarmup();
   const { t } = useI18n();
 
   useEffect(() => {

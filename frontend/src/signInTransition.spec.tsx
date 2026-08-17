@@ -20,6 +20,7 @@ const getIsAdmin = vi.fn();
 const getMyVideos = vi.fn();
 
 vi.mock('./services/api', () => ({
+  warmUpBackend: vi.fn(),
   getIsAdmin: (...args: unknown[]) => getIsAdmin(...args),
   getMyVideos: (...args: unknown[]) => getMyVideos(...args),
   getAdminStats: vi.fn().mockResolvedValue({
