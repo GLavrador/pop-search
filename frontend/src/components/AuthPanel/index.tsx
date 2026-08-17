@@ -8,7 +8,11 @@ import styles from './styles.module.css';
 
 type Mode = 'signIn' | 'signUp';
 
-export const AuthPanel = () => {
+interface AuthPanelProps {
+  onTakeTour?: () => void;
+}
+
+export const AuthPanel = ({ onTakeTour }: AuthPanelProps) => {
   const { isAuthenticated, displayName, signIn, signUp, signOut } = useAuth();
   const { setStatus } = useStatus();
   const { t } = useI18n();
@@ -132,7 +136,19 @@ export const AuthPanel = () => {
         </div>
       )}
 
-      {notice && <div className={styles.notice}>{notice}</div>}
+      {notice && (
+        <div className={styles.notice}>
+          <p>{notice}</p>
+          {onTakeTour && (
+            <div className={styles.noticeActions}>
+              <p>{t.auth.tourInvite}</p>
+              <button type="button" className="win95-btn" onClick={onTakeTour}>
+                {t.gate.takeTour}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className={styles.actions}>
         <button type="submit" className={`win95-btn ${styles.submit}`} disabled={isBusy}>

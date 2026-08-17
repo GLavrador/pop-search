@@ -29,6 +29,11 @@ api.interceptors.request.use(async (config) => {
 
   return config;
 });
+
+export const warmUpBackend = (): void => {
+  api.get('/').catch(() => {});
+};
+
 const ANALYZE_TIMEOUT_MS = 240_000;
 
 export const analyzeVideo = async (

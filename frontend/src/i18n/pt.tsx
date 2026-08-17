@@ -290,6 +290,7 @@ export const pt: Dictionary = {
     email: 'E-mail',
     password: 'Senha',
     created: 'Conta criada. Se for preciso confirmar, veja sua caixa de entrada antes de entrar.',
+    tourInvite: 'Enquanto isso, conheça o app pelo tour. Não consome análise nem precisa de conta.',
     working: 'Processando...',
     toSignIn: 'Já tem conta? Entre',
     toSignUp: 'Ainda não tem conta? Crie uma',
