@@ -18,6 +18,7 @@ interface UseVideoSearchQueryReturn {
     isLoading: boolean;
     hasSearched: boolean;
     error: string | null;
+    lastSearch: SearchArgs | null;
 }
 
 export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
@@ -62,5 +63,6 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
         isLoading: query.isFetching,
         hasSearched,
         error: query.error ? getErrorMessage(query.error) : null,
+        lastSearch: searchQuery,
     };
 };

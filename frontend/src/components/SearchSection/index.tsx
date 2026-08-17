@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useVideoSearchQuery } from "../../hooks/useVideoSearchQuery";
 import { useStatus } from "../../context/StatusContext";
 import { VideoCard } from "../VideoCard";
+import { SearchInspector } from "../SearchInspector";
+import { useSearchExplainQuery } from "../../hooks/useSearchExplainQuery";
 import { TaskProgress } from "../TaskProgress";
 import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
 import { PrecisionPresets } from "../PrecisionPresets";
@@ -16,9 +18,18 @@ export const SearchSection = () => {
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [mode, setMode] = useState<SearchMode>(DEFAULT_SEARCH_MODE);
   const thresholdApplies = findSearchMode(mode).usesThreshold;
-  const { search, results, isLoading, hasSearched, error } = useVideoSearchQuery();
+  const [inspecting, setInspecting] = useState(false);
+  const { search, results, isLoading, hasSearched, error, lastSearch } = useVideoSearchQuery();
+  const { explain, isLoading: isExplaining, failed: explainFailed } = useSearchExplainQuery(
+    lastSearch,
+    inspecting && results.length > 0
+  );
   const { setStatus } = useStatus();
   const { t } = useI18n();
+
+  useEffect(() => {
+    setInspecting(false);
+  }, [lastSearch]);
 
   useEffect(() => {
     if (error) {
@@ -133,6 +144,29 @@ export const SearchSection = () => {
             </span>
           </div>
         )}
+
+        {!isLoading && !error && results.length > 0 && (
+          <div className={styles.inspectorRow}>
+            <button
+              type="button"
+              className="win95-btn"
+              onClick={() => setInspecting((open) => !open)}
+            >
+              {inspecting ? t.inspector.close : t.inspector.open}
+            </button>
+          </div>
+        )}
+
+        {inspecting && isExplaining && <p className={styles.loadingText}>{t.inspector.loading}</p>}
+
+        {inspecting && explainFailed && (
+          <div className="win95-border win95-error">
+            <span>⚠️</span>
+            <strong>{t.inspector.failed}</strong>
+          </div>
+        )}
+
+        {inspecting && explain && <SearchInspector explain={explain} />}
 
         {results.map((video) => (
           <VideoCard key={video.id} data={video} />
