@@ -1,0 +1,13 @@
+venv/
+env/
+.venv/
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+.env
+temp_downloads/
+
+tests/
+requirements-dev.txt
