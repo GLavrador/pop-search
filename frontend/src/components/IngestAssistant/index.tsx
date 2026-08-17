@@ -18,7 +18,7 @@ export const IngestAssistant = (props: IngestContext) => {
   return (
     <Assistant
       tipKey={tipId}
-      message={t.ingestAssistant.tips[tipId]}
+      messages={t.ingestAssistant.tips[tipId]}
       alarmed={ALARMED.includes(tipId)}
       step={step ? t.assistant.step(step, TOTAL_STEPS) : undefined}
     />

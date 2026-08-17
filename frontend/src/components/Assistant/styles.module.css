@@ -169,3 +169,24 @@
   width: 20px;
   height: 20px;
 }
+
+.deck {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px 8px;
+}
+
+.page {
+  min-width: 22px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.counter {
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--win-text-muted);
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pickTip, hasOperators, wordCount, type AssistantContext } from './assistantTips';
+import { pickTip, hasOperators, wordCount, countOrigins, type AssistantContext } from './assistantTips';
 import type { SearchResult } from '../types';
 
 const result = (overrides: Partial<SearchResult> = {}): SearchResult => ({
@@ -46,11 +46,11 @@ describe('wordCount', () => {
 describe('pickTip', () => {
   it('should greet only before anything is typed', () => {
     expect(pickTip(context({ hasSearched: false, query: '' }))).toBe('welcome');
-    expect(pickTip(context({ hasSearched: false, query: 'gato' }))).toBeNull();
+    expect(pickTip(context({ hasSearched: false, query: 'gato' }))).toBe('typing');
   });
 
-  it('should stay quiet while a search is in flight', () => {
-    expect(pickTip(context({ isLoading: true, results: [] }))).toBeNull();
+  it('should narrate the wait instead of vanishing mid search', () => {
+    expect(pickTip(context({ isLoading: true, results: [] }))).toBe('searching');
   });
 
   it('should warn about operators before the search is spent', () => {
@@ -60,8 +60,8 @@ describe('pickTip', () => {
   });
 
   it('should not warn about operators where they actually work', () => {
-    expect(pickTip(context({ mode: 'text', query: '"gato laranja"', results: [result()] }))).toBeNull();
-    expect(pickTip(context({ mode: 'hybrid', query: 'gato -preto' }))).toBeNull();
+    expect(pickTip(context({ mode: 'text', query: '"gato laranja"', results: [result()] }))).toBe('goodResults');
+    expect(pickTip(context({ mode: 'hybrid', query: 'gato -preto' }))).toBe('goodResults');
   });
 
   it('should blame the threshold when it is high and nothing came back', () => {
@@ -103,10 +103,43 @@ describe('pickTip', () => {
   it('should not claim meaning alone outside hybrid, where the other branch never ran', () => {
     const tip = pickTip(context({ mode: 'semantic', results: [result({ text_rank: 0 })] }));
 
-    expect(tip).toBeNull();
+    expect(tip).toBe('goodResults');
   });
 
-  it('should say nothing when the search went well', () => {
-    expect(pickTip(context())).toBeNull();
+  it('should report the mix rather than disappear when the search went well', () => {
+    expect(pickTip(context())).toBe('goodResults');
+  });
+
+  it('should never leave the character with nothing to say', () => {
+    const shapes: Partial<AssistantContext>[] = [
+      { hasSearched: false, query: '' },
+      { hasSearched: false, query: 'gato' },
+      { isLoading: true },
+      { results: [] },
+      { results: [], threshold: 0.9 },
+      { results: [result()] },
+      { results: [result({ similarity: 0 })] },
+      { results: [result({ text_rank: 0 })] },
+      { mode: 'semantic', query: '"x"' },
+    ];
+
+    shapes.forEach((shape) => expect(pickTip(context(shape))).toBeTruthy());
+  });
+});
+
+describe('countOrigins', () => {
+  it('should split a result set by where each row came from', () => {
+    const counts = countOrigins([
+      result({ similarity: 0.8, text_rank: 0.5 }),
+      result({ similarity: 0.8, text_rank: 0 }),
+      result({ similarity: 0, text_rank: 0.5 }),
+      result({ similarity: 0, text_rank: 0.2 }),
+    ]);
+
+    expect(counts).toEqual({ both: 1, meaning: 1, words: 2 });
+  });
+
+  it('should count an empty result set as nothing at all', () => {
+    expect(countOrigins([])).toEqual({ both: 0, meaning: 0, words: 0 });
   });
 });

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { useAssistantVisibility } from '../../hooks/useAssistantVisibility';
 import styles from './styles.module.css';
@@ -26,16 +26,24 @@ export const Floppy = ({ alarmed = false }: { alarmed?: boolean }) => (
 );
 
 interface AssistantProps {
-  /** Identity of the current tip. Changing it replays the arrival animation. */
+  /** Identity of the current tip. Changing it rewinds the deck to its first card. */
   tipKey: string;
-  message: ReactNode;
+  messages: ReactNode[];
   alarmed?: boolean;
   step?: string;
 }
 
-export const Assistant = ({ tipKey, message, alarmed = false, step }: AssistantProps) => {
+export const Assistant = ({ tipKey, messages, alarmed = false, step }: AssistantProps) => {
   const { t } = useI18n();
   const { dismissed, dismiss, restore } = useAssistantVisibility();
+  const [card, setCard] = useState(0);
+
+  useEffect(() => {
+    setCard(0);
+  }, [tipKey]);
+
+  const total = messages.length;
+  const current = Math.min(card, Math.max(total - 1, 0));
 
   if (dismissed) {
     return (
@@ -71,7 +79,31 @@ export const Assistant = ({ tipKey, message, alarmed = false, step }: AssistantP
             ✕
           </button>
         </div>
-        <p className={styles.message}>{message}</p>
+        <p className={styles.message}>{messages[current]}</p>
+
+        {total > 1 && (
+          <div className={styles.deck}>
+            <button
+              type="button"
+              className={`win95-btn ${styles.page}`}
+              onClick={() => setCard(current - 1)}
+              disabled={current === 0}
+              aria-label={t.assistant.previous}
+            >
+              ‹
+            </button>
+            <span className={styles.counter}>{t.assistant.card(current + 1, total)}</span>
+            <button
+              type="button"
+              className={`win95-btn ${styles.page}`}
+              onClick={() => setCard(current + 1)}
+              disabled={current === total - 1}
+              aria-label={t.assistant.next}
+            >
+              ›
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );

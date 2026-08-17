@@ -269,41 +269,99 @@ export const en = {
     label: 'Assistant',
     close: 'Dismiss the assistant',
     restore: 'Show the assistant',
+    previous: 'Previous tip',
+    next: 'Next tip',
+    card: (current: number, total: number) => `${current}/${total}`,
     step: (current: number, total: number) => `Step ${current} of ${total}`,
     tips: {
-      welcome:
-        'Hello! I am the Pop Search assistant. Type something and I will tell you what the archive did with your search.',
-      operatorsIgnored:
-        'I spotted quotes or operators in your text. Semantic mode reads them as ordinary characters, which changes what your sentence means. Switch to Hybrid or Exact to use them.',
-      thresholdTooHigh: (percent: number) =>
-        `Nothing came back with the threshold at ${percent}%. It only tightens the meaning half of the search, never the words half. Try the Broad precision.`,
-      textTooRestrictive:
-        'Nothing came back. Loose words are combined with AND, so every extra word closes the net further. Use fewer words, or "a or b".',
-      nothingFound:
+      welcome: [
+        'Hello! I am the Pop Search assistant. Searching is open to everyone, no account needed.',
+        'Hybrid mode looks two ways at once: for what a video means, and for the words it actually contains.',
+        'The precision slider only tightens the meaning side. A video containing the word you typed shows up at any precision.',
+      ],
+      typing: [
+        'Hit search whenever you like. Searching costs nothing and needs no account.',
+        'Quotes make an exact phrase, a minus excludes a word, and "a or b" accepts either. Those steer the words side.',
+        'Accents do not matter on either side. Typing musica finds música.',
+      ],
+      searching: ['Asking both sides at once...'],
+      operatorsIgnored: [
+        'I spotted quotes or operators in your text. Semantic mode reads them as ordinary characters, which changes what your sentence means.',
+        'Switch to Hybrid or Exact if you want them to work.',
+      ],
+      thresholdTooHigh: (percent: number) => [
+        `Nothing came back with the threshold at ${percent}%.`,
+        'It only tightens the meaning half of the search, never the words half. Try the Broad precision.',
+      ],
+      textTooRestrictive: [
+        'Nothing came back. Loose words are combined with AND, so every extra word closes the net further.',
+        'Use fewer words, or "a or b" to accept either of them.',
+      ],
+      nothingFound: [
         'Nothing came back. The archive is still small, so this subject may simply not live here yet.',
-      onlyText:
+        'Try a broader word, or switch to Hybrid so meaning can help.',
+      ],
+      onlyText: [
         'Worth noticing: every one of these arrived through the exact words. Not one matched by meaning.',
-      onlySemantic:
+        'That usually means the archive has the words but not the subject you had in mind.',
+      ],
+      onlySemantic: [
         'None of these contain your words literally. They were all found by what they show.',
+        'This is the half a plain text search cannot do: the AI watched the video and described it.',
+      ],
+      goodResults: (counts: { both: number; meaning: number; words: number }) => {
+        const parts: string[] = [];
+        if (counts.both) parts.push(`${counts.both} by both`);
+        if (counts.meaning) parts.push(`${counts.meaning} by meaning alone`);
+        if (counts.words) parts.push(`${counts.words} by words alone`);
+
+        return [
+          `Here is the mix: ${parts.join(', ')}.`,
+          'The order does not come from either side score. It comes from where each video ranked in each list, fused by Reciprocal Rank Fusion.',
+          'Raise the precision to cut the loose matches, or lower it to let more meaning in.',
+        ];
+      },
     },
   },
 
   ingestAssistant: {
     tips: {
-      start:
+      start: [
         'Paste the link of an X post that contains a video. Only twitter.com and x.com work here, because the download depends on it.',
-      badLink:
-        'That link is not from X or Twitter, and the server will turn it down. Use the address of the original post, the one ending in /status/ and a number.',
-      ready:
-        'Choose what the AI should pay attention to. Scenes reads what appears on screen, Audio transcribes what is heard. Analysing spends one analysis from your monthly quota.',
-      manual:
-        'In manual mode you write the fields yourself. Nothing goes through the AI and nothing is taken from your quota. Useful when an analysis failed, or when you would rather describe it your own way.',
-      analysing:
-        'I am downloading the video and handing it to Gemini to watch. This usually takes thirty seconds to two minutes, so keep the window open.',
-      failed:
-        'The analysis did not go through. Failures still count against your quota, because the tokens were spent either way. The exception is the AI service being out of capacity, which costs you nothing. You can try again or switch to manual.',
-      review:
-        'Nothing enters the archive without passing through you. Check what the AI wrote, fix anything wrong, and only then save. Saving does not spend an analysis.',
+        'What happens next: the AI watches the video and writes a title, a description, who appears, what is in the scenery, and a transcription of the audio.',
+        'All of that becomes searchable. It is why someone can later find this video by meaning, without knowing a single word of it.',
+        'Then you review everything. Nothing enters the archive without your approval.',
+        'Prefer to do it by hand? Manual input lets you write the fields yourself, with no AI and no quota spent.',
+        'Each analysis costs one from your monthly quota, and the whole project has a daily ceiling. Searching stays free for everyone.',
+      ],
+      badLink: [
+        'That link is not from X or Twitter, and the server will turn it down.',
+        'Use the address of the original post, the one ending in /status/ and a number.',
+      ],
+      ready: [
+        'Choose what the AI should pay attention to. Scenes reads what appears on screen, Audio transcribes what is heard.',
+        'Turning one off makes the analysis faster and cheaper, but leaves the video harder to find later.',
+        'Analysing spends one analysis from your monthly quota. A failed one counts too, so check the link first.',
+      ],
+      manual: [
+        'In manual mode you write the fields yourself. Nothing goes through the AI and nothing is taken from your quota.',
+        'Useful when an analysis failed, or when you would rather describe the video your own way.',
+        'It still gets an embedding when saved, so a manual entry is just as findable by meaning.',
+      ],
+      analysing: [
+        'I am downloading the video and handing it to Gemini to watch. This usually takes thirty seconds to two minutes.',
+        'Keep the window open. Cancelling here does not give the quota back if the video already reached the AI.',
+      ],
+      failed: [
+        'The analysis did not go through.',
+        'Failures still count against your quota, because the tokens were spent either way. The exception is the AI service being out of capacity, which costs you nothing.',
+        'You can try again, or switch to manual input and describe it yourself for free.',
+      ],
+      review: [
+        'Nothing enters the archive without passing through you. Check what the AI wrote and fix anything wrong.',
+        'The description is what most of the searching runs on, so it is worth reading closely.',
+        'Saving does not spend an analysis. Cancelling throws the result away and the quota is not refunded.',
+      ],
     },
   },
 
