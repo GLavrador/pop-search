@@ -268,6 +268,8 @@ export const en = {
   assistant: {
     label: 'Assistant',
     close: 'Dismiss the assistant',
+    restore: 'Show the assistant',
+    step: (current: number, total: number) => `Step ${current} of ${total}`,
     tips: {
       welcome:
         'Hello! I am the Pop Search assistant. Type something and I will tell you what the archive did with your search.',
@@ -283,6 +285,25 @@ export const en = {
         'Worth noticing: every one of these arrived through the exact words. Not one matched by meaning.',
       onlySemantic:
         'None of these contain your words literally. They were all found by what they show.',
+    },
+  },
+
+  ingestAssistant: {
+    tips: {
+      start:
+        'Paste the link of an X post that contains a video. Only twitter.com and x.com work here, because the download depends on it.',
+      badLink:
+        'That link is not from X or Twitter, and the server will turn it down. Use the address of the original post, the one ending in /status/ and a number.',
+      ready:
+        'Choose what the AI should pay attention to. Scenes reads what appears on screen, Audio transcribes what is heard. Analysing spends one analysis from your monthly quota.',
+      manual:
+        'In manual mode you write the fields yourself. Nothing goes through the AI and nothing is taken from your quota. Useful when an analysis failed, or when you would rather describe it your own way.',
+      analysing:
+        'I am downloading the video and handing it to Gemini to watch. This usually takes thirty seconds to two minutes, so keep the window open.',
+      failed:
+        'The analysis did not go through. Failures still count against your quota, because the tokens were spent either way. The exception is the AI service being out of capacity, which costs you nothing. You can try again or switch to manual.',
+      review:
+        'Nothing enters the archive without passing through you. Check what the AI wrote, fix anything wrong, and only then save. Saving does not spend an analysis.',
     },
   },
 

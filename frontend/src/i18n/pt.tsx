@@ -281,6 +281,8 @@ export const pt: Dictionary = {
   assistant: {
     label: 'Assistente',
     close: 'Dispensar o assistente',
+    restore: 'Mostrar o assistente',
+    step: (current: number, total: number) => `Passo ${current} de ${total}`,
     tips: {
       welcome:
         'Olá! Eu sou o assistente do Pop Search. Digite alguma coisa e eu te conto o que o acervo fez com a sua busca.',
@@ -296,6 +298,25 @@ export const pt: Dictionary = {
         'Vale reparar: todos estes chegaram pelas palavras exatas. Nenhum casou por significado.',
       onlySemantic:
         'Nenhum destes contém as suas palavras literalmente. Todos foram achados pelo que mostram.',
+    },
+  },
+
+  ingestAssistant: {
+    tips: {
+      start:
+        'Cole o link de um post do X que tenha vídeo. Aqui só funciona twitter.com e x.com, porque o download depende disso.',
+      badLink:
+        'Esse link não é do X nem do Twitter, e o servidor vai recusar. Use o endereço do post original, aquele que termina em /status/ e um número.',
+      ready:
+        'Escolha o que a IA deve observar. Cenário lê o que aparece na tela, Áudio transcreve o que se ouve. Analisar gasta uma análise da sua cota mensal.',
+      manual:
+        'No modo manual você escreve os campos com as próprias mãos. Nada passa pela IA e nada sai da sua cota. Serve para quando a análise falhou, ou quando você prefere descrever do seu jeito.',
+      analysing:
+        'Estou baixando o vídeo e entregando para o Gemini assistir. Costuma levar de trinta segundos a dois minutos, então deixe a janela aberta.',
+      failed:
+        'A análise não foi adiante. Falhas contam na cota assim mesmo, porque os tokens foram gastos de todo jeito. A exceção é o serviço de IA estar sem capacidade, aí nada é cobrado. Você pode tentar de novo ou ir pelo modo manual.',
+      review:
+        'Nada entra no acervo sem passar por você. Confira o que a IA escreveu, corrija o que estiver errado e só então salve. Salvar não gasta análise.',
     },
   },
 

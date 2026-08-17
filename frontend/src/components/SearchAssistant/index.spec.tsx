@@ -59,30 +59,29 @@ describe('SearchAssistant', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should disappear when dismissed and stay away for the session', async () => {
+  it('should leave a way back after being dismissed', async () => {
     const user = userEvent.setup();
-    const { unmount } = render(<SearchAssistant {...props()} />);
+    render(<SearchAssistant {...props()} />);
 
     await user.click(screen.getByRole('button', { name: 'Dismiss the assistant' }));
 
     expect(screen.queryByText(/I am the Pop Search assistant/)).not.toBeInTheDocument();
 
-    unmount();
-    const { container } = render(<SearchAssistant {...props()} />);
-    expect(container).toBeEmptyDOMElement();
+    await user.click(screen.getByRole('button', { name: /Show the assistant/ }));
+
+    expect(screen.getByText(/I am the Pop Search assistant/)).toBeInTheDocument();
   });
 
-  it('should survive a browser that refuses session storage', () => {
-    const original = Storage.prototype.getItem;
-    Storage.prototype.getItem = () => {
-      throw new Error('storage disabled');
-    };
+  it('should not offer a way back where it had nothing to say anyway', async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<SearchAssistant {...props()} />);
+    await user.click(screen.getByRole('button', { name: 'Dismiss the assistant' }));
+    unmount();
 
-    try {
-      render(<SearchAssistant {...props()} />);
-      expect(screen.getByText(/I am the Pop Search assistant/)).toBeInTheDocument();
-    } finally {
-      Storage.prototype.getItem = original;
-    }
+    const { container } = render(
+      <SearchAssistant {...props({ hasSearched: true, query: 'gato', results: [result()] })} />
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

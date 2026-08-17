@@ -147,3 +147,25 @@
     font-size: 0.74rem;
   }
 }
+
+.restoreRow {
+  display: flex;
+  margin: 8px 0 4px;
+}
+
+.restore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 4px;
+  font-size: 0.74rem;
+}
+
+.restoreIcon {
+  display: inline-flex;
+}
+
+.restoreIcon .character {
+  width: 20px;
+  height: 20px;
+}
