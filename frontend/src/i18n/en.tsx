@@ -277,6 +277,7 @@ export const en = {
     email: 'E-mail',
     password: 'Password',
     created: 'Account created. If confirmation is required, check your inbox before signing in.',
+    tourInvite: 'In the meantime, get to know the app through the tour. It costs no analysis and needs no account.',
     working: 'Working...',
     toSignIn: 'Already have an account? Sign in',
     toSignUp: 'No account yet? Create one',

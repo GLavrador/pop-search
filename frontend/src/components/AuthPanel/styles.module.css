@@ -76,6 +76,14 @@
   background: var(--win-warning-bg);
 }
 
+.noticeActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+}
+
 .divider {
   width: 100%;
   margin: 2px 0;

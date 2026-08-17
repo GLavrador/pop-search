@@ -157,7 +157,7 @@ function AppContent() {
               </div>
             )}
             <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
-              <AuthPanel />
+              <AuthPanel onTakeTour={() => setActiveTab('demo')} />
             </div>
           </div>
           <StatusBar />
