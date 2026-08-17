@@ -204,6 +204,32 @@ Content-Type: application/json
 Cada resultado traz `similarity`, `text_rank` e `score`, o que permite saber se
 casou por significado, por palavra ou pelos dois. **20 req/min.**
 
+### Explicar o ranking - público
+
+```http
+POST /search/explain
+Content-Type: application/json
+
+{
+  "query": "gato laranja",
+  "limit": 5,
+  "threshold": 0.6,
+  "mode": "hybrid"
+}
+```
+
+Roda os dois ramos separadamente e devolve os três rankings: o vetorial, o
+textual e o fundido. Cada linha do fundido traz a posição que o vídeo ocupou em
+cada ramo e quanto isso valeu, de forma que
+`semantic_contribution + text_contribution` reconstrói exatamente o `score` que
+ordenou o resultado.
+
+O ramo vetorial é consultado com limiar zero de propósito. O limiar filtra sem
+reordenar, então mantê-lo renumeraria as posições que o RRF de fato usou e a
+conta exibida não fecharia. Em `semantic` e `text`, só o ramo que alimentou o
+score recebe posição; o outro continua sendo listado, para mostrar o que ele
+teria encontrado. **10 req/min.**
+
 ### Analisar vídeo - requer conta
 
 ```http
