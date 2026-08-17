@@ -17,6 +17,7 @@ Acervo de vídeos do Twitter/X indexados por IA multimodal, com busca híbrida
   - [4. Rodar](#4-rodar)
 - [Uso da API](#uso-da-api)
 - [Testes](#testes)
+- [Deploy](#deploy)
 - [Estrutura do projeto](#estrutura-do-projeto)
 
 ## Visão geral
@@ -136,6 +137,7 @@ SUPABASE_JWT_SECRET="..."
 GEMINI_API_KEY="..."
 DAILY_ANALYSIS_LIMIT=100
 LOG_LEVEL=DEBUG
+CORS_ORIGINS="http://localhost:5173"
 ```
 
 `frontend/.env`:
@@ -144,6 +146,10 @@ LOG_LEVEL=DEBUG
 VITE_SUPABASE_URL="https://seu-projeto.supabase.co"
 VITE_SUPABASE_ANON_KEY="..."
 ```
+
+`VITE_API_URL` fica de fora em desenvolvimento: sem ela o cliente usa `/api`, que
+o proxy do `vite.config.ts` encaminha para o uvicorn. Em produção ela é
+obrigatória, porque não existe proxy nenhum servindo o build estático.
 
 > A `service_role` ignora todas as regras de segurança do banco. Ela só existe no
 > servidor e **nunca** pode ir para o frontend nem para o versionamento.
@@ -160,7 +166,7 @@ cd backend
 python -m venv venv
 .\venv\Scripts\activate      # Windows
 source venv/bin/activate     # Linux/Mac
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 uvicorn main:app --reload
 ```
 
@@ -265,11 +271,69 @@ npm run test
 npx tsc --noEmit
 ```
 
+## Deploy
+
+Três peças: o frontend é estático, o backend é um container e o banco é o
+Supabase que já existe. Tudo cabe em planos gratuitos.
+
+### Backend
+
+O [`Dockerfile`](backend/Dockerfile) serve qualquer plataforma que aceite
+container. Ele instala o ffmpeg, porque o yt-dlp cai em streams HLS no X, e sobe
+o uvicorn em `0.0.0.0:$PORT`.
+
+No Render: *New → Web Service*, root directory `backend`, runtime Docker. O
+healthcheck é `/`. Variáveis a configurar:
+
+| Variável | Valor |
+|---|---|
+| `SUPABASE_URL` | a mesma do desenvolvimento |
+| `SUPABASE_SERVICE_KEY` | a mesma do desenvolvimento |
+| `SUPABASE_JWT_SECRET` | o mesmo do desenvolvimento |
+| `GEMINI_API_KEY` | a mesma do desenvolvimento |
+| `DAILY_ANALYSIS_LIMIT` | o teto diário do projeto |
+| `CORS_ORIGINS` | a URL do frontend, sem barra no final |
+| `LOG_LEVEL` | `INFO` |
+
+`CORS_ORIGINS` só pode ser preenchida depois que o frontend existir, então a
+ordem é: subir o backend, subir o frontend, voltar e preencher.
+
+### Frontend
+
+Qualquer host de estático. Na Vercel: root directory `frontend`, build
+`npm run build`, output `dist`. Variáveis: `VITE_SUPABASE_URL`,
+`VITE_SUPABASE_ANON_KEY` e `VITE_API_URL` com a URL do backend.
+
+O `VITE_` é lido em tempo de build, não em tempo de execução. Mudar uma dessas
+variáveis exige **redeploy**, não só reiniciar.
+
+### Supabase
+
+Em *Authentication → URL Configuration*, troque `Site URL` para o domínio de
+produção e adicione-o em `Redirect URLs`. Sem isso o link de confirmação de
+e-mail leva o usuário para `localhost`.
+
+Reabilite *Confirm email* em *Providers → Email*, que a instalação sugere
+desmarcar para desenvolver.
+
+### O que esperar dos planos gratuitos
+
+- **O backend dorme.** No Render, 15 minutos sem tráfego derrubam o serviço, e a
+  próxima requisição espera de 30 a 60 segundos pelo cold start
+- **O Supabase pausa** o projeto após uma semana sem atividade no banco. O
+  workflow [`supabase-keepalive.yml`](.github/workflows/supabase-keepalive.yml)
+  faz uma leitura semanal para evitar isso, e precisa dos secrets
+  `SUPABASE_URL` e `SUPABASE_ANON_KEY` no repositório
+- **O download pode falhar na nuvem.** O X bloqueia faixas de IP de datacenter,
+  então `/videos/analyze` pode não funcionar hospedado mesmo funcionando local.
+  A busca, o acervo e a entrada manual não dependem de download e continuam de pé
+
 ## Estrutura do projeto
 
 ```
 backend/
 ├── main.py                  # Entry point, CORS, rate limiting
+├── Dockerfile               # Imagem de produção
 ├── schema.sql               # Fonte de verdade do banco
 ├── dtos.py                  # DTOs e limites de validação
 ├── db.py                    # Cliente Supabase (service_role)
