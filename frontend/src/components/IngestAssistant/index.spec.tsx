@@ -41,10 +41,31 @@ describe('IngestAssistant', () => {
     expect(screen.getByText(/not from X or Twitter/)).toBeInTheDocument();
   });
 
-  it('should be honest that a failed analysis still costs quota', () => {
+  it('should be honest that a failed analysis still costs quota', async () => {
+    const user = userEvent.setup();
     render(<IngestAssistant {...props({ url: POST, hasError: true })} />);
 
+    await user.click(screen.getByRole('button', { name: 'Next tip' }));
+
     expect(screen.getByText(/Failures still count against your quota/)).toBeInTheDocument();
+  });
+
+  it('should teach the whole flow before a link is even pasted', async () => {
+    const user = userEvent.setup();
+    render(<IngestAssistant {...props()} />);
+
+    expect(screen.getByText('1/6')).toBeInTheDocument();
+
+    const seen: string[] = [];
+    for (let card = 0; card < 6; card += 1) {
+      seen.push(screen.getByText(/./, { selector: 'aside p' }).textContent ?? '');
+      if (card < 5) await user.click(screen.getByRole('button', { name: 'Next tip' }));
+    }
+
+    expect(seen.join(' ')).toMatch(/watches the video/);
+    expect(seen.join(' ')).toMatch(/Manual input/);
+    expect(seen.join(' ')).toMatch(/daily ceiling/);
+    expect(screen.getByText('6/6')).toBeInTheDocument();
   });
 
   it('should always say something, unlike the search assistant', () => {
