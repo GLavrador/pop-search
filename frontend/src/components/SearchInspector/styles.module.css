@@ -1,0 +1,213 @@
+.panel {
+  padding: 10px;
+  margin-top: 8px;
+  background: var(--win-gray);
+}
+
+.title {
+  margin: 0;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.subtitle {
+  margin: 4px 0 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--win-text-secondary);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.chip {
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  border: 1px solid var(--win-tag-border);
+  background: var(--win-tag-bg);
+}
+
+.chipBoth {
+  border-left: 4px solid var(--win-blue-title);
+}
+
+.chipSemantic {
+  border-left: 4px solid var(--win-teal);
+}
+
+.chipText {
+  border-left: 4px solid var(--win-success);
+}
+
+.diagram {
+  position: relative;
+  width: 100%;
+}
+
+.wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.wire {
+  opacity: 0.35;
+  transition: opacity 120ms linear;
+}
+
+.wire.semantic {
+  stroke: var(--win-teal);
+}
+
+.wire.text {
+  stroke: var(--win-success);
+}
+
+.wireActive {
+  opacity: 1;
+}
+
+.columns {
+  display: flex;
+  align-items: flex-start;
+}
+
+.column {
+  flex: 1;
+  min-width: 0;
+}
+
+.columnHead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--win-text-secondary);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 5px;
+  font-size: 0.72rem;
+  background: var(--win-light);
+  border: 1px solid var(--win-shadow-dark);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.rowFused {
+  cursor: pointer;
+  background: var(--win-warning-bg);
+}
+
+.rowActive {
+  outline: 2px solid var(--win-blue-title);
+  outline-offset: -2px;
+}
+
+.position {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.68rem;
+  background: var(--win-gray);
+  border: 1px solid var(--win-shadow-dark);
+}
+
+.position.both {
+  background: var(--win-blue-title);
+  color: var(--win-light);
+}
+
+.position.semantic {
+  background: var(--win-teal);
+  color: var(--win-light);
+}
+
+.position.text {
+  background: var(--win-success);
+  color: var(--win-light);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.value {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--win-text-muted);
+}
+
+.math {
+  margin-top: 10px;
+  padding: 8px;
+  background: var(--win-light);
+}
+
+.mathTitle {
+  margin: 0;
+  font-weight: bold;
+  font-size: 0.76rem;
+}
+
+.mathVideo {
+  margin: 2px 0 8px;
+  font-size: 0.76rem;
+  color: var(--win-text-secondary);
+}
+
+.mathLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 0;
+}
+
+.mathTotal {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--win-shadow-dark);
+  font-weight: bold;
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 0.7rem;
+  color: var(--win-text-muted);
+}
+
+@media (max-width: 640px) {
+  .columns {
+    flex-direction: column;
+    gap: 10px !important;
+  }
+
+  .wires {
+    display: none;
+  }
+
+  .diagram {
+    height: auto !important;
+  }
+}

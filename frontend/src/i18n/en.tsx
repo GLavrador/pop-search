@@ -265,6 +265,26 @@ export const en = {
     descriptionWords: 'Description must be at least 20 words long',
   },
 
+  inspector: {
+    open: '🔬 Inspect ranking',
+    close: 'Close inspector',
+    loading: 'Running the two searches separately...',
+    failed: 'The ranking explanation could not be built.',
+    title: 'How this ranking was assembled',
+    subtitle: 'Two independent searches happen, and Reciprocal Rank Fusion decides the result by each video position in each one, never by its score. Cosine similarity runs 0 to 1, ts_rank_cd is unbounded, and adding them would compare incomparable scales.',
+    semantic: 'By meaning',
+    fused: 'Final result',
+    text: 'By words',
+    legendBoth: 'Found by both',
+    legendSemantic: 'By meaning only',
+    legendText: 'By words only',
+    formulaTitle: 'The arithmetic for this video',
+    noSemantic: 'did not appear in this search',
+    noText: 'did not appear in this search',
+    total: 'Fused score',
+    hint: 'Hover a result in the middle column to see its arithmetic.',
+  },
+
   auth: {
     signedInAs: 'Signed in as',
     signOut: 'Sign Out',

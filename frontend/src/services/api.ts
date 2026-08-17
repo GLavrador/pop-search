@@ -3,6 +3,7 @@ import type {
   VideoMetadata,
   SearchParams,
   SearchResult,
+  SearchExplain,
   MyVideo,
   QuotaStatus,
   ProjectUsageReport,
@@ -86,6 +87,19 @@ export const searchVideos = async (
   signal?: AbortSignal
 ): Promise<SearchResult[]> => {
   const response = await api.post<SearchResult[]>('/search', {
+    query,
+    limit,
+    threshold,
+    mode
+  }, { signal });
+  return response.data;
+};
+
+export const explainSearch = async (
+  { query, limit = DEFAULT_LIMIT, threshold = DEFAULT_THRESHOLD, mode = DEFAULT_SEARCH_MODE }: SearchParams,
+  signal?: AbortSignal
+): Promise<SearchExplain> => {
+  const response = await api.post<SearchExplain>('/search/explain', {
     query,
     limit,
     threshold,

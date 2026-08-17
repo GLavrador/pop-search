@@ -37,6 +37,39 @@ export interface SearchResult {
   score?: number;
 }
 
+export interface RankedEntry {
+  id: string;
+  titulo_video: string;
+  /** 1-based rank inside this branch alone. */
+  position: number;
+  /** Cosine similarity or ts_rank_cd, depending on the branch. */
+  value: number;
+}
+
+export interface FusionRow {
+  id: string;
+  titulo_video: string;
+  url_original: string;
+  position: number;
+  score: number;
+  similarity: number;
+  text_rank: number;
+  semantic_position: number | null;
+  semantic_contribution: number;
+  text_position: number | null;
+  text_contribution: number;
+}
+
+export interface SearchExplain {
+  query: string;
+  mode: SearchMode;
+  threshold: number;
+  rrf_k: number;
+  semantic: RankedEntry[];
+  text: RankedEntry[];
+  fused: FusionRow[];
+}
+
 export interface QuotaStatus {
   used: number;
   limit: number;

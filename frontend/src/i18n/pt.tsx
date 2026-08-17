@@ -278,6 +278,26 @@ export const pt: Dictionary = {
     descriptionWords: 'A descrição precisa ter pelo menos 20 palavras',
   },
 
+  inspector: {
+    open: '🔬 Inspecionar ranking',
+    close: 'Fechar inspetor',
+    loading: 'Refazendo as duas buscas separadas...',
+    failed: 'Não foi possível montar a explicação do ranking.',
+    title: 'Como este ranking foi montado',
+    subtitle: 'Duas buscas independentes acontecem e o Reciprocal Rank Fusion decide o resultado pela posição de cada vídeo em cada uma, nunca pela nota. Similaridade de cosseno vai de 0 a 1, ts_rank_cd é ilimitado, e somar as duas seria comparar escalas incomparáveis.',
+    semantic: 'Por significado',
+    fused: 'Resultado final',
+    text: 'Por palavras',
+    legendBoth: 'Achado pelos dois',
+    legendSemantic: 'Só por significado',
+    legendText: 'Só por palavras',
+    formulaTitle: 'A conta deste vídeo',
+    noSemantic: 'não apareceu nesta busca',
+    noText: 'não apareceu nesta busca',
+    total: 'Score fundido',
+    hint: 'Passe o mouse por um resultado do meio para ver a conta dele.',
+  },
+
   auth: {
     signedInAs: 'Conectado como',
     signOut: 'Sair',
