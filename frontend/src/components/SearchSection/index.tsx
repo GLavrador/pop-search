@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useVideoSearchQuery } from "../../hooks/useVideoSearchQuery";
 import { useStatus } from "../../context/StatusContext";
 import { VideoCard } from "../VideoCard";
+import { SearchAssistant } from "../SearchAssistant";
 import { TaskProgress } from "../TaskProgress";
 import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
 import { PrecisionPresets } from "../PrecisionPresets";
@@ -110,6 +111,15 @@ export const SearchSection = () => {
             </div>
         )}
       </form>
+
+      <SearchAssistant
+        query={query}
+        mode={mode}
+        threshold={threshold}
+        hasSearched={hasSearched}
+        isLoading={isLoading}
+        results={results}
+      />
 
       {shouldShowSeparator && <hr className={styles.separator} />}
 

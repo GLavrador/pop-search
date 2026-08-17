@@ -278,6 +278,106 @@ export const pt: Dictionary = {
     descriptionWords: 'A descrição precisa ter pelo menos 20 palavras',
   },
 
+  assistant: {
+    label: 'Assistente',
+    close: 'Dispensar o assistente',
+    restore: 'Mostrar o assistente',
+    previous: 'Dica anterior',
+    next: 'Próxima dica',
+    card: (current: number, total: number) => `${current}/${total}`,
+    step: (current: number, total: number) => `Passo ${current} de ${total}`,
+    tips: {
+      welcome: [
+        'Olá! Eu sou o assistente do Pop Search. Buscar é aberto a todo mundo, não precisa de conta.',
+        'O modo Híbrida procura de duas formas ao mesmo tempo: pelo significado do vídeo e pelas palavras que ele contém.',
+        'A precisão só aperta o lado do significado. Um vídeo que contém a palavra que você digitou aparece em qualquer precisão.',
+      ],
+      typing: [
+        'Aperte buscar quando quiser. Buscar não custa nada e não exige conta.',
+        'Aspas fazem frase exata, o menos exclui uma palavra, e "a or b" aceita qualquer uma das duas. Isso comanda o lado das palavras.',
+        'Acentos não importam em nenhum dos lados. Digitar musica encontra música.',
+      ],
+      searching: ['Perguntando aos dois lados ao mesmo tempo...'],
+      operatorsIgnored: [
+        'Vi aspas ou operadores no seu texto. No modo Semântica eles viram caracteres comuns e mudam o sentido da frase.',
+        'Troque para Híbrida ou Exata se quiser que eles funcionem.',
+      ],
+      thresholdTooHigh: (percent: number) => [
+        `Nada voltou com o limiar em ${percent}%.`,
+        'Ele só aperta a metade por significado, nunca a de palavras. Tente a precisão Ampla.',
+      ],
+      textTooRestrictive: [
+        'Nada voltou. Palavras soltas são combinadas com E, então cada palavra a mais fecha o cerco.',
+        'Use menos palavras, ou "a or b" para aceitar qualquer uma delas.',
+      ],
+      nothingFound: [
+        'Nada voltou. O acervo ainda é pequeno, então pode ser que esse assunto simplesmente não more aqui.',
+        'Tente uma palavra mais ampla, ou mude para Híbrida para o significado ajudar.',
+      ],
+      onlyText: [
+        'Vale reparar: todos estes chegaram pelas palavras exatas. Nenhum casou por significado.',
+        'Isso costuma querer dizer que o acervo tem as palavras, mas não o assunto que você tinha em mente.',
+      ],
+      onlySemantic: [
+        'Nenhum destes contém as suas palavras literalmente. Todos foram achados pelo que mostram.',
+        'Essa é a metade que uma busca de texto comum não faz: a IA assistiu ao vídeo e descreveu o que viu.',
+      ],
+      goodResults: (counts: { both: number; meaning: number; words: number }) => {
+        const parts: string[] = [];
+        if (counts.both) parts.push(`${counts.both} pelos dois lados`);
+        if (counts.meaning) parts.push(`${counts.meaning} só por significado`);
+        if (counts.words) parts.push(`${counts.words} só por palavras`);
+
+        return [
+          `A composição foi essa: ${parts.join(', ')}.`,
+          'A ordem não vem da nota de nenhum dos lados. Vem da posição do vídeo em cada ranking, fundida pelo Reciprocal Rank Fusion.',
+          'Aumente a precisão para cortar as conexões vagas, ou diminua para deixar entrar mais significado.',
+        ];
+      },
+    },
+  },
+
+  ingestAssistant: {
+    tips: {
+      start: [
+        'Cole o link de um post do X que tenha vídeo. Aqui só funciona twitter.com e x.com, porque o download depende disso.',
+        'O que vem depois: a IA assiste ao vídeo e escreve título, descrição, quem aparece, o que tem no cenário e a transcrição do áudio.',
+        'Tudo isso vira material de busca. É por isso que alguém consegue achar este vídeo depois pelo significado, sem saber nenhuma palavra dele.',
+        'Aí você revisa tudo. Nada entra no acervo sem a sua aprovação.',
+        'Prefere fazer na mão? A entrada manual deixa você escrever os campos, sem IA e sem gastar cota.',
+        'Cada análise custa uma da sua cota mensal, e o projeto inteiro tem um teto diário. Buscar continua livre para todo mundo.',
+      ],
+      badLink: [
+        'Esse link não é do X nem do Twitter, e o servidor vai recusar.',
+        'Use o endereço do post original, aquele que termina em /status/ e um número.',
+      ],
+      ready: [
+        'Escolha o que a IA deve observar. Cenário lê o que aparece na tela, Áudio transcreve o que se ouve.',
+        'Desligar um dos dois deixa a análise mais rápida e mais barata, mas o vídeo fica mais difícil de achar depois.',
+        'Analisar gasta uma análise da sua cota mensal. Uma que falha também conta, então confira o link antes.',
+      ],
+      manual: [
+        'No modo manual você escreve os campos com as próprias mãos. Nada passa pela IA e nada sai da sua cota.',
+        'Serve para quando a análise falhou, ou quando você prefere descrever o vídeo do seu jeito.',
+        'Ele ainda ganha um embedding ao salvar, então uma entrada manual é igualmente encontrável por significado.',
+      ],
+      analysing: [
+        'Estou baixando o vídeo e entregando para o Gemini assistir. Costuma levar de trinta segundos a dois minutos.',
+        'Deixe a janela aberta. Cancelar aqui não devolve a cota se o vídeo já chegou na IA.',
+      ],
+      failed: [
+        'A análise não foi adiante.',
+        'Falhas contam na cota assim mesmo, porque os tokens foram gastos de todo jeito. A exceção é o serviço de IA estar sem capacidade, aí nada é cobrado.',
+        'Você pode tentar de novo, ou ir pela entrada manual e descrever você mesmo, de graça.',
+      ],
+      review: [
+        'Nada entra no acervo sem passar por você. Confira o que a IA escreveu e corrija o que estiver errado.',
+        'A descrição é onde a maior parte da busca acontece, então vale ler com atenção.',
+        'Salvar não gasta análise. Cancelar joga o resultado fora e a cota não volta.',
+      ],
+    },
+  },
+
   auth: {
     signedInAs: 'Conectado como',
     signOut: 'Sair',

@@ -37,6 +37,8 @@ contribuir exige conta.
 - **Contas com limite mensal**: contribuir exige cadastro; buscar não
 - **Tour guiado**: visitantes conhecem o app inteiro sem criar conta e sem gastar
   chamada de IA
+- **Assistente de busca**: um personagem lê o estado da busca e explica o que
+  aconteceu, sempre a partir das regras reais do sistema
 
 ## Como a busca funciona
 
