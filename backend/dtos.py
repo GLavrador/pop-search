@@ -135,3 +135,34 @@ class SearchResult(BaseModel):
     text_rank: float = Field(0.0, description="ts_rank_cd score, 0.0 if no text match")
     score: float = Field(0.0, description="Fused RRF score used for ordering")
 
+
+class RankedEntry(BaseModel):
+    id: str
+    titulo_video: str
+    position: int = Field(..., ge=1, description="1-based rank inside this branch alone")
+    value: float = Field(..., description="Cosine similarity or ts_rank_cd, depending on the branch")
+
+
+class FusionRow(BaseModel):
+    id: str
+    titulo_video: str
+    url_original: str
+    position: int = Field(..., ge=1, description="1-based rank after fusion")
+    score: float
+    similarity: float
+    text_rank: float
+    semantic_position: Optional[int] = Field(None, description="Rank in the vector branch, None if it never matched there")
+    semantic_contribution: float = Field(0.0, description="1 / (k + semantic_position)")
+    text_position: Optional[int] = Field(None, description="Rank in the lexical branch, None if it never matched there")
+    text_contribution: float = Field(0.0, description="1 / (k + text_position)")
+
+
+class SearchExplain(BaseModel):
+    query: str
+    mode: SearchMode
+    threshold: float
+    rrf_k: int
+    semantic: List[RankedEntry]
+    text: List[RankedEntry]
+    fused: List[FusionRow]
+
