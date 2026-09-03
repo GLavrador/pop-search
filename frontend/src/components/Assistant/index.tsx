@@ -25,15 +25,24 @@ export const Floppy = ({ alarmed = false }: { alarmed?: boolean }) => (
   </svg>
 );
 
+export interface AssistantNav {
+  onBack: () => void;
+  onNext: () => void;
+  canBack: boolean;
+  nextLabel: string;
+}
+
 interface AssistantProps {
   /** Identity of the current tip. Changing it rewinds the deck to its first card. */
   tipKey: string;
   messages: ReactNode[];
   alarmed?: boolean;
   step?: string;
+  /** Present while the tutorial drives the character, replacing the deck pager. */
+  nav?: AssistantNav;
 }
 
-export const Assistant = ({ tipKey, messages, alarmed = false, step }: AssistantProps) => {
+export const Assistant = ({ tipKey, messages, alarmed = false, step, nav }: AssistantProps) => {
   const { t } = useI18n();
   const { dismissed, dismiss, restore } = useAssistantVisibility();
   const [card, setCard] = useState(0);
@@ -81,7 +90,27 @@ export const Assistant = ({ tipKey, messages, alarmed = false, step }: Assistant
         </div>
         <p className={styles.message}>{messages[current]}</p>
 
-        {total > 1 && (
+        {nav && (
+          <div className={styles.deck}>
+            <button
+              type="button"
+              className={`win95-btn ${styles.navButton}`}
+              onClick={nav.onBack}
+              disabled={!nav.canBack}
+            >
+              {t.assistant.previous}
+            </button>
+            <button
+              type="button"
+              className={`win95-btn ${styles.navButton} ${styles.navPrimary}`}
+              onClick={nav.onNext}
+            >
+              {nav.nextLabel}
+            </button>
+          </div>
+        )}
+
+        {!nav && total > 1 && (
           <div className={styles.deck}>
             <button
               type="button"

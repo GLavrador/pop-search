@@ -190,3 +190,12 @@
   font-variant-numeric: tabular-nums;
   color: var(--win-text-muted);
 }
+
+.navButton {
+  padding: 2px 10px;
+  font-size: 0.72rem;
+}
+
+.navPrimary {
+  font-weight: bold;
+}
