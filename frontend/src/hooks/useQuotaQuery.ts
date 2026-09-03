@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMyQuota } from '../services/api';
 import { useAuth } from '../context/authContext';
+import { useDemoMode } from './useDemoMode';
 import type { QuotaStatus } from '../types';
 
 interface UseQuotaQueryReturn {
@@ -9,12 +10,13 @@ interface UseQuotaQueryReturn {
 }
 
 export const useQuotaQuery = (): UseQuotaQueryReturn => {
+    const { active: demoActive } = useDemoMode();
     const { isAuthenticated, session } = useAuth();
 
     const query = useQuery({
         queryKey: ['quota', session?.user.id],
         queryFn: ({ signal }) => getMyQuota(signal),
-        enabled: isAuthenticated,
+        enabled: isAuthenticated || demoActive,
         // Not cached: an analysis changes it, and a stale counter is worse than
         // a brief spinner.
         staleTime: 0,

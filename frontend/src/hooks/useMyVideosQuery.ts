@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMyVideos } from '../services/api';
 import { useAuth } from '../context/authContext';
+import { useDemoMode } from './useDemoMode';
 import { useI18n } from '../i18n/languageContext';
 import type { MyVideo } from '../types';
 
@@ -11,6 +12,7 @@ interface UseMyVideosQueryReturn {
 }
 
 export const useMyVideosQuery = (): UseMyVideosQueryReturn => {
+    const { active: demoActive } = useDemoMode();
     const { isAuthenticated, session } = useAuth();
     const { t } = useI18n();
 
@@ -18,7 +20,7 @@ export const useMyVideosQuery = (): UseMyVideosQueryReturn => {
         // Keyed by user so switching accounts cannot show the previous library.
         queryKey: ['myVideos', session?.user.id],
         queryFn: ({ signal }) => getMyVideos(signal),
-        enabled: isAuthenticated,
+        enabled: isAuthenticated || demoActive,
         refetchOnWindowFocus: false,
         retry: false,
     });
