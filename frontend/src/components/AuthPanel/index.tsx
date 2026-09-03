@@ -45,6 +45,11 @@ export const AuthPanel = ({ onTakeTour }: AuthPanelProps) => {
         </div>
         <QuotaMeter />
         <hr className={styles.divider} />
+        {onTakeTour && (
+          <button type="button" className={`win95-btn ${styles.tutorial}`} onClick={onTakeTour}>
+            {t.tour.open}
+          </button>
+        )}
         <LanguageSwitcher />
       </div>
     );
@@ -170,6 +175,11 @@ export const AuthPanel = ({ onTakeTour }: AuthPanelProps) => {
       </button>
 
       <hr className={styles.divider} />
+      {onTakeTour && (
+        <button type="button" className={`win95-btn ${styles.tutorial}`} onClick={onTakeTour}>
+          {t.tour.open}
+        </button>
+      )}
       <LanguageSwitcher />
     </form>
   );

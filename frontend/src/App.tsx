@@ -9,10 +9,14 @@ import { AuthProvider } from './context/AuthProvider';
 import { useAuth } from './context/authContext';
 import { AuthPanel } from './components/AuthPanel';
 import { MyVideos } from './components/MyVideos';
-import { DemoTour } from './components/DemoTour';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { useIdentityReset } from './hooks/useIdentityReset';
+import { useDemoMode } from './hooks/useDemoMode';
+import { TourProvider } from './context/TourProvider';
+import { useTour } from './context/tourContext';
+import { TourGuide } from './components/TourGuide';
+import { WelcomeDialog } from './components/WelcomeDialog';
 import { useBackendWarmup } from './hooks/useBackendWarmup';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
@@ -31,7 +35,7 @@ const APP_NAME = 'Pop Search';
 const CLICKS_TO_CLOSE = 5;
 const CLOSING_MS = 320;
 
-type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
+type Tab = 'ingest' | 'search' | 'library' | 'account' | 'admin';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
@@ -43,6 +47,9 @@ function AppContent() {
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
+  const { active: demoActive } = useDemoMode();
+  const tour = useTour();
+  const contributing = isAuthenticated || demoActive;
   useIdentityReset();
   useBackendWarmup();
   const { t } = useI18n();
@@ -82,13 +89,18 @@ function AppContent() {
     setWindowState('open');
   };
 
+  // The tutorial drives the tabs. Clicking a tab by hand still works, and the
+  // tour picks its own back up on the next step.
+  useEffect(() => {
+    if (tour.active && tour.frame) setActiveTab(tour.frame.tab);
+  }, [tour.active, tour.frame]);
+
   const isClosed = windowState === 'closed';
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'ingest', label: TAB_LABELS.ingest },
     { id: 'search', label: TAB_LABELS.search },
-    { id: 'demo', label: TAB_LABELS.tour },
-    ...(isAuthenticated ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos }] : []),
+    ...(contributing ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos }] : []),
     ...(isAdmin ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats }] : []),
     { id: 'account', label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn },
   ];
@@ -96,6 +108,8 @@ function AppContent() {
 
   return (
     <div className={styles.appContainer}>
+      <WelcomeDialog onSignIn={() => setActiveTab('account')} />
+
       <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} onOpenApp={handleOpen} />
 
       {isClosed && cat && <CatReveal image={cat.image} phrase={cat.phrase} />}
@@ -113,9 +127,11 @@ function AppContent() {
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
           <TabStrip tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
 
+          <TourGuide />
+
           <div className={`${styles.contentArea} ${isMaximized ? styles.contentAreaMax : ''}`}>
             <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>
-              {isAuthenticated ? (
+              {contributing ? (
                 <IngestSection />
               ) : (
                 <div className={styles.gate}>
@@ -132,7 +148,7 @@ function AppContent() {
                     <button
                       type="button"
                       className="win95-btn"
-                      onClick={() => setActiveTab('demo')}
+                      onClick={tour.start}
                     >
                       {t.gate.takeTour}
                     </button>
@@ -143,21 +159,18 @@ function AppContent() {
             <div style={{ display: activeTab === 'search' ? 'block' : 'none' }}>
               <SearchSection />
             </div>
-            {isAuthenticated && (
+            {contributing && (
               <div style={{ display: activeTab === 'library' ? 'block' : 'none' }}>
                 <MyVideos />
               </div>
             )}
-            <div style={{ display: activeTab === 'demo' ? 'block' : 'none' }}>
-              <DemoTour />
-            </div>
             {isAdmin && activeTab === 'admin' && (
               <div>
                 <AdminDashboard />
               </div>
             )}
             <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
-              <AuthPanel onTakeTour={() => setActiveTab('demo')} />
+              <AuthPanel onTakeTour={tour.start} />
             </div>
           </div>
           <StatusBar />
@@ -189,7 +202,9 @@ function App() {
     <LanguageProvider>
       <AuthProvider>
         <StatusProvider>
-          <AppContent />
+          <TourProvider>
+            <AppContent />
+          </TourProvider>
         </StatusProvider>
       </AuthProvider>
     </LanguageProvider>

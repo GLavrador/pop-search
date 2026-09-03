@@ -1,5 +1,3 @@
-import demo from '../components/DemoTour/styles.module.css';
-import { TAB_LABELS } from '../constants/tabs';
 import type { Dictionary } from './en';
 
 export const pt: Dictionary = {
@@ -442,174 +440,59 @@ export const pt: Dictionary = {
       'Os tokens são o que conta na cota do Google AI. As análises são o que limita cada conta.',
   },
 
+  welcome: {
+    title: 'Bem-vindo ao Pop Search',
+    close: 'Fechar',
+    heading: 'O que voce quer fazer primeiro?',
+    blurb: 'Buscar no acervo e aberto a todo mundo. Adicionar video pede uma conta. E se voce so quer entender o que este lugar faz, eu te acompanho pelo app inteiro.',
+    takeTour: 'Fazer o tutorial',
+    signIn: 'Entrar ou criar conta',
+    explore: 'Explorar sozinho',
+  },
+
   tour: {
-    counter: (current: number, total: number) => `Passo ${current} de ${total}`,
-    back: '◀ Voltar',
-    next: 'Avançar ▶',
-    restart: '↺ Começar de novo',
-    steps: {
-      welcome: {
-        tab: 'Bem-vindo',
-        title: 'O que é o Pop Search',
-        body: (
-          <>
-            <p>
-              Um acervo de vídeos do Twitter e do X que você pode buscar por significado, não só
-              pelas palavras que alguém digitou.
-            </p>
-            <p>
-              Cada vídeo é assistido por uma IA, que escreve uma descrição e lista as pessoas, os
-              objetos e a fala que encontra. É esse texto que a busca consulta.
-            </p>
-            <p className={demo.reassure}>
-              Nada aqui é salvo, e nenhuma IA é chamada. Fique à vontade.
-            </p>
-          </>
-        ),
-      },
-      search: {
-        tab: TAB_LABELS.search,
-        title: 'Encontrando um vídeo',
-        intro: <p>Aberto a todo mundo, sem precisar de conta. Três modos:</p>,
-        definitions: [
-          {
-            term: 'Híbrida',
-            definition:
-              'Significado e palavras exatas juntos. Uma busca por "gato" encontra um vídeo descrito como "felino laranja" e outro cujo título diz gato literalmente.',
-          },
-          {
-            term: 'Semântica',
-            definition:
-              'Só significado. Encontra vídeos relacionados que não têm nenhuma palavra em comum com a sua busca.',
-          },
-          {
-            term: 'Exata',
-            definition: 'Só palavras literais. Toda palavra que você digitar precisa aparecer.',
-          },
-        ],
-        outro: (
-          <>
-            <p>
-              Em <strong>Avançado</strong> você também define o rigor da correspondência, quantos
-              resultados devolver, e lê os operadores aceitos: <code>"frase exata"</code>,{' '}
-              <code>-excluir</code> e <code>a or b</code>.
-            </p>
-            <p>
-              Cada resultado traz um selo dizendo se ele foi encontrado por significado, por
-              palavras, ou pelos dois.
-            </p>
-          </>
-        ),
-      },
-      ingest: {
-        tab: TAB_LABELS.ingest,
-        title: 'Adicionando um vídeo',
-        body: (
-          <p>
-            Esta é a parte que precisa de conta, porque cada análise custa tempo de IA. Experimente
-            o fluxo inteiro abaixo com um exemplo real.
-          </p>
-        ),
-      },
-      manual: {
-        tab: `${TAB_LABELS.ingest} → Entrada manual`,
-        title: 'Adicionando sem a IA',
-        body: (
-          <>
-            <p>
-              Marque <strong>Entrada manual</strong> na tela de adicionar e você recebe o mesmo
-              formulário de revisão, vazio, para preencher você mesmo. Nenhum vídeo é baixado e
-              nenhuma IA é chamada.
-            </p>
-            <p>Dois motivos para usar:</p>
-            <ul className={demo.list}>
-              <li>
-                <strong>Suas análises acabaram.</strong> Entradas manuais não contam no limite
-                mensal, então o acervo continua aberto para você.
-              </li>
-              <li>
-                <strong>Você descreve melhor.</strong> Uma piada ou uma referência que a IA não
-                pega é justamente o que torna um vídeo encontrável depois.
-              </li>
-            </ul>
-            <p className={demo.hint}>
-              Vídeos adicionados à mão são buscáveis como qualquer outro: a descrição que você
-              escreve é o que a busca lê.
-            </p>
-          </>
-        ),
-      },
-      library: {
-        tab: TAB_LABELS.myVideos,
-        title: 'O que você contribuiu',
-        body: (
-          <>
-            <p>
-              Tudo o que você adicionou, do mais recente ao mais antigo, com link para o post
-              original. Os vídeos pertencem a quem os indexou.
-            </p>
-            <p>
-              O acervo em si continua público: qualquer pessoa encontra seus vídeos pela busca, com
-              ou sem conta.
-            </p>
-          </>
-        ),
-      },
-      account: {
-        tab: '👤 Conta',
-        title: 'Sua conta e os limites',
-        body: (
-          <>
-            <p>
-              Cadastre-se com e-mail e senha. Cada conta recebe um número de análises por mês,
-              mostrado como uma barra nesta aba e acima do formulário de adicionar.
-            </p>
-            <p>
-              O limite existe porque assistir a um vídeo com IA é a parte cara. Duas coisas que vale
-              saber:
-            </p>
-            <ul className={demo.list}>
-              <li>Uma análise que falha conta mesmo assim, porque a IA já foi paga.</li>
-              <li>Adicionar um vídeo à mão, sem a IA, não conta no limite.</li>
-            </ul>
-            <p>O contador zera no primeiro dia de cada mês.</p>
-          </>
-        ),
-      },
-    },
-    demoSearch: {
-      tryIt: (query: string) => `Experimente: busque por “${query}”`,
-      inputLabel: 'Busca de exemplo',
-      submit: 'Buscar',
-      badgeHint:
-        'Repare no selo de cada resultado. O primeiro contém a palavra e é sobre um gato, então foi encontrado das duas formas. O segundo nunca diz “gato” - uma girafa rodando apareceu porque a busca entendeu a ideia. O terceiro foi encontrado só pela palavra.',
-      modeHint: (
-        <>
-          No modo <strong>Exata</strong> a girafa sumiria. No modo <strong>Semântica</strong>,
-          sumiria o terceiro.
-        </>
-      ),
-    },
-    demoUpload: {
-      step1: 'Passo 1 - cole um link',
-      urlLabel: 'URL de vídeo de exemplo',
-      step1Hint:
-        'Só links do twitter.com e do x.com são aceitos. As análises de cenário e de áudio vêm ligadas por padrão, e são elas que preenchem os metadados buscáveis abaixo.',
-      runAnalysis: 'Analisar',
-      step2: 'Passo 2 - a IA assiste ao vídeo',
-      step2Hint:
-        'De verdade, o app baixa o vídeo, manda para o Gemini e espera uma descrição. Este tour pula isso e usa um resultado capturado antes.',
-      step3: 'Passo 3 - você revisa o que a IA escreveu',
-      step3Hint:
-        'Todo campo é editável. Esta é a conferência humana antes de qualquer coisa ser indexada, e é o mesmo formulário que o fluxo real usa.',
-      step4: 'Passo 4 - indexado',
-      savedNotice: (
-        <>
-          <strong>Nada foi salvo.</strong> No app de verdade este vídeo já estaria no acervo e
-          encontrável por qualquer pessoa, e contaria como uma das suas análises do mês.
-        </>
-      ),
-      again: 'Rodar de novo',
+    next: 'Avancar',
+    finish: 'Concluir',
+    open: 'Fazer o tutorial',
+    running: 'Tutorial em andamento',
+    script: {
+      welcome: [
+        'Oi! Vou te acompanhar pelo app inteiro, aba por aba. Tudo aqui roda com exemplos guardados, entao nada gasta IA e nada entra no acervo de verdade.',
+        'Pode clicar, digitar e mexer a vontade. Se quiser sair, e so fechar a minha janelinha.',
+      ],
+      search: [
+        'Esta e a busca, e ela e aberta: qualquer pessoa busca sem ter conta.',
+        'Ela faz duas perguntas ao mesmo tempo. Uma procura pelo significado do video, usando o que a IA viu nele. A outra procura pelas palavras que o video contem.',
+        'Digite gato no campo e clique em buscar. Eu espero aqui.',
+      ],
+      results: [
+        'Repare na etiqueta de cada resultado. Uma diz significado mais palavras, outra so significado, outra so palavras.',
+        'Um dos resultados e uma girafa. Ela apareceu numa busca por gato porque a IA assistiu ao video e descreveu a cena, e o significado aproximou os dois. Busca de texto comum nao faz isso.',
+        'Outro tem a palavra gato escrita na descricao, mas nao casou por significado. Caminho oposto, mesmo destino: ele aparece.',
+      ],
+      precision: [
+        'Ali em cima tem a precisao. Mude para Precisa e busque de novo.',
+        'Um resultado sai da lista. A precisao aperta so o lado do significado, nunca o das palavras. Por isso quem tem a palavra exata continua aparecendo em qualquer precisao.',
+      ],
+      ingest: [
+        'Agora a outra metade: como um video entra no acervo. Normalmente isto exige conta, mas no tutorial esta liberado.',
+        'Cole qualquer link do X no campo. Pode ser inventado, porque aqui eu respondo com um exemplo guardado.',
+      ],
+      analysis: [
+        'Clique em analisar e observe. A IA baixa o video, assiste e escreve titulo, descricao, quem aparece, o que tem no cenario e a transcricao do audio.',
+        'Numa analise de verdade isso leva de trinta segundos a dois minutos e consome uma da sua cota mensal.',
+      ],
+      review: [
+        'Este e o passo que mais importa: nada entra no acervo sem passar por uma pessoa.',
+        'A IA erra. Voce le, corrige o que estiver torto e so entao salva. E por isso que da para confiar no acervo.',
+      ],
+      library: [
+        'Aqui ficam os videos que voce adicionou. Estes dois sao exemplos do tutorial.',
+      ],
+      account: [
+        'Por ultimo, a sua conta. E aqui que fica a cota mensal de analises e o botao para refazer este tutorial quando quiser.',
+        'Buscar continua livre para todo mundo, sem conta. A conta serve para contribuir com o acervo. O formulario esta logo abaixo se voce quiser criar uma, e esta tudo bem se nao quiser: voce ja viu o app inteiro.',
+      ],
     },
   },
 };
