@@ -1,4 +1,4 @@
-import type { VideoMetadata, SearchResult } from '../types';
+import type { MyVideo, QuotaStatus, SearchResult, VideoMetadata } from '../types';
 
 export const DEMO_QUERY = 'gato';
 
@@ -52,3 +52,37 @@ export const DEMO_VIDEO: VideoMetadata = {
     },
   },
 };
+
+const firstOfNextMonth = (): string => {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString();
+};
+
+const daysAgo = (days: number): string =>
+  new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+/** Built on each call so the tour never shows a renewal date that has passed. */
+export const demoQuotaStatus = (): QuotaStatus => ({
+  used: 3,
+  limit: 20,
+  remaining: 17,
+  resets_at: firstOfNextMonth(),
+  tokens_this_month: 48210,
+});
+
+export const demoMyVideos = (): MyVideo[] => [
+  {
+    id: 'demo-1',
+    titulo_video: DEMO_SEARCH_RESULTS[0].titulo_video,
+    descricao_completa: DEMO_SEARCH_RESULTS[0].descricao_completa,
+    url_original: DEMO_SEARCH_RESULTS[0].url_original,
+    created_at: daysAgo(2),
+  },
+  {
+    id: 'demo-2',
+    titulo_video: DEMO_SEARCH_RESULTS[1].titulo_video,
+    descricao_completa: DEMO_SEARCH_RESULTS[1].descricao_completa,
+    url_original: DEMO_SEARCH_RESULTS[1].url_original,
+    created_at: daysAgo(9),
+  },
+];
