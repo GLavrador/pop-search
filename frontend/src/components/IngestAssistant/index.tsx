@@ -7,13 +7,17 @@ import {
   type IngestTipId,
 } from '../../constants/ingestTips';
 import { Assistant } from '../Assistant';
+import { useTour } from '../../context/tourContext';
 
 const ALARMED: IngestTipId[] = ['badLink', 'failed'];
 
 export const IngestAssistant = (props: IngestContext) => {
   const { t } = useI18n();
+  const tour = useTour();
   const tipId = pickIngestTip(props);
   const step = STEP_NUMBER[tipId];
+
+  if (tour.active) return null;
 
   return (
     <Assistant
