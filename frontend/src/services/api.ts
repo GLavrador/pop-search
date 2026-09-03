@@ -11,6 +11,14 @@ import type {
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
 import { supabase } from '../lib/supabase';
+import {
+  demoAnalyse,
+  demoQuota,
+  demoSave,
+  demoSearch,
+  demoVideos,
+  isDemoActive,
+} from './demoMode';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -41,6 +49,8 @@ export const analyzeVideo = async (
   options: { analyzeScenes: boolean; analyzeAudio: boolean },
   signal: AbortSignal
 ): Promise<VideoMetadata> => {
+  if (isDemoActive()) return demoAnalyse();
+
   const response = await api.post<VideoMetadata>('/videos/analyze', {
     url,
     analyze_scenes: options.analyzeScenes,
@@ -50,15 +60,24 @@ export const analyzeVideo = async (
 };
 
 export const saveVideo = async (data: VideoMetadata): Promise<void> => {
+  // The one interception that is not about convenience: a visitor walking the
+  // tutorial must never be able to write into the real archive.
+  if (isDemoActive()) return demoSave();
+
   await api.post('/videos', data);
 };
 
 export const getMyQuota = async (signal?: AbortSignal): Promise<QuotaStatus> => {
+  if (isDemoActive()) return demoQuota();
+
   const response = await api.get<QuotaStatus>('/me/quota', { signal });
   return response.data;
 };
 
 export const getIsAdmin = async (signal?: AbortSignal): Promise<boolean> => {
+  // Keeps the admin tab out of the tutorial without a second flag.
+  if (isDemoActive()) return false;
+
   const response = await api.get<{ is_admin: boolean }>('/me/is-admin', { signal });
   return response.data.is_admin;
 };
@@ -77,6 +96,8 @@ export const getAdminStats = async (
 };
 
 export const getMyVideos = async (signal?: AbortSignal): Promise<MyVideo[]> => {
+  if (isDemoActive()) return demoVideos();
+
   const response = await api.get<MyVideo[]>('/me/videos', { signal });
   return response.data;
 };
@@ -85,6 +106,8 @@ export const searchVideos = async (
   { query, limit = DEFAULT_LIMIT, threshold = DEFAULT_THRESHOLD, mode = DEFAULT_SEARCH_MODE }: SearchParams,
   signal?: AbortSignal
 ): Promise<SearchResult[]> => {
+  if (isDemoActive()) return demoSearch({ query, limit, threshold, mode });
+
   const response = await api.post<SearchResult[]>('/search', {
     query,
     limit,
