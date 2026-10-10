@@ -641,6 +641,57 @@
   line-height: 1.5;
 }
 
+/* A numbered list in the script is drawn as steps side by side, one leading to the next. */
+.say ol {
+  display: flex;
+  gap: 16px;
+  margin: 9px 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: beat;
+}
+
+.say li {
+  flex: 1;
+  position: relative;
+  padding: 7px 9px 8px 33px;
+  background: var(--win-light);
+  border: 1px solid var(--win-shadow-dark);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  counter-increment: beat;
+}
+
+.say li::before {
+  content: counter(beat);
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 18px;
+  height: 18px;
+  background: var(--win-blue-title);
+  font-size: 0.76rem;
+  font-weight: bold;
+  line-height: 18px;
+  text-align: center;
+  color: var(--win-light);
+}
+
+.say li + li::after {
+  content: '▶';
+  position: absolute;
+  top: calc(50% - 7px);
+  left: -14px;
+  font-size: 0.66rem;
+  line-height: 14px;
+  color: var(--win-blue-title);
+}
+
+.say li strong {
+  display: block;
+  color: var(--win-blue-title);
+}
+
 /* What to do in the app, set apart from what is merely being explained. */
 .task {
   margin: 7px 0 0;
@@ -855,6 +906,15 @@
   .say,
   .task {
     font-size: 0.82rem;
+  }
+
+  .say ol {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .say li + li::after {
+    display: none;
   }
 
   .foot {

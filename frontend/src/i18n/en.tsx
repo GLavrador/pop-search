@@ -392,7 +392,38 @@ export const en = {
     steps: {
       welcome: {
         title: 'Hi! I am BIP-98',
-        say: 'Pop Search keeps videos from X so you can find them later, just by describing what happens in them. I will show you how in two minutes. This is only practice: nothing we do here reaches the real app.',
+        say: (
+          <>
+            I am the robot that lives in here and helps whoever is just arriving. Before I show
+            you where everything is, let me tell you <strong>what Pop Search is</strong> and what
+            it is for. It will not take long.
+          </>
+        ),
+        next: 'Tell me ▶',
+      },
+      about: {
+        title: 'What Pop Search is',
+        say: (
+          <>
+            Know that video you saw on X and then could never find again? Pop Search is an archive
+            of videos built so that does not happen. It works in three beats:
+            <ol>
+              <li>
+                <strong>You keep it</strong> Paste the link to the post that has the video.
+              </li>
+              <li>
+                <strong>The AI watches</strong> An artificial intelligence sees the video and
+                writes down what happens in it.
+              </li>
+              <li>
+                <strong>You find it</strong> Later you just write what you remember, like{' '}
+                <em>cat knocking over a glass</em>.
+              </li>
+            </ol>
+            Now I will show you each part working, on a practice screen: nothing we do here
+            reaches the real app.
+          </>
+        ),
         next: 'Off we go ▶',
       },
       paste: {

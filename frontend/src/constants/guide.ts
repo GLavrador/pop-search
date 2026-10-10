@@ -39,6 +39,7 @@ export interface GuideStep {
 // from anywhere lands on the same state.
 export const GUIDE_STEPS = [
   { id: 'welcome', tab: 'ingest', ingest: 'url', search: 'idle', spot: 'balloon', act: false },
+  { id: 'about', tab: 'ingest', ingest: 'url', search: 'idle', spot: 'balloon', act: false },
   { id: 'paste', tab: 'ingest', ingest: 'url', search: 'idle', spot: 'url', act: true },
   { id: 'options', tab: 'ingest', ingest: 'options', search: 'idle', spot: 'options', act: true },
   {
