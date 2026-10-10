@@ -44,19 +44,21 @@ const clickThrough = async (node: Element) => {
   await user.click(document.querySelector('[data-help-layer]') as Element);
 };
 
-// The icon gets a place on screen, and the robot is picked up beside it and carried onto it.
-const dropOn = async (icon: string | RegExp) => {
+const theRobot = () => screen.getByRole('button', { name: 'Poke BIP-98' });
+
+// The target gets a place on screen, and the robot is picked up beside it and carried onto it.
+const dropAt = async (target: Element) => {
   const box = { left: 300, top: 300, right: 360, bottom: 360, width: 60, height: 60 };
-  vi.spyOn(screen.getByRole('button', { name: icon }), 'getBoundingClientRect').mockReturnValue(
-    box as DOMRect,
-  );
-  const robot = screen.getByRole('button', { name: 'Poke BIP-98' });
+  vi.spyOn(target, 'getBoundingClientRect').mockReturnValue(box as DOMRect);
+  const robot = theRobot();
   await user.pointer([
     { keys: '[MouseLeft>]', target: robot, coords: { clientX: 320, clientY: 320 } },
     { target: robot, coords: { clientX: 330, clientY: 330 } },
     { keys: '[/MouseLeft]', target: robot, coords: { clientX: 330, clientY: 330 } },
   ]);
 };
+
+const dropOn = (name: string | RegExp) => dropAt(screen.getByRole('button', { name }));
 
 const BIN = /^(NOT THE BIN!!|I AM NOT RUBBISH!|HELP!!)$/;
 
@@ -226,6 +228,67 @@ describe('the robot outside the guide', () => {
 
     expect(
       within(screen.getByRole('status')).getByText(/already mine|my house|may be biased/),
+    ).toBeInTheDocument();
+  });
+
+  it('should read out the time when it is dropped on the clock', async () => {
+    renderApp();
+    const clock = document.querySelector('[data-robot-zone="clock"]') as HTMLElement;
+
+    await dropAt(clock);
+
+    expect(screen.getByRole('status')).toHaveTextContent(clock.textContent ?? 'no clock');
+  });
+
+  it('should have another go at the Start button when it is dropped on it', async () => {
+    renderApp();
+
+    await dropOn('Start');
+
+    expect(
+      within(screen.getByRole('status')).getByText(/never opened|just for show|Not today/),
+    ).toBeInTheDocument();
+  });
+
+  it('should warn about the cat when it is dropped on the close button', async () => {
+    renderApp();
+
+    await dropOn('Close');
+
+    expect(within(screen.getByRole('status')).getByText(/cat/)).toBeInTheDocument();
+  });
+
+  it('should get dizzy when it is shaken from side to side', async () => {
+    renderApp();
+    const robot = theRobot();
+    const to = (clientX: number) => ({ target: robot, coords: { clientX, clientY: 300 } });
+
+    await user.pointer([
+      { keys: '[MouseLeft>]', ...to(300) },
+      ...[360, 300, 360, 300, 360, 300, 360, 300].map(to),
+      { keys: '[/MouseLeft]', ...to(300) },
+    ]);
+
+    expect(
+      screen.getByText(/^(so dizzy\.\.\.|stop the world!|everything is spinning\.\.\.)$/),
+    ).toBeInTheDocument();
+  });
+
+  it('should do a somersault on a double click', async () => {
+    renderApp();
+
+    await user.dblClick(theRobot());
+
+    expect(screen.getByText(/^(wheee!|watch this!|ta-da!)$/)).toBeInTheDocument();
+  });
+
+  it('should ask for a break when it is poked over and over', async () => {
+    renderApp();
+
+    for (let i = 0; i < 5; i += 1) await user.click(theRobot());
+
+    expect(
+      screen.getByText(/^(enough!|stop, that tickles!|hey, that will do!)$/),
     ).toBeInTheDocument();
   });
 

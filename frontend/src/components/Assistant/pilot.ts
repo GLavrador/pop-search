@@ -26,14 +26,18 @@ import {
   type Stop,
 } from './trips';
 import {
+  NOT_SHAKING,
   angleOf,
   coast,
   hangFrom,
+  isShaken,
+  shake,
   steady,
   swing,
   throwOf,
   type Hang,
   type Sample,
+  type Shaking,
 } from './carry';
 import { createVariety } from './variety';
 import type { Aim } from '../Demo/spotlight';
@@ -48,8 +52,8 @@ export type Target = HTMLElement | (() => HTMLElement | null) | null;
 
 export type Move = 'jolt' | 'spin' | 'hop' | 'nod' | 'shake';
 
-/** The desktop icons it can be dropped on. Each one gets its own answer. */
-export type Zone = 'bin' | 'computer' | 'app';
+/** The places it can be dropped on. Each one gets its own answer. */
+export type Zone = 'bin' | 'computer' | 'app' | 'clock' | 'start' | 'close' | 'roof';
 
 export interface Mission {
   /** Changes whenever the robot has something new to say. */
@@ -101,6 +105,8 @@ export interface Pilot {
   drag: (x: number, y: number) => void;
   /** Let go. Says what it was dropped on, if anything. */
   release: () => Zone | null;
+  /** A somersault on the spot. */
+  flip: () => void;
   dispose: () => void;
 }
 
@@ -148,6 +154,17 @@ const TRAIL = 8;
 const BOUNCE = 0.45;
 const BRACE = 0.03;
 const MAX_BRACE = 24;
+const ROOF_REACH = 30;
+const ROOF_FOR = 9000;
+const HOVER_FOR = 4200;
+const DIZZY_FOR = 4500;
+const POKE_MEMORY = 3500;
+const POKES_TO_COMPLAIN = 5;
+const POKES_TO_FLEE = 8;
+const BORED_AFTER = 120000;
+const ASLEEP_AFTER = 180000;
+const READING_FOR = 1800;
+const TYPED_INTO = new Set(['text', 'search', 'url', 'email', 'password']);
 const SNORE_EVERY = 9000;
 
 const LAYERS = { behind: '0', front: '' };
@@ -163,6 +180,11 @@ const JOLT = [
   { transform: 'translateY(0) scale(1)' },
 ];
 const SPIN = [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }];
+const FLIP = [
+  { transformOrigin: '50% 55%', transform: 'translateY(0) rotate(0deg)' },
+  { transformOrigin: '50% 55%', transform: 'translateY(-24px) rotate(-180deg)', offset: 0.5 },
+  { transformOrigin: '50% 55%', transform: 'translateY(0) rotate(-360deg)' },
+];
 const NOD = [
   { transform: 'translateY(0)' },
   { transform: 'translateY(3px)' },
@@ -217,7 +239,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   let tilt = 0;
   let tiltRate = 0;
   let slide: Point | null = null;
-  let landing = { scared: false, hold: 0 };
+  let landing: { zone: Zone | null; hold: number } = { zone: null, hold: 0 };
+  let shaking: Shaking = NOT_SHAKING;
+  let dizzyUntil = 0;
 
   let face: Face = 'neutral';
   let flash: Face = 'wow';
@@ -235,8 +259,12 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   let shifted = false;
   let balloonOn = false;
   let pokes = 0;
+  let pokedAt: number[] = [];
   let prankUntil = 0;
   let lastInput = 0;
+  let yawned = false;
+  let dozing = false;
+  let reading: { node: HTMLInputElement | HTMLTextAreaElement; until: number } | null = null;
   let pointer: (Point & { at: number }) | null = null;
   let later: { at: number; run: () => void }[] = [];
   let raf = 0;
@@ -280,6 +308,12 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
         grabbed: [],
         bin: [],
         hiding: [],
+        dizzy: [],
+        enough: [],
+        flip: [],
+        roof: [],
+        yawn: [],
+        woke: [],
       },
     after: (ms, run) => later.push({ at: clock + ms, run }),
     move,
@@ -329,6 +363,13 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     else if (now - tuckedAt > REMEASURE_EVERY) tuck();
   };
 
+  /** True when the balloon fits next to a robot standing there, clear of what is under it. */
+  const roomBeside = (at: Point) => {
+    const reach = balloon.offsetWidth + BALLOON_GAP + 8;
+    const lifted = at.y + size.h - BALLOON_LIFT - balloon.offsetHeight >= 4;
+    return lifted && (at.x - reach >= 0 || at.x + size.w + reach <= window.innerWidth);
+  };
+
   /**
    * Hangs the balloon over the robot and inside the screen. With no room above
    * it goes beside the robot, and only as a last resort under it, over the app.
@@ -345,10 +386,11 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     if (perch?.side === 'below') {
       hang = fitsBelow || !fitsAbove ? 'drop' : 'up';
     } else if (!fitsAbove) {
-      const clear = !perch?.side && pos.y + size.h - BALLOON_LIFT - height >= 4;
+      // Standing beside a control, a balloon at its side would land on that control.
+      const free = perch?.side !== 'left' && perch?.side !== 'right';
       const reach = width + BALLOON_GAP + 8;
-      if (clear && pos.x - reach >= 0) hang = 'left';
-      else if (clear && pos.x + size.w + reach <= window.innerWidth) hang = 'right';
+      if (free && roomBeside(pos) && pos.x - reach >= 0) hang = 'left';
+      else if (free && roomBeside(pos)) hang = 'right';
       else hang = 'drop';
     }
 
@@ -380,8 +422,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     const tall = balloon.firstElementChild ? balloon.offsetHeight + BALLOON_GAP : 0;
 
     let spot = perchBy(box, room, size, mission?.aim?.from);
-    // On top with no room left above, the balloon would drop over the control itself.
-    if (tall && spot.side === 'above' && spot.at.y - tall < 4) {
+    // On top with no room left above or beside, the balloon would drop over the control itself.
+    if (tall && spot.side === 'above' && spot.at.y - tall < 4 && !roomBeside(spot.at)) {
       const under = perchBy(box, room, size, 'below');
       if (under.side === 'below') spot = under;
     }
@@ -536,19 +578,34 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     return true;
   };
 
+  /**
+   * What it was let go over. Its body counts and so does the pointer: a target
+   * as small as a title bar button is aimed at with the hand, not with the robot.
+   */
   const zoneAt = (at: Point): Zone | null => {
-    const x = at.x + size.w / 2;
-    const y = at.y + size.h / 2;
+    const centre = { x: at.x + size.w / 2, y: at.y + size.h / 2 };
+    const over = (box: DOMRect) =>
+      [centre, hand].some(
+        (mark) =>
+          mark.x >= box.left - DROP_REACH &&
+          mark.x <= box.right + DROP_REACH &&
+          mark.y >= box.top - DROP_REACH &&
+          mark.y <= box.bottom + DROP_REACH,
+      );
+
     for (const node of document.querySelectorAll<HTMLElement>('[data-robot-zone]')) {
-      const box = node.getBoundingClientRect();
-      const inside =
-        x >= box.left - DROP_REACH &&
-        x <= box.right + DROP_REACH &&
-        y >= box.top - DROP_REACH &&
-        y <= box.bottom + DROP_REACH;
-      if (inside) return (node.dataset.robotZone as Zone | undefined) ?? null;
+      if (node.closest('[aria-hidden="true"]')) continue;
+      if (over(node.getBoundingClientRect())) return (node.dataset.robotZone as Zone | undefined) ?? null;
     }
-    return null;
+
+    // Anywhere along the top edge of the window is a seat.
+    const frame = boxOf(openWindow());
+    const onEdge =
+      frame !== null &&
+      centre.x >= frame.left &&
+      centre.x <= frame.right &&
+      Math.abs(at.y + size.h - frame.top) <= ROOF_REACH;
+    return onEdge ? 'roof' : null;
   };
 
   /** Out of its own hands: drawn where physics puts it, turned about the point it is held by. */
@@ -593,11 +650,24 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     toss(now, 'dangle', 'wow');
   };
 
-  /** Back on its own feet: whatever it was doing before is over, and this spot is home for now. */
+  /**
+   * Back on its own: seated if it was put on the window, hovering if it was left
+   * in mid-air. Either way this spot is home until it goes back to what it was doing.
+   */
   const touchDown = (now: number) => {
     if (!pos) return;
-    const here = pos;
-    const { scared, hold } = landing;
+    const { zone, hold } = landing;
+    const scared = zone === 'bin';
+    const ledge = zone === 'roof' ? boxOf(openWindow()) : null;
+    const spot: Stop = ledge
+      ? {
+          at: {
+            x: clamp(pos.x, ledge.left + 4, ledge.right - size.w - 4),
+            y: ledge.top - size.h + SEATED,
+          },
+          pose: 'sit',
+        }
+      : { at: pos };
 
     slide = null;
     hang = null;
@@ -606,12 +676,19 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     if (body) body.style.transform = '';
 
     leg = {
-      where: () => ({ at: here }),
-      pose: 'stand',
-      face: scared ? 'worried' : 'neutral',
+      where: () => spot,
+      pose: zone ? 'stand' : 'hover',
+      face: scared ? 'worried' : ledge ? 'happy' : 'neutral',
       hold,
     };
-    perch = { at: here };
+    perch = spot;
+
+    if (ledge) {
+      // A short hop down onto the edge. Landing there does the rest.
+      flight = planFlight(pos, spot.at, now, 0);
+      say(vary('roof', scene.emotes().roof), now + 2400);
+      return;
+    }
     face = leg.face;
     holdUntil = now + hold;
     move(SQUASH, 300);
@@ -635,7 +712,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     lean += (brace - lean) * Math.min(1, dt / 80);
 
     const speed = Math.hypot(slide.x, slide.y);
-    toss(now, speed > 40 ? 'brake' : 'stand', speed > 320 ? 'wow' : 'neutral');
+    const resting = landing.zone ? 'stand' : 'hover';
+    toss(now, speed > 40 ? 'brake' : resting, speed > 320 ? 'wow' : 'neutral');
     if (speed < 24 && Math.abs(tilt) < 0.03 && Math.abs(tiltRate) < 0.4) touchDown(now);
   };
 
@@ -645,6 +723,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       leg?.mission === true &&
       roam !== 'never' &&
       !still &&
+      !dozing &&
       !mission?.parked &&
       mission?.cue !== 'sleep';
 
@@ -741,12 +820,35 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
 
     const flying = flight !== null;
     const side = perch?.side;
-    lean += ((flying ? leanFor(speedX) : 0) - lean) * Math.min(1, dt / 110);
+    // Shaken too hard, it sways on its feet until its head stops spinning.
+    const sway = now < dizzyUntil ? Math.sin(now / 170) * 10 : 0;
+    lean += ((flying ? leanFor(speedX) : sway) - lean) * Math.min(1, dt / 110);
+
+    // Left alone long enough it yawns, and after a while longer it nods off where it sits.
+    const idle =
+      !flying && leg.mission === true && mission?.roam === 'calm' && mission.cue === 'rest';
+    const away = now - Math.max(lastInput, pointer?.at ?? 0);
+    if (idle && !dozing && away > ASLEEP_AFTER) {
+      dozing = true;
+    } else if (idle && !dozing && !yawned && away > BORED_AFTER) {
+      yawned = true;
+      flash = 'yawn';
+      flashUntil = now + 2400;
+      say(vary('yawn', scene.emotes().yawn), now + 2600);
+    }
 
     let want: Point = AHEAD;
     const rest = typeof leg.gaze === 'function' ? leg.gaze(side) : leg.gaze;
     if (flying) {
       want = heading ?? want;
+    } else if (reading && now < reading.until && reading.node.isConnected) {
+      // It reads along: its eyes sit on the end of what has been typed so far.
+      const box = reading.node.getBoundingClientRect();
+      const typed = Math.min(box.width - 10, 12 + reading.node.value.length * 7.5);
+      const dx = box.left + typed - (pos.x + size.w / 2);
+      const dy = box.top + box.height / 2 - (pos.y + size.h * 0.35);
+      const far = Math.hypot(dx, dy) || 1;
+      want = { x: dx / far, y: dy / far };
     } else if (pointer && now - pointer.at < POINTER_MEMORY) {
       const dx = pointer.x - (pos.x + size.w / 2);
       const dy = pointer.y - (pos.y + size.h * 0.35);
@@ -770,14 +872,15 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
 
     const pose = perch?.pose ?? (typeof leg.pose === 'function' ? leg.pose(side) : leg.pose);
     setFlag('data-pose', flying ? 'fly' : pose);
-    setFlag('data-face', now < flashUntil ? flash : flying ? 'neutral' : face);
+    const resting = dozing ? 'sleepy' : face;
+    setFlag('data-face', now < flashUntil ? flash : flying ? 'neutral' : resting);
     setFlag('data-talking', now < talkUntil ? '' : null);
 
     const depth = leg.layer === 'behind' ? 'behind' : 'front';
     if (sky.style.zIndex !== LAYERS[depth]) sky.style.zIndex = LAYERS[depth];
     label(now);
 
-    if (!flying && leg.mission && mission?.cue === 'sleep' && now >= snoreAt) {
+    if (!flying && leg.mission && (mission?.cue === 'sleep' || dozing) && now >= snoreAt) {
       say('z z z', now + 2800);
       snoreAt = now + SNORE_EVERY;
     }
@@ -793,11 +896,39 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   const onLayout = () => {
     shifted = true;
   };
+  /** Any sign of life from the user: no more yawning, and if it had dozed off it starts awake. */
+  const stir = () => {
+    yawned = false;
+    if (!dozing) return;
+    dozing = false;
+    const now = present();
+    flash = 'wow';
+    flashUntil = now + 900;
+    say(vary('woke', scene.emotes().woke), now + 1700);
+    move(JOLT, 420);
+  };
   const onPointer = (event: PointerEvent) => {
     pointer = { x: event.clientX, y: event.clientY, at: clock };
+    stir();
   };
   const onInput = () => {
     lastInput = present();
+    stir();
+  };
+  const onType = (event: Event) => {
+    const node = event.target;
+    const input = node instanceof HTMLInputElement && TYPED_INTO.has(node.type) ? node : null;
+    const field = input ?? (node instanceof HTMLTextAreaElement ? node : null);
+    if (!field) return;
+
+    // A password is none of its business: it covers its eyes for as long as the typing lasts.
+    if (input?.type === 'password') {
+      reading = null;
+      flash = 'shy';
+      flashUntil = present() + 1400;
+      return;
+    }
+    reading = { node: field, until: present() + READING_FOR };
   };
 
   window.addEventListener('resize', onLayout);
@@ -805,6 +936,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   window.addEventListener('pointermove', onPointer, { passive: true });
   window.addEventListener('pointerdown', onInput, { passive: true });
   window.addEventListener('keydown', onInput);
+  window.addEventListener('input', onType, true);
   raf = window.requestAnimationFrame(tick);
 
   return {
@@ -819,7 +951,10 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       // When it sent the window away itself, that is part of the act, not new orders.
       const itsOwnDoing = sameStep && clock < prankUntil;
       mission = next;
-      if (!unchanged && !itsOwnDoing) briefed = true;
+      if (!unchanged && !itsOwnDoing) {
+        briefed = true;
+        dozing = false;
+      }
     },
 
     poke: (quiet = false) => {
@@ -830,6 +965,23 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       }
 
       const now = present();
+      pokedAt = [...pokedAt.filter((at) => now - at < POKE_MEMORY), now];
+
+      // Poked over and over it objects, and if that does not work it gets out of reach.
+      if (pokedAt.length >= POKES_TO_COMPLAIN) {
+        const fleeing = pokedAt.length >= POKES_TO_FLEE;
+        flash = 'worried';
+        flashUntil = now + 1300;
+        say(vary('enough', scene.emotes().enough), now + 1600);
+        move(SHAKE, 520);
+        if (fleeing) {
+          pokedAt = [];
+          wantTrick = true;
+          holdUntil = now + 500;
+        }
+        return false;
+      }
+
       pokes += 1;
       const lines = mission?.beeps ?? [];
       if (!quiet && lines.length) say(lines[pokes % lines.length], now + 1300);
@@ -868,6 +1020,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       const now = present();
       pos ??= { x: x - size.w / 2, y: y - size.h / 2 };
       hand = { x, y };
+      shaking = NOT_SHAKING;
       held = { x: x - pos.x, y: y - pos.y };
       hang = null;
       pivotWas = null;
@@ -882,9 +1035,20 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
 
     drag: (x, y) => {
       if (!held) return;
+      const at = performance.now();
+      shaking = shake(shaking, x - hand.x, at);
       hand = { x, y };
       pos = onScreen({ x: x - held.x, y: y - held.y });
-      trail = [...trail.slice(1 - TRAIL), { x, y, at: performance.now() }];
+      trail = [...trail.slice(1 - TRAIL), { x, y, at }];
+
+      if (isShaken(shaking, at) && present() >= dizzyUntil) {
+        const now = present();
+        shaking = NOT_SHAKING;
+        dizzyUntil = now + DIZZY_FOR;
+        flash = 'dizzy';
+        flashUntil = dizzyUntil;
+        say(vary('dizzy', scene.emotes().dizzy), now + 2000);
+      }
     },
 
     release: () => {
@@ -895,10 +1059,13 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       const zone = zoneAt(pos);
       const scared = zone === 'bin';
 
-      // Put on an icon it stays on it; thrown anywhere else it carries on for a bit.
+      // Put on something it stays on it; thrown anywhere else it carries on for a bit.
       slide = zone || still ? { x: 0, y: 0 } : throwOf(trail, performance.now());
-      // Wherever it ends up it stays a moment, then goes back to what it was doing.
-      landing = { scared, hold: scared ? 450 : zone ? 700 : 2400 };
+      // Wherever it ends up it stays a while, then goes back to what it was doing.
+      const stay = scared ? 450 : zone === 'roof' ? ROOF_FOR : zone ? 700 : HOVER_FOR;
+      landing = { zone, hold: Math.max(stay, dizzyUntil - now) };
+      shaking = NOT_SHAKING;
+      if (now >= dizzyUntil) hush();
 
       if (scared) {
         flash = 'worried';
@@ -909,6 +1076,16 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       return zone;
     },
 
+    flip: () => {
+      const now = present();
+      // The two clicks of a double click are no reason to complain.
+      pokedAt = pokedAt.slice(0, -2);
+      flash = 'happy';
+      flashUntil = now + 1300;
+      say(vary('flip', scene.emotes().flip), now + 1500);
+      move(FLIP, 760);
+    },
+
     dispose: () => {
       window.cancelAnimationFrame(raf);
       window.removeEventListener('resize', onLayout);
@@ -916,6 +1093,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('pointerdown', onInput);
       window.removeEventListener('keydown', onInput);
+      window.removeEventListener('input', onType, true);
       sky.style.zIndex = '';
     },
   };

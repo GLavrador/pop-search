@@ -7,6 +7,7 @@ import {
   type PressKey,
   type RobotEvent,
   type RobotVoice,
+  type TypedWord,
 } from '../context/robotContext';
 import type { Cue, Mission, Reaction, Target, Zone } from '../components/Assistant/pilot';
 import type { Face } from '../components/Assistant/trips';
@@ -64,10 +65,39 @@ const PRESS_FACES: Partial<Record<PressKey, Face>> = {
   back: 'neutral',
 };
 
-const icon = (zone: Zone) => () =>
+const mark = (zone: Zone) => () =>
   document.querySelector<HTMLElement>(`[data-robot-zone="${zone}"]`);
-const ICONS = { computer: icon('computer'), app: icon('app') };
+// The bin and the top of the window it handles with its body alone; these get a balloon.
+const DROPS = {
+  computer: mark('computer'),
+  app: mark('app'),
+  clock: mark('clock'),
+  start: mark('start'),
+  close: mark('close'),
+};
 const BESIDE_ICON: Aim = { from: 'right' };
+
+// Matched against what was typed with the accents taken off, so "robô" is "robo".
+const TYPED_WORDS: Record<TypedWord, RegExp> = {
+  cat: /\b(gat[oa]s?|gatinh[oa]s?|cats?|kittens?)\b/,
+  robot: /\b(robos?|robots?|bip)\b/,
+  dog: /\b(cachorr[oa]s?|doguinhos?|dogs?|pupp(y|ies))\b/,
+  bin: /\b(lixo|lixeira|trash|rubbish)\b/,
+  home: /\bpop ?search\b/,
+};
+const TYPED_LOOKS: Record<TypedWord, Reaction> = {
+  cat: { face: 'wow', move: 'jolt' },
+  robot: { face: 'happy', move: 'hop' },
+  dog: { face: 'happy', move: 'nod' },
+  bin: { face: 'worried', move: 'shake' },
+  home: { face: 'happy', move: 'nod' },
+};
+
+const plain = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 // Under the panel, so the balloon lands on the desktop and not on what the user needs next.
 const FROM_UNDER: Aim = { from: 'below', free: true };
 const PROGRESS = () => findHelp('ingest.progress');
@@ -96,6 +126,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   const spoken = useRef<Line | null>(null);
   const visited = useRef(new Set<Tab>());
   const pressed = useRef<{ what: PressKey | null; at: number }>({ what: null, at: 0 });
+  const noticed = useRef(new Set<TypedWord>());
   const vary = useMemo(() => createVariety(), []);
   const live = useRef({ guiding, t });
 
@@ -140,19 +171,32 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
     [say],
   );
 
-  /** Dropped on the bin it runs for it on its own; the other icons get a word. */
+  /** Let go over something it has an opinion about. The bin and the roof need no words. */
   const dropped = useCallback(
     (zone: Zone | null) => {
-      if (zone !== 'computer' && zone !== 'app') return;
+      if (!zone || zone === 'bin' || zone === 'roof') return;
+
       const turn = vary(`drop.${zone}`, [0, 1, 2]);
+      const time = DROPS.clock()?.textContent?.trim() ?? '';
+      const onIcon = zone === 'computer' || zone === 'app';
       say({
         rank: 'react',
-        copy: ({ robot }) => ({ text: robot.drop[zone][turn % robot.drop[zone].length] }),
+        copy: ({ robot }) => ({
+          text:
+            zone === 'clock'
+              ? robot.drop.clock[turn % robot.drop.clock.length](time)
+              : robot.drop[zone][turn % robot.drop[zone].length],
+        }),
         cue: zone === 'app' ? 'cheer' : 'teach',
-        target: ICONS[zone],
-        aim: BESIDE_ICON,
+        target: DROPS[zone],
+        aim: onIcon ? BESIDE_ICON : undefined,
         ttl: 6500,
       });
+
+      // On the Start button it does what it always does there: jumps on it, to no avail.
+      if (zone === 'start') {
+        [900, 1500].forEach((ms) => setTimeout(() => handle.current?.react({ move: 'hop' }), ms));
+      }
     },
     [say, vary],
   );
@@ -182,6 +226,14 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
             face: PRESS_FACES[event.what] ?? 'happy',
             emote: vary(`press.${event.what}`, says.press[event.what]),
           });
+          break;
+        }
+        case 'typing': {
+          const text = plain(event.text);
+          const words = Object.keys(TYPED_WORDS) as TypedWord[];
+          const fresh = words.find((word) => TYPED_WORDS[word].test(text) && !noticed.current.has(word));
+          noticed.current = new Set(words.filter((word) => TYPED_WORDS[word].test(text)));
+          if (fresh) react({ ...TYPED_LOOKS[fresh], emote: vary(`typed.${fresh}`, says.typed[fresh]) });
           break;
         }
         case 'searchStarted':

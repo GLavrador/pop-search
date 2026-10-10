@@ -27,6 +27,7 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
         type="button"
         className={styles.start}
         data-robot="start"
+        data-robot-zone="start"
         {...helpAt('taskbar.start')}
       >
         <img src={logo} alt="" className={styles.logo} />
@@ -38,7 +39,12 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
       <div className={styles.tasks}>{children}</div>
 
       <div className={styles.tray}>
-        <span className={styles.clock} data-robot="clock" {...helpAt('taskbar.clock')}>
+        <span
+          className={styles.clock}
+          data-robot="clock"
+          data-robot-zone="clock"
+          {...helpAt('taskbar.clock')}
+        >
           {time}
         </span>
       </div>

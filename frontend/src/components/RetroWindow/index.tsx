@@ -112,6 +112,7 @@ export const RetroWindow = ({
             className={styles.controlButton}
             aria-label={t.window.close}
             onClick={onClose}
+            data-robot-zone="close"
             {...helpAt('window.buttons')}
           >
             X

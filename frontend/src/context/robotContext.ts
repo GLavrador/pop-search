@@ -7,6 +7,9 @@ export type HelpKey = keyof Dictionary['robot']['help'];
 /** The buttons inside the tabs it has something to say about. */
 export type PressKey = keyof Dictionary['robot']['says']['press'];
 
+/** The words it pricks up its ears at when they are typed into the search. */
+export type TypedWord = keyof Dictionary['robot']['says']['typed'];
+
 /** Marks a control as one the robot can find and explain. */
 export const helpAt = (key: HelpKey) => ({ 'data-help': key });
 
@@ -20,6 +23,7 @@ export const findHelp = (key: HelpKey): HTMLElement | null =>
 export type RobotEvent =
   | { kind: 'tab'; tab: Tab }
   | { kind: 'pressed'; what: PressKey }
+  | { kind: 'typing'; text: string }
   | { kind: 'searchStarted' }
   | { kind: 'searchFound'; count: number }
   /** Each way out that is still open comes along, ready to run from the balloon. */

@@ -326,13 +326,33 @@
   transform-origin: center top;
 }
 
-.jet {
-  fill: #ffb347;
+/* Out unless a pose lights it. It stretches from the sole of the foot down. */
+.flame {
+  fill: #ff8a1f;
   stroke: #c2410c;
-  stroke-width: 1;
+  stroke-width: 0.8;
   opacity: 0;
-  transform-origin: 26px 58px;
+  transform-box: fill-box;
+  transform-origin: center top;
   transition: opacity 120ms ease-out;
+}
+
+.flameCore {
+  fill: #ffe27a;
+  stroke: none;
+}
+
+.hands {
+  display: none;
+}
+
+[data-face='shy'] .hands {
+  display: inline;
+}
+
+[data-face='shy'] .armL,
+[data-face='shy'] .armR {
+  opacity: 0;
 }
 
 .brows path,
@@ -343,15 +363,59 @@
   stroke-linecap: square;
 }
 
+.eyesDizzy path,
+.mouthWavy {
+  fill: none;
+  stroke: var(--robot-glow);
+  stroke-width: 1.3;
+  stroke-linecap: square;
+}
+
+.eyesDizzy path {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: whirl 0.8s linear infinite;
+}
+
+.eyesDizzy path + path {
+  animation-direction: reverse;
+}
+
+.mouthYawn {
+  fill: var(--robot-glow);
+  stroke: none;
+}
+
 /* Faces: one set of eyes and one mouth shows at a time. */
 .eyesHappy,
 .eyesWide,
 .eyesShut,
+.eyesDizzy,
 .brows,
 .mouthSmile,
 .mouthOh,
-.mouthFrown {
+.mouthFrown,
+.mouthWavy,
+.mouthYawn {
   display: none;
+}
+
+[data-face='dizzy'] .eyesRound,
+[data-face='dizzy'] .mouthFlat,
+[data-face='yawn'] .eyesRound,
+[data-face='yawn'] .mouthFlat {
+  display: none;
+}
+
+[data-face='dizzy'] .eyesDizzy,
+[data-face='dizzy'] .mouthWavy,
+[data-face='yawn'] .eyesShut,
+[data-face='yawn'] .mouthYawn {
+  display: inline;
+}
+
+[data-face='dizzy'] .led {
+  animation-duration: 0.25s;
 }
 
 [data-face='worried'] .mouthFlat {
@@ -412,7 +476,8 @@
 /* Speaking wins over any mouth the face had picked. */
 [data-talking] .mouthSmile,
 [data-talking] .mouthOh,
-[data-talking] .mouthFrown {
+[data-talking] .mouthFrown,
+[data-talking] .mouthWavy {
   display: none;
 }
 
@@ -422,7 +487,7 @@
 }
 
 /* Poses. */
-[data-pose='fly'] .jet {
+[data-pose='fly'] .flame {
   opacity: 1;
   animation: thrust 0.11s steps(2, jump-none) infinite;
 }
@@ -488,8 +553,50 @@
   animation: flailBack 0.34s ease-in-out infinite;
 }
 
+/* Left in mid-air: small flames under its feet, which open and close to keep it there. */
+[data-pose='hover'] .robot {
+  animation: steadying 2.6s ease-in-out infinite;
+}
+
+[data-pose='hover'] .flame {
+  opacity: 1;
+  animation: glow 0.3s ease-in-out infinite alternate;
+}
+
+[data-pose='hover'] .legR .flame {
+  animation-delay: -0.15s;
+}
+
+[data-pose='hover'] .armL {
+  animation: balance 1.8s ease-in-out infinite;
+}
+
+[data-pose='hover'] .armR {
+  animation: balanceBack 1.8s ease-in-out -0.4s infinite;
+}
+
+/* Slow, small corrections: it is holding its place, not kicking. */
+[data-pose='hover'] .legL {
+  animation: paddle 1.8s ease-in-out infinite;
+}
+
+[data-pose='hover'] .legR {
+  animation: paddleBack 1.8s ease-in-out -0.6s infinite;
+}
+
+/* A stretch goes with the yawn, whatever it was doing with its arms. */
+[data-face='yawn'] .armL {
+  transform: rotate(62deg);
+  animation: none;
+}
+
+[data-face='yawn'] .armR {
+  transform: rotate(-62deg);
+  animation: none;
+}
+
 /* Jets against the slide, arms out for balance. */
-[data-pose='brake'] .jet {
+[data-pose='brake'] .flame {
   opacity: 1;
   animation: thrust 0.09s steps(2, jump-none) infinite;
 }
@@ -615,6 +722,71 @@
   }
 }
 
+@keyframes whirl {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glow {
+  from {
+    transform: scale(0.88, 0.62);
+  }
+  to {
+    transform: scale(1.06, 0.9);
+  }
+}
+
+@keyframes steadying {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.3deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(1.3deg);
+  }
+}
+
+@keyframes balance {
+  0%,
+  100% {
+    transform: rotate(10deg);
+  }
+  50% {
+    transform: rotate(22deg);
+  }
+}
+
+@keyframes balanceBack {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(-22deg);
+  }
+}
+
+@keyframes paddle {
+  0%,
+  100% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes paddleBack {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+
 @keyframes kick {
   0%,
   100% {
@@ -647,12 +819,13 @@
 @media (prefers-reduced-motion: reduce) {
   .robot,
   .eye,
+  .eyesDizzy path,
   .led,
   .armL,
   .armR,
   .legL,
   .legR,
-  .jet,
+  .flame,
   [data-talking] .mouthFlat {
     animation: none !important;
   }

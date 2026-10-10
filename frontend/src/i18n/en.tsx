@@ -342,6 +342,12 @@ export const en = {
       grabbed: ['whoa!', 'hey!', 'put me down!', 'wheee!'],
       bin: ['NOT THE BIN!!', 'I AM NOT RUBBISH!', 'HELP!!'],
       hiding: ['is it over?', 'is it gone?', 'can I come out?'],
+      dizzy: ['so dizzy...', 'stop the world!', 'everything is spinning...'],
+      enough: ['enough!', 'stop, that tickles!', 'hey, that will do!'],
+      flip: ['wheee!', 'watch this!', 'ta-da!'],
+      roof: ['I can see it all from here', 'my favourite spot', 'what a view!'],
+      yawn: ['yaaawn...', 'so sleepy...', 'where did everyone go?'],
+      woke: ['huh? I am awake!', 'I was not sleeping!', 'oh, you are back!'],
     },
     progress: (current: number, total: number) => `Step ${current} of ${total}`,
     back: '◂ back',
@@ -559,6 +565,13 @@ export const en = {
       reopened: ['phew!', 'it is back!', 'what a scare!'],
       bigger: ['wow, so big!', 'full screen!', 'room to spare!'],
       smaller: ['that fits better', 'regular size', 'back to my corner'],
+      typed: {
+        cat: ['meow?', 'a cat?! where?', 'the one behind the window?'],
+        robot: ['that is me!!', 'did you call?', 'robot? present!'],
+        dog: ['woof woof!', 'dogs I like', 'where is the puppy?'],
+        bin: ['do not say that word!', 'a bin?! where?!', 'yikes...'],
+        home: ['you are already in it!', 'the best program there is!', 'that is my house!'],
+      },
       press: {
         next: ['nice, a link!', 'let us see that video', 'next step!'],
         back: ['going back...', 'no hurry', 'back to the link'],
@@ -618,6 +631,21 @@ export const en = {
         'Pop Search! This one is already mine: I live in it.',
         'That is my house! I tidied it all up myself.',
         'Pop Search, the best program on this computer. I may be biased.',
+      ],
+      clock: [
+        (time: string) => `It is ${time}. Time flies when you are looking for a video.`,
+        (time: string) => `Let me see... ${time}. Right on time, as always.`,
+        (time: string) => `${time}! High time to keep a new video.`,
+      ],
+      start: [
+        'Open! Open! ... Nothing. This Start has never opened.',
+        'Let me try again... no, still just for show.',
+        'One day this button will open. Not today.',
+      ],
+      close: [
+        'Careful with that button: they say there is a cat on the other side.',
+        'The X? I would not press it. There is a cat waiting back there.',
+        'That one closes the window. And lets the cat out.',
       ],
     },
     whatsThis: {

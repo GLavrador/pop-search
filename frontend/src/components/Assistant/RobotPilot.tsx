@@ -51,7 +51,9 @@ interface RobotPilotProps {
   handle?: RefObject<RobotHandle | null>;
   /** Takes the click. Without it a click is just a poke. */
   onPoke?: () => void;
-  /** It was dragged and let go, on one of the desktop icons or nowhere in particular. */
+  /** It was picked up: whatever it was saying is cut short. */
+  onGrab?: () => void;
+  /** It was dragged and let go, on something it knows or nowhere in particular. */
   onDrop?: (zone: Zone | null) => void;
   /** What hangs over it: what it is saying, or its menu. */
   children?: ReactNode;
@@ -71,6 +73,7 @@ export const RobotPilot = ({
   pinned = false,
   handle,
   onPoke,
+  onGrab,
   onDrop,
   children,
 }: RobotPilotProps) => {
@@ -153,6 +156,7 @@ export const RobotPilot = ({
       if (Math.hypot(event.clientX - start.x, event.clientY - start.y) < DRAG_AFTER) return;
       start.carrying = true;
       pilot.current?.grab(start.x, start.y);
+      onGrab?.();
     }
     pilot.current?.drag(event.clientX, event.clientY);
   };
@@ -180,6 +184,7 @@ export const RobotPilot = ({
           title={label}
           aria-label={label}
           onClick={handleClick}
+          onDoubleClick={() => pilot.current?.flip()}
           onPointerDown={handleDown}
           onPointerMove={handleMove}
           onPointerUp={handleUp}

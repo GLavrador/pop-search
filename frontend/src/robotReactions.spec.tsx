@@ -139,6 +139,18 @@ describe('the robot reacting to the app', () => {
     expect(screen.getByText(COPIED)).toBeInTheDocument();
   });
 
+  it.each([
+    ['cat', ['meow?', 'a cat?! where?', 'the one behind the window?']],
+    ['a robô', ['that is me!!', 'did you call?', 'robot? present!']],
+  ])('should prick up its ears when "%s" is typed into the search', async (words, lines) => {
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+
+    await user.type(screen.getByPlaceholderText('Type to search...'), words);
+
+    expect(screen.getByText(anyOf(lines))).toBeInTheDocument();
+  });
+
   it('should have a word for the buttons inside a tab', async () => {
     renderApp();
     await user.click(tab('🔍 Search.exe'));

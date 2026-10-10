@@ -142,7 +142,10 @@ export const SearchSection = () => {
             type="text"
             placeholder={t.search.placeholder}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              robot.notify({ kind: 'typing', text: e.target.value });
+            }}
             className={`win95-inset win95-input`}
             disabled={isLoading}
           />

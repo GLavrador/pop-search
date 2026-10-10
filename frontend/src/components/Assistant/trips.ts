@@ -1,7 +1,16 @@
 import type { Box, Point, Side, Size } from './flight';
 import type { Variety } from './variety';
 
-export type Face = 'neutral' | 'happy' | 'curious' | 'wow' | 'sleepy' | 'worried';
+export type Face =
+  | 'neutral'
+  | 'happy'
+  | 'curious'
+  | 'wow'
+  | 'sleepy'
+  | 'worried'
+  | 'dizzy'
+  | 'yawn'
+  | 'shy';
 
 export type Pose =
   | 'stand'
@@ -12,6 +21,7 @@ export type Pose =
   | 'peek'
   | 'dangle'
   | 'brake'
+  | 'hover'
   | 'point-down'
   | 'point-up'
   | 'point-left'
@@ -53,6 +63,12 @@ export interface Emotes {
   grabbed: readonly string[];
   bin: readonly string[];
   hiding: readonly string[];
+  dizzy: readonly string[];
+  enough: readonly string[];
+  flip: readonly string[];
+  roof: readonly string[];
+  yawn: readonly string[];
+  woke: readonly string[];
 }
 
 /** What a trip may use of the robot and of the screen it lives on. */

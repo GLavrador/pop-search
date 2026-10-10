@@ -318,6 +318,7 @@ function AppContent() {
         stage={stage}
         label={t.guide.poke}
         handle={robot.handle}
+        onGrab={robot.dismiss}
         onDrop={robot.dropped}
       >
         {robot.line && <Speech line={robot.line} onDismiss={robot.dismiss} />}

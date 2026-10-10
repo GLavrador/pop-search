@@ -348,6 +348,12 @@ export const pt: Dictionary = {
       grabbed: ['eeei!', 'opa!', 'me solta!', 'uooou!'],
       bin: ['LIXO NÃO!!', 'EU NÃO SOU LIXO!', 'SOCORRO!!'],
       hiding: ['já passou?', 'ela já foi embora?', 'posso sair?'],
+      dizzy: ['tô tonto...', 'para o mundo!', 'tá tudo girando...'],
+      enough: ['chega!', 'para, faz cócegas!', 'ei, já deu!'],
+      flip: ['iupiii!', 'olha isso!', 'tcharam!'],
+      roof: ['daqui eu vejo tudo', 'meu lugar preferido', 'que vista!'],
+      yawn: ['uaaah...', 'que soninho...', 'cadê todo mundo?'],
+      woke: ['ãh? acordei!', 'eu não tava dormindo!', 'opa, você voltou!'],
     },
     progress: (current: number, total: number) => `Passo ${current} de ${total}`,
     back: '◂ voltar',
@@ -566,6 +572,13 @@ export const pt: Dictionary = {
       reopened: ['ufa!', 'voltou!', 'que susto!'],
       bigger: ['uau, que grande!', 'tela cheia!', 'espaço de sobra!'],
       smaller: ['assim cabe melhor', 'tamanho normal', 'de volta ao cantinho'],
+      typed: {
+        cat: ['miau?', 'gato?! cadê?', 'é o de trás da janela?'],
+        robot: ['sou eu!!', 'me chamou?', 'robô? presente!'],
+        dog: ['au au!', 'de cachorro eu gosto', 'cadê o doguinho?'],
+        bin: ['não fala essa palavra!', 'lixo?! onde?!', 'credo...'],
+        home: ['você já está nele!', 'o melhor programa que tem!', 'essa é a minha casa!'],
+      },
       press: {
         next: ['boa, um link!', 'vamos ver esse vídeo', 'próximo passo!'],
         back: ['voltando...', 'sem pressa', 'de volta ao link'],
@@ -625,6 +638,21 @@ export const pt: Dictionary = {
         'Pop Search! Esse aqui já é meu: eu moro nele.',
         'Essa é a minha casa! Fui eu que arrumei tudo.',
         'Pop Search, o melhor programa deste computador. Sou suspeito, eu sei.',
+      ],
+      clock: [
+        (time: string) => `São ${time}. O tempo voa quando a gente procura vídeo.`,
+        (time: string) => `Deixa eu ver... ${time}. Pontual como sempre.`,
+        (time: string) => `${time}! Já está na hora de guardar um vídeo novo.`,
+      ],
+      start: [
+        'Abre! Abre! ... Nada. Esse Iniciar nunca abriu.',
+        'Vou tentar de novo... não, continua sendo enfeite.',
+        'Um dia esse botão ainda abre. Hoje não.',
+      ],
+      close: [
+        'Cuidado com esse botão: dizem que tem um gato do outro lado.',
+        'O X? Eu não apertaria. Tem um gato esperando ali atrás.',
+        'Esse fecha a janela. E solta o gato.',
       ],
     },
     whatsThis: {
