@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useVideoAnalysisMutation } from '../../hooks/useVideoAnalysisMutation';
 import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
@@ -8,6 +8,7 @@ import { QuotaMeter } from '../QuotaMeter';
 import { URLInputView } from './URLInputView';
 import { createVideoUrlInputSchema } from '../../schemas/videoMetadata';
 import { useI18n } from '../../i18n/languageContext';
+import { useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 const createEmptyMetadata = (url: string): VideoMetadata => ({
@@ -32,8 +33,33 @@ export const IngestSection = () => {
   const { analyze, reset, isLoading, data, error } = useVideoAnalysisMutation();
   const { setStatus } = useStatus();
   const { t } = useI18n();
+  const robot = useRobot();
+  const toldData = useRef<VideoMetadata | undefined>(undefined);
+  const toldError = useRef<string | null>(null);
 
   const [analyticsOptions, setAnalyticsOptions] = useState({ analyzeScenes: true, analyzeAudio: true });
+
+  useEffect(() => {
+    if (data === toldData.current) return;
+    toldData.current = data;
+    if (data) robot.notify({ kind: 'analysisDone' });
+  }, [data, robot]);
+
+  // The way out it offers is the manual form, opened on the link that just failed.
+  useEffect(() => {
+    if (error === toldError.current) return;
+    toldError.current = error;
+    if (!error) return;
+
+    robot.notify({
+      kind: 'analysisFailed',
+      manual: () => {
+        setManualData(createEmptyMetadata(url));
+        setAnalyticsOptions({ analyzeScenes: true, analyzeAudio: true });
+        setStatus(t.ingest.status.manual);
+      },
+    });
+  }, [error, robot, url, setStatus, t.ingest.status.manual]);
 
   useEffect(() => {
     if (data) {
@@ -52,6 +78,7 @@ export const IngestSection = () => {
     if (!result.success) {
       const reason = result.error.issues[0]?.message || t.validation.invalidUrl;
       setStatus(t.ingest.status.invalid(reason), 3000);
+      robot.notify({ kind: 'urlRejected' });
       return false;
     }
     return true;
@@ -61,6 +88,7 @@ export const IngestSection = () => {
     if (!performValidation()) return;
     setAnalyticsOptions(options);
     setStatus(t.ingest.status.analysing);
+    robot.notify({ kind: 'analysisStarted' });
     analyze(url, options);
   };
 
@@ -69,6 +97,7 @@ export const IngestSection = () => {
     setManualData(createEmptyMetadata(url));
     setAnalyticsOptions({ analyzeScenes: true, analyzeAudio: true }); // By default show all in manual mode
     setStatus(t.ingest.status.manual);
+    robot.notify({ kind: 'manualOpened' });
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
@@ -76,16 +105,19 @@ export const IngestSection = () => {
         setStatus(t.ingest.status.saving);
         await saveVideo(finalData);
         setStatus(t.ingest.status.saved, 5000);
+        robot.notify({ kind: 'saved' });
         handleCancelReview();
       } catch (err: unknown) {
         console.error("Failed to save video to database:", err);
         setStatus(t.ingest.status.saveFailed, 5000);
+        robot.notify({ kind: 'saveFailed' });
       }
   };
 
   const handleCancelLoading = () => {
     reset();
     setStatus(t.ingest.status.cancelled, 3000);
+    robot.notify({ kind: 'analysisCancelled' });
   };
 
   const handleCancelReview = () => {

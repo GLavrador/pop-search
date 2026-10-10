@@ -11,3 +11,14 @@ class ResizeObserverStub {
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver;
 
 Element.prototype.scrollIntoView ??= () => {};
+
+window.matchMedia ??= ((media: string) => ({
+  matches: false,
+  media,
+  addEventListener() {},
+  removeEventListener() {},
+})) as unknown as typeof window.matchMedia;
+
+Element.prototype.animate ??= (() => ({
+  cancel() {},
+})) as unknown as typeof Element.prototype.animate;

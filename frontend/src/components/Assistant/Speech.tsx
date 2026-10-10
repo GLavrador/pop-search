@@ -23,6 +23,18 @@ export const Speech = ({ line, onDismiss }: SpeechProps) => {
       />
       {copy.title && <p className={styles.speechTitle}>{copy.title}</p>}
       <p className={styles.speechText}>{copy.text}</p>
+      {copy.action && line.run && (
+        <button
+          type="button"
+          className={`win95-btn ${styles.go}`}
+          onClick={() => {
+            line.run?.();
+            onDismiss();
+          }}
+        >
+          {copy.action}
+        </button>
+      )}
     </div>
   );
 };

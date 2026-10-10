@@ -530,6 +530,55 @@ export const pt: Dictionary = {
   robot: {
     dismiss: 'Fechar',
     ask: (what: string) => `O que é ${what}?`,
+    says: {
+      tabs: {
+        ingest: ['hora de guardar!', 'manda o link!'],
+        search: ['vamos procurar?', 'o que a gente procura?'],
+        library: ['sua coleção!', 'olha quanta coisa!'],
+        account: ['sua conta'],
+        admin: ['os números!'],
+      },
+      searching: 'procurando...',
+      found: (count: number) => (count === 1 ? 'achei 1!' : `achei ${count}!`),
+      searchFailed: 'ops, deu erro...',
+      copied: 'copiado!',
+      badLink: 'esse link não serve',
+      analysed: 'pronto!',
+      cancelled: 'ok, parei.',
+      manual: 'eu confio em você!',
+      saved: 'guardado!',
+      saveFailed: 'não salvou...',
+      hello: (name: string | null) => (name ? `oi, ${name}!` : 'oi!'),
+      bye: 'até mais!',
+      language: 'agora em português!',
+      closing: ['ei!', 'não fecha!', 'sério?', 'tem um gato aí...'],
+      reopened: 'ufa!',
+      bigger: 'uau, que grande!',
+      smaller: 'assim cabe melhor',
+    },
+    lines: {
+      watching: 'Vou ficar de olho. Costuma levar por volta de um minuto.',
+      waiting: [
+        'A IA assiste ao vídeo inteiro antes de escrever, por isso demora.',
+        'Vídeo longo leva mais tempo. Ainda está andando.',
+        'Quase lá, eu acho. Se cansar de esperar, dá para cancelar.',
+      ],
+      analysisFailed: {
+        text: 'A IA não conseguiu desta vez, e o motivo está na caixa vermelha. Você pode tentar de novo, ou escrever o título e a descrição você mesmo.',
+        action: 'Preencher eu mesmo',
+      },
+      emptyWiden: {
+        text: 'Não achei nada com essa precisão. Quer que eu procure de novo, aceitando vídeos menos parecidos?',
+        action: 'Tentar com Ampla',
+      },
+      emptyLoosen: {
+        text: 'Nenhum vídeo tem exatamente essas palavras. Quer que eu procure pelo significado também?',
+        action: 'Buscar por significado',
+      },
+      emptyStuck: {
+        text: 'Nem assim eu achei. Tente outras palavras, ou descreva a cena de outro jeito.',
+      },
+    },
     whatsThis: {
       button: 'O que é isso?',
       title: 'O que é isso? Clique aqui e depois em qualquer coisa da tela.',

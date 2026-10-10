@@ -1,7 +1,7 @@
 import type { SearchResult } from "../../types";
 import { useStatus } from "../../context/StatusContext";
 import { useI18n } from "../../i18n/languageContext";
-import { helpAt } from "../../context/robotContext";
+import { helpAt, useRobot } from "../../context/robotContext";
 import styles from "./styles.module.css";
 
 interface VideoCardProps {
@@ -20,6 +20,7 @@ const matchOriginKey = (similarity: number, textRank: number) => {
 export const VideoCard = ({ data }: VideoCardProps) => {
   const { setStatus } = useStatus();
   const { t } = useI18n();
+  const robot = useRobot();
   const percentage = Math.round(data.similarity * 100);
   const displayUrl = data.url_original;
   const origin = t.card[matchOriginKey(data.similarity, data.text_rank ?? 0)];
@@ -27,6 +28,7 @@ export const VideoCard = ({ data }: VideoCardProps) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(displayUrl);
     setStatus(t.card.copied, 2000);
+    robot.notify({ kind: 'copied' });
   };
 
   return (

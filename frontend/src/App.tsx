@@ -65,7 +65,9 @@ function AppContent() {
   const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
-  const robot = useRobotDirector();
+  const robot = useRobotDirector({ guiding: guide.isVisible });
+  const { notify } = robot;
+  const wasSignedIn = useRef<boolean | null>(null);
   const [invite, setInvite] = useState(readInvite);
   const [spotNode, setSpotNode] = useState<HTMLElement | null>(null);
   const reportSpot = useCallback((node: HTMLElement | null) => setSpotNode(node), []);
@@ -73,7 +75,22 @@ function AppContent() {
   const stage = useRef<HTMLDivElement>(null);
   useIdentityReset();
   useBackendWarmup();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const spokenIn = useRef(language);
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+    if (wasSignedIn.current !== null && wasSignedIn.current !== isAuthenticated) {
+      notify(isAuthenticated ? { kind: 'signedIn', name: displayName } : { kind: 'signedOut' });
+    }
+    wasSignedIn.current = isAuthenticated;
+  }, [isAuthLoading, isAuthenticated, displayName, notify]);
+
+  useEffect(() => {
+    if (spokenIn.current === language) return;
+    spokenIn.current = language;
+    notify({ kind: 'language' });
+  }, [language, notify]);
 
   useEffect(() => {
     if (windowState !== 'closing') return;
@@ -93,6 +110,7 @@ function AppContent() {
 
     if (closeClicks.current < CLICKS_TO_CLOSE) {
       setShakeKey((key) => key + 1);
+      notify({ kind: 'closeAttempt', attempt: closeClicks.current });
       return;
     }
 
@@ -108,6 +126,17 @@ function AppContent() {
     pendingCat.current = null;
     setCat(null);
     setWindowState('open');
+    notify({ kind: 'reopened' });
+  };
+
+  const selectTab = (tab: Tab) => {
+    if (tab !== activeTab) notify({ kind: 'tab', tab });
+    setActiveTab(tab);
+  };
+
+  const toggleMaximized = () => {
+    notify({ kind: 'maximized', on: !isMaximized });
+    setIsMaximized(!isMaximized);
   };
 
   const isClosed = windowState === 'closed';
@@ -171,7 +200,7 @@ function AppContent() {
         maximized={isMaximized}
         shakeKey={shakeKey}
         onMinimize={() => setWindowState('minimized')}
-        onMaximize={() => setIsMaximized((value) => !value)}
+        onMaximize={toggleMaximized}
         onClose={handleClose}
         aside={offersGuide && invite === 'tucked' ? <GuideChip onOpen={startGuide} /> : undefined}
         onHelp={robot.toggleHelp}
@@ -216,7 +245,7 @@ function AppContent() {
           <TabStrip
             tabs={tabs}
             activeId={activeTab}
-            onSelect={setActiveTab}
+            onSelect={selectTab}
             quiet={step !== null}
           />
 

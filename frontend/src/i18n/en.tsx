@@ -523,6 +523,55 @@ export const en = {
   robot: {
     dismiss: 'Close',
     ask: (what: string) => `What is ${what}?`,
+    says: {
+      tabs: {
+        ingest: ['time to keep one!', 'send me the link!'],
+        search: ['shall we look?', 'what are we after?'],
+        library: ['your collection!', 'look at all that!'],
+        account: ['your account'],
+        admin: ['the numbers!'],
+      },
+      searching: 'looking...',
+      found: (count: number) => (count === 1 ? 'found 1!' : `found ${count}!`),
+      searchFailed: 'oops, that failed...',
+      copied: 'copied!',
+      badLink: 'that link will not do',
+      analysed: 'done!',
+      cancelled: 'ok, stopped.',
+      manual: 'I trust you!',
+      saved: 'kept!',
+      saveFailed: 'it did not save...',
+      hello: (name: string | null) => (name ? `hi, ${name}!` : 'hi!'),
+      bye: 'see you!',
+      language: 'now in English!',
+      closing: ['hey!', 'do not close it!', 'really?', 'there is a cat in there...'],
+      reopened: 'phew!',
+      bigger: 'wow, so big!',
+      smaller: 'that fits better',
+    },
+    lines: {
+      watching: 'I will keep an eye on it. It usually takes about a minute.',
+      waiting: [
+        'The AI watches the whole video before it writes, that is why it takes a while.',
+        'A long video takes longer. It is still going.',
+        'Nearly there, I think. If you get tired of waiting, you can cancel.',
+      ],
+      analysisFailed: {
+        text: 'The AI could not manage this time, and the reason is in the red box. You can try again, or write the title and the description yourself.',
+        action: 'Fill it in myself',
+      },
+      emptyWiden: {
+        text: 'I found nothing at this precision. Shall I look again, accepting videos that are less alike?',
+        action: 'Try Broad',
+      },
+      emptyLoosen: {
+        text: 'No video has exactly those words. Shall I look by meaning as well?',
+        action: 'Search by meaning too',
+      },
+      emptyStuck: {
+        text: 'Still nothing. Try other words, or describe the scene another way.',
+      },
+    },
     whatsThis: {
       button: "What's this?",
       title: "What's this? Click here, then on anything on screen.",

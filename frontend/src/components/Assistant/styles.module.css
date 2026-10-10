@@ -210,6 +210,17 @@
   left: auto;
 }
 
+/* Up against the top of the screen there is no room over its head. */
+.emote[data-beside] {
+  top: 6px;
+  left: 50px;
+}
+
+.emote[data-beside][data-flip] {
+  right: 50px;
+  left: auto;
+}
+
 .robot {
   --robot-glow: #4fe3c1;
 
@@ -868,8 +879,16 @@
   margin: 0;
 }
 
+.speech .go {
+  display: block;
+  min-width: 0;
+  margin-top: 8px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+}
+
 /* The navy button is always the way forward, and there is only ever one. */
-:is(.assistant, .invite, .paused) .go {
+:is(.assistant, .invite, .paused, .speech) .go {
   min-width: 124px;
   background: var(--win-blue-title);
   color: var(--win-light);

@@ -242,7 +242,10 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   const say = (text: string, until: number) => {
     if (!text) return;
     emote.textContent = text;
-    emote.toggleAttribute('data-flip', (pos?.x ?? 0) > window.innerWidth - 160);
+    // Behind the window a flipped label would be behind it too.
+    const flip = (pos?.x ?? 0) > window.innerWidth - 160 && leg?.layer !== 'behind';
+    emote.toggleAttribute('data-flip', flip);
+    emote.toggleAttribute('data-beside', (pos?.y ?? window.innerHeight) < 18);
     emote.setAttribute('data-on', '');
     emoteUntil = until;
   };
@@ -262,10 +265,12 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
 
     const width = balloon.offsetWidth;
     const height = balloon.offsetHeight;
+    const fitsAbove = pos.y - height - BALLOON_GAP >= 4;
+    const fitsBelow = pos.y + size.h + BALLOON_GAP + height <= window.innerHeight - 34;
     let hang = 'up';
     if (perch?.side === 'below') {
-      hang = 'drop';
-    } else if (pos.y - height - BALLOON_GAP < 4) {
+      hang = fitsBelow || !fitsAbove ? 'drop' : 'up';
+    } else if (!fitsAbove) {
       const clear = !perch?.side && pos.y + size.h - BALLOON_LIFT - height >= 4;
       const reach = width + BALLOON_GAP + 8;
       if (clear && pos.x - reach >= 0) hang = 'left';
@@ -294,9 +299,10 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   const beside = (control: HTMLElement): Stop => {
     const box = control.getBoundingClientRect();
     // Inside the panel it keeps to the panel; anything else has the whole screen.
-    const room = stage.current?.contains(control)
-      ? stage.current.getBoundingClientRect()
-      : { left: 4, top: 4, right: window.innerWidth - 4, bottom: window.innerHeight - 4 };
+    const room =
+      !mission?.aim?.free && stage.current?.contains(control)
+        ? stage.current.getBoundingClientRect()
+        : { left: 4, top: 4, right: window.innerWidth - 4, bottom: window.innerHeight - 4 };
     const tall = balloon.firstElementChild ? balloon.offsetHeight + BALLOON_GAP : 0;
 
     let spot = perchBy(box, room, size, mission?.aim?.from);
