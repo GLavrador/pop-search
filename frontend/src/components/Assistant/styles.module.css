@@ -67,8 +67,8 @@
   left: var(--shift, 0px);
   z-index: 3;
   width: max-content;
-  max-width: min(262px, calc(100vw - 12px));
-  font-size: 0.82rem;
+  max-width: min(310px, calc(100vw - 12px));
+  font-size: 0.94rem;
   line-height: 1.45;
   visibility: hidden;
   opacity: 0;
@@ -187,14 +187,14 @@
 
 .emote {
   position: absolute;
-  top: -15px;
+  top: -20px;
   left: 36px;
   z-index: 2;
-  padding: 1px 6px;
+  padding: 2px 8px;
   background: var(--win-tooltip-bg);
   border: 1px solid var(--win-dark);
   font-family: inherit;
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: bold;
   line-height: 1.35;
   color: var(--win-dark);
@@ -930,7 +930,7 @@
 
 .speech {
   position: relative;
-  padding: 8px 28px 9px 11px;
+  padding: 9px 30px 10px 12px;
   background: var(--win-tooltip-bg);
   border: 1px solid var(--win-dark);
   box-shadow: 2px 2px 0 0 var(--win-shadow-dark);
@@ -946,7 +946,7 @@
 
 .speechTitle {
   margin: 0 0 3px;
-  font-size: 0.84rem;
+  font-size: 0.97rem;
   font-weight: bold;
   color: var(--win-blue-title);
 }
@@ -958,9 +958,9 @@
 .speech .go {
   display: block;
   min-width: 0;
-  margin-top: 8px;
-  padding: 4px 12px;
-  font-size: 0.8rem;
+  margin-top: 9px;
+  padding: 5px 14px;
+  font-size: 0.9rem;
 }
 
 /* The navy button is always the way forward, and there is only ever one. */
