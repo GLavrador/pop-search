@@ -717,6 +717,33 @@
   color: var(--win-blue-title);
 }
 
+.speech {
+  position: relative;
+  padding: 8px 28px 9px 11px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  box-shadow: 2px 2px 0 0 var(--win-shadow-dark);
+  color: var(--win-dark);
+  text-align: left;
+}
+
+.speech .close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.speechTitle {
+  margin: 0 0 3px;
+  font-size: 0.84rem;
+  font-weight: bold;
+  color: var(--win-blue-title);
+}
+
+.speechText {
+  margin: 0;
+}
+
 /* The navy button is always the way forward, and there is only ever one. */
 :is(.assistant, .invite, .paused) .go {
   min-width: 124px;

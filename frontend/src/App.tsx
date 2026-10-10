@@ -28,11 +28,14 @@ import { GuidePaused } from './components/Assistant/Paused';
 import { GuideInvite } from './components/Assistant/Invite';
 import { GuideChip } from './components/Assistant/Chip';
 import { RobotPilot } from './components/Assistant/RobotPilot';
+import { Speech } from './components/Assistant/Speech';
 import type { Cue } from './components/Assistant/pilot';
 import { DemoIngest } from './components/Demo/DemoIngest';
 import { DemoSearch } from './components/Demo/DemoSearch';
 import { AIMS } from './components/Demo/spotlight';
 import { useGuide } from './hooks/useGuide';
+import { useRobotDirector } from './hooks/useRobotDirector';
+import { RobotContext } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
 
 const WINDOW_ICON = '💻';
@@ -61,6 +64,7 @@ function AppContent() {
   const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
+  const robot = useRobotDirector();
   const [invite, setInvite] = useState(readInvite);
   const [spotNode, setSpotNode] = useState<HTMLElement | null>(null);
   const reportSpot = useCallback((node: HTMLElement | null) => setSpotNode(node), []);
@@ -135,7 +139,17 @@ function AppContent() {
 
   const offersGuide = !isAuthLoading && !isAuthenticated && guide.step === null;
 
-  return (
+  const brief = robot.briefOver(
+    step && {
+      utterance: guide.index,
+      cue,
+      target: spotNode,
+      aim: step.spot ? AIMS[step.spot] : null,
+      roam: 'eager',
+    },
+  );
+
+  const desktop = (
     <div className={styles.appContainer}>
       <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} onOpenApp={handleOpen} />
 
@@ -255,16 +269,15 @@ function AppContent() {
       </RetroWindow>
 
       <RobotPilot
-        utterance={step ? guide.index : 'rest'}
-        cue={step ? cue : 'rest'}
+        {...brief}
         home={robotSeat}
-        target={step ? spotNode : null}
-        aim={step?.spot ? AIMS[step.spot] : null}
         parked={windowState === 'minimized'}
-        roam={step ? 'eager' : 'calm'}
         stage={stage}
         label={t.guide.poke}
-      />
+        handle={robot.handle}
+      >
+        {robot.line && <Speech line={robot.line} onDismiss={robot.dismiss} />}
+      </RobotPilot>
 
       <footer className={styles.footer}>
         <p>{t.footer}</p>
@@ -284,6 +297,8 @@ function AppContent() {
       </Taskbar>
     </div>
   );
+
+  return <RobotContext.Provider value={robot.voice}>{desktop}</RobotContext.Provider>;
 }
 
 function App() {

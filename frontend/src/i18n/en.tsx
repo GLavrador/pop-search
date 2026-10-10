@@ -1,4 +1,10 @@
+import type { ReactNode } from 'react';
 import type { GuideStepCopy, GuideStepId } from '../constants/guide';
+
+interface HelpCopy {
+  title: string;
+  text: ReactNode;
+}
 
 export const en = {
   language: {
@@ -485,6 +491,27 @@ export const en = {
         next: 'Finish ✓',
       },
     } satisfies Record<GuideStepId, GuideStepCopy>,
+  },
+
+  robot: {
+    dismiss: 'Close',
+    ask: (what: string) => `What is ${what}?`,
+    help: {
+      'search.mode': {
+        title: 'Search mode',
+        text: (
+          <>
+            It is how I look. <strong>Hybrid</strong> uses both ways at once and is the default.{' '}
+            <strong>Semantic</strong> goes by subject, even when the video uses other words.{' '}
+            <strong>Exact</strong> only brings videos that contain the words you typed.
+          </>
+        ),
+      } as HelpCopy,
+      'search.threshold': {
+        title: 'Match threshold',
+        text: 'How closely a video has to resemble what you wrote to make the list. Further right I get picky and bring fewer videos. Further left I bring more, some of them not that close. It only applies to searching by meaning.',
+      } as HelpCopy,
+    },
   },
 };
 

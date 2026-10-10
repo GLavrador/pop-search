@@ -124,6 +124,7 @@ export const RobotPilot = ({
         <button
           type="button"
           className={styles.body}
+          data-robot-body
           title={label}
           aria-label={label}
           onClick={handleClick}

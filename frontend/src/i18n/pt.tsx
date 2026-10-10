@@ -499,4 +499,26 @@ export const pt: Dictionary = {
       },
     },
   },
+
+  robot: {
+    dismiss: 'Fechar',
+    ask: (what: string) => `O que é ${what}?`,
+    help: {
+      'search.mode': {
+        title: 'Modo de busca',
+        text: (
+          <>
+            É o jeito que eu procuro. <strong>Híbrida</strong> usa os dois jeitos ao mesmo tempo e
+            é o padrão. <strong>Semântica</strong> procura pelo assunto, mesmo que as palavras do
+            vídeo sejam outras. <strong>Exata</strong> só traz vídeos com as palavras que você
+            digitou.
+          </>
+        ),
+      },
+      'search.threshold': {
+        title: 'Limiar de correspondência',
+        text: 'É o quanto um vídeo precisa se parecer com o que você escreveu para entrar na lista. Mais para a direita eu fico exigente e trago menos vídeos. Mais para a esquerda trago mais, alguns nem tão parecidos. Só vale para a busca por significado.',
+      },
+    },
+  },
 };
