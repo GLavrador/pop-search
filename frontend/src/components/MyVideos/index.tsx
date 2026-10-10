@@ -1,6 +1,6 @@
 import { useMyVideosQuery } from '../../hooks/useMyVideosQuery';
 import { useI18n } from '../../i18n/languageContext';
-import { helpAt } from '../../context/robotContext';
+import { helpAt, useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 const formatDate = (value: string, locale: string): string => {
@@ -11,6 +11,7 @@ const formatDate = (value: string, locale: string): string => {
 export const MyVideos = () => {
   const { videos, isLoading, error } = useMyVideosQuery();
   const { t, locale } = useI18n();
+  const robot = useRobot();
 
   if (isLoading) {
     return <p className={styles.message}>{t.myVideos.loading}</p>;
@@ -50,6 +51,7 @@ export const MyVideos = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.link}
+                onClick={() => robot.notify({ kind: 'pressed', what: 'openVideo' })}
               >
                 {video.titulo_video || video.url_original}
               </a>

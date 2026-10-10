@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useStatus } from '../../context/StatusContext';
 import { useI18n } from '../../i18n/languageContext';
-import { helpAt } from '../../context/robotContext';
+import { helpAt, useRobot } from '../../context/robotContext';
 import { QuotaMeter } from '../QuotaMeter';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import styles from './styles.module.css';
@@ -17,6 +17,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   const { isAuthenticated, displayName, signIn, signUp, signOut } = useAuth();
   const { setStatus } = useStatus();
   const { t } = useI18n();
+  const robot = useRobot();
 
   const [mode, setMode] = useState<Mode>('signIn');
   const [email, setEmail] = useState('');
@@ -70,6 +71,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
     setError(null);
     setNotice(null);
     setIsBusy(true);
+    robot.notify({ kind: 'pressed', what: 'authSubmit' });
 
     const result =
       mode === 'signIn'
@@ -180,6 +182,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
         className={styles.switch}
         disabled={isBusy}
         onClick={() => {
+          robot.notify({ kind: 'pressed', what: 'authSwitch' });
           setMode(isSignUp ? 'signIn' : 'signUp');
           setError(null);
           setNotice(null);

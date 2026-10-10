@@ -5,7 +5,7 @@ import type { VideoMetadata } from "../../types";
 import { createVideoMetadataFormSchema, type VideoMetadataForm } from "../../schemas/videoMetadata";
 import { transformFormDataToMetadata } from "../../utils/transformers";
 import { useI18n } from "../../i18n/languageContext";
-import { helpAt } from "../../context/robotContext";
+import { helpAt, useRobot } from "../../context/robotContext";
 import styles from "./styles.module.css";
 
 interface ReviewFormProps {
@@ -26,6 +26,7 @@ const toFormData = (data: VideoMetadata): VideoMetadataForm => ({
 
 export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, showAudio = true }: ReviewFormProps) => {
   const { t } = useI18n();
+  const robot = useRobot();
   const schema = useMemo(() => createVideoMetadataFormSchema(t.validation), [t]);
 
   const {
@@ -136,7 +137,10 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
       <div className={styles.actions} {...helpAt('review.save')}>
         <button
           type="button"
-          onClick={onCancel}
+          onClick={() => {
+            robot.notify({ kind: 'pressed', what: 'reviewCancel' });
+            onCancel();
+          }}
           className="win95-btn"
           disabled={isSubmitting}
         >

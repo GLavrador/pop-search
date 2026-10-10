@@ -1,4 +1,5 @@
 import type { Box, Point, Side, Size } from './flight';
+import type { Variety } from './variety';
 
 export type Face = 'neutral' | 'happy' | 'curious' | 'wow' | 'sleepy' | 'worried';
 
@@ -49,9 +50,9 @@ export interface Emotes {
   sorry: string;
   knock: string;
   puzzled: string;
-  grabbed: string;
-  bin: string;
-  hiding: string;
+  grabbed: readonly string[];
+  bin: readonly string[];
+  hiding: readonly string[];
 }
 
 /** What a trip may use of the robot and of the screen it lives on. */
@@ -68,6 +69,8 @@ export interface Scene {
   prank: (ms: number) => void;
   /** How long since the user last typed or clicked. */
   idleFor: () => number;
+  /** Chooses among ways of saying one thing, never the same twice running. */
+  vary: Variety;
 }
 
 interface Trip {
@@ -536,7 +539,7 @@ export const TRIPS: Record<string, Trip> = {
 };
 
 /** Somewhere to cower: behind the far edge of the window, or half out of the screen. */
-export const hide = ({ size, emotes }: Scene): Leg[] => {
+export const hide = ({ size, emotes, vary }: Scene): Leg[] => {
   const frame = boxOf(openWindow());
   const behind = frame !== null && window.innerWidth - frame.right > size.w * 0.6;
   const at = behind
@@ -548,7 +551,7 @@ export const hide = ({ size, emotes }: Scene): Leg[] => {
       pose: 'peek',
       face: 'worried',
       gaze: { x: -1, y: -0.4 },
-      emote: () => emotes().hiding,
+      emote: () => vary('hiding', emotes().hiding),
       hold: 5200,
       layer: behind ? 'behind' : undefined,
       swift: true,

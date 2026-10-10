@@ -45,6 +45,7 @@ export const VideoCard = ({ data }: VideoCardProps) => {
             rel="noopener noreferrer"
             className={styles.title}
             title={data.titulo_video}
+            onClick={() => robot.notify({ kind: 'pressed', what: 'openVideo' })}
           >
             {data.titulo_video}
           </a>

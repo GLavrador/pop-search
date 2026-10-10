@@ -35,6 +35,7 @@ import {
   type Hang,
   type Sample,
 } from './carry';
+import { createVariety } from './variety';
 import type { Aim } from '../Demo/spotlight';
 
 export type Cue = 'greet' | 'teach' | 'cheer' | 'rest' | 'watch' | 'worry' | 'sleep';
@@ -189,6 +190,7 @@ const clamp = (value: number, low: number, high: number) => Math.min(Math.max(va
 
 export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts): Pilot => {
   const svg = craft.querySelector('svg');
+  const vary = createVariety();
   const body = craft.querySelector<HTMLElement>('button');
   const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   const size = { w: craft.offsetWidth || ROBOT.w, h: craft.offsetHeight || ROBOT.h };
@@ -275,9 +277,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
         sorry: '',
         knock: '',
         puzzled: '',
-        grabbed: '',
-        bin: '',
-        hiding: '',
+        grabbed: [],
+        bin: [],
+        hiding: [],
       },
     after: (ms, run) => later.push({ at: clock + ms, run }),
     move,
@@ -285,6 +287,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       prankUntil = clock + ms;
     },
     idleFor: () => clock - lastInput,
+    vary,
   };
 
   /** Keeps the short label on screen: near an edge it slides along instead of running off it. */
@@ -874,7 +877,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       queue = [];
       later = [];
       lastInput = now;
-      say(scene.emotes().grabbed, now + 1300);
+      say(vary('grabbed', scene.emotes().grabbed), now + 1300);
     },
 
     drag: (x, y) => {
@@ -900,7 +903,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       if (scared) {
         flash = 'worried';
         flashUntil = now + 1500;
-        say(scene.emotes().bin, now + 1500);
+        say(vary('bin', scene.emotes().bin), now + 1500);
         move(SHAKE, 520);
       }
       return zone;

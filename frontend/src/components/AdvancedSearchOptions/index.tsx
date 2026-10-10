@@ -5,6 +5,12 @@ import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
+const MODE_PRESSES = {
+  hybrid: 'modeHybrid',
+  semantic: 'modeSemantic',
+  text: 'modeText',
+} as const;
+
 interface AdvancedSearchOptionsProps {
   threshold: number;
   onThresholdChange: (val: number) => void;
@@ -32,7 +38,10 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
           type="button"
           className={`win95-btn ${styles.toggleButton}`}
           aria-expanded={isOpen}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            robot.notify({ kind: 'pressed', what: isOpen ? 'advancedClose' : 'advancedOpen' });
+            setIsOpen(!isOpen);
+          }}
           {...helpAt(isOpen ? 'search.advancedOpen' : 'search.advanced')}
         >
           {isOpen ? t.advanced.hide : t.advanced.show}
@@ -63,7 +72,12 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
                   type="button"
                   title={t.searchModes[option.id].hint}
                   aria-pressed={option.id === mode}
-                  onClick={() => onModeChange(option.id)}
+                  onClick={() => {
+                    if (option.id !== mode) {
+                      robot.notify({ kind: 'pressed', what: MODE_PRESSES[option.id] });
+                    }
+                    onModeChange(option.id);
+                  }}
                   className={`win95-btn ${styles.modeButton} ${option.id === mode ? 'win95-btn-pressed' : ''}`}
                 >
                   {t.searchModes[option.id].label}
@@ -103,7 +117,13 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
               max="0.99"
               step="0.01"
               value={threshold}
-              onChange={(e) => onThresholdChange(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const next = parseFloat(e.target.value);
+                if (next !== threshold) {
+                  robot.notify({ kind: 'pressed', what: next > threshold ? 'stricter' : 'looser' });
+                }
+                onThresholdChange(next);
+              }}
               className={styles.slider}
               aria-label={t.advanced.thresholdLabel}
             />
@@ -152,7 +172,10 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
                 id="max-results"
                 className={`win95-inset win95-input ${styles.select}`}
                 value={limit}
-                onChange={(e) => onLimitChange(Number(e.target.value))}
+                onChange={(e) => {
+                  robot.notify({ kind: 'pressed', what: 'limit' });
+                  onLimitChange(Number(e.target.value));
+                }}
               >
                 <option value={5}>5</option>
                 <option value={10}>10</option>

@@ -4,10 +4,13 @@ import { useI18n } from '../i18n/languageContext';
 import {
   findHelp,
   type HelpKey,
+  type PressKey,
   type RobotEvent,
   type RobotVoice,
 } from '../context/robotContext';
 import type { Cue, Mission, Reaction, Target, Zone } from '../components/Assistant/pilot';
+import type { Face } from '../components/Assistant/trips';
+import { createVariety } from '../components/Assistant/variety';
 import type { RobotHandle } from '../components/Assistant/RobotPilot';
 import type { Aim } from '../components/Demo/spotlight';
 import type { Tab } from '../constants/tabs';
@@ -49,6 +52,17 @@ const RANK = { tip: 0, react: 1, ask: 2 };
 const LINE_SPEECH = 2200;
 const WAIT_BETWEEN_LINES = 18000;
 const REVISIT_CHATTER = 0.4;
+const SAME_PRESS_GAP = 1500;
+
+// Most buttons get a smile. These few get a different look.
+const PRESS_FACES: Partial<Record<PressKey, Face>> = {
+  advancedOpen: 'curious',
+  modeSemantic: 'curious',
+  stricter: 'curious',
+  authSubmit: 'curious',
+  reviewCancel: 'neutral',
+  back: 'neutral',
+};
 
 const icon = (zone: Zone) => () =>
   document.querySelector<HTMLElement>(`[data-robot-zone="${zone}"]`);
@@ -72,8 +86,6 @@ const WATCHING: Brief = {
 const isHelpKey = (key: string | undefined): key is HelpKey =>
   key !== undefined && key in en.robot.help;
 
-const oneOf = (items: readonly string[]) => items[Math.floor(Math.random() * items.length)];
-
 export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   const { t } = useI18n();
   const [line, setLine] = useState<Line | null>(null);
@@ -83,6 +95,8 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   const handle = useRef<RobotHandle>(null);
   const spoken = useRef<Line | null>(null);
   const visited = useRef(new Set<Tab>());
+  const pressed = useRef<{ what: PressKey | null; at: number }>({ what: null, at: 0 });
+  const vary = useMemo(() => createVariety(), []);
   const live = useRef({ guiding, t });
 
   useEffect(() => {
@@ -130,16 +144,17 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   const dropped = useCallback(
     (zone: Zone | null) => {
       if (zone !== 'computer' && zone !== 'app') return;
+      const turn = vary(`drop.${zone}`, [0, 1, 2]);
       say({
         rank: 'react',
-        copy: (t) => ({ text: t.robot.drop[zone] }),
+        copy: ({ robot }) => ({ text: robot.drop[zone][turn % robot.drop[zone].length] }),
         cue: zone === 'app' ? 'cheer' : 'teach',
         target: ICONS[zone],
         aim: BESIDE_ICON,
         ttl: 6500,
       });
     },
-    [say],
+    [say, vary],
   );
 
   const notify = useCallback(
@@ -153,16 +168,28 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           visited.current.add(event.tab);
           put(null);
           if (firstVisit || Math.random() < REVISIT_CHATTER) {
-            react({ face: 'happy', emote: oneOf(says.tabs[event.tab]) });
+            react({ face: 'happy', emote: vary(`tab.${event.tab}`, says.tabs[event.tab]) });
           }
+          break;
+        }
+        case 'pressed': {
+          // A slider reports every notch it passes: one remark covers the whole drag.
+          const now = Date.now();
+          const again = pressed.current.what === event.what;
+          if (again && now - pressed.current.at < SAME_PRESS_GAP) break;
+          pressed.current = { what: event.what, at: now };
+          react({
+            face: PRESS_FACES[event.what] ?? 'happy',
+            emote: vary(`press.${event.what}`, says.press[event.what]),
+          });
           break;
         }
         case 'searchStarted':
           hush('search');
-          react({ face: 'curious', emote: says.searching, ms: 1200 });
+          react({ face: 'curious', emote: vary('searching', says.searching), ms: 1200 });
           break;
         case 'searchFound':
-          react({ face: 'happy', emote: says.found(event.count), move: 'nod' });
+          react({ face: 'happy', emote: vary('found', says.found)(event.count), move: 'nod' });
           break;
         case 'searchEmpty': {
           const retry = event.widen ?? event.loosen;
@@ -184,13 +211,13 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           break;
         }
         case 'searchFailed':
-          react({ face: 'worried', emote: says.searchFailed, move: 'shake' });
+          react({ face: 'worried', emote: vary('searchFailed', says.searchFailed), move: 'shake' });
           break;
         case 'copied':
-          react({ face: 'happy', emote: says.copied, move: 'nod', ms: 1300 });
+          react({ face: 'happy', emote: vary('copied', says.copied), move: 'nod', ms: 1300 });
           break;
         case 'urlRejected':
-          react({ face: 'curious', emote: says.badLink, move: 'shake' });
+          react({ face: 'curious', emote: vary('badLink', says.badLink), move: 'shake' });
           break;
         case 'analysisStarted':
           setWatching(true);
@@ -206,7 +233,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
         case 'analysisDone':
           setWatching(false);
           hush('analysis');
-          react({ face: 'happy', emote: says.analysed, move: 'hop' });
+          react({ face: 'happy', emote: vary('analysed', says.analysed), move: 'hop' });
           break;
         case 'analysisFailed':
           setWatching(false);
@@ -224,26 +251,26 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
         case 'analysisCancelled':
           setWatching(false);
           hush('analysis');
-          react({ emote: says.cancelled });
+          react({ emote: vary('cancelled', says.cancelled) });
           break;
         case 'manualOpened':
           hush('analysis');
-          react({ face: 'happy', emote: says.manual });
+          react({ face: 'happy', emote: vary('manual', says.manual) });
           break;
         case 'saved':
-          react({ face: 'happy', emote: says.saved, move: 'spin', ms: 2000 });
+          react({ face: 'happy', emote: vary('saved', says.saved), move: 'spin', ms: 2000 });
           break;
         case 'saveFailed':
-          react({ face: 'worried', emote: says.saveFailed, move: 'shake' });
+          react({ face: 'worried', emote: vary('saveFailed', says.saveFailed), move: 'shake' });
           break;
         case 'signedIn':
-          react({ face: 'happy', emote: says.hello(event.name), move: 'hop' });
+          react({ face: 'happy', emote: vary('hello', says.hello)(event.name), move: 'hop' });
           break;
         case 'signedOut':
-          react({ emote: says.bye });
+          react({ emote: vary('bye', says.bye) });
           break;
         case 'language':
-          react({ face: 'happy', emote: says.language });
+          react({ face: 'happy', emote: vary('language', says.language) });
           break;
         case 'closeAttempt':
           react({
@@ -253,14 +280,17 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           });
           break;
         case 'reopened':
-          react({ face: 'happy', emote: says.reopened, move: 'hop' });
+          react({ face: 'happy', emote: vary('reopened', says.reopened), move: 'hop' });
           break;
         case 'maximized':
-          react({ face: event.on ? 'wow' : 'neutral', emote: event.on ? says.bigger : says.smaller });
+          react({
+            face: event.on ? 'wow' : 'neutral',
+            emote: event.on ? vary('bigger', says.bigger) : vary('smaller', says.smaller),
+          });
           break;
       }
     },
-    [hush, put, react, say],
+    [hush, put, react, say, vary],
   );
 
   const stopHelp = useCallback(() => {

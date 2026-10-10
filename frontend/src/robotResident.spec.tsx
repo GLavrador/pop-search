@@ -44,7 +44,7 @@ const clickThrough = async (node: Element) => {
   await user.click(document.querySelector('[data-help-layer]') as Element);
 };
 
-// The icon gets a place on screen, and the robot is carried from elsewhere onto it.
+// The icon gets a place on screen, and the robot is picked up beside it and carried onto it.
 const dropOn = async (icon: string | RegExp) => {
   const box = { left: 300, top: 300, right: 360, bottom: 360, width: 60, height: 60 };
   vi.spyOn(screen.getByRole('button', { name: icon }), 'getBoundingClientRect').mockReturnValue(
@@ -52,11 +52,13 @@ const dropOn = async (icon: string | RegExp) => {
   );
   const robot = screen.getByRole('button', { name: 'Poke BIP-98' });
   await user.pointer([
-    { keys: '[MouseLeft>]', target: robot, coords: { clientX: 10, clientY: 10 } },
+    { keys: '[MouseLeft>]', target: robot, coords: { clientX: 320, clientY: 320 } },
     { target: robot, coords: { clientX: 330, clientY: 330 } },
     { keys: '[/MouseLeft]', target: robot, coords: { clientX: 330, clientY: 330 } },
   ]);
 };
+
+const BIN = /^(NOT THE BIN!!|I AM NOT RUBBISH!|HELP!!)$/;
 
 const openAdvanced = async () => {
   await user.click(tab('🔍 Search.exe'));
@@ -192,7 +194,17 @@ describe('the robot outside the guide', () => {
 
     await dropOn('Recycle Bin');
 
-    expect(screen.getByText('NOT THE BIN!!')).toBeInTheDocument();
+    expect(screen.getByText(BIN)).toBeInTheDocument();
+  });
+
+  it('should panic in other words when it is dropped there again', async () => {
+    renderApp();
+    await dropOn('Recycle Bin');
+    const first = screen.getByText(BIN).textContent;
+
+    await dropOn('Recycle Bin');
+
+    expect(screen.getByText(BIN)).not.toHaveTextContent(first ?? '');
   });
 
   it('should point out that everything already runs inside My Computer', async () => {
@@ -200,7 +212,11 @@ describe('the robot outside the guide', () => {
 
     await dropOn('My Computer');
 
-    expect(within(screen.getByRole('status')).getByText(/already inside it/)).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('status')).getByText(
+        /already inside it|already live in it|head is spinning/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it('should claim Pop Search as its own when dropped on it', async () => {
@@ -208,7 +224,9 @@ describe('the robot outside the guide', () => {
 
     await dropOn(/Pop Search$/);
 
-    expect(within(screen.getByRole('status')).getByText(/already mine/)).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('status')).getByText(/already mine|my house|may be biased/),
+    ).toBeInTheDocument();
   });
 
   it('should not take the end of a drag for a poke', async () => {

@@ -270,7 +270,10 @@ function AppContent() {
                       <button
                         type="button"
                         className="win95-btn"
-                        onClick={() => setActiveTab('account')}
+                        onClick={() => {
+                          notify({ kind: 'pressed', what: 'gateSignIn' });
+                          setActiveTab('account');
+                        }}
                       >
                         {t.gate.signIn}
                       </button>

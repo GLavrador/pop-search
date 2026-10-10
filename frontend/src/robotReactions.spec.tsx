@@ -54,6 +54,16 @@ const tab = (name: string) => screen.getByRole('tab', { name });
 
 const balloon = async () => within(await screen.findByRole('status'));
 
+// Everything it says comes in a few wordings, so the tests accept any of them.
+const literal = (line: string) => line.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const anyOf = (lines: string[]) => new RegExp(`^(${lines.map(literal).join('|')})$`);
+
+const FOUND_ONE = anyOf(['found 1!', 'got 1 here!', 'look, 1 video!']);
+const COPIED = anyOf(['copied!', 'it is yours!', 'link copied!']);
+const SEARCH_TAB = anyOf(['shall we look?', 'what are we after?', 'I will find it for you!']);
+const ADVANCED_OPEN = ['the fine settings!', 'time to tinker', 'the control panel'];
+const BROAD = ['net wide open!', 'bring them all!', 'the more the merrier'];
+
 const signIn = () =>
   mockGetSession.mockResolvedValue({
     data: {
@@ -98,7 +108,7 @@ describe('the robot reacting to the app', () => {
 
     await user.click(tab('🔍 Search.exe'));
 
-    expect(screen.getByText(/shall we look\?|what are we after\?/)).toBeInTheDocument();
+    expect(screen.getByText(SEARCH_TAB)).toBeInTheDocument();
   });
 
   it('should object when the window is being closed', async () => {
@@ -115,18 +125,58 @@ describe('the robot reacting to the app', () => {
 
     await searchFor('whale');
 
-    expect(await screen.findByText('found 1!')).toBeInTheDocument();
+    expect(await screen.findByText(FOUND_ONE)).toBeInTheDocument();
   });
 
   it('should confirm that a link was copied', async () => {
     searchVideos.mockResolvedValue([whale]);
     renderApp();
     await searchFor('whale');
-    await screen.findByText('found 1!');
+    await screen.findByText(FOUND_ONE);
 
     await press('Copy');
 
-    expect(screen.getByText('copied!')).toBeInTheDocument();
+    expect(screen.getByText(COPIED)).toBeInTheDocument();
+  });
+
+  it('should have a word for the buttons inside a tab', async () => {
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+
+    await press('Broad');
+    expect(
+      screen.getByText(anyOf(BROAD)),
+    ).toBeInTheDocument();
+
+    await press('Precise');
+    expect(
+      screen.getByText(anyOf(['only the best', 'picky mode', 'fine comb!'])),
+    ).toBeInTheDocument();
+  });
+
+  it('should not comment on a button that changes nothing', async () => {
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+    await press('Broad');
+    const said = screen.getByText(anyOf(BROAD)).textContent;
+
+    await press('Broad');
+
+    expect(screen.getByText(anyOf(BROAD))).toHaveTextContent(said ?? '');
+  });
+
+  it('should put the same thing in different words the next time', async () => {
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+
+    await press('▼ Advanced');
+    const first = screen.getByText(anyOf(ADVANCED_OPEN)).textContent;
+    await press('▲ Hide Advanced');
+    await press('▼ Advanced');
+
+    expect(
+      screen.getByText(anyOf(ADVANCED_OPEN.filter((line) => line !== first))),
+    ).toBeInTheDocument();
   });
 
   it('should offer a broader search when nothing comes up, and run it', async () => {

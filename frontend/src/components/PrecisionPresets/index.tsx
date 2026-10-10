@@ -1,6 +1,6 @@
 import { PRECISION_PRESETS, findPresetByThreshold } from '../../constants/searchPresets';
 import { useI18n } from '../../i18n/languageContext';
-import { helpAt } from '../../context/robotContext';
+import { helpAt, useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface PrecisionPresetsProps {
@@ -9,8 +9,15 @@ interface PrecisionPresetsProps {
   disabled?: boolean;
 }
 
+const PRESSES = {
+  broad: 'presetBroad',
+  balanced: 'presetBalanced',
+  precise: 'presetPrecise',
+} as const;
+
 export const PrecisionPresets = ({ threshold, onThresholdChange, disabled }: PrecisionPresetsProps) => {
   const { t } = useI18n();
+  const robot = useRobot();
   const activePreset = findPresetByThreshold(threshold);
 
   return (
@@ -28,7 +35,10 @@ export const PrecisionPresets = ({ threshold, onThresholdChange, disabled }: Pre
               title={t.presets[preset.id].hint}
               aria-pressed={isActive}
               disabled={disabled}
-              onClick={() => onThresholdChange(preset.threshold)}
+              onClick={() => {
+                if (!isActive) robot.notify({ kind: 'pressed', what: PRESSES[preset.id] });
+                onThresholdChange(preset.threshold);
+              }}
               className={`win95-btn ${styles.presetButton} ${isActive ? 'win95-btn-pressed' : ''}`}
             >
               {t.presets[preset.id].label}
