@@ -36,3 +36,11 @@
   flex-direction: column;
   gap: 4px;
 }
+
+.empty {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--win-tooltip-bg);
+  font-size: 0.95em;
+}
