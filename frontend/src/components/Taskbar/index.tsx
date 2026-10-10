@@ -21,7 +21,7 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
   const time = useClock(locale);
 
   return (
-    <div className={styles.taskbar}>
+    <div className={styles.taskbar} data-robot="taskbar">
       <button type="button" className={styles.start}>
         <img src={logo} alt="" className={styles.logo} />
         {t.taskbar.start}
@@ -32,7 +32,9 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
       <div className={styles.tasks}>{children}</div>
 
       <div className={styles.tray}>
-        <span className={styles.clock}>{time}</span>
+        <span className={styles.clock} data-robot="clock">
+          {time}
+        </span>
       </div>
     </div>
   );

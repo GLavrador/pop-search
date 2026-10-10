@@ -15,6 +15,7 @@ export const DesktopIcon = ({ art, label, onOpen }: DesktopIconProps) => (
   <button
     type="button"
     className={styles.icon}
+    data-robot="icon"
     onClick={() => {
       if (isTouch()) onOpen?.();
     }}
