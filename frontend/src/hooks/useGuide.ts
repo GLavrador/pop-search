@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { GUIDE_STEPS, type GuideStepDef } from '../constants/guide';
+import { GUIDE_STEPS, type GuideStepDef, type GuideStepId } from '../constants/guide';
 import type { Tab } from '../constants/tabs';
 
 const LAST_INDEX = GUIDE_STEPS.length - 1;
@@ -20,6 +20,8 @@ export interface Guide {
   hide: () => void;
   quit: () => void;
   goTo: (index: number) => void;
+  /** Goes to the step whose screen is the one an action in the app just produced. */
+  jump: (id: GuideStepId) => void;
   next: () => void;
   back: () => void;
 }
@@ -57,6 +59,7 @@ export const useGuide = ({ onEnterTab }: UseGuideOptions): Guide => {
     hide: useCallback(() => setIsHidden(true), []),
     quit,
     goTo,
+    jump: useCallback((id) => goTo(GUIDE_STEPS.findIndex((step) => step.id === id)), [goTo]),
     next: useCallback(() => goTo((index ?? 0) + 1), [goTo, index]),
     back: useCallback(() => goTo((index ?? 0) - 1), [goTo, index]),
   };

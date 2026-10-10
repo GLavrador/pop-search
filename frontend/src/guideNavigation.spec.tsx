@@ -40,7 +40,11 @@ const jumpTo = async (step: number) => {
   await user.click(screen.getByRole('button', { name: `Go to step ${step}` }));
 };
 
+const press = (name: string) => user.click(screen.getByRole('button', { name }));
+
 const tab = (name: string) => screen.getByRole('tab', { name });
+
+const demo = () => screen.getByText('DEMO').parentElement as HTMLElement;
 
 describe('guided demo navigation', () => {
   beforeEach(() => {
@@ -49,28 +53,85 @@ describe('guided demo navigation', () => {
     mockGetSession.mockResolvedValue({ data: { session: null } });
   });
 
-  it('should open on the first step with the scripted add screen', async () => {
+  it('should open on a reading step, where the assistant holds the way forward', async () => {
     renderApp();
     await startGuide();
 
-    expect(screen.getByText('Hello')).toBeInTheDocument();
-    expect(screen.getByText('Step 1 of 11')).toBeInTheDocument();
+    expect(screen.getByText('Hi! I am BIP-98')).toBeInTheDocument();
+    expect(screen.getByText('1/12')).toBeInTheDocument();
     expect(screen.getByText('DEMO')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Off we go ▶' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'skip ▸' })).not.toBeInTheDocument();
+  });
+
+  it('should hand the way forward to the app on a doing step', async () => {
+    renderApp();
+    await startGuide();
+    await press('Off we go ▶');
+
+    expect(screen.getByText('Keeping a video')).toBeInTheDocument();
+    expect(screen.getByText('Your turn:')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Got it ▶' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'skip ▸' })).toBeInTheDocument();
+  });
+
+  it('should follow the user through the whole add flow', async () => {
+    renderApp();
+    await startGuide();
+    await press('Off we go ▶');
+
+    await press('Next');
+    expect(screen.getByText('What the AI looks at')).toBeInTheDocument();
+
+    await press('Run Analysis');
+    expect(screen.getByText('The AI is watching')).toBeInTheDocument();
+
+    await press('Skip the wait ▶');
+    expect(screen.getByText('Check what the AI wrote')).toBeInTheDocument();
+
+    await press('Got it ▶');
+    expect(screen.getByText('Keep it')).toBeInTheDocument();
+
+    await press('Save');
+    expect(await screen.findByText('Video kept')).toBeInTheDocument();
+    expect(screen.getByText('7/12')).toBeInTheDocument();
+  });
+
+  it('should let a doing step be skipped', async () => {
+    renderApp();
+    await startGuide();
+    await jumpTo(2);
+
+    await press('skip ▸');
+
+    expect(screen.getByText('What the AI looks at')).toBeInTheDocument();
+  });
+
+  it.each([
+    [2, '[data-aim]'],
+    [3, '[data-aim]'],
+    [6, 'button[type="submit"]'],
+    [9, '[data-aim]'],
+  ])('should name the real control in the instruction of step %i', async (step, control) => {
+    renderApp();
+    await startGuide();
+    await jumpTo(step);
+
+    const label = demo().querySelector(control)?.textContent ?? 'no control found';
+
+    expect(screen.getByText('Your turn:').parentElement).toHaveTextContent(label);
   });
 
   it('should rewind the add screen when stepping back', async () => {
     renderApp();
     await startGuide();
+    await jumpTo(7);
+    expect(screen.getByText(/Saved, in pretend/)).toBeInTheDocument();
 
-    const next = screen.getByRole('button', { name: 'Next ▶' });
-    for (let i = 0; i < 5; i += 1) await user.click(next);
-    expect(screen.getByText(/Nothing was saved/)).toBeInTheDocument();
+    for (let i = 0; i < 5; i += 1) await press('◂ back');
 
-    const back = screen.getByRole('button', { name: '◀ Back' });
-    for (let i = 0; i < 4; i += 1) await user.click(back);
-
-    expect(screen.getByText('Step 2 of 11')).toBeInTheDocument();
-    expect(screen.queryByText(/Nothing was saved/)).not.toBeInTheDocument();
+    expect(screen.getByText('2/12')).toBeInTheDocument();
+    expect(screen.queryByText(/Saved, in pretend/)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument();
   });
 
@@ -78,8 +139,8 @@ describe('guided demo navigation', () => {
     renderApp();
     await startGuide();
 
-    await jumpTo(9);
-    expect(screen.getByText('Reading the results')).toBeInTheDocument();
+    await jumpTo(10);
+    expect(screen.getByText('What came up')).toBeInTheDocument();
     expect(tab('🔍 Search.exe')).toHaveAttribute('aria-selected', 'true');
 
     await jumpTo(3);
@@ -95,28 +156,39 @@ describe('guided demo navigation', () => {
     await user.click(tab('🔍 Search.exe'));
 
     expect(screen.queryByText('DEMO')).not.toBeInTheDocument();
-    expect(screen.getByText('Step 3 of 11')).toBeInTheDocument();
+    expect(screen.getByText('3/12')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Take me back/i }));
+    await press('Take me back');
 
     expect(screen.getByText('Analysis Options')).toBeInTheDocument();
     expect(tab('💿 Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('should keep its place while hidden and restore the same step', async () => {
+  it('should keep its place while closed and restore the same step', async () => {
     renderApp();
     await startGuide();
     await jumpTo(5);
 
-    await user.click(screen.getByRole('button', { name: 'Hide' }));
+    await press('Close the guide');
 
     expect(screen.queryByText('DEMO')).not.toBeInTheDocument();
-    expect(screen.getByText('Guide paused on step 5 of 11.')).toBeInTheDocument();
+    expect(screen.getByText('Guide paused on step 5 of 12.')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Resume/i }));
+    await press('▶ Resume');
 
-    expect(screen.getByText('Your turn to check')).toBeInTheDocument();
-    expect(screen.getByText('Step 5 of 11')).toBeInTheDocument();
+    expect(screen.getByText('Check what the AI wrote')).toBeInTheDocument();
+    expect(screen.getByText('5/12')).toBeInTheDocument();
+  });
+
+  it('should end on the last step and not invite again', async () => {
+    renderApp();
+    await startGuide();
+    await jumpTo(12);
+
+    await press('Finish ✓');
+
+    expect(screen.queryByText('12/12')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Start the guide/i })).not.toBeInTheDocument();
   });
 
   it('should leave the real search untouched while it runs', async () => {
@@ -126,8 +198,9 @@ describe('guided demo navigation', () => {
     await user.type(screen.getByPlaceholderText('Type to search...'), 'whales');
 
     await startGuide();
-    await jumpTo(9);
-    await user.click(screen.getByRole('button', { name: 'End guide' }));
+    await jumpTo(10);
+    await press('Close the guide');
+    await press('end guide');
 
     expect(screen.getByPlaceholderText('Type to search...')).toHaveValue('whales');
   });

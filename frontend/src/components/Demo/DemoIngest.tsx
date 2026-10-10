@@ -4,28 +4,27 @@ import { ReviewForm } from '../ReviewForm';
 import { DEMO_VIDEO } from '../../constants/demoVideo';
 import { useI18n } from '../../i18n/languageContext';
 import { useSpotlight } from './spotlight';
-import type { IngestStage, Spot } from '../../constants/guide';
+import type { GuideStep, GuideStepId } from '../../constants/guide';
 import ingest from '../IngestSection/styles.module.css';
 import styles from './styles.module.css';
 
 interface DemoIngestProps {
-  stage: IngestStage;
-  spot: Spot;
-  onAdvance: () => void;
-  onBack: () => void;
+  step: GuideStep;
+  /** Every control does what it really does: the guide follows to the matching step. */
+  onGo: (id: GuideStepId) => void;
   onSpot: (node: HTMLElement | null) => void;
 }
 
-export const DemoIngest = ({ stage, spot, onSpot, onAdvance, onBack }: DemoIngestProps) => {
+export const DemoIngest = ({ step, onGo, onSpot }: DemoIngestProps) => {
   const [manual, setManual] = useState(false);
   const [scenes, setScenes] = useState(true);
   const [audio, setAudio] = useState(true);
   const { t } = useI18n();
 
-  const spotlight = useSpotlight(spot, onSpot);
+  const spotlight = useSpotlight(step, onSpot);
 
   const body = (): ReactNode => {
-    if (stage === 'options') {
+    if (step.ingest === 'options') {
       return (
         <div {...spotlight('options', 'win95-border', ingest.optionsContainer)}>
           <div className={ingest.optionsTitle}>{t.ingest.optionsTitle}</div>
@@ -52,13 +51,13 @@ export const DemoIngest = ({ stage, spot, onSpot, onAdvance, onBack }: DemoInges
           </div>
 
           <div className={ingest.runAnalysisActions}>
-            <button type="button" className="win95-btn" onClick={onBack}>
+            <button type="button" className="win95-btn" onClick={() => onGo('paste')}>
               {t.common.back}
             </button>
             <button
               type="button"
               className={`win95-btn ${ingest.runButton}`}
-              onClick={onAdvance}
+              onClick={() => onGo('analyzing')}
               data-aim
             >
               {t.ingest.runAnalysis}
@@ -68,7 +67,7 @@ export const DemoIngest = ({ stage, spot, onSpot, onAdvance, onBack }: DemoInges
       );
     }
 
-    if (stage === 'analyzing') {
+    if (step.ingest === 'analyzing') {
       return (
         <div {...spotlight('progress', ingest.progressRow)}>
           <div className={ingest.progressContainer}>
@@ -76,7 +75,7 @@ export const DemoIngest = ({ stage, spot, onSpot, onAdvance, onBack }: DemoInges
             <button
               type="button"
               className={`win95-btn ${ingest.cancelButton}`}
-              onClick={onBack}
+              onClick={() => onGo('paste')}
             >
               {t.common.cancel}
             </button>
@@ -85,25 +84,25 @@ export const DemoIngest = ({ stage, spot, onSpot, onAdvance, onBack }: DemoInges
       );
     }
 
-    if (stage === 'review') {
+    if (step.ingest === 'review') {
       return (
-        <div {...spotlight('review')}>
+        <div {...spotlight(['review', 'save'])}>
           <ReviewForm
             initialData={DEMO_VIDEO}
-            onSave={async () => onAdvance()}
-            onCancel={onBack}
+            onSave={async () => onGo('saved')}
+            onCancel={() => onGo('paste')}
           />
         </div>
       );
     }
 
-    if (stage === 'saved') {
+    if (step.ingest === 'saved') {
       return <div {...spotlight('saved', styles.saved)}>{t.guide.demo.saved}</div>;
     }
 
     return (
       <>
-        <label className={ingest.label}>{t.ingest.urlLabel}</label>
+        <label {...spotlight([], ingest.label)}>{t.ingest.urlLabel}</label>
         <div {...spotlight('url', ingest.inputRow)}>
           <input
             type="text"
@@ -115,7 +114,7 @@ export const DemoIngest = ({ stage, spot, onSpot, onAdvance, onBack }: DemoInges
           <button
             type="button"
             className={`win95-btn ${ingest.runButton}`}
-            onClick={onAdvance}
+            onClick={() => onGo('options')}
             data-aim
           >
             {manual ? t.ingest.openForm : t.ingest.next}

@@ -151,17 +151,16 @@ function AppContent() {
               index={guide.index}
               total={guide.total}
               copy={t.guide.steps[step.id]}
+              act={step.act}
               isFirst={guide.isFirst}
-              isLast={guide.isLast}
               strayedFrom={strayedFrom}
               robotSeat={robotSeat}
               robotAway={spotNode !== null}
               onBack={guide.back}
-              onNext={guide.next}
+              onNext={guide.isLast ? guide.quit : guide.next}
               onJump={guide.goTo}
               onReturn={() => guide.goTo(guide.index)}
-              onHide={guide.hide}
-              onQuit={guide.quit}
+              onClose={guide.hide}
             />
           )}
 
@@ -174,7 +173,12 @@ function AppContent() {
             />
           )}
 
-          <TabStrip tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
+          <TabStrip
+            tabs={tabs}
+            activeId={activeTab}
+            onSelect={setActiveTab}
+            quiet={step !== null}
+          />
 
           <div
             ref={stage}
@@ -184,13 +188,7 @@ function AppContent() {
           >
             <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>
               {ingestStep && (
-                <DemoIngest
-                  stage={ingestStep.ingest}
-                  spot={ingestStep.spot}
-                  onSpot={reportSpot}
-                  onAdvance={guide.next}
-                  onBack={guide.back}
-                />
+                <DemoIngest step={ingestStep} onGo={guide.jump} onSpot={reportSpot} />
               )}
               <div style={{ display: ingestStep ? 'none' : 'block' }}>
                 {isAuthenticated ? (
@@ -217,12 +215,7 @@ function AppContent() {
             </div>
             <div style={{ display: activeTab === 'search' ? 'block' : 'none' }}>
               {searchStep && (
-                <DemoSearch
-                  stage={searchStep.search}
-                  spot={searchStep.spot}
-                  onSpot={reportSpot}
-                  onAdvance={guide.next}
-                />
+                <DemoSearch step={searchStep} onGo={guide.jump} onSpot={reportSpot} />
               )}
               <div style={{ display: searchStep ? 'none' : 'block' }}>
                 <SearchSection />

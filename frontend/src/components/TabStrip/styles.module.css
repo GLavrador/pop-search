@@ -41,6 +41,10 @@
   user-select: none;
 }
 
+.quiet .tab:not(.tabActive) {
+  opacity: 0.5;
+}
+
 .tab:hover:not(.tabActive) {
   color: var(--win-blue-title);
 }

@@ -53,7 +53,7 @@ export const pt: Dictionary = {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',
     signIn: 'Entrar',
-    openGuide: '📎 Me mostre como funciona',
+    openGuide: '▶ Me mostre como funciona',
   },
 
   footer: '© 1998 Pop Search Corp. - Todos os direitos reservados.',
@@ -344,16 +344,24 @@ export const pt: Dictionary = {
     name: 'BIP-98',
     poke: 'Cutucar o BIP-98',
     beeps: ['Bip!', 'Bop.', 'Oi?', 'Ai!', 'Zzzt.'],
-    counter: (current: number, total: number) => `Passo ${current} de ${total}`,
-    back: '◀ Voltar',
-    next: 'Avançar ▶',
-    finish: '✓ Pronto',
-    hide: 'Esconder',
-    hideTitle: 'Guardar o assistente sem perder o seu lugar',
+    emotes: {
+      heavy: 'que pesado!',
+      sorry: 'ops, desculpa!',
+      knock: 'toc toc',
+      puzzled: 'ué?',
+    },
+    progress: (current: number, total: number) => `Passo ${current} de ${total}`,
+    back: '◂ voltar',
+    next: 'Entendi ▶',
+    skip: 'pular ▸',
+    skipTitle: 'Seguir sem fazer este passo',
+    yourTurn: 'Sua vez:',
+    close: 'Fechar o guia',
+    closeTitle: 'Fechar o guia. Dá para retomar de onde você parou.',
     jumpTo: (step: number) => `Ir para o passo ${step}`,
     paused: (current: number, total: number) => `Guia pausado no passo ${current} de ${total}.`,
     resume: '▶ Retomar',
-    quit: 'Encerrar guia',
+    quit: 'encerrar guia',
     offScript: (tab: string) => (
       <>
         Você saiu do roteiro. Esta parte do guia fica em <strong>{tab}</strong>.
@@ -363,68 +371,119 @@ export const pt: Dictionary = {
     invite: {
       text: 'Primeira vez aqui? Eu te mostro o app inteiro em dois minutos.',
       start: '▶ Começar o guia',
-      dismiss: '✕',
       dismissTitle: 'Esconder este convite',
     },
     profile: {
       legend: 'Demonstração guiada',
-      note: 'Um passeio adicionando um vídeo e buscando por ele. Nada é salvo e nenhuma IA é chamada.',
-      start: '📎 Abrir o guia',
+      note: 'Um passeio guardando um vídeo e encontrando ele de novo. Nada é salvo e nenhuma IA é chamada.',
+      start: '▶ Abrir o guia',
     },
     demo: {
       badge: 'DEMO',
-      badgeTitle: 'Exemplo roteirizado. Nada é enviado para lugar nenhum.',
+      badgeTitle: 'Tela de treino. Nada daqui é enviado para lugar nenhum.',
       saved: (
         <>
-          <strong>Nada foi salvo.</strong> No app de verdade este vídeo estaria no acervo a partir
-          de agora, achável por qualquer pessoa, e uma análise teria saído da sua cota do mês.
+          <strong>Salvo, de mentirinha.</strong> Como isto é um treino, nada foi guardado de
+          verdade.
         </>
       ),
     },
     steps: {
       welcome: {
-        title: 'Olá',
-        say: 'Oi! Eu sou o BIP-98, o assistente daqui. Vou te mostrar o Pop Search em uns dois minutos. Nada do que a gente fizer aqui vale: é um tutorial, não vai para o app de verdade. Clique à vontade. Vamos começar de onde os vídeos vêm.',
+        title: 'Oi! Eu sou o BIP-98',
+        say: 'O Pop Search guarda vídeos do X para você achar depois, só descrevendo o que acontece neles. Eu te mostro como em dois minutos. Isto é só um treino: nada do que a gente fizer aqui vai para o app de verdade.',
+        next: 'Vamos lá ▶',
       },
       paste: {
-        title: 'Um link para começar',
-        say: 'Tudo começa com o link de um post do X que tenha vídeo. Já colei um aqui para você.',
+        title: 'Guardar um vídeo',
+        say: 'Tudo começa com o link de um post do X que tenha vídeo. No app de verdade você copia esse link e cola neste campo. Aqui eu já colei um de exemplo.',
+        task: (
+          <>
+            clique em <strong>Avançar</strong>, ao lado do link.
+          </>
+        ),
       },
       options: {
         title: 'O que a IA vai olhar',
-        say: 'Aqui você escolhe o que a IA vai olhar no vídeo: as cenas, o áudio falado, ou os dois. Tudo que ela ler vira texto que a busca enxerga depois, então quanto mais você marcar, mais jeitos existem de achar esse vídeo.',
+        say: 'Quem descreve o vídeo é uma inteligência artificial (IA): ela assiste e escreve o que vê. Aqui você escolhe se ela olha as cenas, ouve o áudio, ou os dois. Quanto mais ela olhar, mais fácil achar o vídeo depois.',
+        task: (
+          <>
+            clique em <strong>Analisar</strong>.
+          </>
+        ),
       },
       analyzing: {
-        title: 'A IA assiste ao vídeo',
-        say: 'O app de verdade baixa o vídeo e entrega para o Gemini, que assiste de fato. Isso leva perto de um minuto. Não vamos ficar esperando aqui - siga em frente.',
+        title: 'A IA está assistindo',
+        say: 'Agora a IA assiste ao vídeo inteiro e escreve um resumo dele. No app de verdade isso leva mais ou menos um minuto, e esta barra mostra o andamento. Aqui a gente não precisa esperar.',
+        next: 'Pular a espera ▶',
       },
       review: {
-        title: 'Agora é você que confere',
-        say: 'Esta tela é o ponto da coisa toda. A IA escreveu tudo isso, e nada entra no acervo antes de uma pessoa ler. Todo campo é editável, e o que ficar aqui é o que a busca vai ler.',
+        title: 'Confira o que a IA escreveu',
+        say: 'Pronto: a IA sugeriu um título e uma descrição. Ela erra de vez em quando, então nada é guardado antes de você conferir. Clique em qualquer campo para corrigir. É esse texto que a busca vai ler depois.',
+      },
+      save: {
+        title: 'Guardar',
+        say: 'Quando o texto estiver bom, é só salvar. É nesse momento que o vídeo entra no arquivo.',
+        task: (
+          <>
+            clique em <strong>Salvar</strong>, no fim do formulário.
+          </>
+        ),
       },
       saved: {
-        title: 'Indexado',
-        say: 'É o ciclo completo. No app de verdade o vídeo estaria no acervo a partir de agora, e uma análise teria saído da sua cota do mês.',
+        title: 'Vídeo guardado',
+        say: 'É isso! No app de verdade, a partir de agora qualquer pessoa conseguiria achar esse vídeo. Cada vídeo que a IA analisa gasta uma das suas análises do mês: toda conta tem um limite.',
       },
       manual: {
-        title: 'O caminho sem IA',
-        say: 'De volta nesta tela, repare no Manual Input. Ele pula a IA por completo e te entrega o mesmo formulário, vazio. É o que você usa quando a sua cota do mês acabou, e também quando a piada precisa de explicação e você descreve melhor que o Gemini.',
+        title: 'E sem a IA?',
+        say: (
+          <>
+            Reparou nesta caixinha? Com <strong>Entrada manual</strong> marcada a IA não é usada:
+            você mesmo escreve o título e a descrição. Serve para quando as suas análises do mês
+            acabarem, ou quando você explica o vídeo melhor do que a IA explicaria.
+          </>
+        ),
       },
       searchIntro: {
-        title: 'Encontrar um vídeo',
-        say: 'Agora a outra metade, e a que não exige conta nenhuma. Qualquer pessoa pode buscar no acervo. Vamos procurar um gato.',
+        title: 'Agora, encontrar',
+        say: (
+          <>
+            Esta é a outra metade, e ela não pede conta: qualquer pessoa pode buscar. Você escreve
+            o que lembra do vídeo, do seu jeito. Eu já escrevi <strong>gato</strong> para a gente
+            testar.
+          </>
+        ),
+        task: (
+          <>
+            clique em <strong>Buscar</strong>.
+          </>
+        ),
       },
       results: {
-        title: 'Lendo os resultados',
-        say: 'Três resultados, e a etiqueta de cada um diz como ele chegou aqui. O primeiro casou por significado e pela palavra. O segundo nunca diz gato - uma girafa girando apareceu porque a busca entendeu a ideia. O terceiro casou só pela palavra.',
+        title: 'O que apareceu',
+        say: (
+          <>
+            Três vídeos. Olhe a etiqueta ao lado de cada um: ela conta por que aquele vídeo
+            apareceu. <strong>palavras</strong> quer dizer que o texto dele tem a palavra que você
+            digitou. <strong>significado</strong> quer dizer que ele fala de algo parecido, mesmo
+            sem a palavra. Foi assim que uma girafa veio parar aqui.
+          </>
+        ),
       },
       modes: {
-        title: 'Ajustando a busca',
-        say: 'Abra o Avançado e você escolhe como o casamento funciona, quão exigente ele é e quantos resultados voltam. No modo Exato a girafa desaparece; no Semântico desaparece o terceiro. Os operadores estão listados ali também.',
+        title: 'Para afinar a busca',
+        say: (
+          <>
+            O botão <strong>Avançado</strong> abre os ajustes: buscar só pelas palavras exatas, só
+            pelo significado, ou pelos dois, que é o padrão. Abra e mexa à vontade: os resultados
+            aqui embaixo mudam na hora.
+          </>
+        ),
       },
       account: {
-        title: 'Contas e limites',
-        say: 'É isso tudo. Buscar continua aberto e de graça. Adicionar vídeo é o que pede conta, porque cada análise custa tempo de IA, e é nesta aba que você criaria a sua e acompanharia a cota do mês.',
+        title: 'Para guardar vídeos, uma conta',
+        say: 'Buscar é aberto para todo mundo. Para guardar vídeos você precisa de uma conta, porque cada análise da IA tem um custo. É nesta aba que você cria a sua e vê quantas análises ainda tem no mês.',
+        next: 'Terminar ✓',
       },
     },
   },

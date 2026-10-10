@@ -53,7 +53,7 @@ export const en = {
     title: 'An account is required to add videos.',
     body: 'Indexing a video runs it through the AI, so it is limited to signed-in users. Searching the archive stays open to everyone.',
     signIn: 'Sign In',
-    openGuide: '📎 Show me how it works',
+    openGuide: '▶ Show me how it works',
   },
 
   footer: '© 1998 Pop Search Corp. - All rights reserved.',
@@ -332,16 +332,24 @@ export const en = {
     name: 'BIP-98',
     poke: 'Poke BIP-98',
     beeps: ['Beep!', 'Boop.', 'Hm?', 'Ouch.', 'Zzzt.'],
-    counter: (current: number, total: number) => `Step ${current} of ${total}`,
-    back: '◀ Back',
-    next: 'Next ▶',
-    finish: '✓ Done',
-    hide: 'Hide',
-    hideTitle: 'Put the assistant away without losing your place',
+    emotes: {
+      heavy: 'so heavy!',
+      sorry: 'oops, sorry!',
+      knock: 'knock knock',
+      puzzled: 'huh?',
+    },
+    progress: (current: number, total: number) => `Step ${current} of ${total}`,
+    back: '◂ back',
+    next: 'Got it ▶',
+    skip: 'skip ▸',
+    skipTitle: 'Carry on without doing this step',
+    yourTurn: 'Your turn:',
+    close: 'Close the guide',
+    closeTitle: 'Close the guide. You can pick it up again where you stopped.',
     jumpTo: (step: number) => `Go to step ${step}`,
     paused: (current: number, total: number) => `Guide paused on step ${current} of ${total}.`,
     resume: '▶ Resume',
-    quit: 'End guide',
+    quit: 'end guide',
     offScript: (tab: string) => (
       <>
         You stepped away. This part of the guide lives on <strong>{tab}</strong>.
@@ -351,73 +359,121 @@ export const en = {
     invite: {
       text: 'First time here? I can show you the whole app in two minutes.',
       start: '▶ Start the guide',
-      dismiss: '✕',
       dismissTitle: 'Hide this invitation',
     },
     profile: {
       legend: 'Guided demo',
-      note: 'A walk through adding a video and searching it. Nothing is saved and no AI is called.',
-      start: '📎 Open the guide',
+      note: 'A walk through keeping a video and finding it again. Nothing is saved and no AI is called.',
+      start: '▶ Open the guide',
     },
     demo: {
       badge: 'DEMO',
-      badgeTitle: 'Scripted example. Nothing is sent anywhere.',
+      badgeTitle: 'Practice screen. Nothing here is sent anywhere.',
       saved: (
         <>
-          <strong>Nothing was saved.</strong> In the real app this video would be in the archive
-          from now on, findable by anyone, and one analysis would have come off your monthly
-          allowance.
+          <strong>Saved, in pretend.</strong> This is practice, so nothing was really kept.
         </>
       ),
     },
     steps: {
       welcome: {
-        title: 'Hello',
-        say: "Hi! I am BIP-98, the Pop Search assistant. I will show you around in about two minutes. None of what we do here counts for real: it is a tutorial, nothing reaches the app. Click away. Let's start where the videos come from.",
+        title: 'Hi! I am BIP-98',
+        say: 'Pop Search keeps videos from X so you can find them later, just by describing what happens in them. I will show you how in two minutes. This is only practice: nothing we do here reaches the real app.',
+        next: 'Off we go ▶',
       },
       paste: {
-        title: 'A link to start',
-        say: 'Everything begins with a link to a post on X that has video in it. I pasted one in for you.',
+        title: 'Keeping a video',
+        say: 'It all starts with the link to a post on X that has a video. In the real app you copy that link and paste it into this field. I already pasted an example for you.',
+        task: (
+          <>
+            click <strong>Next</strong>, beside the link.
+          </>
+        ),
       },
       options: {
-        title: 'What the AI should look at',
-        say: 'Here you pick what the AI looks at in the video: the scenes, the spoken audio, or both. Everything it reads turns into text that the search can see later, so the more you tick, the more ways there are to find this video.',
+        title: 'What the AI looks at',
+        say: 'The video is described by an artificial intelligence (AI): it watches the video and writes down what it sees. Here you choose whether it looks at the scenes, listens to the audio, or both. The more it takes in, the easier the video is to find later.',
+        task: (
+          <>
+            click <strong>Run Analysis</strong>.
+          </>
+        ),
       },
       analyzing: {
-        title: 'The AI watches the video',
-        say: 'The real app downloads the video and hands it to Gemini, which genuinely watches it. That takes about a minute. We are not going to sit here for it - go on.',
+        title: 'The AI is watching',
+        say: 'Now the AI watches the whole video and writes a summary of it. In the real app this takes about a minute, and this bar shows how far along it is. Here we do not have to wait.',
+        next: 'Skip the wait ▶',
       },
       review: {
-        title: 'Your turn to check',
-        say: 'This screen is the whole point. The AI wrote all of it, and nothing enters the archive until a person has read it. Every field is editable, and what you leave here is what the search will read.',
+        title: 'Check what the AI wrote',
+        say: 'Done: the AI suggested a title and a description. It gets things wrong now and then, so nothing is kept before you check it. Click any field to fix it. This text is what the search will read later.',
+      },
+      save: {
+        title: 'Keep it',
+        say: 'When the text looks right, all that is left is saving. That is the moment the video enters the archive.',
+        task: (
+          <>
+            click <strong>Save</strong>, at the end of the form.
+          </>
+        ),
       },
       saved: {
-        title: 'Indexed',
-        say: 'That is the full loop. In the real app the video would be in the archive from now on, and one analysis would have come off your monthly allowance.',
+        title: 'Video kept',
+        say: 'That is it! In the real app, from now on anyone could find this video. Each video the AI analyses uses up one of your analyses for the month: every account has a limit.',
       },
       manual: {
-        title: 'The path without AI',
-        say: 'Back on this screen, notice Manual Input. It skips the AI entirely and hands you the same form, empty. It is what you use when your monthly allowance has run out, and also when a joke needs explaining and you describe it better than Gemini does.',
+        title: 'And without the AI?',
+        say: (
+          <>
+            See this little box? With <strong>Manual Input</strong> ticked the AI is not used: you
+            write the title and the description yourself. It is for when your analyses for the
+            month run out, or when you can explain the video better than the AI would.
+          </>
+        ),
       },
       searchIntro: {
-        title: 'Finding something',
-        say: 'Now the other half, and the half that needs no account at all. Anyone can search the archive. Let us go looking for a cat.',
+        title: 'Now, finding one',
+        say: (
+          <>
+            This is the other half, and it needs no account: anyone can search. You write what you
+            remember of the video, in your own words. I already typed <strong>gato</strong>, which
+            is cat in Portuguese, for us to try.
+          </>
+        ),
+        task: (
+          <>
+            click <strong>Find Now</strong>.
+          </>
+        ),
       },
       results: {
-        title: 'Reading the results',
-        say: "Three hits, and the badge on each says how it got here. The first matched by meaning and by the word. The second never says cat at all - a spinning giraffe surfaced because the search understood the idea. The third matched on the word alone.",
+        title: 'What came up',
+        say: (
+          <>
+            Three videos. Look at the label next to each one: it tells you why that video came up.{' '}
+            <strong>words</strong> means its text has the word you typed. <strong>meaning</strong>{' '}
+            means it is about something similar, even without the word. That is how a giraffe got
+            here.
+          </>
+        ),
       },
       modes: {
-        title: 'Tuning the search',
-        say: 'Open Advanced and you choose how matching works, how strict it is, and how many results come back. In Exact mode the giraffe disappears; in Semantic mode the third result does. The operators are listed in there too.',
+        title: 'Fine-tuning the search',
+        say: (
+          <>
+            The <strong>Advanced</strong> button opens the settings: search by the exact words
+            only, by meaning only, or by both, which is the default. Open it and play around: the
+            results below change as you go.
+          </>
+        ),
       },
       account: {
-        title: 'Accounts and limits',
-        say: 'That is everything. Searching stays open and free. Adding a video is what needs an account, because every analysis costs AI time, and this tab is where you would create one and watch your monthly allowance.',
+        title: 'To keep videos, an account',
+        say: 'Searching is open to everyone. To keep videos you need an account, because every AI analysis has a cost. This tab is where you create yours and see how many analyses you have left this month.',
+        next: 'Finish ✓',
       },
     } satisfies Record<GuideStepId, GuideStepCopy>,
   },
-
 };
 
 export type Dictionary = typeof en;

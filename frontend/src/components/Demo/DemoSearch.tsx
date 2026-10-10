@@ -7,15 +7,15 @@ import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../../constants/searchPresets'
 import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from '../../constants/searchModes';
 import { useI18n } from '../../i18n/languageContext';
 import { useSpotlight } from './spotlight';
-import type { SearchStage, Spot } from '../../constants/guide';
+import type { GuideStep, GuideStepId } from '../../constants/guide';
 import type { SearchResult } from '../../types';
 import search from '../SearchSection/styles.module.css';
 import styles from './styles.module.css';
 
 interface DemoSearchProps {
-  stage: SearchStage;
-  spot: Spot;
-  onAdvance: () => void;
+  step: GuideStep;
+  /** Every control does what it really does: the guide follows to the matching step. */
+  onGo: (id: GuideStepId) => void;
   onSpot: (node: HTMLElement | null) => void;
 }
 
@@ -27,7 +27,7 @@ const qualifies = (result: SearchResult, mode: SearchMode, threshold: number) =>
   return byMeaning || byWords;
 };
 
-export const DemoSearch = ({ stage, spot, onSpot, onAdvance }: DemoSearchProps) => {
+export const DemoSearch = ({ step, onGo, onSpot }: DemoSearchProps) => {
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [mode, setMode] = useState<SearchMode>(DEFAULT_SEARCH_MODE);
@@ -39,7 +39,7 @@ export const DemoSearch = ({ stage, spot, onSpot, onAdvance }: DemoSearchProps) 
     limit,
   );
 
-  const spotlight = useSpotlight(spot, onSpot);
+  const spotlight = useSpotlight(step, onSpot);
 
   return (
     <div className={styles.panel}>
@@ -47,22 +47,26 @@ export const DemoSearch = ({ stage, spot, onSpot, onAdvance }: DemoSearchProps) 
         {t.guide.demo.badge}
       </span>
 
-      <div {...spotlight('advanced', search.searchForm)}>
-        <AdvancedSearchOptions
-          threshold={threshold}
-          onThresholdChange={setThreshold}
-          limit={limit}
-          onLimitChange={setLimit}
-          mode={mode}
-          onModeChange={setMode}
-          labelClassName={search.label}
-        />
+      <div className={search.searchForm}>
+        <div {...spotlight('advanced', styles.stack)}>
+          <AdvancedSearchOptions
+            threshold={threshold}
+            onThresholdChange={setThreshold}
+            limit={limit}
+            onLimitChange={setLimit}
+            mode={mode}
+            onModeChange={setMode}
+            labelClassName={search.label}
+          />
+        </div>
 
-        <PrecisionPresets
-          threshold={threshold}
-          onThresholdChange={setThreshold}
-          disabled={!thresholdApplies}
-        />
+        <div {...spotlight('presets')}>
+          <PrecisionPresets
+            threshold={threshold}
+            onThresholdChange={setThreshold}
+            disabled={!thresholdApplies}
+          />
+        </div>
 
         <div {...spotlight('query', search.inputRow)}>
           <input
@@ -75,7 +79,7 @@ export const DemoSearch = ({ stage, spot, onSpot, onAdvance }: DemoSearchProps) 
           <button
             type="button"
             className={`win95-btn ${search.submitButton}`}
-            onClick={onAdvance}
+            onClick={() => onGo('results')}
             data-aim
           >
             {t.search.submit}
@@ -83,7 +87,7 @@ export const DemoSearch = ({ stage, spot, onSpot, onAdvance }: DemoSearchProps) 
         </div>
       </div>
 
-      {stage === 'results' && (
+      {step.search === 'results' && (
         <>
           <hr className={search.separator} />
 

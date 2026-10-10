@@ -1,16 +1,10 @@
 .assistant {
   flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 6px;
-  padding: 7px;
-}
-
-.head {
-  display: flex;
   align-items: flex-start;
   gap: 10px;
+  margin-bottom: 8px;
+  padding-right: 2px;
 }
 
 /* The seat kept for the robot while it is off pointing at something. */
@@ -18,7 +12,7 @@
   flex: 0 0 auto;
   width: 46px;
   height: 53px;
-  margin-top: -18px;
+  margin-top: -6px;
 }
 
 .slotEmpty {
@@ -422,15 +416,16 @@
   position: relative;
   flex: 1;
   min-width: 0;
-  padding: 6px 9px 7px;
+  padding: 8px 12px 9px;
   background: var(--win-tooltip-bg);
   border: 1px solid var(--win-dark);
+  box-shadow: 2px 2px 0 0 var(--win-shadow-dark);
 }
 
 .bubble::before {
   content: '';
   position: absolute;
-  top: 13px;
+  top: 14px;
   left: -8px;
   border-top: 6px solid transparent;
   border-bottom: 6px solid transparent;
@@ -440,7 +435,7 @@
 .bubble::after {
   content: '';
   position: absolute;
-  top: 14px;
+  top: 15px;
   left: -6px;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
@@ -453,211 +448,208 @@
 }
 
 .title {
-  margin: 0 0 3px;
-  font-size: 0.9rem;
+  margin: 0 24px 4px 0;
+  font-size: 0.95rem;
   font-weight: bold;
   color: var(--win-blue-title);
 }
 
 .say {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+/* What to do in the app, set apart from what is merely being explained. */
+.task {
+  margin: 7px 0 0;
+  padding: 4px 9px;
+  border-left: 3px solid var(--win-blue-title);
+  background: rgba(0, 0, 128, 0.07);
+  font-size: 0.86rem;
   line-height: 1.45;
 }
 
-.strayed {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 7px;
+.yourTurn {
+  font-weight: bold;
+  color: var(--win-blue-title);
 }
 
-.control {
+/* The glyph is drawn, not typed: at this size a character all but vanishes. */
+.close {
   flex: 0 0 auto;
+  position: relative;
   width: 16px;
   height: 14px;
-  padding: 0 0 3px;
+  padding: 0;
   background: var(--win-gray);
   border-top: 1px solid var(--win-light);
   border-left: 1px solid var(--win-light);
   border-right: 1px solid var(--win-dark);
   border-bottom: 1px solid var(--win-dark);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
   cursor: default;
 }
 
-/* the glyph is drawn, not typed: the underscore character all but vanished */
-.control::after {
+.bubble .close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.close::before,
+.close::after {
   content: '';
-  width: 7px;
+  position: absolute;
+  top: 5px;
+  left: 3px;
+  width: 8px;
   height: 2px;
   background: var(--win-dark);
 }
 
-.control:active {
+.close::before {
+  transform: rotate(45deg);
+}
+
+.close::after {
+  transform: rotate(-45deg);
+}
+
+.close:active {
   border-top: 1px solid var(--win-dark);
   border-left: 1px solid var(--win-dark);
   border-right: 1px solid var(--win-light);
   border-bottom: 1px solid var(--win-light);
 }
 
-.meta {
+.foot {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  margin-top: 9px;
 }
 
-.pips {
+.progress {
   flex: 1;
   display: flex;
-  gap: 3px;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
+.track {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* A thin bar to look at, with a taller invisible band around it to click. */
 .pip {
   flex: 1;
   min-width: 0;
-  height: 9px;
-  padding: 0;
+  height: 14px;
+  padding: 4px 0;
   border: none;
-  background: var(--win-shadow-light);
-  box-shadow: inset 1px 1px 0 0 var(--win-shadow-dark);
+  background-color: rgba(0, 0, 0, 0.16);
+  background-clip: content-box;
   cursor: pointer;
 }
 
 .pipDone {
-  background: var(--win-blue-grad);
+  background-color: var(--win-blue-grad);
 }
 
 .pipHere {
-  background: var(--win-blue-title);
-  box-shadow: inset 1px 1px 0 0 var(--win-dark);
+  background-color: var(--win-blue-title);
 }
 
-.counter {
-  font-size: 0.75rem;
-  font-weight: bold;
+.count {
+  font-size: 0.72rem;
+  color: var(--win-text-secondary);
   white-space: nowrap;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.actions :global(.win95-btn) {
-  min-width: 120px;
-}
-
-.advance {
-  min-width: 140px;
-}
-
-.quit {
-  margin-left: auto;
-  padding: 2px 4px;
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 0.75rem;
-  color: var(--win-text-secondary);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.quit:hover {
-  color: var(--win-blue-title);
-}
-
-.invite {
+.moves {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding: 5px 8px;
-  background: var(--win-tooltip-bg);
+  gap: 12px;
 }
 
-.inviteText {
+.link {
+  padding: 2px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: var(--win-text-secondary);
+  text-decoration: underline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--win-blue-title);
+}
+
+/* The navy button is always the way forward, and there is only ever one. */
+:is(.assistant, .invite, .paused) .go {
+  min-width: 124px;
+  background: var(--win-blue-title);
+  color: var(--win-light);
+}
+
+.invite,
+.paused {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+  padding: 5px 8px 5px 10px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  box-shadow: 2px 2px 0 0 var(--win-shadow-dark);
+}
+
+.inviteText,
+.pausedText {
   flex: 1;
   min-width: 0;
   font-size: 0.8rem;
 }
 
-.inviteStart {
+:is(.invite, .paused) .go {
   min-width: 0;
   padding: 3px 12px;
   font-size: 0.8rem;
   white-space: nowrap;
 }
 
-.paused {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  padding: 4px 8px;
-}
-
-.pausedText {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.78rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pausedButton {
-  min-width: 0;
-  padding: 2px 10px;
-  font-size: 0.78rem;
-}
-
 @media (max-width: 768px) {
-  .avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 1.2rem;
-  }
-
-  .say {
+  .say,
+  .task {
     font-size: 0.82rem;
   }
 
-  .actions {
+  .foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .moves {
+    justify-content: space-between;
+  }
+
+  .invite,
+  .paused {
     flex-wrap: wrap;
   }
 
-  .actions :global(.win95-btn) {
-    flex: 1 1 0;
-    min-width: 0;
-    padding: 4px 6px;
-  }
-
-  .advance {
-    min-width: 0;
-  }
-
-  .quit {
-    flex: 0 0 auto;
-    font-size: 0.72rem;
-  }
-
+  .inviteText,
   .pausedText {
-    white-space: normal;
-  }
-
-  .invite {
-    flex-wrap: wrap;
-  }
-
-  .inviteText {
     flex: 1 1 60%;
   }
 }
