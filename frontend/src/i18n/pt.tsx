@@ -341,8 +341,9 @@ export const pt: Dictionary = {
   },
 
   guide: {
-    name: 'Assistente',
-    avatar: '📎',
+    name: 'BIP-98',
+    poke: 'Cutucar o BIP-98',
+    beeps: ['Bip!', 'Bop.', 'Oi?', 'Ai!', 'Zzzt.'],
     counter: (current: number, total: number) => `Passo ${current} de ${total}`,
     back: '◀ Voltar',
     next: 'Avançar ▶',
@@ -383,15 +384,15 @@ export const pt: Dictionary = {
     steps: {
       welcome: {
         title: 'Olá',
-        say: 'Eu te mostro o Pop Search em uns dois minutos. Nada que você mexer aqui é salvo e nenhuma IA é chamada, então clique à vontade. Vamos começar de onde os vídeos vêm.',
+        say: 'Oi! Eu sou o BIP-98, o assistente daqui. Vou te mostrar o Pop Search em uns dois minutos. Nada do que a gente fizer aqui vale: é um tutorial, não vai para o app de verdade. Clique à vontade. Vamos começar de onde os vídeos vêm.',
       },
       paste: {
         title: 'Um link para começar',
-        say: 'Tudo começa com o link de um post no X. Só entram links de twitter.com e x.com, e só posts que tenham vídeo. Já colei um para você.',
+        say: 'Tudo começa com o link de um post do X que tenha vídeo. Já colei um aqui para você.',
       },
       options: {
         title: 'O que a IA vai olhar',
-        say: 'Antes de gastar tempo de IA você diz o que ela deve ler: as cenas, o áudio falado, ou os dois. O que ela lê vira texto buscável depois, então deixar os dois ligados costuma ser a escolha certa.',
+        say: 'Aqui você escolhe o que a IA vai olhar no vídeo: as cenas, o áudio falado, ou os dois. Tudo que ela ler vira texto que a busca enxerga depois, então quanto mais você marcar, mais jeitos existem de achar esse vídeo.',
       },
       analyzing: {
         title: 'A IA assiste ao vídeo',
@@ -407,7 +408,7 @@ export const pt: Dictionary = {
       },
       manual: {
         title: 'O caminho sem IA',
-        say: 'De volta nesta tela, repare no Manual Input. Ele pula a IA por completo e te entrega o mesmo formulário, vazio. Não custa análise nenhuma, e quando a piada precisa de explicação você descreve melhor que o Gemini.',
+        say: 'De volta nesta tela, repare no Manual Input. Ele pula a IA por completo e te entrega o mesmo formulário, vazio. É o que você usa quando a sua cota do mês acabou, e também quando a piada precisa de explicação e você descreve melhor que o Gemini.',
       },
       searchIntro: {
         title: 'Encontrar um vídeo',

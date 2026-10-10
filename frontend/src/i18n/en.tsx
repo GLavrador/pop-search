@@ -329,8 +329,9 @@ export const en = {
   },
 
   guide: {
-    name: 'Assistant',
-    avatar: '📎',
+    name: 'BIP-98',
+    poke: 'Poke BIP-98',
+    beeps: ['Beep!', 'Boop.', 'Hm?', 'Ouch.', 'Zzzt.'],
     counter: (current: number, total: number) => `Step ${current} of ${total}`,
     back: '◀ Back',
     next: 'Next ▶',
@@ -372,15 +373,15 @@ export const en = {
     steps: {
       welcome: {
         title: 'Hello',
-        say: "I'll show you Pop Search in about two minutes. Nothing you touch here is saved and no AI is called, so click freely. Let's start where the videos come from.",
+        say: "Hi! I am BIP-98, the Pop Search assistant. I will show you around in about two minutes. None of what we do here counts for real: it is a tutorial, nothing reaches the app. Click away. Let's start where the videos come from.",
       },
       paste: {
         title: 'A link to start',
-        say: 'Everything begins with a link to a post on X. Only twitter.com and x.com are accepted, and only posts that carry video. I pasted one in for you.',
+        say: 'Everything begins with a link to a post on X that has video in it. I pasted one in for you.',
       },
       options: {
         title: 'What the AI should look at',
-        say: 'Before spending AI time you say what it should read: the scenes, the spoken audio, or both. Whatever it reads becomes searchable text later, so leaving both on is usually the right call.',
+        say: 'Here you pick what the AI looks at in the video: the scenes, the spoken audio, or both. Everything it reads turns into text that the search can see later, so the more you tick, the more ways there are to find this video.',
       },
       analyzing: {
         title: 'The AI watches the video',
@@ -396,7 +397,7 @@ export const en = {
       },
       manual: {
         title: 'The path without AI',
-        say: 'Back on this screen, notice Manual Input. It skips the AI entirely and hands you the same form, empty. It costs no analysis, and when a joke needs explaining you will describe it better than Gemini does.',
+        say: 'Back on this screen, notice Manual Input. It skips the AI entirely and hands you the same form, empty. It is what you use when your monthly allowance has run out, and also when a joke needs explaining and you describe it better than Gemini does.',
       },
       searchIntro: {
         title: 'Finding something',

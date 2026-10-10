@@ -1,4 +1,5 @@
 import { useI18n } from '../../i18n/languageContext';
+import { Robot } from './Robot';
 import styles from './styles.module.css';
 
 interface GuidePausedProps {
@@ -13,9 +14,7 @@ export const GuidePaused = ({ index, total, onResume, onQuit }: GuidePausedProps
 
   return (
     <div className={`win95-border ${styles.paused}`}>
-      <span className={styles.pausedIcon} aria-hidden="true">
-        {t.guide.avatar}
-      </span>
+      <Robot className={styles.robotSmall} />
       <span className={styles.pausedText}>{t.guide.paused(index + 1, total)}</span>
       <button type="button" className={`win95-btn ${styles.pausedButton}`} onClick={onResume}>
         {t.guide.resume}

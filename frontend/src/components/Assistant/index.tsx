@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { Robot } from './Robot';
 import type { GuideStepCopy } from '../../constants/guide';
 import styles from './styles.module.css';
 
@@ -33,13 +35,25 @@ export const Assistant = ({
   onQuit,
 }: AssistantProps) => {
   const { t } = useI18n();
+  const [pokes, setPokes] = useState(0);
 
   return (
     <div className={`win95-border ${styles.assistant}`}>
       <div className={styles.head}>
-        <div className={`win95-inset ${styles.avatar}`} aria-hidden="true">
-          {t.guide.avatar}
-        </div>
+        <button
+          type="button"
+          className={styles.avatar}
+          title={t.guide.poke}
+          aria-label={t.guide.poke}
+          onClick={() => setPokes((count) => count + 1)}
+        >
+          <Robot key={`${index}-${pokes}`} talking />
+          {pokes > 0 && (
+            <span key={pokes} className={styles.beep}>
+              {t.guide.beeps[pokes % t.guide.beeps.length]}
+            </span>
+          )}
+        </button>
 
         <div className={styles.bubble} aria-live="polite">
           <p className={styles.title}>{copy.title}</p>
@@ -62,9 +76,7 @@ export const Assistant = ({
           title={t.guide.hideTitle}
           aria-label={t.guide.hide}
           onClick={onHide}
-        >
-          _
-        </button>
+        />
       </div>
 
       <div className={styles.meta}>

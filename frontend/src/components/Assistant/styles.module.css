@@ -15,13 +15,181 @@
 
 .avatar {
   flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  line-height: 1;
+  position: relative;
+  margin-top: -18px;
+  padding: 0;
+  background: none;
+  border: none;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.robot {
+  display: block;
+  width: 46px;
+  height: 53px;
+  overflow: visible;
+  fill: var(--win-gray);
+  stroke: var(--win-dark);
+  stroke-width: 2;
+  animation: bob 3.2s ease-in-out infinite;
+}
+
+.robotSmall {
+  width: 22px;
+  height: 26px;
+  flex: 0 0 auto;
+}
+
+.face {
+  fill: var(--win-blue-title);
+}
+
+.eye,
+.mouth,
+.led,
+.chest {
+  fill: #4fe3c1;
+  stroke: none;
+}
+
+.eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 4.6s ease-in-out infinite;
+}
+
+.eyeRight {
+  animation-delay: 0.07s;
+}
+
+.led {
+  animation: led 1.7s ease-in-out infinite;
+}
+
+.mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mouthTalking {
+  animation: talk 0.19s ease-in-out 9;
+}
+
+.armLeft,
+.armRight {
+  transform-box: fill-box;
+}
+
+.armLeft {
+  transform-origin: right center;
+  animation: wave 0.62s ease-in-out 2 reverse;
+}
+
+.armRight {
+  transform-origin: left center;
+  animation: wave 0.48s ease-in-out 3;
+}
+
+.beep {
+  position: absolute;
+  top: 4px;
+  left: 40px;
+  z-index: 2;
+  padding: 1px 6px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  font-size: 0.68rem;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  animation: beepUp 1.3s ease-out forwards;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes blink {
+  0%,
+  91%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes talk {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1.6);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  35% {
+    transform: rotate(-38deg);
+  }
+  70% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes beepUp {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-13px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot,
+  .eye,
+  .led,
+  .mouthTalking,
+  .armLeft,
+  .armRight,
+  .beep {
+    animation: none;
+  }
 }
 
 .bubble {
@@ -77,11 +245,7 @@
   flex: 0 0 auto;
   width: 16px;
   height: 14px;
-  padding: 0;
-  font-size: 9px;
-  font-weight: bold;
-  line-height: 1;
-  font-family: sans-serif;
+  padding: 0 0 3px;
   background: var(--win-gray);
   border-top: 1px solid var(--win-light);
   border-left: 1px solid var(--win-light);
@@ -91,6 +255,14 @@
   align-items: flex-end;
   justify-content: center;
   cursor: default;
+}
+
+/* the glyph is drawn, not typed: the underscore character all but vanished */
+.control::after {
+  content: '';
+  width: 7px;
+  height: 2px;
+  background: var(--win-dark);
 }
 
 .control:active {
@@ -179,11 +351,6 @@
   background: var(--win-tooltip-bg);
 }
 
-.inviteIcon {
-  font-size: 1.1rem;
-  line-height: 1;
-}
-
 .inviteText {
   flex: 1;
   min-width: 0;
@@ -204,11 +371,6 @@
   gap: 8px;
   margin-bottom: 6px;
   padding: 4px 8px;
-}
-
-.pausedIcon {
-  font-size: 1.05rem;
-  line-height: 1;
 }
 
 .pausedText {

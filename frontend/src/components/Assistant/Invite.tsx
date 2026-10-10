@@ -1,4 +1,5 @@
 import { useI18n } from '../../i18n/languageContext';
+import { Robot } from './Robot';
 import styles from './styles.module.css';
 
 interface GuideInviteProps {
@@ -11,9 +12,7 @@ export const GuideInvite = ({ onStart, onDismiss }: GuideInviteProps) => {
 
   return (
     <div className={`win95-border ${styles.invite}`}>
-      <span className={styles.inviteIcon} aria-hidden="true">
-        {t.guide.avatar}
-      </span>
+      <Robot className={styles.robotSmall} talking />
       <span className={styles.inviteText}>{t.guide.invite.text}</span>
       <button type="button" className={`win95-btn ${styles.inviteStart}`} onClick={onStart}>
         {t.guide.invite.start}
