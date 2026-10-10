@@ -121,40 +121,31 @@ export const SearchSection = () => {
   return (
     <div className={styles.container}>
       <form className={styles.searchForm} onSubmit={handleSearch}>
-        <AdvancedSearchOptions
-          threshold={threshold}
-          onThresholdChange={setThreshold}
-          limit={limit}
-          onLimitChange={setLimit}
-          mode={mode}
-          onModeChange={setMode}
-          labelClassName={styles.label}
-        />
+        <div className={styles.query}>
+          <label htmlFor="search-query" className={styles.label}>
+            {t.advanced.queryLabel}
+          </label>
 
-        <PrecisionPresets
-          threshold={threshold}
-          onThresholdChange={setThreshold}
-          disabled={isLoading || !thresholdApplies}
-        />
+          <div className={styles.inputRow} {...helpAt('search.query')}>
+            <input
+              id="search-query"
+              type="text"
+              placeholder={t.search.placeholder}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                robot.notify({ kind: 'typing', text: e.target.value, mode, threshold });
+              }}
+              className={`win95-inset win95-input`}
+              disabled={isLoading}
+            />
 
-        <div className={styles.inputRow} {...helpAt('search.query')}>
-          <input
-            type="text"
-            placeholder={t.search.placeholder}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              robot.notify({ kind: 'typing', text: e.target.value, mode, threshold });
-            }}
-            className={`win95-inset win95-input`}
-            disabled={isLoading}
-          />
-
-          {!isLoading && (
-            <button type="submit" className={`win95-btn ${styles.submitButton}`}>
-              {t.search.submit}
-            </button>
-          )}
+            {!isLoading && (
+              <button type="submit" className={`win95-btn ${styles.submitButton}`}>
+                {t.search.submit}
+              </button>
+            )}
+          </div>
         </div>
 
         {isLoading && (
@@ -162,6 +153,21 @@ export const SearchSection = () => {
               <TaskProgress onCancel={handleCancel} />
             </div>
         )}
+
+        <AdvancedSearchOptions
+          threshold={threshold}
+          onThresholdChange={setThreshold}
+          limit={limit}
+          onLimitChange={setLimit}
+          mode={mode}
+          onModeChange={setMode}
+        >
+          <PrecisionPresets
+            threshold={threshold}
+            onThresholdChange={setThreshold}
+            disabled={isLoading || !thresholdApplies}
+          />
+        </AdvancedSearchOptions>
       </form>
 
       {shouldShowSeparator && <hr className={styles.separator} />}

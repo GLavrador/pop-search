@@ -119,11 +119,11 @@ describe('SearchSection Component', () => {
     renderWithProviders(<SearchSection />);
     fireEvent.click(screen.getByRole('button', { name: '▼ Advanced' }));
 
-    expect(screen.getByText(/steer the exact-terms half/)).toBeInTheDocument();
+    expect(screen.getByText(/the part of the search that looks for your words/)).toBeInTheDocument();
     expect(screen.getByText('baleia -orca')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Exact' }));
-    expect(screen.getByText('These control the entire search.')).toBeInTheDocument();
+    expect(screen.getByText('Here they apply to the entire search.')).toBeInTheDocument();
     expect(screen.getByText('baleia -orca')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Semantic' }));

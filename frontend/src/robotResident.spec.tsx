@@ -91,10 +91,10 @@ describe('the robot outside the guide', () => {
     await openAdvanced();
     await press('What is Search Mode?');
 
-    await press('What is Match Threshold?');
+    await press('What is Precision fine-tuning?');
 
     const balloon = within(screen.getByRole('status'));
-    expect(balloon.getByText('Match threshold')).toBeInTheDocument();
+    expect(balloon.getByText('Precision fine-tuning')).toBeInTheDocument();
     expect(balloon.queryByText('Search mode')).not.toBeInTheDocument();
   });
 
@@ -104,9 +104,9 @@ describe('the robot outside the guide', () => {
     await press('Exact');
     expect(screen.getByRole('slider', { name: 'Match threshold' })).toBeDisabled();
 
-    await press('What is Match Threshold?');
+    await press('What is Precision fine-tuning?');
 
-    expect(within(screen.getByRole('status')).getByText('Match threshold')).toBeInTheDocument();
+    expect(within(screen.getByRole('status')).getByText('Precision fine-tuning')).toBeInTheDocument();
   });
 
   it('should put the explanation away with its own close button', async () => {

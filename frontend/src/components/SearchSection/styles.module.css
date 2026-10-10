@@ -17,6 +17,12 @@
   width: 100%;
 }
 
+.query {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .label {
   font-weight: bold;
   color: var(--win-dark);
