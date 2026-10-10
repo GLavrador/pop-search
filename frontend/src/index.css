@@ -108,7 +108,7 @@ body {
 }
 
 .win95-input {
-  padding: 6px;
+  padding: 4px 6px;
   font-family: inherit;
   width: 100%;
   border: none;
@@ -138,6 +138,13 @@ button {
   -webkit-appearance: none;
   border-radius: 0;
   font-family: inherit;
+}
+
+/* The font draws its descenders below the height it declares, so a field needs the room. */
+input,
+textarea,
+select {
+  line-height: 1.4;
 }
 
 input:focus,
