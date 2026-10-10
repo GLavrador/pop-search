@@ -254,17 +254,17 @@ function AppContent() {
         </div>
       </RetroWindow>
 
-      {guide.isVisible && (windowState === 'open' || windowState === 'minimized') && (
-        <RobotPilot
-          utterance={guide.index}
-          cue={cue}
-          home={robotSeat}
-          target={spotNode}
-          aim={step?.spot ? AIMS[step.spot] : null}
-          parked={windowState === 'minimized'}
-          stage={stage}
-        />
-      )}
+      <RobotPilot
+        utterance={step ? guide.index : 'rest'}
+        cue={step ? cue : 'rest'}
+        home={robotSeat}
+        target={step ? spotNode : null}
+        aim={step?.spot ? AIMS[step.spot] : null}
+        parked={windowState === 'minimized'}
+        roam={step ? 'eager' : 'calm'}
+        stage={stage}
+        label={t.guide.poke}
+      />
 
       <footer className={styles.footer}>
         <p>{t.footer}</p>

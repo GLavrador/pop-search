@@ -48,6 +48,10 @@ export const Robot = ({ className = '' }: RobotProps) => (
             <rect x="17" y="20.4" width="6" height="1.8" />
             <rect x="29" y="20.4" width="6" height="1.8" />
           </g>
+          <g className={styles.brows}>
+            <path d="M17 17.4 L22.6 15.9" />
+            <path d="M29.4 15.9 L35 17.4" />
+          </g>
           <g className={styles.eyesWide}>
             <circle cx="20" cy="20.3" r="3.5" />
             <circle cx="32" cy="20.3" r="3.5" />
@@ -58,6 +62,7 @@ export const Robot = ({ className = '' }: RobotProps) => (
           <rect className={styles.mouthFlat} x="20" y="25.5" width="12" height="2.6" />
           <path className={styles.mouthSmile} d="M20.5 25 V28 H31.5 V25" />
           <rect className={styles.mouthOh} x="24" y="24.8" width="4" height="3.8" />
+          <path className={styles.mouthFrown} d="M20.5 28.4 V25.6 H31.5 V28.4" />
         </g>
       </g>
     </g>

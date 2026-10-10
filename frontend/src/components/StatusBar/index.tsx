@@ -7,7 +7,7 @@ export const StatusBar = () => {
   const { t } = useI18n();
 
   return (
-    <div className={`win95-inset ${styles.bar}`}>
+    <div className={`win95-inset ${styles.bar}`} data-robot="status">
       <span className={styles.text}>{status ?? t.common.ready}</span>
     </div>
   );

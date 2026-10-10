@@ -65,6 +65,7 @@ export const RetroWindow = ({
       ].join(' ')}
       aria-hidden={hidden}
       data-robot="window"
+      data-maximized={maximized || undefined}
     >
       <div className={styles.titleBar}>
         <div className={styles.titleText}>

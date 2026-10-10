@@ -28,19 +28,99 @@
   pointer-events: none;
 }
 
+/* A maximized window on a small screen sits above everything else, the taskbar included. */
+@media (max-width: 768px) {
+  :global(body):has([data-robot='window'][data-maximized]) .sky {
+    z-index: 210;
+  }
+}
+
 /* Moved every frame by the pilot, so it carries no transition of its own. */
 .craft {
   position: absolute;
   top: 0;
   left: 0;
+  line-height: 0;
+  will-change: transform;
+  transform: translate3d(-200px, -200px, 0);
+}
+
+.body {
+  display: block;
   padding: 0;
   background: none;
   border: none;
   line-height: 0;
   cursor: pointer;
   pointer-events: auto;
-  will-change: transform;
-  transform: translate3d(-200px, -200px, 0);
+}
+
+/* Hung over the robot by the pilot, which feeds --shift and --tail every few frames. */
+.balloon {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: var(--shift, 0px);
+  z-index: 3;
+  width: max-content;
+  max-width: min(262px, calc(100vw - 12px));
+  font-size: 0.82rem;
+  line-height: 1.45;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 140ms ease-out, visibility 0s linear 140ms;
+}
+
+.balloon:empty {
+  display: none;
+}
+
+.balloon[data-on] {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 140ms ease-out;
+}
+
+.balloon[data-drop] {
+  top: calc(100% + 10px);
+  bottom: auto;
+}
+
+.balloon::before,
+.balloon::after {
+  content: '';
+  position: absolute;
+  left: var(--tail, 23px);
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
+  translate: -7px 0;
+}
+
+.balloon::before {
+  top: 100%;
+  border-top: 8px solid var(--win-dark);
+}
+
+.balloon::after {
+  top: calc(100% - 2px);
+  border-top: 8px solid var(--tip, var(--win-tooltip-bg));
+}
+
+.balloon[data-drop]::before,
+.balloon[data-drop]::after {
+  border-top: none;
+}
+
+.balloon[data-drop]::before {
+  top: auto;
+  bottom: 100%;
+  border-bottom: 8px solid var(--win-dark);
+}
+
+.balloon[data-drop]::after {
+  top: auto;
+  bottom: calc(100% - 2px);
+  border-bottom: 8px solid var(--tip, var(--win-tooltip-bg));
 }
 
 .emote {
@@ -193,13 +273,40 @@
   transition: opacity 120ms ease-out;
 }
 
+.brows path,
+.mouthFrown {
+  fill: none;
+  stroke: var(--robot-glow);
+  stroke-width: 1.8;
+  stroke-linecap: square;
+}
+
 /* Faces: one set of eyes and one mouth shows at a time. */
 .eyesHappy,
 .eyesWide,
 .eyesShut,
+.brows,
 .mouthSmile,
-.mouthOh {
+.mouthOh,
+.mouthFrown {
   display: none;
+}
+
+[data-face='worried'] .mouthFlat {
+  display: none;
+}
+
+[data-face='worried'] .brows,
+[data-face='worried'] .mouthFrown {
+  display: inline;
+}
+
+[data-face='worried'] .eyesRound {
+  translate: 0 1px;
+}
+
+[data-face='worried'] .led {
+  animation-duration: 0.6s;
 }
 
 [data-face='sleepy'] .eyesRound {
@@ -242,7 +349,8 @@
 
 /* Speaking wins over any mouth the face had picked. */
 [data-talking] .mouthSmile,
-[data-talking] .mouthOh {
+[data-talking] .mouthOh,
+[data-talking] .mouthFrown {
   display: none;
 }
 
@@ -421,7 +529,9 @@
   .armR,
   .legL,
   .legR,
-  .emote {
+  .emote,
+  .balloon,
+  .balloon[data-on] {
     transition: none;
   }
 }

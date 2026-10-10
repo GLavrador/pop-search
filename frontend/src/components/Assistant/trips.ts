@@ -1,6 +1,6 @@
 import type { Box, Point, Side, Size } from './flight';
 
-export type Face = 'neutral' | 'happy' | 'curious' | 'wow' | 'sleepy';
+export type Face = 'neutral' | 'happy' | 'curious' | 'wow' | 'sleepy' | 'worried';
 
 export type Pose =
   | 'stand'
@@ -17,6 +17,9 @@ export type Pose =
 export interface Stop {
   at: Point;
   side?: Side;
+  /** How it settles there, when the place itself decides it: a ledge is for sitting. */
+  pose?: Pose;
+  layer?: 'top';
 }
 
 /** One stop: where to go, how to look once there, and how long to stay. */
@@ -27,7 +30,7 @@ export interface Leg {
   pose: Pose | ((side?: Side) => Pose);
   face: Face;
   /** Where the eyes rest, as a direction; 'wander' lets them drift. */
-  gaze?: Point | 'wander' | ((side?: Side) => Point);
+  gaze?: Point | 'wander' | ((side?: Side) => Point | 'wander');
   emote?: () => string;
   hold: number;
   layer?: 'behind' | 'top';
@@ -59,6 +62,8 @@ export interface Scene {
   move: (frames: Keyframe[], duration: number) => void;
   /** Says the next change to the window is the robot's own doing, not a new errand. */
   prank: (ms: number) => void;
+  /** How long since the user last typed or clicked. */
+  idleFor: () => number;
 }
 
 interface Trip {
@@ -70,8 +75,9 @@ interface Trip {
 
 const AHEAD: Point = { x: 0, y: 0 };
 const DOWN: Point = { x: 0, y: 1 };
+const BUSY_FOR = 12000;
 
-const HOP = [
+export const HOP = [
   { transform: 'translateY(0)' },
   { transform: 'translateY(-16px)', offset: 0.45 },
   { transform: 'translateY(0)' },
@@ -101,6 +107,11 @@ const pick = <T>(items: readonly T[]): T | undefined =>
   items[Math.floor(Math.random() * items.length)];
 export const landmark = (name: string) =>
   document.querySelector<HTMLElement>(`[data-robot="${name}"]`);
+/** The app window, unless it is minimized or closed: then there is nothing to stand on. */
+export const openWindow = () => {
+  const frame = landmark('window');
+  return frame?.getAttribute('aria-hidden') === 'true' ? null : frame;
+};
 const boxOf = (node: Element | null): Box | null => (node ? node.getBoundingClientRect() : null);
 const icons = () => [...document.querySelectorAll<HTMLElement>('[data-robot="icon"]')];
 const animate = (node: Element, frames: Keyframe[], duration: number) =>
@@ -250,7 +261,8 @@ export const TRIPS: Record<string, Trip> = {
     plan: (scene) => {
       const button = landmark('task');
       const bar = landmark('taskbar');
-      if (!button || !bar) return [];
+      // Never while the user is in the middle of something: it takes the window away.
+      if (!button || !bar || scene.idleFor() < BUSY_FOR) return [];
       const where = onTaskbar(button, bar, scene);
       const isOpen = () => button.getAttribute('aria-pressed') === 'true';
       const jump = (onImpact?: () => void) => {
@@ -340,7 +352,7 @@ export const TRIPS: Record<string, Trip> = {
   peek: {
     odds: 1,
     plan: ({ size }) => {
-      const frame = boxOf(landmark('window'));
+      const frame = boxOf(openWindow());
       if (!frame) return [];
       const height = frame.bottom - frame.top;
       const width = frame.right - frame.left;
@@ -380,7 +392,7 @@ export const TRIPS: Record<string, Trip> = {
     odds: 0.7,
     plan: ({ size, position }) => {
       const floor = (boxOf(landmark('taskbar'))?.top ?? window.innerHeight) - size.h - 6;
-      const frame = boxOf(landmark('window'));
+      const frame = boxOf(openWindow());
       const ceiling = frame && floor - frame.bottom > 10 ? frame.bottom + 2 : 8;
       if (floor <= ceiling) return [];
       const far = window.innerWidth - size.w - 10;
@@ -439,7 +451,7 @@ export const TRIPS: Record<string, Trip> = {
   rooftop: {
     odds: 0.7,
     plan: ({ size }) => {
-      const frame = landmark('window');
+      const frame = openWindow();
       if (!frame || frame.getBoundingClientRect().top < size.h) return [];
       return [
         {
@@ -461,7 +473,7 @@ export const TRIPS: Record<string, Trip> = {
   nap: {
     odds: 0.5,
     plan: ({ size }) => {
-      const frame = landmark('window');
+      const frame = openWindow();
       if (!frame || frame.getBoundingClientRect().top < size.h) return [];
       return [
         {
@@ -484,7 +496,7 @@ export const TRIPS: Record<string, Trip> = {
   knock: {
     odds: 0.6,
     plan: (scene) => {
-      const frame = boxOf(landmark('window'));
+      const frame = boxOf(openWindow());
       const at = frame
         ? { x: (frame.left + frame.right - scene.size.w) / 2, y: frame.top - 12 }
         : { x: (window.innerWidth - scene.size.w) / 2, y: window.innerHeight * 0.3 };
