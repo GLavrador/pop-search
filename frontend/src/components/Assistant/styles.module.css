@@ -127,6 +127,7 @@
 
 .eye,
 .eyesWide circle,
+.eyesShut rect,
 .mouthFlat,
 .mouthOh,
 .led,
@@ -195,9 +196,22 @@
 /* Faces: one set of eyes and one mouth shows at a time. */
 .eyesHappy,
 .eyesWide,
+.eyesShut,
 .mouthSmile,
 .mouthOh {
   display: none;
+}
+
+[data-face='sleepy'] .eyesRound {
+  display: none;
+}
+
+[data-face='sleepy'] .eyesShut {
+  display: inline;
+}
+
+[data-face='sleepy'] .led {
+  animation-duration: 3.6s;
 }
 
 [data-face='happy'] .eyesRound,

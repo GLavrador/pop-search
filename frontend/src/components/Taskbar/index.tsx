@@ -22,7 +22,7 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
 
   return (
     <div className={styles.taskbar} data-robot="taskbar">
-      <button type="button" className={styles.start}>
+      <button type="button" className={styles.start} data-robot="start">
         <img src={logo} alt="" className={styles.logo} />
         {t.taskbar.start}
       </button>

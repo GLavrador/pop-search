@@ -44,6 +44,10 @@ export const Robot = ({ className = '' }: RobotProps) => (
             <path d="M17 22 L20 18.6 L23 22" />
             <path d="M29 22 L32 18.6 L35 22" />
           </g>
+          <g className={styles.eyesShut}>
+            <rect x="17" y="20.4" width="6" height="1.8" />
+            <rect x="29" y="20.4" width="6" height="1.8" />
+          </g>
           <g className={styles.eyesWide}>
             <circle cx="20" cy="20.3" r="3.5" />
             <circle cx="32" cy="20.3" r="3.5" />

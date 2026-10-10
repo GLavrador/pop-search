@@ -14,11 +14,21 @@ interface RobotPilotProps {
   /** The spotlight of the current step, when it has one. */
   target: HTMLElement | null;
   aim: Aim | null;
+  /** True while the window is minimized: it waits on the taskbar instead of leaving. */
+  parked: boolean;
   /** The scrolling panel: while pointing it never leaves it, so it covers no chrome. */
   stage: RefObject<HTMLElement | null>;
 }
 
-export const RobotPilot = ({ utterance, cue, home, target, aim, stage }: RobotPilotProps) => {
+export const RobotPilot = ({
+  utterance,
+  cue,
+  home,
+  target,
+  aim,
+  parked,
+  stage,
+}: RobotPilotProps) => {
   const { t } = useI18n();
   const sky = useRef<HTMLDivElement>(null);
   const craft = useRef<HTMLButtonElement>(null);
@@ -44,8 +54,16 @@ export const RobotPilot = ({ utterance, cue, home, target, aim, stage }: RobotPi
   }, [home, stage]);
 
   useEffect(() => {
-    pilot.current?.brief({ utterance, cue, target, aim, beeps: t.guide.beeps });
-  }, [utterance, cue, target, aim, t.guide.beeps]);
+    pilot.current?.brief({
+      utterance,
+      cue,
+      target,
+      aim,
+      parked,
+      beeps: t.guide.beeps,
+      emotes: t.guide.emotes,
+    });
+  }, [utterance, cue, target, aim, parked, t.guide.beeps, t.guide.emotes]);
 
   return (
     <div ref={sky} className={styles.sky}>

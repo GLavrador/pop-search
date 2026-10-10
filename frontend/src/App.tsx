@@ -239,13 +239,14 @@ function AppContent() {
         </div>
       </RetroWindow>
 
-      {guide.isVisible && windowState === 'open' && (
+      {guide.isVisible && (windowState === 'open' || windowState === 'minimized') && (
         <RobotPilot
           utterance={guide.index}
           cue={cue}
           home={robotSeat}
           target={spotNode}
           aim={step?.spot ? AIMS[step.spot] : null}
+          parked={windowState === 'minimized'}
           stage={stage}
         />
       )}

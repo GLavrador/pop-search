@@ -13,23 +13,10 @@ import {
   type Point,
   type Side,
 } from './flight';
+import { landmark, planTrip, type Emotes, type Face, type Leg, type Scene } from './trips';
 import type { Aim } from '../Demo/spotlight';
 
 export type Cue = 'greet' | 'teach' | 'cheer';
-
-type Face = 'neutral' | 'happy' | 'curious' | 'wow';
-
-type Pose =
-  | 'stand'
-  | 'fly'
-  | 'wave'
-  | 'cheer'
-  | 'sit'
-  | 'peek'
-  | 'point-down'
-  | 'point-up'
-  | 'point-left'
-  | 'point-right';
 
 export interface Mission {
   /** Changes whenever the robot has something new to say. */
@@ -38,7 +25,10 @@ export interface Mission {
   /** The spotlight of the current step, when it has one. */
   target: HTMLElement | null;
   aim: Aim | null;
+  /** True while the app window is down on the taskbar, with nothing to point at. */
+  parked: boolean;
   beeps: readonly string[];
+  emotes: Emotes;
 }
 
 interface Parts {
@@ -57,25 +47,6 @@ export interface Pilot {
   dispose: () => void;
 }
 
-interface Spot {
-  at: Point;
-  side?: Side;
-}
-
-/** One stop: where to go, how to look once there, and how long to stay. */
-interface Leg {
-  where: () => Spot | null;
-  pose: Pose | ((side?: Side) => Pose);
-  face: Face;
-  /** Where the eyes rest, as a direction; 'wander' lets them drift. */
-  gaze?: Point | 'wander' | ((side?: Side) => Point);
-  emote?: () => string;
-  hold: number;
-  layer?: 'behind' | 'top';
-  /** The stop the current step asks for, as opposed to a trip of its own. */
-  mission?: boolean;
-}
-
 const ROBOT = { w: 46, h: 53 };
 const AHEAD: Point = { x: 0, y: 0 };
 const EYE_TRAVEL = { x: 2.2, y: 1.3 };
@@ -87,6 +58,7 @@ const SEAT_DWELL = 8000;
 const SPEECH = { greet: 3200, teach: 1900, cheer: 1900 };
 const POINTER_MEMORY = 1600;
 const REMEASURE_EVERY = 110;
+const SWIFT = 0.3;
 
 const LAYERS = { behind: '0', front: '', top: '120' };
 
@@ -103,9 +75,6 @@ const JOLT = [
 const SPIN = [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }];
 
 const clamp = (value: number, low: number, high: number) => Math.min(Math.max(value, low), high);
-const pick = <T>(items: readonly T[]): T | undefined =>
-  items[Math.floor(Math.random() * items.length)];
-const landmark = (name: string) => document.querySelector<HTMLElement>(`[data-robot="${name}"]`);
 
 export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot => {
   const svg = craft.querySelector('svg');
@@ -135,7 +104,9 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
   let measuredAt = 0;
   let shifted = false;
   let pokes = 0;
+  let prankUntil = 0;
   let pointer: (Point & { at: number }) | null = null;
+  let later: { at: number; run: () => void }[] = [];
   let raf = 0;
 
   const setFlag = (name: string, value: string | null) => {
@@ -150,6 +121,22 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
     y: clamp(at.y, 2, Math.max(2, window.innerHeight - size.h - 2)),
   });
 
+  const move = (frames: Keyframe[], duration: number) => {
+    if (!still) svg?.animate?.(frames, { duration, easing: 'ease-out' });
+  };
+
+  const scene: Scene = {
+    size,
+    position: () => pos,
+    onScreen,
+    emotes: () => mission?.emotes ?? { heavy: '', sorry: '', knock: '', puzzled: '' },
+    after: (ms, run) => later.push({ at: clock + ms, run }),
+    move,
+    prank: (ms) => {
+      prankUntil = clock + ms;
+    },
+  };
+
   const say = (text: string, until: number) => {
     if (!text) return;
     emote.textContent = text;
@@ -163,8 +150,31 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
     emoteUntil = 0;
   };
 
+  /** With the window minimized there is nothing to teach: it waits on the app's button. */
+  const waiting = (): Leg => ({
+    mission: true,
+    hold: DWELL,
+    face: 'neutral',
+    pose: 'sit',
+    gaze: 'wander',
+    layer: 'top',
+    where: () => {
+      const button = boxOf(landmark('task'));
+      const bar = boxOf(landmark('taskbar'));
+      if (!button || !bar) return null;
+      return {
+        at: onScreen({
+          x: (button.left + button.right - size.w) / 2,
+          y: bar.top - size.h + 9,
+        }),
+      };
+    },
+  });
+
   /** Next to the control the step is about, or back in its seat when there is none. */
   const station = (): Leg => {
+    if (mission?.parked) return waiting();
+
     const cue = mission?.cue ?? 'teach';
     const returning = visits > 0;
 
@@ -205,168 +215,6 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
     };
   };
 
-  /** Things it goes off to do when left alone for a while. Empty when not possible here. */
-  const trips: Record<string, () => Leg[]> = {
-    icon: () => {
-      const icon = pick([...document.querySelectorAll<HTMLElement>('[data-robot="icon"]')]);
-      if (!icon) return [];
-      return [
-        {
-          where: () => {
-            const box = icon.getBoundingClientRect();
-            const fitsRight = box.right + 4 + size.w <= window.innerWidth;
-            return {
-              at: onScreen({
-                x: fitsRight ? box.right + 4 : box.left - size.w - 4,
-                y: box.top + (box.height - size.h) / 2,
-              }),
-              side: fitsRight ? 'right' : 'left',
-            };
-          },
-          pose: 'stand',
-          face: 'curious',
-          gaze: (where) => ({ x: where === 'right' ? -1 : 1, y: 0.3 }),
-          emote: () => pick(['?', '!', 'hm...']) ?? '',
-          hold: 2400,
-        },
-      ];
-    },
-
-    clock: () => {
-      const dial = landmark('clock');
-      const bar = landmark('taskbar');
-      if (!dial || !bar) return [];
-      return [
-        {
-          where: () => {
-            const box = dial.getBoundingClientRect();
-            return {
-              at: onScreen({
-                x: box.left + (box.width - size.w) / 2,
-                y: bar.getBoundingClientRect().top - size.h,
-              }),
-            };
-          },
-          pose: 'point-down',
-          face: 'curious',
-          gaze: { x: 0, y: 1 },
-          emote: () => dial.textContent?.trim() ?? '',
-          hold: 2800,
-        },
-      ];
-    },
-
-    sit: () => {
-      const bar = landmark('taskbar');
-      if (!bar) return [];
-      const edge = bar.getBoundingClientRect();
-      const limit = (boxOf(landmark('clock'))?.left ?? edge.right) - size.w - 24;
-      const from = Math.min(edge.left + 190, limit);
-      const x = from + Math.random() * Math.max(0, limit - from);
-      return [
-        {
-          where: () => ({ at: { x, y: bar.getBoundingClientRect().top - size.h + 9 } }),
-          pose: 'sit',
-          face: 'happy',
-          gaze: 'wander',
-          emote: () => '♪',
-          hold: 4200,
-          layer: 'top',
-        },
-      ];
-    },
-
-    peek: () => {
-      const frame = boxOf(landmark('window'));
-      if (!frame) return [];
-      const height = frame.bottom - frame.top;
-      const width = frame.right - frame.left;
-      const down = frame.top + 50 + Math.random() * Math.max(0, height - 100 - size.h);
-      const spots: Spot[] = [];
-      if (frame.top > size.h * 0.6) {
-        spots.push({
-          side: 'above',
-          at: {
-            x: frame.left + 40 + Math.random() * Math.max(0, width - 80 - size.w),
-            y: frame.top - size.h * 0.55,
-          },
-        });
-      }
-      if (window.innerWidth - frame.right > size.w * 0.6) {
-        spots.push({ side: 'right', at: { x: frame.right - size.w * 0.42, y: down } });
-      }
-      if (frame.left > size.w * 0.6) {
-        spots.push({ side: 'left', at: { x: frame.left - size.w * 0.58, y: down } });
-      }
-      const spot = pick(spots);
-      if (!spot) return [];
-      return [
-        {
-          where: () => spot,
-          pose: 'peek',
-          face: 'wow',
-          gaze: (where) => ({ x: where === 'right' ? 1 : where === 'left' ? -1 : 0, y: 0.5 }),
-          hold: 2300,
-          layer: 'behind',
-        },
-      ];
-    },
-
-    zigzag: () => {
-      const floor = (boxOf(landmark('taskbar'))?.top ?? window.innerHeight) - size.h - 6;
-      const frame = boxOf(landmark('window'));
-      const ceiling = frame && floor - frame.bottom > 10 ? frame.bottom + 2 : 8;
-      if (floor <= ceiling) return [];
-      const height = () => ceiling + Math.random() * (floor - ceiling);
-      const far = window.innerWidth - size.w - 10;
-      const startLeft = (pos?.x ?? 0) > window.innerWidth / 2;
-      const sweep = (left: boolean, hold: number, last = false): Leg => {
-        const at = { x: left ? 10 : far, y: height() };
-        return {
-          where: () => ({ at }),
-          pose: last ? 'cheer' : 'fly',
-          face: 'happy',
-          emote: last ? () => '✦' : undefined,
-          hold,
-        };
-      };
-      return [sweep(startLeft, 90), sweep(!startLeft, 90), sweep(startLeft, 1000, true)];
-    },
-
-    rooftop: () => {
-      const frame = landmark('window');
-      if (!frame || frame.getBoundingClientRect().top < size.h) return [];
-      return [
-        {
-          where: () => {
-            const box = frame.getBoundingClientRect();
-            return { at: { x: box.right - size.w - 34, y: box.top - size.h + 1 }, side: 'above' };
-          },
-          pose: 'point-down',
-          face: 'curious',
-          gaze: { x: 0.6, y: 1 },
-          emote: () => pick(['_ □ X ?', 'hm...']) ?? '',
-          hold: 2600,
-        },
-      ];
-    },
-  };
-
-  const excursion = (): Leg[] => {
-    if (still) return [];
-    const names = Object.keys(trips)
-      .filter((name) => name !== lastTrip)
-      .sort(() => Math.random() - 0.5);
-    for (const name of names) {
-      const legs = trips[name]();
-      if (legs.length) {
-        lastTrip = name;
-        return legs;
-      }
-    }
-    return [];
-  };
-
   const land = (now: number) => {
     if (!leg) return;
     flight = null;
@@ -374,7 +222,8 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
     holdUntil = now + leg.hold;
     if (leg.mission) visits += 1;
     if (leg.emote) say(leg.emote(), holdUntil);
-    if (!still) svg?.animate?.(SQUASH, { duration: 260, easing: 'ease-out' });
+    move(SQUASH, 260);
+    leg.onLand?.();
   };
 
   /** Sets off for a stop. False when the stop cannot be found yet. */
@@ -387,23 +236,34 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
     hush();
     sky.style.zIndex = LAYERS[next.layer === 'behind' ? 'behind' : 'front'];
 
-    // First time on stage: it flies in from beyond the right edge.
-    pos ??= { x: window.innerWidth + 12, y: Math.max(16, spot.at.y - 110) };
+    // First time on stage, or back from beyond the edge: it flies in from outside.
+    pos = next.from?.() ?? pos ?? { x: window.innerWidth + 12, y: Math.max(16, spot.at.y - 110) };
 
-    const bow = (0.45 + Math.random() * 0.55) * (Math.random() < 0.8 ? 1 : -1);
-    const plan = contain(planFlight(pos, spot.at, now, bow * climbing(pos, spot.at)), {
-      left: 4,
-      top: 4,
-      right: window.innerWidth - size.w - 4,
-      bottom: window.innerHeight - size.h - 4,
-    });
-    flight = still ? { ...plan, duration: 0 } : plan;
+    const bow = next.direct ? 0 : (0.45 + Math.random() * 0.55) * (Math.random() < 0.8 ? 1 : -1);
+    const plan = planFlight(pos, spot.at, now, bow * climbing(pos, spot.at));
+    const path = next.direct
+      ? plan
+      : contain(plan, {
+          left: 4,
+          top: 4,
+          right: window.innerWidth - size.w - 4,
+          bottom: window.innerHeight - size.h - 4,
+        });
+    const pace = still ? 0 : next.swift ? SWIFT : 1;
+    flight = { ...path, duration: path.duration * pace };
+
     if (speech) talkUntil = now + flight.duration + speech;
     return true;
   };
 
   const advance = (now: number) => {
-    if (!queue.length && leg?.mission) queue = excursion();
+    if (!queue.length && leg?.mission && !still && !mission?.parked) {
+      const trip = planTrip(scene, lastTrip);
+      if (trip) {
+        lastTrip = trip.name;
+        queue = trip.legs;
+      }
+    }
 
     const next = queue.shift();
     if (next) depart(next, now);
@@ -418,10 +278,17 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
 
     if (briefed) {
       queue = [];
+      later = [];
       visits = 0;
       briefed = !depart(station(), now, SPEECH[mission?.cue ?? 'teach']);
     }
     if (!leg || !pos) return;
+
+    if (later.length) {
+      const due = later.filter((entry) => entry.at <= now);
+      later = later.filter((entry) => entry.at > now);
+      due.forEach((entry) => entry.run());
+    }
 
     if (leg.mission && now - measuredAt > REMEASURE_EVERY) shifted = true;
 
@@ -515,25 +382,33 @@ export const createPilot = ({ sky, craft, emote, home, stage }: Parts): Pilot =>
 
   return {
     brief: (next) => {
-      const unchanged =
+      const sameStep =
         mission !== null &&
         mission.utterance === next.utterance &&
         mission.target === next.target &&
         mission.aim === next.aim &&
         mission.cue === next.cue;
+      const unchanged = sameStep && mission?.parked === next.parked;
+      // When it sent the window away itself, that is part of the act, not new orders.
+      const itsOwnDoing = sameStep && clock < prankUntil;
       mission = next;
-      if (!unchanged) briefed = true;
+      if (!unchanged && !itsOwnDoing) briefed = true;
     },
 
     poke: () => {
+      // Sitting on the taskbar button it is in the way of it, so it presses it for you.
+      if (mission?.parked) {
+        landmark('task')?.click();
+        return;
+      }
+
       pokes += 1;
       const lines = mission?.beeps ?? [];
       if (lines.length) say(lines[pokes % lines.length], clock + 1300);
       wowUntil = clock + 800;
       talkUntil = Math.max(talkUntil, clock + 600);
-      if (still) return;
       const spinning = pokes % 4 === 0;
-      svg?.animate?.(spinning ? SPIN : JOLT, { duration: spinning ? 620 : 420, easing: 'ease-out' });
+      move(spinning ? SPIN : JOLT, spinning ? 620 : 420);
     },
 
     dispose: () => {
