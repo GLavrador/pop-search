@@ -15,6 +15,9 @@ import { createVariety } from '../components/Assistant/variety';
 import type { RobotHandle } from '../components/Assistant/RobotPilot';
 import type { Aim } from '../components/Demo/spotlight';
 import type { Tab } from '../constants/tabs';
+import { findSearchMode } from '../constants/searchModes';
+import { PRECISION_PRESETS } from '../constants/searchPresets';
+import { useReadingAlong } from './useReadingAlong';
 
 export interface LineCopy {
   text: ReactNode;
@@ -103,6 +106,9 @@ const FROM_UNDER: Aim = { from: 'below', free: true };
 const PROGRESS = () => findHelp('ingest.progress');
 const ERROR_BOX = () => findHelp('ingest.error');
 const EMPTY_BOX = () => findHelp('search.empty');
+const SEARCH_FIELD = () => findHelp('search.query')?.querySelector<HTMLElement>('input') ?? null;
+const TITLE_FIELD = () => findHelp('review.general')?.querySelector<HTMLElement>('input') ?? null;
+const BROADEST = Math.min(...PRECISION_PRESETS.map((preset) => preset.threshold));
 
 const AT_REST: Brief = { utterance: 'rest', cue: 'rest', target: null, aim: null, roam: 'calm' };
 const WATCHING: Brief = {
@@ -111,6 +117,12 @@ const WATCHING: Brief = {
   target: PROGRESS,
   aim: null,
   roam: 'never',
+};
+
+// Perched on a field, reading what is in it.
+const READING: Record<'search' | 'title', Brief> = {
+  search: { utterance: 'read', cue: 'watch', target: SEARCH_FIELD, aim: null, roam: 'never' },
+  title: { utterance: 'read-title', cue: 'watch', target: TITLE_FIELD, aim: null, roam: 'never' },
 };
 
 const isHelpKey = (key: string | undefined): key is HelpKey =>
@@ -164,6 +176,10 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
     handle.current?.react(spoken.current ? { ...reaction, emote: undefined } : reaction);
   }, []);
 
+  const lines = useCallback(() => live.current.t.robot.says, []);
+  const reader = useReadingAlong({ react, vary, says: lines });
+  const { typed, review, stop: stopReading } = reader;
+
   const explain = useCallback(
     (key: HelpKey, node: HTMLElement) => {
       // Asked about itself it stays put: it cannot go and stand next to itself.
@@ -213,6 +229,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           const firstVisit = !visited.current.has(event.tab);
           visited.current.add(event.tab);
           put(null);
+          stopReading();
           if (firstVisit || Math.random() < REVISIT_CHATTER) {
             react({ face: 'happy', emote: vary(`tab.${event.tab}`, says.tabs[event.tab]) });
           }
@@ -224,6 +241,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           const again = pressed.current.what === event.what;
           if (again && now - pressed.current.at < SAME_PRESS_GAP) break;
           pressed.current = { what: event.what, at: now };
+          if (event.what === 'reviewCancel') stopReading();
           react({
             face: PRESS_FACES[event.what] ?? 'happy',
             emote: vary(`press.${event.what}`, says.press[event.what]),
@@ -236,9 +254,15 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           const fresh = words.find((word) => TYPED_WORDS[word].test(text) && !noticed.current.has(word));
           noticed.current = new Set(words.filter((word) => TYPED_WORDS[word].test(text)));
           if (fresh) react({ ...TYPED_LOOKS[fresh], emote: vary(`typed.${fresh}`, says.typed[fresh]) });
+          const searching = findSearchMode(event.mode);
+          typed(event.text, fresh !== undefined, {
+            operators: searching.supportsOperators,
+            canWiden: searching.usesThreshold && event.threshold > BROADEST,
+          });
           break;
         }
         case 'searchStarted':
+          stopReading();
           hush('search');
           react({ face: 'curious', emote: vary('searching', says.searching), ms: 1200 });
           break;
@@ -288,6 +312,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           setWatching(false);
           hush('analysis');
           react({ face: 'happy', emote: vary('analysed', says.analysed), move: 'hop' });
+          review(event.title);
           break;
         case 'analysisFailed':
           setWatching(false);
@@ -312,6 +337,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           react({ face: 'happy', emote: vary('manual', says.manual) });
           break;
         case 'saved':
+          stopReading();
           react({ face: 'happy', emote: vary('saved', says.saved), move: 'spin', ms: 2000 });
           break;
         case 'saveFailed':
@@ -344,7 +370,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           break;
       }
     },
-    [hush, put, react, say, vary],
+    [hush, put, react, review, say, stopReading, typed, vary],
   );
 
   const stopHelp = useCallback(() => {
@@ -454,7 +480,9 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
         speech: LINE_SPEECH,
       };
     }
-    return guide ?? (watching ? WATCHING : AT_REST);
+    if (guide) return guide;
+    if (watching) return WATCHING;
+    return reader.reading ? READING[reader.reading] : AT_REST;
   };
 
   return {

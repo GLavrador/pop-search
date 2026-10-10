@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { Dictionary } from '../i18n/en';
 import type { Tab } from '../constants/tabs';
+import type { SearchMode } from '../constants/searchModes';
 
 export type HelpKey = keyof Dictionary['robot']['help'];
 
@@ -23,7 +24,8 @@ export const findHelp = (key: HelpKey): HTMLElement | null =>
 export type RobotEvent =
   | { kind: 'tab'; tab: Tab }
   | { kind: 'pressed'; what: PressKey }
-  | { kind: 'typing'; text: string }
+  /** A keystroke in the search field, with the settings the search would run under. */
+  | { kind: 'typing'; text: string; mode: SearchMode; threshold: number }
   | { kind: 'searchStarted' }
   | { kind: 'searchFound'; count: number }
   /** Each way out that is still open comes along, ready to run from the balloon. */
@@ -32,7 +34,7 @@ export type RobotEvent =
   | { kind: 'copied' }
   | { kind: 'urlRejected' }
   | { kind: 'analysisStarted' }
-  | { kind: 'analysisDone' }
+  | { kind: 'analysisDone'; title: string }
   | { kind: 'analysisFailed'; manual: () => void }
   | { kind: 'analysisCancelled' }
   | { kind: 'manualOpened' }

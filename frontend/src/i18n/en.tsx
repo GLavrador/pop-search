@@ -565,6 +565,49 @@ export const en = {
       reopened: ['phew!', 'it is back!', 'what a scare!'],
       bigger: ['wow, so big!', 'full screen!', 'room to spare!'],
       smaller: ['that fits better', 'regular size', 'back to my corner'],
+      echo: [
+        (word: string) => `${word}?`,
+        (word: string) => `hm, ${word}?`,
+        (word: string) => `${word}, eh?`,
+      ],
+      got: [
+        (word: string) => `ah, ${word}!`,
+        (word: string) => `${word}, I see!`,
+        (word: string) => `so it was ${word}!`,
+      ],
+      quirks: {
+        cleared: ['huh, gave up?', 'all gone!', 'starting over, eh?'],
+        shouting: ['no need to shout!', 'ow, my ears!', 'CALM DOWN!'],
+        stuck: ['is the key stuck?', 'keyboard jammed?', 'let go of the key!'],
+        long: ['what a long search!', 'is that an essay?', 'take a breath!'],
+      },
+      caught: ['oops, I read nothing!', 'I was not looking!', 'I saw nothing, promise!'],
+      hints: {
+        lone: [
+          (word: string) => `just "${word}"? try Broad!`,
+          () => 'one word only? Broad finds more',
+          (word: string) => `${word}... Broad brings more`,
+        ],
+        quoted: [
+          () => 'in quotes means the exact phrase!',
+          () => 'quotes? to the letter, then',
+          () => 'exact phrase, noted!',
+        ],
+        quotedIgnored: [
+          () => 'quotes do not count in Semantic mode',
+          () => 'here the quotes are just decoration',
+          () => 'quotes do nothing in this mode',
+        ],
+      },
+      title: {
+        good: ['I like that title!', 'the AI did well!', 'good title, easy to find'],
+        short: [
+          'short title: it needs 5 words',
+          'is that all? the search wants more',
+          'hm, that title is thin',
+        ],
+        long: ['whoa, what a long title!', 'a title or a description?', 'now that is a title!'],
+      },
       typed: {
         cat: ['meow?', 'a cat?! where?', 'the one behind the window?'],
         robot: ['that is me!!', 'did you call?', 'robot? present!'],

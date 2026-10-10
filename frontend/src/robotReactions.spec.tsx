@@ -62,6 +62,25 @@ const FOUND_ONE = anyOf(['found 1!', 'got 1 here!', 'look, 1 video!']);
 const COPIED = anyOf(['copied!', 'it is yours!', 'link copied!']);
 const SEARCH_TAB = anyOf(['shall we look?', 'what are we after?', 'I will find it for you!']);
 const ADVANCED_OPEN = ['the fine settings!', 'time to tinker', 'the control panel'];
+const ECHO = (word: string) => [`${word}?`, `hm, ${word}?`, `${word}, eh?`];
+const CAUGHT = ['oops, I read nothing!', 'I was not looking!', 'I saw nothing, promise!'];
+const LONE = (word: string) => [
+  `just "${word}"? try Broad!`,
+  'one word only? Broad finds more',
+  `${word}... Broad brings more`,
+];
+
+const analysed = (title: string) => ({
+  titulo_sugerido: title,
+  descricao_completa:
+    'A whale jumps out of the sea and lands with a huge splash right beside a small boat full of people.',
+  url_original: 'https://x.com/a/status/1',
+  metadados_estruturados: {
+    pessoas: [],
+    elementos_cenario: [],
+    audio: { transcricao: '', musica: null, artista: null },
+  },
+});
 const BROAD = ['net wide open!', 'bring them all!', 'the more the merrier'];
 
 const signIn = () =>
@@ -149,6 +168,180 @@ describe('the robot reacting to the app', () => {
     await user.type(screen.getByPlaceholderText('Type to search...'), words);
 
     expect(screen.getByText(anyOf(lines))).toBeInTheDocument();
+  });
+
+  it('should say a searched word back now and then, and then pretend it never did', async () => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+
+    await user.type(screen.getByPlaceholderText('Type to search...'), 'a whale');
+
+    expect(screen.getByText('whale...')).toBeInTheDocument();
+    expect(await screen.findByText(anyOf(ECHO('whale')), {}, { timeout: 3000 })).toBeInTheDocument();
+    expect(await screen.findByText(anyOf(CAUGHT), {}, { timeout: 4000 })).toBeInTheDocument();
+    chance.mockRestore();
+  }, 12000);
+
+  it('should pick the reading back up when the typing carries on', async () => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+    const field = screen.getByPlaceholderText('Type to search...');
+
+    await user.type(field, 'a wha');
+    await screen.findByText(anyOf(ECHO('wha')), {}, { timeout: 3000 });
+    await user.type(field, 'le');
+
+    expect(screen.getByText('whale...')).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        anyOf(['ah, whale!', 'whale, I see!', 'so it was whale!']),
+        {},
+        { timeout: 3000 },
+      ),
+    ).toBeInTheDocument();
+    chance.mockRestore();
+  }, 12000);
+
+  it('should suggest a broader precision for a search of a single word', async () => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+
+    await user.type(screen.getByPlaceholderText('Type to search...'), 'whale');
+
+    expect(
+      await screen.findByText(anyOf(LONE('whale')), {}, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    chance.mockRestore();
+  });
+
+  it('should keep that suggestion to itself when the search is already at its broadest', async () => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+    await press('Broad');
+
+    await user.type(screen.getByPlaceholderText('Type to search...'), 'whale');
+
+    expect(
+      await screen.findByText(anyOf(ECHO('whale')), {}, { timeout: 3000 }),
+    ).toBeInTheDocument();
+    chance.mockRestore();
+  });
+
+  it.each([
+    [
+      'mean an exact phrase',
+      'Hybrid',
+      ['in quotes means the exact phrase!', 'quotes? to the letter, then', 'exact phrase, noted!'],
+    ],
+    [
+      'count for nothing',
+      'Semantic',
+      [
+        'quotes do not count in Semantic mode',
+        'here the quotes are just decoration',
+        'quotes do nothing in this mode',
+      ],
+    ],
+  ])('should say that quotes %s in %s mode', async (_, mode, lines) => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+    await press('▼ Advanced');
+    await press(mode);
+
+    await user.type(screen.getByPlaceholderText('Type to search...'), '"big whale"');
+
+    expect(await screen.findByText(anyOf(lines), {}, { timeout: 3000 })).toBeInTheDocument();
+    chance.mockRestore();
+  });
+
+  it.each([
+    [
+      'a good size',
+      'A whale jumps right beside the boat',
+      ['I like that title!', 'the AI did well!', 'good title, easy to find'],
+    ],
+    [
+      'too short to be saved',
+      'Whale jumps',
+      [
+        'short title: it needs 5 words',
+        'is that all? the search wants more',
+        'hm, that title is thin',
+      ],
+    ],
+  ])(
+    'should read the title the AI wrote and say it is %s',
+    async (_, title, lines) => {
+      signIn();
+      analyzeVideo.mockResolvedValue(analysed(title));
+      renderApp();
+
+      await runAnalysis();
+
+      const start = title.split(' ')[0];
+      expect(await screen.findByText(`${start}...`, {}, { timeout: 6000 })).toBeInTheDocument();
+      expect(await screen.findByText(anyOf(lines), {}, { timeout: 6000 })).toBeInTheDocument();
+    },
+    15000,
+  );
+
+  it('should own up at once when the search is wiped under its nose', async () => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+    const field = screen.getByPlaceholderText('Type to search...');
+    await user.type(field, 'whale');
+
+    await user.clear(field);
+
+    expect(screen.getByText(anyOf(CAUGHT))).toBeInTheDocument();
+    chance.mockRestore();
+  });
+
+  it.each([
+    ['shouting', 'WHALE', ['no need to shout!', 'ow, my ears!', 'CALM DOWN!']],
+    ['a stuck key', 'whaaaaa', ['is the key stuck?', 'keyboard jammed?', 'let go of the key!']],
+  ])('should remark on %s in the search', async (_, words, lines) => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+
+    await user.type(screen.getByPlaceholderText('Type to search...'), words);
+
+    expect(screen.getByText(anyOf(lines))).toBeInTheDocument();
+    chance.mockRestore();
+  });
+
+  it('should notice a search being given up on', async () => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+    const field = screen.getByPlaceholderText('Type to search...');
+    await user.type(field, 'whale');
+
+    await user.clear(field);
+
+    expect(
+      screen.getByText(anyOf(['huh, gave up?', 'all gone!', 'starting over, eh?'])),
+    ).toBeInTheDocument();
+    chance.mockRestore();
+  });
+
+  it('should mind its own business most of the time', async () => {
+    const chance = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    renderApp();
+    await user.click(tab('🔍 Search.exe'));
+
+    await user.type(screen.getByPlaceholderText('Type to search...'), 'a whale');
+    await new Promise((done) => setTimeout(done, 1500));
+
+    expect(screen.queryByText(anyOf(['whale...', ...ECHO('whale')]))).not.toBeInTheDocument();
+    chance.mockRestore();
   });
 
   it('should have a word for the buttons inside a tab', async () => {

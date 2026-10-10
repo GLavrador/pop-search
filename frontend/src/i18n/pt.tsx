@@ -572,6 +572,49 @@ export const pt: Dictionary = {
       reopened: ['ufa!', 'voltou!', 'que susto!'],
       bigger: ['uau, que grande!', 'tela cheia!', 'espaço de sobra!'],
       smaller: ['assim cabe melhor', 'tamanho normal', 'de volta ao cantinho'],
+      echo: [
+        (word: string) => `${word}?`,
+        (word: string) => `hm, ${word}?`,
+        (word: string) => `${word}, é?`,
+      ],
+      got: [
+        (word: string) => `ah, ${word}!`,
+        (word: string) => `${word}, entendi!`,
+        (word: string) => `era ${word}!`,
+      ],
+      quirks: {
+        cleared: ['ué, desistiu?', 'apagou tudo!', 'começar de novo, né?'],
+        shouting: ['não precisa gritar!', 'ai, meus ouvidos!', 'CALMA!'],
+        stuck: ['travou a tecla?', 'o teclado emperrou?', 'solta a tecla!'],
+        long: ['que busca comprida!', 'isso é uma redação?', 'haja fôlego!'],
+      },
+      caught: ['ops, eu não li nada!', 'eu não tava olhando!', 'não vi nada, juro!'],
+      hints: {
+        lone: [
+          (word: string) => `só "${word}"? tenta a Ampla!`,
+          () => 'uma palavra só? a Ampla acha mais',
+          (word: string) => `${word}... com a Ampla vem mais`,
+        ],
+        quoted: [
+          () => 'entre aspas é a frase exata!',
+          () => 'aspas? então é ao pé da letra',
+          () => 'frase exata, anotado!',
+        ],
+        quotedIgnored: [
+          () => 'no modo Semântica as aspas não valem',
+          () => 'aqui as aspas são só enfeite',
+          () => 'aspas não funcionam neste modo',
+        ],
+      },
+      title: {
+        good: ['gostei desse título!', 'a IA caprichou!', 'bom título, fácil de achar'],
+        short: [
+          'título curtinho: precisa de 5 palavras',
+          'só isso? a busca quer mais',
+          'hm, falta título aí',
+        ],
+        long: ['eita, que título comprido!', 'é título ou descrição?', 'título de respeito!'],
+      },
       typed: {
         cat: ['miau?', 'gato?! cadê?', 'é o de trás da janela?'],
         robot: ['sou eu!!', 'me chamou?', 'robô? presente!'],

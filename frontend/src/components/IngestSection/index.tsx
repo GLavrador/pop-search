@@ -42,7 +42,7 @@ export const IngestSection = () => {
   useEffect(() => {
     if (data === toldData.current) return;
     toldData.current = data;
-    if (data) robot.notify({ kind: 'analysisDone' });
+    if (data) robot.notify({ kind: 'analysisDone', title: data.titulo_sugerido });
   }, [data, robot]);
 
   // The way out it offers is the manual form, opened on the link that just failed.

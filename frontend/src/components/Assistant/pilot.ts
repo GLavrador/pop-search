@@ -77,6 +77,8 @@ export interface Reaction {
   emote?: string;
   move?: Move;
   ms?: number;
+  /** Looks pointedly somewhere else for as long as it lasts: it was not reading, honest. */
+  avert?: boolean;
 }
 
 interface Parts {
@@ -242,6 +244,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   let landing: { zone: Zone | null; hold: number } = { zone: null, hold: 0 };
   let shaking: Shaking = NOT_SHAKING;
   let dizzyUntil = 0;
+  let avertUntil = 0;
 
   let face: Face = 'neutral';
   let flash: Face = 'wow';
@@ -841,6 +844,11 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     const rest = typeof leg.gaze === 'function' ? leg.gaze(side) : leg.gaze;
     if (flying) {
       want = heading ?? want;
+    } else if (now < avertUntil) {
+      // Caught reading over a shoulder: up and away from the field, as if nothing happened.
+      const field = reading?.node.isConnected ? reading.node.getBoundingClientRect() : null;
+      const toTheLeft = field ? field.left + field.width / 2 < pos.x : true;
+      want = { x: toTheLeft ? 0.8 : -0.8, y: -0.7 };
     } else if (reading && now < reading.until && reading.node.isConnected) {
       // It reads along: its eyes sit on the end of what has been typed so far.
       const box = reading.node.getBoundingClientRect();
@@ -993,8 +1001,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       return false;
     },
 
-    react: ({ face: look, emote: text, move: kind, ms = 1700 }) => {
+    react: ({ face: look, emote: text, move: kind, ms = 1700, avert }) => {
       const now = present();
+      if (avert) avertUntil = now + ms;
       if (look) {
         flash = look;
         flashUntil = now + ms;
