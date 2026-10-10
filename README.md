@@ -37,6 +37,9 @@ contribuir exige conta.
 - **Contas com limite mensal**: contribuir exige cadastro; buscar não
 - **Assistente guiado**: um assistente conduz o visitante pelas telas de verdade,
   com uma adição de vídeo e uma busca de mentira, sem conta e sem chamada de IA
+- **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
+  qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
+  falha da IA, vídeo salvo) e pode ser arrastado pela tela
 
 ## Como a busca funciona
 
@@ -363,8 +366,8 @@ backend/
 
 frontend/src/
 ├── components/              # Um diretório por componente, com CSS Module
-├── context/                 # Sessão e barra de status
-├── hooks/                   # Queries e mutations
+├── context/                 # Sessão, barra de status e voz do robô
+├── hooks/                   # Queries, mutations e o que o robô diz e quando
 ├── services/api.ts          # Cliente HTTP, anexa o token
 ├── constants/               # Presets, modos e roteiro do guia
 └── lib/supabase.ts          # Cliente Supabase (só autenticação)
