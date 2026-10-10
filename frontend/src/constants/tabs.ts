@@ -6,3 +6,5 @@ export const TAB_LABELS = {
   stats: '📊 Stats.exe',
   signIn: '🔑 Sign In',
 } as const;
+
+export type Tab = 'ingest' | 'search' | 'library' | 'account' | 'admin';

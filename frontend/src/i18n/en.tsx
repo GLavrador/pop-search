@@ -1,5 +1,6 @@
 import demo from '../components/DemoTour/styles.module.css';
 import { TAB_LABELS } from '../constants/tabs';
+import type { GuideStepCopy, GuideStepId } from '../constants/guide';
 
 export const en = {
   language: {
@@ -327,6 +328,95 @@ export const en = {
     tokens: 'Tokens',
     perUserNote:
       'Tokens are what count against the Google AI quota. Analyses are what each account is limited by.',
+  },
+
+  guide: {
+    name: 'Assistant',
+    avatar: '📎',
+    counter: (current: number, total: number) => `Step ${current} of ${total}`,
+    back: '◀ Back',
+    next: 'Next ▶',
+    finish: '✓ Done',
+    hide: 'Hide',
+    hideTitle: 'Put the assistant away without losing your place',
+    jumpTo: (step: number) => `Go to step ${step}`,
+    paused: (current: number, total: number) => `Guide paused on step ${current} of ${total}.`,
+    resume: '▶ Resume',
+    quit: 'End guide',
+    offScript: (tab: string) => (
+      <>
+        You stepped away. This part of the guide lives on <strong>{tab}</strong>.
+      </>
+    ),
+    offScriptAction: 'Take me back',
+    invite: {
+      text: 'First time here? I can show you the whole app in two minutes.',
+      start: '▶ Start the guide',
+      dismiss: '✕',
+      dismissTitle: 'Hide this invitation',
+    },
+    profile: {
+      legend: 'Guided demo',
+      note: 'A walk through adding a video and searching it. Nothing is saved and no AI is called.',
+      start: '📎 Open the guide',
+    },
+    demo: {
+      badge: 'DEMO',
+      badgeTitle: 'Scripted example. Nothing is sent anywhere.',
+      saved: (
+        <>
+          <strong>Nothing was saved.</strong> In the real app this video would be in the archive
+          from now on, findable by anyone, and one analysis would have come off your monthly
+          allowance.
+        </>
+      ),
+    },
+    steps: {
+      welcome: {
+        title: 'Hello',
+        say: "I'll show you Pop Search in about two minutes. Nothing you touch here is saved and no AI is called, so click freely. Let's start where the videos come from.",
+      },
+      paste: {
+        title: 'A link to start',
+        say: 'Everything begins with a link to a post on X. Only twitter.com and x.com are accepted, and only posts that carry video. I pasted one in for you.',
+      },
+      options: {
+        title: 'What the AI should look at',
+        say: 'Before spending AI time you say what it should read: the scenes, the spoken audio, or both. Whatever it reads becomes searchable text later, so leaving both on is usually the right call.',
+      },
+      analyzing: {
+        title: 'The AI watches the video',
+        say: 'The real app downloads the video and hands it to Gemini, which genuinely watches it. That takes about a minute. We are not going to sit here for it - go on.',
+      },
+      review: {
+        title: 'Your turn to check',
+        say: 'This screen is the whole point. The AI wrote all of it, and nothing enters the archive until a person has read it. Every field is editable, and what you leave here is what the search will read.',
+      },
+      saved: {
+        title: 'Indexed',
+        say: 'That is the full loop. In the real app the video would be in the archive from now on, and one analysis would have come off your monthly allowance.',
+      },
+      manual: {
+        title: 'The path without AI',
+        say: 'Back on this screen, notice Manual Input. It skips the AI entirely and hands you the same form, empty. It costs no analysis, and when a joke needs explaining you will describe it better than Gemini does.',
+      },
+      searchIntro: {
+        title: 'Finding something',
+        say: 'Now the other half, and the half that needs no account at all. Anyone can search the archive. Let us go looking for a cat.',
+      },
+      results: {
+        title: 'Reading the results',
+        say: "Three hits, and the badge on each says how it got here. The first matched by meaning and by the word. The second never says cat at all - a spinning giraffe surfaced because the search understood the idea. The third matched on the word alone.",
+      },
+      modes: {
+        title: 'Tuning the search',
+        say: 'Open Advanced and you choose how matching works, how strict it is, and how many results come back. In Exact mode the giraffe disappears; in Semantic mode the third result does. The operators are listed in there too.',
+      },
+      account: {
+        title: 'Accounts and limits',
+        say: 'That is everything. Searching stays open and free. Adding a video is what needs an account, because every analysis costs AI time, and this tab is where you would create one and watch your monthly allowance.',
+      },
+    } satisfies Record<GuideStepId, GuideStepCopy>,
   },
 
   tour: {

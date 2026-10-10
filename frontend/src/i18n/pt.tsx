@@ -342,6 +342,94 @@ export const pt: Dictionary = {
       'Os tokens são o que conta na cota do Google AI. As análises são o que limita cada conta.',
   },
 
+  guide: {
+    name: 'Assistente',
+    avatar: '📎',
+    counter: (current: number, total: number) => `Passo ${current} de ${total}`,
+    back: '◀ Voltar',
+    next: 'Avançar ▶',
+    finish: '✓ Pronto',
+    hide: 'Esconder',
+    hideTitle: 'Guardar o assistente sem perder o seu lugar',
+    jumpTo: (step: number) => `Ir para o passo ${step}`,
+    paused: (current: number, total: number) => `Guia pausado no passo ${current} de ${total}.`,
+    resume: '▶ Retomar',
+    quit: 'Encerrar guia',
+    offScript: (tab: string) => (
+      <>
+        Você saiu do roteiro. Esta parte do guia fica em <strong>{tab}</strong>.
+      </>
+    ),
+    offScriptAction: 'Me leve de volta',
+    invite: {
+      text: 'Primeira vez aqui? Eu te mostro o app inteiro em dois minutos.',
+      start: '▶ Começar o guia',
+      dismiss: '✕',
+      dismissTitle: 'Esconder este convite',
+    },
+    profile: {
+      legend: 'Demonstração guiada',
+      note: 'Um passeio adicionando um vídeo e buscando por ele. Nada é salvo e nenhuma IA é chamada.',
+      start: '📎 Abrir o guia',
+    },
+    demo: {
+      badge: 'DEMO',
+      badgeTitle: 'Exemplo roteirizado. Nada é enviado para lugar nenhum.',
+      saved: (
+        <>
+          <strong>Nada foi salvo.</strong> No app de verdade este vídeo estaria no acervo a partir
+          de agora, achável por qualquer pessoa, e uma análise teria saído da sua cota do mês.
+        </>
+      ),
+    },
+    steps: {
+      welcome: {
+        title: 'Olá',
+        say: 'Eu te mostro o Pop Search em uns dois minutos. Nada que você mexer aqui é salvo e nenhuma IA é chamada, então clique à vontade. Vamos começar de onde os vídeos vêm.',
+      },
+      paste: {
+        title: 'Um link para começar',
+        say: 'Tudo começa com o link de um post no X. Só entram links de twitter.com e x.com, e só posts que tenham vídeo. Já colei um para você.',
+      },
+      options: {
+        title: 'O que a IA vai olhar',
+        say: 'Antes de gastar tempo de IA você diz o que ela deve ler: as cenas, o áudio falado, ou os dois. O que ela lê vira texto buscável depois, então deixar os dois ligados costuma ser a escolha certa.',
+      },
+      analyzing: {
+        title: 'A IA assiste ao vídeo',
+        say: 'O app de verdade baixa o vídeo e entrega para o Gemini, que assiste de fato. Isso leva perto de um minuto. Não vamos ficar esperando aqui - siga em frente.',
+      },
+      review: {
+        title: 'Agora é você que confere',
+        say: 'Esta tela é o ponto da coisa toda. A IA escreveu tudo isso, e nada entra no acervo antes de uma pessoa ler. Todo campo é editável, e o que ficar aqui é o que a busca vai ler.',
+      },
+      saved: {
+        title: 'Indexado',
+        say: 'É o ciclo completo. No app de verdade o vídeo estaria no acervo a partir de agora, e uma análise teria saído da sua cota do mês.',
+      },
+      manual: {
+        title: 'O caminho sem IA',
+        say: 'De volta nesta tela, repare no Manual Input. Ele pula a IA por completo e te entrega o mesmo formulário, vazio. Não custa análise nenhuma, e quando a piada precisa de explicação você descreve melhor que o Gemini.',
+      },
+      searchIntro: {
+        title: 'Encontrar um vídeo',
+        say: 'Agora a outra metade, e a que não exige conta nenhuma. Qualquer pessoa pode buscar no acervo. Vamos procurar um gato.',
+      },
+      results: {
+        title: 'Lendo os resultados',
+        say: 'Três resultados, e a etiqueta de cada um diz como ele chegou aqui. O primeiro casou por significado e pela palavra. O segundo nunca diz gato - uma girafa girando apareceu porque a busca entendeu a ideia. O terceiro casou só pela palavra.',
+      },
+      modes: {
+        title: 'Ajustando a busca',
+        say: 'Abra o Avançado e você escolhe como o casamento funciona, quão exigente ele é e quantos resultados voltam. No modo Exato a girafa desaparece; no Semântico desaparece o terceiro. Os operadores estão listados ali também.',
+      },
+      account: {
+        title: 'Contas e limites',
+        say: 'É isso tudo. Buscar continua aberto e de graça. Adicionar vídeo é o que pede conta, porque cada análise custa tempo de IA, e é nesta aba que você criaria a sua e acompanharia a cota do mês.',
+      },
+    },
+  },
+
   tour: {
     counter: (current: number, total: number) => `Passo ${current} de ${total}`,
     back: '◀ Voltar',
