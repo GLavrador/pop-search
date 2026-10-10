@@ -26,6 +26,7 @@ import { CatReveal } from './components/CatReveal';
 import { randomCat } from './constants/cats';
 import { Assistant } from './components/Assistant';
 import { GuidePaused } from './components/Assistant/Paused';
+import { GuideInvite } from './components/Assistant/Invite';
 import { DemoIngest } from './components/Demo/DemoIngest';
 import { DemoSearch } from './components/Demo/DemoSearch';
 import { useGuide } from './hooks/useGuide';
@@ -35,6 +36,7 @@ const WINDOW_ICON = '💻';
 const APP_NAME = 'Pop Search';
 const CLICKS_TO_CLOSE = 5;
 const CLOSING_MS = 320;
+const INVITE_KEY = 'pop-search:guide-invite';
 
 type Tab = 'ingest' | 'search' | 'library' | 'account' | 'demo' | 'admin';
 
@@ -49,6 +51,9 @@ function AppContent() {
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
+  const [inviteTaken, setInviteTaken] = useState(
+    () => localStorage.getItem(INVITE_KEY) === 'taken',
+  );
   useIdentityReset();
   useBackendWarmup();
   const { t } = useI18n();
@@ -106,6 +111,16 @@ function AppContent() {
   const ingestStep = onStepTab && step?.tab === 'ingest' ? step : null;
   const searchStep = onStepTab && step?.tab === 'search' ? step : null;
 
+  const takeInvite = () => {
+    setInviteTaken(true);
+    localStorage.setItem(INVITE_KEY, 'taken');
+  };
+
+  const startGuide = () => {
+    takeInvite();
+    guide.start();
+  };
+
   return (
     <div className={styles.appContainer}>
       <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} onOpenApp={handleOpen} />
@@ -123,6 +138,10 @@ function AppContent() {
         onClose={handleClose}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
+          {!isAuthenticated && !inviteTaken && guide.step === null && (
+            <GuideInvite onStart={startGuide} onDismiss={takeInvite} />
+          )}
+
           <TabStrip tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
 
           <div className={`${styles.contentArea} ${isMaximized ? styles.contentAreaMax : ''}`}>
@@ -150,7 +169,7 @@ function AppContent() {
                       >
                         {t.gate.signIn}
                       </button>
-                      <button type="button" className="win95-btn" onClick={guide.start}>
+                      <button type="button" className="win95-btn" onClick={startGuide}>
                         {t.gate.takeTour}
                       </button>
                     </div>
@@ -184,7 +203,7 @@ function AppContent() {
               </div>
             )}
             <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
-              <AuthPanel onTakeTour={() => setActiveTab('demo')} />
+              <AuthPanel onStartGuide={startGuide} />
             </div>
           </div>
 

@@ -165,6 +165,34 @@
   color: var(--win-blue-title);
 }
 
+.invite {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 5px 8px;
+  background: var(--win-tooltip-bg);
+}
+
+.inviteIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.inviteText {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
+.inviteStart {
+  min-width: 0;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
 .paused {
   flex: 0 0 auto;
   display: flex;
@@ -226,5 +254,13 @@
 
   .pausedText {
     white-space: normal;
+  }
+
+  .invite {
+    flex-wrap: wrap;
+  }
+
+  .inviteText {
+    flex: 1 1 60%;
   }
 }

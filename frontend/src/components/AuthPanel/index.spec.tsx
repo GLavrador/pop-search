@@ -39,8 +39,8 @@ describe('AuthPanel', () => {
   });
 
   it('should offer the tour once the account is created', async () => {
-    const onTakeTour = vi.fn();
-    render(<AuthPanel onTakeTour={onTakeTour} />);
+    const onStartGuide = vi.fn();
+    render(<AuthPanel onStartGuide={onStartGuide} />);
 
     const user = await createAccount();
 
@@ -48,18 +48,18 @@ describe('AuthPanel', () => {
 
     await user.click(screen.getByRole('button', { name: /Take the tour/i }));
 
-    expect(onTakeTour).toHaveBeenCalledOnce();
+    expect(onStartGuide).toHaveBeenCalledOnce();
   });
 
   it('should not offer the tour before the account exists', () => {
-    render(<AuthPanel onTakeTour={vi.fn()} />);
+    render(<AuthPanel onStartGuide={vi.fn()} />);
 
     expect(screen.queryByRole('button', { name: /Take the tour/i })).not.toBeInTheDocument();
   });
 
   it('should not offer the tour when sign up fails', async () => {
     mockSignUp.mockResolvedValue({ error: 'E-mail already taken.' });
-    render(<AuthPanel onTakeTour={vi.fn()} />);
+    render(<AuthPanel onStartGuide={vi.fn()} />);
 
     await createAccount();
 
