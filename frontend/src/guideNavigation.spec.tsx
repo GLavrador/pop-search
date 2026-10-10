@@ -240,6 +240,29 @@ describe('guided demo navigation', () => {
     expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
   });
 
+  it('should keep the robot around when the window is minimized', async () => {
+    renderApp();
+    await startGuide();
+    expect(screen.getByRole('button', { name: 'Poke BIP-98' })).toBeInTheDocument();
+
+    await press('Minimize');
+
+    expect(screen.getByRole('button', { name: 'Poke BIP-98' })).toBeInTheDocument();
+  });
+
+  it('should bring the window back when the waiting robot is clicked', async () => {
+    renderApp();
+    await startGuide();
+    await press('Minimize');
+    const taskButton = (pressed: boolean) =>
+      screen.getByRole('button', { name: /Pop Search System/, pressed });
+    expect(taskButton(false)).toBeInTheDocument();
+
+    await press('Poke BIP-98');
+
+    expect(taskButton(true)).toBeInTheDocument();
+  });
+
   it('should leave the real search untouched while it runs', async () => {
     renderApp();
 
