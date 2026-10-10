@@ -3,6 +3,7 @@ import { ProgressBar } from '../ProgressBar';
 import { ReviewForm } from '../ReviewForm';
 import { DEMO_VIDEO } from '../../constants/demoVideo';
 import { useI18n } from '../../i18n/languageContext';
+import { useSpotlight } from './spotlight';
 import type { IngestStage, Spot } from '../../constants/guide';
 import ingest from '../IngestSection/styles.module.css';
 import styles from './styles.module.css';
@@ -20,12 +21,12 @@ export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) 
   const [audio, setAudio] = useState(true);
   const { t } = useI18n();
 
-  const ring = (target: Spot) => (spot === target ? styles.spot : '');
+  const spotlight = useSpotlight(spot);
 
   const body = (): ReactNode => {
     if (stage === 'options') {
       return (
-        <div className={`win95-border ${ingest.optionsContainer} ${ring('options')}`}>
+        <div {...spotlight('options', 'win95-border', ingest.optionsContainer)}>
           <div className={ingest.optionsTitle}>{t.ingest.optionsTitle}</div>
           <div className={ingest.optionsDescription}>{t.ingest.optionsDescription}</div>
 
@@ -63,7 +64,7 @@ export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) 
 
     if (stage === 'analyzing') {
       return (
-        <div className={`${ingest.progressRow} ${ring('progress')}`}>
+        <div {...spotlight('progress', ingest.progressRow)}>
           <div className={ingest.progressContainer}>
             <ProgressBar loading />
             <button
@@ -80,7 +81,7 @@ export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) 
 
     if (stage === 'review') {
       return (
-        <div className={ring('review')}>
+        <div {...spotlight('review')}>
           <ReviewForm
             initialData={DEMO_VIDEO}
             onSave={async () => onAdvance()}
@@ -91,13 +92,13 @@ export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) 
     }
 
     if (stage === 'saved') {
-      return <div className={`${styles.saved} ${ring('saved')}`}>{t.guide.demo.saved}</div>;
+      return <div {...spotlight('saved', styles.saved)}>{t.guide.demo.saved}</div>;
     }
 
     return (
       <>
         <label className={ingest.label}>{t.ingest.urlLabel}</label>
-        <div className={`${ingest.inputRow} ${ring('url')}`}>
+        <div {...spotlight('url', ingest.inputRow)}>
           <input
             type="text"
             readOnly
@@ -110,7 +111,7 @@ export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) 
           </button>
         </div>
 
-        <div className={`${ingest.manualToggle} ${styles.tight} ${ring('manual')}`}>
+        <div {...spotlight('manual', ingest.manualToggle, styles.tight)}>
           <input
             type="checkbox"
             id="demo-manual"

@@ -6,6 +6,7 @@ import { DEMO_QUERY, DEMO_SEARCH_RESULTS } from '../../constants/demoVideo';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from '../../constants/searchModes';
 import { useI18n } from '../../i18n/languageContext';
+import { useSpotlight } from './spotlight';
 import type { SearchStage, Spot } from '../../constants/guide';
 import type { SearchResult } from '../../types';
 import search from '../SearchSection/styles.module.css';
@@ -37,7 +38,7 @@ export const DemoSearch = ({ stage, spot, onAdvance }: DemoSearchProps) => {
     limit,
   );
 
-  const ring = (target: Spot) => (spot === target ? styles.spot : '');
+  const spotlight = useSpotlight(spot);
 
   return (
     <div className={styles.panel}>
@@ -45,7 +46,7 @@ export const DemoSearch = ({ stage, spot, onAdvance }: DemoSearchProps) => {
         {t.guide.demo.badge}
       </span>
 
-      <div className={`${search.searchForm} ${ring('advanced')}`}>
+      <div {...spotlight('advanced', search.searchForm)}>
         <AdvancedSearchOptions
           threshold={threshold}
           onThresholdChange={setThreshold}
@@ -62,7 +63,7 @@ export const DemoSearch = ({ stage, spot, onAdvance }: DemoSearchProps) => {
           disabled={!thresholdApplies}
         />
 
-        <div className={`${search.inputRow} ${ring('query')}`}>
+        <div {...spotlight('query', search.inputRow)}>
           <input
             type="text"
             readOnly
@@ -80,7 +81,7 @@ export const DemoSearch = ({ stage, spot, onAdvance }: DemoSearchProps) => {
         <>
           <hr className={search.separator} />
 
-          <div className={`${styles.results} ${ring('results')}`}>
+          <div {...spotlight('results', styles.results)}>
             {results.length === 0 ? (
               <div className={`win95-border ${styles.empty}`}>
                 <strong>{t.search.emptyTitle}</strong>{' '}
