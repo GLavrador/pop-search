@@ -40,7 +40,9 @@ export const GUIDE_STEPS = [
   { id: 'account', tab: 'account', ingest: 'url', search: 'idle', spot: null },
 ] as const satisfies readonly GuideStep[];
 
-export type GuideStepId = (typeof GUIDE_STEPS)[number]['id'];
+export type GuideStepDef = (typeof GUIDE_STEPS)[number];
+
+export type GuideStepId = GuideStepDef['id'];
 
 export interface GuideStepCopy {
   title: string;

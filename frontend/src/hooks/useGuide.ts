@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { GUIDE_STEPS, type GuideStep } from '../constants/guide';
+import { GUIDE_STEPS, type GuideStepDef } from '../constants/guide';
 import type { Tab } from '../constants/tabs';
 
 const LAST_INDEX = GUIDE_STEPS.length - 1;
@@ -9,7 +9,7 @@ interface UseGuideOptions {
 }
 
 export interface Guide {
-  step: GuideStep | null;
+  step: GuideStepDef | null;
   index: number;
   total: number;
   isVisible: boolean;

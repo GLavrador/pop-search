@@ -2,9 +2,9 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 6px;
-  padding: 8px;
+  padding: 7px;
 }
 
 .head {
@@ -15,8 +15,8 @@
 
 .avatar {
   flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,7 +28,7 @@
   position: relative;
   flex: 1;
   min-width: 0;
-  padding: 7px 10px 8px;
+  padding: 6px 9px 7px;
   background: var(--win-tooltip-bg);
   border: 1px solid var(--win-dark);
 }
@@ -210,7 +210,9 @@
   }
 
   .actions :global(.win95-btn) {
-    flex: 1 1 40%;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 4px 6px;
   }
 
   .advance {
@@ -218,9 +220,8 @@
   }
 
   .quit {
-    flex: 1 1 100%;
-    margin-left: 0;
-    text-align: center;
+    flex: 0 0 auto;
+    font-size: 0.72rem;
   }
 
   .pausedText {

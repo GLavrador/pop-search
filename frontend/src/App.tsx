@@ -24,6 +24,11 @@ import { Desktop } from './components/Desktop';
 import { TabStrip } from './components/TabStrip';
 import { CatReveal } from './components/CatReveal';
 import { randomCat } from './constants/cats';
+import { Assistant } from './components/Assistant';
+import { GuidePaused } from './components/Assistant/Paused';
+import { DemoIngest } from './components/Demo/DemoIngest';
+import { DemoSearch } from './components/Demo/DemoSearch';
+import { useGuide } from './hooks/useGuide';
 import type { WindowState } from './components/RetroWindow';
 
 const WINDOW_ICON = '💻';
@@ -43,6 +48,7 @@ function AppContent() {
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
   const { isAuthenticated, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
+  const guide = useGuide({ onEnterTab: setActiveTab });
   useIdentityReset();
   useBackendWarmup();
   const { t } = useI18n();
@@ -93,6 +99,12 @@ function AppContent() {
     { id: 'account', label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn },
   ];
 
+  const step = guide.isVisible ? guide.step : null;
+  const onStepTab = step !== null && step.tab === activeTab;
+  const strayedFrom =
+    step !== null && !onStepTab ? (tabs.find((tab) => tab.id === step.tab)?.label ?? '') : null;
+  const ingestStep = onStepTab && step?.tab === 'ingest' ? step : null;
+  const searchStep = onStepTab && step?.tab === 'search' ? step : null;
 
   return (
     <div className={styles.appContainer}>
@@ -115,33 +127,48 @@ function AppContent() {
 
           <div className={`${styles.contentArea} ${isMaximized ? styles.contentAreaMax : ''}`}>
             <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>
-              {isAuthenticated ? (
-                <IngestSection />
-              ) : (
-                <div className={styles.gate}>
-                  <p><strong>{t.gate.title}</strong></p>
-                  <p>{t.gate.body}</p>
-                  <div className={styles.gateActions}>
-                    <button
-                      type="button"
-                      className="win95-btn"
-                      onClick={() => setActiveTab('account')}
-                    >
-                      {t.gate.signIn}
-                    </button>
-                    <button
-                      type="button"
-                      className="win95-btn"
-                      onClick={() => setActiveTab('demo')}
-                    >
-                      {t.gate.takeTour}
-                    </button>
-                  </div>
-                </div>
+              {ingestStep && (
+                <DemoIngest
+                  stage={ingestStep.ingest}
+                  spot={ingestStep.spot}
+                  onAdvance={guide.next}
+                  onBack={guide.back}
+                />
               )}
+              <div style={{ display: ingestStep ? 'none' : 'block' }}>
+                {isAuthenticated ? (
+                  <IngestSection />
+                ) : (
+                  <div className={styles.gate}>
+                    <p><strong>{t.gate.title}</strong></p>
+                    <p>{t.gate.body}</p>
+                    <div className={styles.gateActions}>
+                      <button
+                        type="button"
+                        className="win95-btn"
+                        onClick={() => setActiveTab('account')}
+                      >
+                        {t.gate.signIn}
+                      </button>
+                      <button type="button" className="win95-btn" onClick={guide.start}>
+                        {t.gate.takeTour}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div style={{ display: activeTab === 'search' ? 'block' : 'none' }}>
-              <SearchSection />
+              {searchStep && (
+                <DemoSearch
+                  stage={searchStep.search}
+                  spot={searchStep.spot}
+                  onAdvance={guide.next}
+                />
+              )}
+              <div style={{ display: searchStep ? 'none' : 'block' }}>
+                <SearchSection />
+              </div>
             </div>
             {isAuthenticated && (
               <div style={{ display: activeTab === 'library' ? 'block' : 'none' }}>
@@ -160,6 +187,33 @@ function AppContent() {
               <AuthPanel onTakeTour={() => setActiveTab('demo')} />
             </div>
           </div>
+
+          {step && (
+            <Assistant
+              index={guide.index}
+              total={guide.total}
+              copy={t.guide.steps[step.id]}
+              isFirst={guide.isFirst}
+              isLast={guide.isLast}
+              strayedFrom={strayedFrom}
+              onBack={guide.back}
+              onNext={guide.next}
+              onJump={guide.goTo}
+              onReturn={() => guide.goTo(guide.index)}
+              onHide={guide.hide}
+              onQuit={guide.quit}
+            />
+          )}
+
+          {guide.isPaused && (
+            <GuidePaused
+              index={guide.index}
+              total={guide.total}
+              onResume={() => guide.goTo(guide.index)}
+              onQuit={guide.quit}
+            />
+          )}
+
           <StatusBar />
         </div>
       </RetroWindow>
