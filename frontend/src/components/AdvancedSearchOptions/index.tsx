@@ -2,7 +2,7 @@ import {useState} from 'react';
 import { findPresetByThreshold } from '../../constants/searchPresets';
 import { SEARCH_MODES, findSearchMode, type SearchMode } from '../../constants/searchModes';
 import { useI18n } from '../../i18n/languageContext';
-import { useRobot } from '../../context/robotContext';
+import { helpAt, useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface AdvancedSearchOptionsProps {
@@ -33,6 +33,7 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
           className={`win95-btn ${styles.toggleButton}`}
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
+          {...helpAt(isOpen ? 'search.advancedOpen' : 'search.advanced')}
         >
           {isOpen ? t.advanced.hide : t.advanced.show}
         </button>
@@ -40,7 +41,7 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
 
       {isOpen && (
         <div className={styles.panel}>
-          <fieldset className={styles.group}>
+          <fieldset className={styles.group} {...helpAt('search.mode')}>
             <legend className={styles.legend}>
               {t.advanced.modeLegend}
               <button
@@ -71,7 +72,11 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
             </div>
           </fieldset>
 
-          <fieldset className={styles.group} disabled={!thresholdApplies}>
+          <fieldset
+            className={styles.group}
+            disabled={!thresholdApplies}
+            {...helpAt('search.threshold')}
+          >
             {/* The legend is the one part of a disabled fieldset that stays usable. */}
             <legend className={styles.legend}>
               {t.advanced.thresholdLegend}
@@ -115,7 +120,7 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
             )}
           </fieldset>
 
-          <fieldset className={styles.group}>
+          <fieldset className={styles.group} {...helpAt('search.syntax')}>
             <legend className={styles.legend}>{t.advanced.syntaxLegend}</legend>
 
             <p
@@ -136,7 +141,7 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
             )}
           </fieldset>
 
-          <fieldset className={styles.group}>
+          <fieldset className={styles.group} {...helpAt('search.limit')}>
             <legend className={styles.legend}>{t.advanced.resultsLegend}</legend>
 
             <div className={styles.row}>

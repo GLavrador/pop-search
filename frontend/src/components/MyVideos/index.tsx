@@ -1,5 +1,6 @@
 import { useMyVideosQuery } from '../../hooks/useMyVideosQuery';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 const formatDate = (value: string, locale: string): string => {
@@ -25,11 +26,15 @@ export const MyVideos = () => {
   }
 
   if (videos.length === 0) {
-    return <div className={styles.message}>{t.myVideos.empty}</div>;
+    return (
+      <div className={styles.message} {...helpAt('library')}>
+        {t.myVideos.empty}
+      </div>
+    );
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} {...helpAt('library')}>
       <div className={styles.header}>
         <p className={styles.title}>{t.myVideos.title}</p>
         <span className={styles.count}>{t.myVideos.count(videos.length)}</span>

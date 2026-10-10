@@ -1,5 +1,6 @@
 import { useQuotaQuery } from '../../hooks/useQuotaQuery';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 // Rendered in UTC because the window is counted in UTC on the server. In local
@@ -17,7 +18,11 @@ export const QuotaMeter = () => {
   const { t, locale } = useI18n();
 
   if (isLoading && !quota) {
-    return <div className={styles.meter}><span className={styles.note}>{t.quota.loading}</span></div>;
+    return (
+      <div className={styles.meter} {...helpAt('ingest.quota')}>
+        <span className={styles.note}>{t.quota.loading}</span>
+      </div>
+    );
   }
 
   if (!quota) {
@@ -28,7 +33,10 @@ export const QuotaMeter = () => {
   const percent = quota.limit > 0 ? Math.min((quota.used / quota.limit) * 100, 100) : 0;
 
   return (
-    <div className={`${styles.meter} ${isExhausted ? styles.exhausted : ''}`}>
+    <div
+      className={`${styles.meter} ${isExhausted ? styles.exhausted : ''}`}
+      {...helpAt('ingest.quota')}
+    >
       <div className={styles.row}>
         <span className={styles.label}>{t.quota.label}</span>
         <span className={styles.count}>

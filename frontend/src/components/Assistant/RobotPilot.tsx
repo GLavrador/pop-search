@@ -10,6 +10,7 @@ import {
   type Target,
 } from './pilot';
 import type { Aim } from '../Demo/spotlight';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 /** The one-off things it can be asked to do, as opposed to where it should be. */
@@ -125,6 +126,7 @@ export const RobotPilot = ({
           type="button"
           className={styles.body}
           data-robot-body
+          {...helpAt('robot')}
           title={label}
           aria-label={label}
           onClick={handleClick}

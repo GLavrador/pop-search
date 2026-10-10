@@ -29,13 +29,14 @@ import { GuideInvite } from './components/Assistant/Invite';
 import { GuideChip } from './components/Assistant/Chip';
 import { RobotPilot } from './components/Assistant/RobotPilot';
 import { Speech } from './components/Assistant/Speech';
+import { HelpOverlay } from './components/Assistant/HelpOverlay';
 import type { Cue } from './components/Assistant/pilot';
 import { DemoIngest } from './components/Demo/DemoIngest';
 import { DemoSearch } from './components/Demo/DemoSearch';
 import { AIMS } from './components/Demo/spotlight';
 import { useGuide } from './hooks/useGuide';
 import { useRobotDirector } from './hooks/useRobotDirector';
-import { RobotContext } from './context/robotContext';
+import { RobotContext, helpAt, type HelpKey } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
 
 const WINDOW_ICON = '💻';
@@ -111,12 +112,20 @@ function AppContent() {
 
   const isClosed = windowState === 'closed';
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'ingest', label: TAB_LABELS.ingest },
-    { id: 'search', label: TAB_LABELS.search },
-    ...(isAuthenticated ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos }] : []),
-    ...(isAdmin ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats }] : []),
-    { id: 'account', label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn },
+  const tabs: { id: Tab; label: string; help: HelpKey }[] = [
+    { id: 'ingest', label: TAB_LABELS.ingest, help: 'tab.ingest' },
+    { id: 'search', label: TAB_LABELS.search, help: 'tab.search' },
+    ...(isAuthenticated
+      ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos, help: 'tab.library' as HelpKey }]
+      : []),
+    ...(isAdmin
+      ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats, help: 'tab.admin' as HelpKey }]
+      : []),
+    {
+      id: 'account',
+      label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn,
+      help: 'tab.account',
+    },
   ];
 
   const step = guide.isVisible ? guide.step : null;
@@ -165,6 +174,8 @@ function AppContent() {
         onMaximize={() => setIsMaximized((value) => !value)}
         onClose={handleClose}
         aside={offersGuide && invite === 'tucked' ? <GuideChip onOpen={startGuide} /> : undefined}
+        onHelp={robot.toggleHelp}
+        helping={robot.helping}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
           {offersGuide && invite !== 'tucked' && (
@@ -223,7 +234,7 @@ function AppContent() {
                 {isAuthenticated ? (
                   <IngestSection />
                 ) : (
-                  <div className={styles.gate}>
+                  <div className={styles.gate} {...helpAt('ingest.gate')}>
                     <p><strong>{t.gate.title}</strong></p>
                     <p>{t.gate.body}</p>
                     <div className={styles.gateActions}>
@@ -278,6 +289,8 @@ function AppContent() {
       >
         {robot.line && <Speech line={robot.line} onDismiss={robot.dismiss} />}
       </RobotPilot>
+
+      {robot.helping && <HelpOverlay onPick={robot.pick} onCancel={robot.stopHelp} />}
 
       <footer className={styles.footer}>
         <p>{t.footer}</p>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 export type WindowState = 'open' | 'minimized' | 'closing' | 'closed';
@@ -16,6 +17,9 @@ interface RetroWindowProps {
   onClose?: () => void;
   /** Shown in the title bar, just before the window controls. */
   aside?: ReactNode;
+  /** Adds the "what's this?" button; `helping` is true while it is armed. */
+  onHelp?: () => void;
+  helping?: boolean;
 }
 
 const SHAKE_MS = 340;
@@ -40,6 +44,8 @@ export const RetroWindow = ({
   onMaximize,
   onClose,
   aside,
+  onHelp,
+  helping = false,
 }: RetroWindowProps) => {
   const { t } = useI18n();
   const frame = useRef<HTMLDivElement>(null);
@@ -74,10 +80,23 @@ export const RetroWindow = ({
         </div>
         <div className={styles.controls}>
           {aside}
+          {onHelp && (
+            <button
+              className={`${styles.controlButton} ${styles.helpButton} ${helping ? styles.armed : ''}`}
+              title={t.robot.whatsThis.title}
+              aria-label={t.robot.whatsThis.button}
+              aria-pressed={helping}
+              data-help-toggle
+              onClick={onHelp}
+            >
+              ?
+            </button>
+          )}
           <button
             className={styles.controlButton}
             aria-label={t.window.minimize}
             onClick={onMinimize}
+            {...helpAt('window.buttons')}
           >
             _
           </button>
@@ -85,6 +104,7 @@ export const RetroWindow = ({
             className={styles.controlButton}
             aria-label={maximized ? t.window.restore : t.window.maximize}
             onClick={onMaximize}
+            {...helpAt('window.buttons')}
           >
             {maximized ? '❐' : '□'}
           </button>
@@ -92,6 +112,7 @@ export const RetroWindow = ({
             className={styles.controlButton}
             aria-label={t.window.close}
             onClick={onClose}
+            {...helpAt('window.buttons')}
           >
             X
           </button>

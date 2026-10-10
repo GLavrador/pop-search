@@ -499,7 +499,125 @@ export const pt: Dictionary = {
   robot: {
     dismiss: 'Fechar',
     ask: (what: string) => `O que é ${what}?`,
+    whatsThis: {
+      button: 'O que é isso?',
+      title: 'O que é isso? Clique aqui e depois em qualquer coisa da tela.',
+      prompt: 'Clique em qualquer coisa da tela que eu explico o que é.',
+      unknown: 'Hm, sobre isso eu não sei dizer nada. Clique em outra coisa.',
+    },
     help: {
+      'tab.ingest': {
+        title: 'Add-Video.exe',
+        text: 'É aqui que você guarda um vídeo: cola o link de um post do X, e a IA assiste e escreve o que acontece nele.',
+      },
+      'tab.search': {
+        title: 'Search.exe',
+        text: 'É aqui que você acha um vídeo guardado. Escreva o que lembra dele, do seu jeito, e eu procuro. Não precisa de conta.',
+      },
+      'tab.library': {
+        title: 'My-Videos.exe',
+        text: 'A lista dos vídeos que você mesmo guardou.',
+      },
+      'tab.account': {
+        title: 'Sua conta',
+        text: 'Aqui você entra ou cria a sua conta, vê quantas análises ainda tem no mês e troca o idioma.',
+      },
+      'tab.admin': {
+        title: 'Stats.exe',
+        text: 'Só administradores veem esta aba. Ela mostra quanto a IA foi usada, e por quem.',
+      },
+      status: {
+        title: 'Barra de status',
+        text: 'Conta o que o programa acabou de fazer: buscando, salvou, deu erro. Vale olhar aqui quando algo parecer parado.',
+      },
+      'window.buttons': {
+        title: 'Botões da janela',
+        text: 'Minimizar, maximizar e fechar. O de fechar é teimoso: precisa insistir. Dizem que tem um gato do outro lado.',
+      },
+      'taskbar.start': {
+        title: 'Iniciar',
+        text: 'Esse é só enfeite. Eu já pulei em cima dele várias vezes e nunca abriu nada.',
+      },
+      'taskbar.clock': {
+        title: 'Relógio',
+        text: 'A hora do seu computador. Eu passo aqui de vez em quando para conferir.',
+      },
+      'taskbar.task': {
+        title: 'Pop Search System',
+        text: 'O botão da janela. Clique para minimizar o programa, clique de novo para trazer de volta.',
+      },
+      'desktop.icon': {
+        title: 'Área de trabalho',
+        text: 'Os ícones são decoração. O do Pop Search abre o programa de novo se você fechar a janela.',
+      },
+      robot: {
+        title: 'BIP-98',
+        text: 'Esse sou eu! Moro aqui no Pop Search e explico o que você quiser.',
+      },
+      'guide.invite': {
+        title: 'O guia',
+        text: 'Um passeio de dois minutos em que eu te mostro o app inteiro numa tela de treino. Nada do que você fizer lá vale de verdade.',
+      },
+      'ingest.url': {
+        title: 'Link do vídeo',
+        text: 'Cole aqui o link de um post do X que tenha vídeo. Depois clique em Avançar para escolher o que a IA vai olhar.',
+      },
+      'ingest.manual': {
+        title: 'Entrada manual',
+        text: 'Com esta caixinha marcada a IA não é usada: você mesmo escreve o título e a descrição. Não gasta nenhuma das suas análises.',
+      },
+      'ingest.options': {
+        title: 'Opções de análise',
+        text: 'A IA sempre escreve um título e uma descrição. Aqui você escolhe se ela também anota o cenário e transcreve o áudio. Quanto mais ela anotar, mais fácil achar o vídeo depois.',
+      },
+      'ingest.progress': {
+        title: 'Análise em andamento',
+        text: 'A IA está assistindo ao vídeo inteiro. Costuma levar por volta de um minuto, mais para vídeos longos. Dá para cancelar.',
+      },
+      'ingest.error': {
+        title: 'A análise falhou',
+        text: 'A mensagem diz o que deu errado. Você pode tentar de novo, ou marcar Entrada manual e escrever você mesmo.',
+      },
+      'ingest.quota': {
+        title: 'Análises do mês',
+        text: 'Cada vídeo que a IA analisa gasta uma análise, e toda conta tem um limite por mês. Quando acaba, a Entrada manual continua funcionando.',
+      },
+      'ingest.gate': {
+        title: 'Precisa de conta',
+        text: 'Guardar vídeos usa a IA, que tem custo, por isso pede uma conta. Buscar continua aberto para todo mundo.',
+      },
+      'review.general': {
+        title: 'Título e descrição',
+        text: 'É este texto que a busca lê para achar o vídeo. A IA erra de vez em quando, então confira e corrija o que precisar antes de salvar.',
+      },
+      'review.scenes': {
+        title: 'Elementos de cenário',
+        text: 'Coisas que aparecem no vídeo, separadas por vírgula. Ajudam a achar o vídeo por um detalhe, como "tigela azul".',
+      },
+      'review.audio': {
+        title: 'Áudio',
+        text: 'O que é falado ou cantado no vídeo, e a música quando a IA reconhece. Serve para achar o vídeo por uma frase dita nele.',
+      },
+      'review.save': {
+        title: 'Salvar ou cancelar',
+        text: 'Salvar guarda o vídeo no acervo com o texto acima. Cancelar joga tudo fora e volta para o começo.',
+      },
+      'search.query': {
+        title: 'Sua busca',
+        text: 'Escreva o que lembra do vídeo, do seu jeito: uma cena, uma frase, um assunto. Depois clique em Buscar.',
+      },
+      'search.presets': {
+        title: 'Precisão',
+        text: 'O quanto um vídeo precisa se parecer com o que você escreveu. Ampla traz mais vídeos, Precisa só os mais parecidos. Se não vier nada, tente Ampla.',
+      },
+      'search.advanced': {
+        title: 'Avançado',
+        text: 'Abre os ajustes finos da busca: o modo, o limiar, os atalhos de escrita e quantos resultados vêm.',
+      },
+      'search.advancedOpen': {
+        title: 'Ocultar avançado',
+        text: 'Guarda os ajustes finos de volta. O que você escolheu neles continua valendo.',
+      },
       'search.mode': {
         title: 'Modo de busca',
         text: (
@@ -514,6 +632,58 @@ export const pt: Dictionary = {
       'search.threshold': {
         title: 'Limiar de correspondência',
         text: 'É o quanto um vídeo precisa se parecer com o que você escreveu para entrar na lista. Mais para a direita eu fico exigente e trago menos vídeos. Mais para a esquerda trago mais, alguns nem tão parecidos. Só vale para a busca por significado.',
+      },
+      'search.syntax': {
+        title: 'Sintaxe de busca',
+        text: 'Atalhos para a busca por palavras: aspas procuram a frase exata, um sinal de menos tira uma palavra, e "or" aceita qualquer uma das duas.',
+      },
+      'search.limit': {
+        title: 'Máximo de resultados',
+        text: 'Quantos vídeos eu trago de cada vez. Com menos, a lista fica curta e só com os melhores.',
+      },
+      'search.empty': {
+        title: 'Nada encontrado',
+        text: 'Nenhum vídeo passou no filtro. Tente a precisão Ampla, menos palavras, ou descreva de outro jeito.',
+      },
+      card: {
+        title: 'Um resultado',
+        text: 'Um vídeo do acervo: o título leva ao post original e o texto é o resumo guardado junto com ele.',
+      },
+      'card.origin': {
+        title: 'Por que apareceu',
+        text: 'A etiqueta conta o motivo: "palavras" quer dizer que o texto do vídeo tem o que você digitou, "significado" quer dizer que ele fala de algo parecido.',
+      },
+      'card.match': {
+        title: 'Match',
+        text: 'O quanto o assunto do vídeo se parece com a sua busca. Quanto mais perto de 100%, mais parecido.',
+      },
+      'card.copy': {
+        title: 'Link do post',
+        text: 'O endereço do post original no X. O botão Copiar deixa ele pronto para colar onde você quiser.',
+      },
+      library: {
+        title: 'Meus vídeos',
+        text: 'Tudo que você guardou com a sua conta. Clique no título de um vídeo para abrir o post original.',
+      },
+      'account.form': {
+        title: 'Entrar ou criar conta',
+        text: 'A conta é o que deixa você guardar vídeos. Buscar não precisa dela.',
+      },
+      'account.session': {
+        title: 'Sua conta',
+        text: 'Você está conectado. O botão Sair encerra a sessão neste navegador.',
+      },
+      'account.guide': {
+        title: 'Demonstração guiada',
+        text: 'Refaz o passeio comigo numa tela de treino. Não gasta análise e nada é salvo.',
+      },
+      language: {
+        title: 'Idioma',
+        text: 'Troca o idioma do programa inteiro, e o meu também.',
+      },
+      admin: {
+        title: 'Estatísticas',
+        text: 'O painel de quem administra o projeto: quanto a IA foi usada, quanto custou e por que as análises falharam.',
       },
     },
   },

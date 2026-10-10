@@ -81,46 +81,103 @@
   transition: opacity 140ms ease-out;
 }
 
-.balloon[data-drop] {
+.balloon[data-hang='drop'] {
   top: calc(100% + 10px);
   bottom: auto;
 }
 
+.balloon[data-hang='left'],
+.balloon[data-hang='right'] {
+  bottom: 23px;
+}
+
+.balloon[data-hang='left'] {
+  right: calc(100% + 12px);
+  left: auto;
+}
+
+.balloon[data-hang='right'] {
+  left: calc(100% + 12px);
+}
+
+/* The tail: a dark triangle with a paler one two pixels inside it. */
 .balloon::before,
 .balloon::after {
   content: '';
   position: absolute;
   left: var(--tail, 23px);
-  border-right: 7px solid transparent;
-  border-left: 7px solid transparent;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 8px 7px 0;
   translate: -7px 0;
 }
 
 .balloon::before {
   top: 100%;
-  border-top: 8px solid var(--win-dark);
+  border-top-color: var(--win-dark);
 }
 
 .balloon::after {
   top: calc(100% - 2px);
-  border-top: 8px solid var(--tip, var(--win-tooltip-bg));
+  border-top-color: var(--win-tooltip-bg);
 }
 
-.balloon[data-drop]::before,
-.balloon[data-drop]::after {
-  border-top: none;
-}
-
-.balloon[data-drop]::before {
+.balloon[data-hang='drop']::before,
+.balloon[data-hang='drop']::after {
   top: auto;
+  border-width: 0 7px 8px;
+  border-top-color: transparent;
+}
+
+.balloon[data-hang='drop']::before {
   bottom: 100%;
-  border-bottom: 8px solid var(--win-dark);
+  border-bottom-color: var(--win-dark);
 }
 
-.balloon[data-drop]::after {
-  top: auto;
+.balloon[data-hang='drop']::after {
   bottom: calc(100% - 2px);
-  border-bottom: 8px solid var(--tip, var(--win-tooltip-bg));
+  border-bottom-color: var(--win-tooltip-bg);
+}
+
+.balloon[data-hang='left']::before,
+.balloon[data-hang='left']::after,
+.balloon[data-hang='right']::before,
+.balloon[data-hang='right']::after {
+  top: auto;
+  bottom: 9px;
+  border-top-color: transparent;
+  translate: none;
+}
+
+.balloon[data-hang='left']::before,
+.balloon[data-hang='left']::after {
+  border-width: 7px 0 7px 8px;
+}
+
+.balloon[data-hang='left']::before {
+  left: 100%;
+  border-left-color: var(--win-dark);
+}
+
+.balloon[data-hang='left']::after {
+  left: calc(100% - 2px);
+  border-left-color: var(--win-tooltip-bg);
+}
+
+.balloon[data-hang='right']::before,
+.balloon[data-hang='right']::after {
+  left: auto;
+  border-width: 7px 8px 7px 0;
+}
+
+.balloon[data-hang='right']::before {
+  right: 100%;
+  border-right-color: var(--win-dark);
+}
+
+.balloon[data-hang='right']::after {
+  right: calc(100% - 2px);
+  border-right-color: var(--win-tooltip-bg);
 }
 
 .emote {
@@ -715,6 +772,22 @@
 
 .link:hover {
   color: var(--win-blue-title);
+}
+
+/* Above everything, the robot included: while it is up, a click explains instead of acting. */
+.helpLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  cursor: help;
+}
+
+.helpFrame {
+  position: fixed;
+  display: none;
+  border: 2px dotted var(--win-blue-title);
+  background: rgba(0, 0, 128, 0.08);
+  pointer-events: none;
 }
 
 .speech {

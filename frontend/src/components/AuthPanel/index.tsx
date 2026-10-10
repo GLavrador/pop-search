@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useStatus } from '../../context/StatusContext';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import { QuotaMeter } from '../QuotaMeter';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import styles from './styles.module.css';
@@ -28,7 +29,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   if (isAuthenticated) {
     return (
       <div className={`win95-border ${styles.panel}`}>
-        <div className={styles.session}>
+        <div className={styles.session} {...helpAt('account.session')}>
           <span className={styles.who}>
             {t.auth.signedInAs} <span className={styles.name}>{displayName}</span>
           </span>
@@ -48,7 +49,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
         {onStartGuide && (
           <>
             <hr className={styles.divider} />
-            <div className={styles.guide}>
+            <div className={styles.guide} {...helpAt('account.guide')}>
               <p className={styles.guideLegend}>{t.guide.profile.legend}</p>
               <p className={styles.guideNote}>{t.guide.profile.note}</p>
               <button type="button" className="win95-btn" onClick={onStartGuide}>
@@ -95,7 +96,11 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   const isSignUp = mode === 'signUp';
 
   return (
-    <form className={`win95-border ${styles.panel}`} onSubmit={handleSubmit}>
+    <form
+      className={`win95-border ${styles.panel}`}
+      onSubmit={handleSubmit}
+      {...helpAt('account.form')}
+    >
       <p className={styles.title}>{isSignUp ? t.auth.createAccount : t.auth.signIn}</p>
       <p className={styles.subtitle}>{t.auth.subtitle}</p>
 

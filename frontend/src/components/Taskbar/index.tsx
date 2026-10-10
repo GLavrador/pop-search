@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import logo from '../../assets/windows-98-logo.png';
 import styles from './styles.module.css';
 
@@ -22,7 +23,12 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
 
   return (
     <div className={styles.taskbar} data-robot="taskbar">
-      <button type="button" className={styles.start} data-robot="start">
+      <button
+        type="button"
+        className={styles.start}
+        data-robot="start"
+        {...helpAt('taskbar.start')}
+      >
         <img src={logo} alt="" className={styles.logo} />
         {t.taskbar.start}
       </button>
@@ -32,7 +38,7 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
       <div className={styles.tasks}>{children}</div>
 
       <div className={styles.tray}>
-        <span className={styles.clock} data-robot="clock">
+        <span className={styles.clock} data-robot="clock" {...helpAt('taskbar.clock')}>
           {time}
         </span>
       </div>

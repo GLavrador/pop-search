@@ -1,3 +1,4 @@
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface TaskButtonProps {
@@ -13,6 +14,7 @@ export const TaskButton = ({ icon, label, active, onClick }: TaskButtonProps) =>
     aria-pressed={active}
     onClick={onClick}
     data-robot="task"
+    {...helpAt('taskbar.task')}
     className={`${styles.task} ${active ? styles.taskActive : ''}`}
   >
     <span className={styles.taskIcon}>{icon}</span>

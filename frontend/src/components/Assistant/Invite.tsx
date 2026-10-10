@@ -1,4 +1,5 @@
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import { Robot } from './Robot';
 import styles from './styles.module.css';
 
@@ -14,7 +15,10 @@ export const GuideInvite = ({ returning, onStart, onDismiss }: GuideInviteProps)
   const copy = returning ? t.guide.invite.again : t.guide.invite.fresh;
 
   return (
-    <div className={`${styles.invite} ${returning ? '' : styles.inviteFresh}`}>
+    <div
+      className={`${styles.invite} ${returning ? '' : styles.inviteFresh}`}
+      {...helpAt('guide.invite')}
+    >
       <span className={styles.mini} data-pose="wave" data-face="happy">
         <Robot className={styles.robotMedium} />
       </span>

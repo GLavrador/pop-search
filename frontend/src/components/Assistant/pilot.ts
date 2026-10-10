@@ -119,6 +119,7 @@ const SWIFT = 0.3;
 const SEATED = 9;
 const ROOST_INSET = 118;
 const BALLOON_GAP = 10;
+const BALLOON_LIFT = 23;
 const SNORE_EVERY = 9000;
 
 const LAYERS = { behind: '0', front: '', top: '120' };
@@ -207,7 +208,11 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     else if (craft.getAttribute(name) !== value) craft.setAttribute(name, value);
   };
 
-  const boxOf = (node: Element | null): Box | null => (node ? node.getBoundingClientRect() : null);
+  // A page that is not laid out reports empty boxes: that is no place to fly to.
+  const boxOf = (node: Element | null): Box | null => {
+    const box = node?.getBoundingClientRect();
+    return box && (box.width > 0 || box.height > 0) ? box : null;
+  };
 
   const shown = (node: HTMLElement | null | undefined): node is HTMLElement =>
     !!node && node.isConnected && node.getClientRects().length > 0;
@@ -247,13 +252,27 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     emoteUntil = 0;
   };
 
-  /** Hangs the balloon over the robot, inside the screen, or under it when there is no room. */
+  /**
+   * Hangs the balloon over the robot and inside the screen. With no room above
+   * it goes beside the robot, and only as a last resort under it, over the app.
+   */
   const arrange = (now: number) => {
     arrangedAt = now;
     if (!pos || !balloon.firstElementChild) return;
 
     const width = balloon.offsetWidth;
-    const drop = perch?.side === 'below' || pos.y - balloon.offsetHeight - BALLOON_GAP < 4;
+    const height = balloon.offsetHeight;
+    let hang = 'up';
+    if (perch?.side === 'below') {
+      hang = 'drop';
+    } else if (pos.y - height - BALLOON_GAP < 4) {
+      const clear = !perch?.side && pos.y + size.h - BALLOON_LIFT - height >= 4;
+      const reach = width + BALLOON_GAP + 8;
+      if (clear && pos.x - reach >= 0) hang = 'left';
+      else if (clear && pos.x + size.w + reach <= window.innerWidth) hang = 'right';
+      else hang = 'drop';
+    }
+
     const left = clamp(
       pos.x + size.w / 2 - width / 2,
       6,
@@ -261,7 +280,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     );
     balloon.style.setProperty('--shift', `${Math.round(left - pos.x)}px`);
     balloon.style.setProperty('--tail', `${Math.round(pos.x + size.w / 2 - left)}px`);
-    balloon.toggleAttribute('data-drop', drop);
+    if (balloon.getAttribute('data-hang') !== hang) balloon.setAttribute('data-hang', hang);
   };
 
   const aimed = (): HTMLElement | null => {
@@ -470,6 +489,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
 
   const tick = (now: number) => {
     raf = window.requestAnimationFrame(tick);
+    // With no viewport there is nowhere to be: every box on the page is meaningless.
+    if (!window.innerWidth || !window.innerHeight) return;
     const dt = clock ? clamp(now - clock, 1, 80) : 16;
     clock = now;
 

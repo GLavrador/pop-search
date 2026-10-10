@@ -1,6 +1,7 @@
 import type { SearchResult } from "../../types";
 import { useStatus } from "../../context/StatusContext";
 import { useI18n } from "../../i18n/languageContext";
+import { helpAt } from "../../context/robotContext";
 import styles from "./styles.module.css";
 
 interface VideoCardProps {
@@ -29,7 +30,7 @@ export const VideoCard = ({ data }: VideoCardProps) => {
   };
 
   return (
-    <div className={styles.card}>
+    <div className={styles.card} {...helpAt('card')}>
       <div className={styles.iconColumn}>
         🎬
       </div>
@@ -46,8 +47,8 @@ export const VideoCard = ({ data }: VideoCardProps) => {
             {data.titulo_video}
           </a>
 
-          <span className={styles.score}>
-            <span className={styles.origin} title={origin.title}>
+          <span className={styles.score} {...helpAt('card.match')}>
+            <span className={styles.origin} title={origin.title} {...helpAt('card.origin')}>
               {origin.label}
             </span>
             {t.card.match(percentage)}
@@ -58,7 +59,7 @@ export const VideoCard = ({ data }: VideoCardProps) => {
           {data.descricao_completa || t.card.noDescription}
         </p>
 
-        <div className={styles.urlRow}>
+        <div className={styles.urlRow} {...helpAt('card.copy')}>
           <input
             type="text"
             readOnly

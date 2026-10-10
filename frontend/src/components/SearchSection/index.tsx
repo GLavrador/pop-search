@@ -8,6 +8,7 @@ import { PrecisionPresets } from "../PrecisionPresets";
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from "../../constants/searchPresets";
 import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from "../../constants/searchModes";
 import { useI18n } from "../../i18n/languageContext";
+import { helpAt } from "../../context/robotContext";
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
@@ -87,7 +88,7 @@ export const SearchSection = () => {
           disabled={isLoading || !thresholdApplies}
         />
 
-        <div className={styles.inputRow}>
+        <div className={styles.inputRow} {...helpAt('search.query')}>
           <input
             type="text"
             placeholder={t.search.placeholder}
@@ -124,7 +125,7 @@ export const SearchSection = () => {
         )}
 
         {!isLoading && !error && hasSearched && results.length === 0 && (
-          <div className="win95-border" style={{ padding: '4px 8px', backgroundColor: '#ffffe1', marginTop: '5px', display: 'flex', alignItems: 'center' }}>
+          <div className="win95-border" style={{ padding: '4px 8px', backgroundColor: '#ffffe1', marginTop: '5px', display: 'flex', alignItems: 'center' }} {...helpAt('search.empty')}>
             <span style={{ fontSize: '0.95em' }}>
               <strong>{t.search.emptyTitle}</strong>{' '}
               {thresholdApplies

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { Dictionary } from '../i18n/en';
+import { en, type Dictionary } from '../i18n/en';
 import type { HelpKey, RobotVoice } from '../context/robotContext';
 import type { Cue, Mission, Target } from '../components/Assistant/pilot';
 import type { RobotHandle } from '../components/Assistant/RobotPilot';
@@ -30,8 +30,12 @@ export type Brief = Pick<Mission, 'utterance' | 'cue' | 'target' | 'aim' | 'roam
 const AT_REST: Brief = { utterance: 'rest', cue: 'rest', target: null, aim: null, roam: 'calm' };
 const LINE_SPEECH = 2200;
 
+const isHelpKey = (key: string | undefined): key is HelpKey =>
+  key !== undefined && key in en.robot.help;
+
 export const useRobotDirector = () => {
   const [line, setLine] = useState<Line | null>(null);
+  const [helping, setHelping] = useState(false);
   const lastId = useRef(0);
   const handle = useRef<RobotHandle>(null);
 
@@ -49,6 +53,46 @@ export const useRobotDirector = () => {
     [say],
   );
 
+  const stopHelp = useCallback(() => {
+    setHelping(false);
+    setLine((current) => (current?.rank === 'ask' ? null : current));
+  }, []);
+
+  const toggleHelp = useCallback(() => {
+    if (helping) {
+      stopHelp();
+      return;
+    }
+    setHelping(true);
+    say({
+      rank: 'ask',
+      copy: (t) => ({ text: t.robot.whatsThis.prompt }),
+      cue: 'rest',
+      target: null,
+      ttl: null,
+    });
+  }, [helping, say, stopHelp]);
+
+  /** The click that "what's this?" was waiting for. Anything unmarked keeps it waiting. */
+  const pick = useCallback(
+    (node: HTMLElement | null) => {
+      const key = node?.dataset.help;
+      if (node && isHelpKey(key)) {
+        setHelping(false);
+        explain(key, node);
+        return;
+      }
+      say({
+        rank: 'ask',
+        copy: (t) => ({ text: t.robot.whatsThis.unknown }),
+        cue: 'rest',
+        target: null,
+        ttl: null,
+      });
+    },
+    [explain, say],
+  );
+
   useEffect(() => {
     if (!line || line.ttl === null) return;
     const id = setTimeout(
@@ -60,7 +104,7 @@ export const useRobotDirector = () => {
 
   // An answer the user asked for goes away as soon as they move on to something else.
   useEffect(() => {
-    if (line?.rank !== 'ask') return;
+    if (line?.rank !== 'ask' || helping) return;
 
     const onPress = (event: PointerEvent) => {
       const within =
@@ -77,7 +121,7 @@ export const useRobotDirector = () => {
       document.removeEventListener('pointerdown', onPress);
       document.removeEventListener('keydown', onKey);
     };
-  }, [line]);
+  }, [line, helping]);
 
   const voice = useMemo<RobotVoice>(() => ({ explain }), [explain]);
 
@@ -96,5 +140,5 @@ export const useRobotDirector = () => {
     return guide ?? AT_REST;
   };
 
-  return { voice, line, dismiss, handle, briefOver };
+  return { voice, line, dismiss, handle, briefOver, helping, toggleHelp, stopHelp, pick };
 };

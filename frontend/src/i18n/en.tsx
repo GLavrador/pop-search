@@ -492,7 +492,125 @@ export const en = {
   robot: {
     dismiss: 'Close',
     ask: (what: string) => `What is ${what}?`,
+    whatsThis: {
+      button: "What's this?",
+      title: "What's this? Click here, then on anything on screen.",
+      prompt: 'Click on anything on screen and I will tell you what it is.',
+      unknown: 'Hm, I have nothing to say about that one. Click on something else.',
+    },
     help: {
+      'tab.ingest': {
+        title: 'Add-Video.exe',
+        text: 'This is where you keep a video: paste the link to a post on X, and the AI watches it and writes down what happens.',
+      } as HelpCopy,
+      'tab.search': {
+        title: 'Search.exe',
+        text: 'This is where you find a video that was kept. Write what you remember of it, in your own words, and I look for it. No account needed.',
+      } as HelpCopy,
+      'tab.library': {
+        title: 'My-Videos.exe',
+        text: 'The list of the videos you kept yourself.',
+      } as HelpCopy,
+      'tab.account': {
+        title: 'Your account',
+        text: 'Here you sign in or create your account, see how many analyses you have left this month and switch language.',
+      } as HelpCopy,
+      'tab.admin': {
+        title: 'Stats.exe',
+        text: 'Only administrators see this tab. It shows how much the AI was used, and by whom.',
+      } as HelpCopy,
+      status: {
+        title: 'Status bar',
+        text: 'It tells what the program just did: searching, saved, something failed. Worth a look whenever things seem stuck.',
+      } as HelpCopy,
+      'window.buttons': {
+        title: 'Window buttons',
+        text: 'Minimize, maximize and close. The close one is stubborn: you have to insist. They say there is a cat on the other side.',
+      } as HelpCopy,
+      'taskbar.start': {
+        title: 'Start',
+        text: 'That one is just for show. I have jumped on it many times and it never opened a thing.',
+      } as HelpCopy,
+      'taskbar.clock': {
+        title: 'Clock',
+        text: 'The time on your computer. I drop by now and then to check it.',
+      } as HelpCopy,
+      'taskbar.task': {
+        title: 'Pop Search System',
+        text: 'The button of the window. Click to minimize the program, click again to bring it back.',
+      } as HelpCopy,
+      'desktop.icon': {
+        title: 'Desktop',
+        text: 'The icons are decoration. The Pop Search one opens the program again if you close the window.',
+      } as HelpCopy,
+      robot: {
+        title: 'BIP-98',
+        text: 'That is me! I live here in Pop Search and explain whatever you want.',
+      } as HelpCopy,
+      'guide.invite': {
+        title: 'The guide',
+        text: 'A two minute tour where I show you the whole app on a practice screen. Nothing you do there counts for real.',
+      } as HelpCopy,
+      'ingest.url': {
+        title: 'Video link',
+        text: 'Paste here the link to a post on X that has a video. Then click Next to choose what the AI looks at.',
+      } as HelpCopy,
+      'ingest.manual': {
+        title: 'Manual input',
+        text: 'With this box ticked the AI is not used: you write the title and the description yourself. It spends none of your analyses.',
+      } as HelpCopy,
+      'ingest.options': {
+        title: 'Analysis options',
+        text: 'The AI always writes a title and a description. Here you choose whether it also notes the scenery and transcribes the audio. The more it notes, the easier the video is to find later.',
+      } as HelpCopy,
+      'ingest.progress': {
+        title: 'Analysis under way',
+        text: 'The AI is watching the whole video. It usually takes about a minute, longer for long videos. You can cancel.',
+      } as HelpCopy,
+      'ingest.error': {
+        title: 'The analysis failed',
+        text: 'The message says what went wrong. You can try again, or tick Manual input and write it yourself.',
+      } as HelpCopy,
+      'ingest.quota': {
+        title: 'Analyses this month',
+        text: 'Every video the AI analyses spends one analysis, and each account has a monthly limit. When it runs out, Manual input keeps working.',
+      } as HelpCopy,
+      'ingest.gate': {
+        title: 'Account needed',
+        text: 'Keeping videos uses the AI, which has a cost, so it asks for an account. Searching stays open to everyone.',
+      } as HelpCopy,
+      'review.general': {
+        title: 'Title and description',
+        text: 'This is the text the search reads to find the video. The AI gets things wrong now and then, so check it and fix what needs fixing before you save.',
+      } as HelpCopy,
+      'review.scenes': {
+        title: 'Scene elements',
+        text: 'Things that show up in the video, separated by commas. They help find the video by a detail, like "blue bowl".',
+      } as HelpCopy,
+      'review.audio': {
+        title: 'Audio',
+        text: 'What is said or sung in the video, and the song when the AI recognises it. It lets you find the video by a line spoken in it.',
+      } as HelpCopy,
+      'review.save': {
+        title: 'Save or cancel',
+        text: 'Save keeps the video in the archive with the text above. Cancel throws it all away and goes back to the start.',
+      } as HelpCopy,
+      'search.query': {
+        title: 'Your search',
+        text: 'Write what you remember of the video, in your own words: a scene, a line, a subject. Then click Search.',
+      } as HelpCopy,
+      'search.presets': {
+        title: 'Precision',
+        text: 'How closely a video has to resemble what you wrote. Broad brings more videos, Precise only the closest ones. If nothing comes up, try Broad.',
+      } as HelpCopy,
+      'search.advanced': {
+        title: 'Advanced',
+        text: 'Opens the fine settings of the search: the mode, the threshold, the writing shortcuts and how many results come back.',
+      } as HelpCopy,
+      'search.advancedOpen': {
+        title: 'Hide advanced',
+        text: 'Tucks the fine settings away again. Whatever you chose in them still applies.',
+      } as HelpCopy,
       'search.mode': {
         title: 'Search mode',
         text: (
@@ -506,6 +624,58 @@ export const en = {
       'search.threshold': {
         title: 'Match threshold',
         text: 'How closely a video has to resemble what you wrote to make the list. Further right I get picky and bring fewer videos. Further left I bring more, some of them not that close. It only applies to searching by meaning.',
+      } as HelpCopy,
+      'search.syntax': {
+        title: 'Search syntax',
+        text: 'Shortcuts for searching by words: quotes look for the exact phrase, a minus sign leaves a word out, and "or" accepts either one.',
+      } as HelpCopy,
+      'search.limit': {
+        title: 'Max results',
+        text: 'How many videos I bring each time. With fewer, the list stays short and holds only the best ones.',
+      } as HelpCopy,
+      'search.empty': {
+        title: 'Nothing found',
+        text: 'No video made it through the filter. Try the Broad precision, fewer words, or describe it another way.',
+      } as HelpCopy,
+      card: {
+        title: 'A result',
+        text: 'A video from the archive: the title leads to the original post and the text is the summary kept with it.',
+      } as HelpCopy,
+      'card.origin': {
+        title: 'Why it came up',
+        text: 'The tag tells the reason: "words" means the text of the video has what you typed, "meaning" means it is about something similar.',
+      } as HelpCopy,
+      'card.match': {
+        title: 'Match',
+        text: 'How much the subject of the video resembles your search. The closer to 100%, the more alike.',
+      } as HelpCopy,
+      'card.copy': {
+        title: 'Link to the post',
+        text: 'The address of the original post on X. The Copy button leaves it ready to paste wherever you like.',
+      } as HelpCopy,
+      library: {
+        title: 'My videos',
+        text: 'Everything you kept with your account. Click the title of a video to open the original post.',
+      } as HelpCopy,
+      'account.form': {
+        title: 'Sign in or create an account',
+        text: 'The account is what lets you keep videos. Searching does not need one.',
+      } as HelpCopy,
+      'account.session': {
+        title: 'Your account',
+        text: 'You are signed in. The Sign Out button ends the session in this browser.',
+      } as HelpCopy,
+      'account.guide': {
+        title: 'Guided demo',
+        text: 'Takes the tour with me again on a practice screen. It spends no analysis and nothing is saved.',
+      } as HelpCopy,
+      language: {
+        title: 'Language',
+        text: 'Switches the language of the whole program, mine included.',
+      } as HelpCopy,
+      admin: {
+        title: 'Statistics',
+        text: 'The panel for whoever runs the project: how much the AI was used, what it cost and why analyses failed.',
       } as HelpCopy,
     },
   },

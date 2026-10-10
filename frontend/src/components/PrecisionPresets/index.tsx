@@ -1,5 +1,6 @@
 import { PRECISION_PRESETS, findPresetByThreshold } from '../../constants/searchPresets';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface PrecisionPresetsProps {
@@ -13,7 +14,7 @@ export const PrecisionPresets = ({ threshold, onThresholdChange, disabled }: Pre
   const activePreset = findPresetByThreshold(threshold);
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} {...helpAt('search.presets')}>
       <span className={styles.label}>{t.presets.caption}</span>
 
       <div className={styles.buttonGroup} role="group" aria-label={t.presets.groupLabel}>

@@ -5,6 +5,7 @@ import type { VideoMetadata } from "../../types";
 import { createVideoMetadataFormSchema, type VideoMetadataForm } from "../../schemas/videoMetadata";
 import { transformFormDataToMetadata } from "../../utils/transformers";
 import { useI18n } from "../../i18n/languageContext";
+import { helpAt } from "../../context/robotContext";
 import styles from "./styles.module.css";
 
 interface ReviewFormProps {
@@ -43,7 +44,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
 
   return (
     <form className={styles.formContainer} onSubmit={handleSubmit(onSubmit)}>
-      <fieldset className={styles.groupFrame}>
+      <fieldset className={styles.groupFrame} {...helpAt('review.general')}>
         <legend className={styles.legend}>{t.review.generalLegend}</legend>
 
         <div className={styles.formGroup}>
@@ -86,7 +87,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
       </fieldset>
 
       {showScenes && (
-        <fieldset className={styles.groupFrame}>
+        <fieldset className={styles.groupFrame} {...helpAt('review.scenes')}>
           <legend className={styles.legend}>{t.review.scenesLegend}</legend>
 
           <div className={styles.formGroup}>
@@ -101,7 +102,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
       )}
 
       {showAudio && (
-        <fieldset className={styles.groupFrame}>
+        <fieldset className={styles.groupFrame} {...helpAt('review.audio')}>
           <legend className={styles.legend}>{t.review.audioLegend}</legend>
 
         <div className={styles.formGroup}>
@@ -132,7 +133,7 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
         </fieldset>
       )}
 
-      <div className={styles.actions}>
+      <div className={styles.actions} {...helpAt('review.save')}>
         <button
           type="button"
           onClick={onCancel}

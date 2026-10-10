@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RANGE_OPTIONS, useAdminStatsQuery } from '../../hooks/useAdminStatsQuery';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface CardProps {
@@ -41,7 +42,7 @@ export const AdminDashboard = () => {
   const busiestDay = Math.max(1, ...stats.daily.map((point) => point.analyses));
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} {...helpAt('admin')}>
       <div className={styles.header}>
         <h2 className={styles.title}>{t.admin.title}</h2>
         <div className={styles.ranges} role="group" aria-label={t.admin.rangeLabel}>

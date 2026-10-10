@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 import { ProgressBar } from '../ProgressBar';
 
@@ -58,7 +59,7 @@ export const URLInputView = ({
       {step === 1 ? (
         <>
           <label className={styles.label}>{t.ingest.urlLabel}</label>
-          <div className={styles.inputRow}>
+          <div className={styles.inputRow} {...helpAt('ingest.url')}>
             <input
               type="text"
               className="win95-inset win95-input"
@@ -88,7 +89,7 @@ export const URLInputView = ({
             )}
           </div>
 
-          <div className={styles.manualToggle}>
+          <div className={styles.manualToggle} {...helpAt('ingest.manual')}>
             <input
               type="checkbox"
               id="manualModeCheckbox"
@@ -103,7 +104,7 @@ export const URLInputView = ({
           </div>
         </>
       ) : (
-        <div className={`win95-border ${styles.optionsContainer}`}>
+        <div className={`win95-border ${styles.optionsContainer}`} {...helpAt('ingest.options')}>
           <div className={styles.optionsTitle}>{t.ingest.optionsTitle}</div>
           <div className={styles.optionsDescription}>
             {t.ingest.optionsDescription}
@@ -150,7 +151,7 @@ export const URLInputView = ({
       )}
 
       {showProgress && (
-        <div className={styles.progressRow}>
+        <div className={styles.progressRow} {...helpAt('ingest.progress')}>
           <div className={styles.progressContainer}>
             <ProgressBar loading={loading} />
 
@@ -168,7 +169,7 @@ export const URLInputView = ({
       )}
 
       {error && (
-        <div className="win95-border win95-error">
+        <div className="win95-border win95-error" {...helpAt('ingest.error')}>
           <span>⚠️</span>
           <strong>{error}</strong>
         </div>

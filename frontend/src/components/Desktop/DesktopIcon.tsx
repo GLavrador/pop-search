@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface DesktopIconProps {
@@ -16,6 +17,7 @@ export const DesktopIcon = ({ art, label, onOpen }: DesktopIconProps) => (
     type="button"
     className={styles.icon}
     data-robot="icon"
+    {...helpAt('desktop.icon')}
     onClick={() => {
       if (isTouch()) onOpen?.();
     }}
