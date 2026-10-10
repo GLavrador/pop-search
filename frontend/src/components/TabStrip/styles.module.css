@@ -1,4 +1,5 @@
 .bar {
+  flex: 0 0 auto;
   position: relative;
   z-index: 2;
   margin-bottom: -2px;
@@ -38,6 +39,10 @@
   text-overflow: ellipsis;
   cursor: pointer;
   user-select: none;
+}
+
+.quiet .tab:not(.tabActive) {
+  opacity: 0.5;
 }
 
 .tab:hover:not(.tabActive) {

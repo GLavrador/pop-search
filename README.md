@@ -35,8 +35,8 @@ contribuir exige conta.
   dois rankings
 - **Entrada manual**: dá para catalogar um vídeo sem usar IA
 - **Contas com limite mensal**: contribuir exige cadastro; buscar não
-- **Tour guiado**: visitantes conhecem o app inteiro sem criar conta e sem gastar
-  chamada de IA
+- **Assistente guiado**: um assistente conduz o visitante pelas telas de verdade,
+  com uma adição de vídeo e uma busca de mentira, sem conta e sem chamada de IA
 
 ## Como a busca funciona
 
@@ -366,6 +366,6 @@ frontend/src/
 ├── context/                 # Sessão e barra de status
 ├── hooks/                   # Queries e mutations
 ├── services/api.ts          # Cliente HTTP, anexa o token
-├── constants/               # Presets, modos e dados do tour
+├── constants/               # Presets, modos e roteiro do guia
 └── lib/supabase.ts          # Cliente Supabase (só autenticação)
 ```

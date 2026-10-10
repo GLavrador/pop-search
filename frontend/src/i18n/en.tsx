@@ -1,5 +1,4 @@
-import demo from '../components/DemoTour/styles.module.css';
-import { TAB_LABELS } from '../constants/tabs';
+import type { GuideStepCopy, GuideStepId } from '../constants/guide';
 
 export const en = {
   language: {
@@ -54,7 +53,7 @@ export const en = {
     title: 'An account is required to add videos.',
     body: 'Indexing a video runs it through the AI, so it is limited to signed-in users. Searching the archive stays open to everyone.',
     signIn: 'Sign In',
-    takeTour: '🎓 Take the tour instead',
+    openGuide: '▶ Show me how it works',
   },
 
   footer: '© 1998 Pop Search Corp. - All rights reserved.',
@@ -277,7 +276,7 @@ export const en = {
     email: 'E-mail',
     password: 'Password',
     created: 'Account created. If confirmation is required, check your inbox before signing in.',
-    tourInvite: 'In the meantime, get to know the app through the tour. It costs no analysis and needs no account.',
+    guideInvite: 'In the meantime, let the assistant walk you through the app. It costs no analysis and needs no account.',
     working: 'Working...',
     toSignIn: 'Already have an account? Sign in',
     toSignUp: 'No account yet? Create one',
@@ -329,172 +328,163 @@ export const en = {
       'Tokens are what count against the Google AI quota. Analyses are what each account is limited by.',
   },
 
-  tour: {
-    counter: (current: number, total: number) => `Step ${current} of ${total}`,
-    back: '◀ Back',
-    next: 'Next ▶',
-    restart: '↺ Start over',
+  guide: {
+    name: 'BIP-98',
+    poke: 'Poke BIP-98',
+    beeps: ['Beep!', 'Boop.', 'Hm?', 'Ouch.', 'Zzzt.'],
+    emotes: {
+      heavy: 'so heavy!',
+      sorry: 'oops, sorry!',
+      knock: 'knock knock',
+      puzzled: 'huh?',
+    },
+    progress: (current: number, total: number) => `Step ${current} of ${total}`,
+    back: '◂ back',
+    next: 'Got it ▶',
+    skip: 'skip ▸',
+    skipTitle: 'Carry on without doing this step',
+    yourTurn: 'Your turn:',
+    close: 'Close the guide',
+    closeTitle: 'Close the guide. You can pick it up again where you stopped.',
+    jumpTo: (step: number) => `Go to step ${step}`,
+    paused: (current: number, total: number) => `Guide paused on step ${current} of ${total}.`,
+    resume: '▶ Resume',
+    quit: 'end guide',
+    offScript: (tab: string) => (
+      <>
+        You stepped away. This part of the guide lives on <strong>{tab}</strong>.
+      </>
+    ),
+    offScriptAction: 'Take me back',
+    invite: {
+      fresh: {
+        lead: 'First time here?',
+        text: 'I can show you the whole app in two minutes.',
+        start: '▶ Start the guide',
+      },
+      again: {
+        lead: 'Want another look?',
+        text: 'I can show you the app again in two minutes.',
+        start: '▶ See the guide again',
+      },
+      dismissTitle: 'Tuck this away. The guide stays up in the title bar.',
+    },
+    chip: {
+      label: 'Guide',
+      title: 'Guide: let BIP-98 show you around',
+    },
+    profile: {
+      legend: 'Guided demo',
+      note: 'A walk through keeping a video and finding it again. Nothing is saved and no AI is called.',
+      start: '▶ Open the guide',
+    },
+    demo: {
+      badge: 'DEMO',
+      badgeTitle: 'Practice screen. Nothing here is sent anywhere.',
+      saved: (
+        <>
+          <strong>Saved, in pretend.</strong> This is practice, so nothing was really kept.
+        </>
+      ),
+    },
     steps: {
       welcome: {
-        tab: 'Welcome',
-        title: 'What Pop Search is',
-        body: (
+        title: 'Hi! I am BIP-98',
+        say: 'Pop Search keeps videos from X so you can find them later, just by describing what happens in them. I will show you how in two minutes. This is only practice: nothing we do here reaches the real app.',
+        next: 'Off we go ▶',
+      },
+      paste: {
+        title: 'Keeping a video',
+        say: 'It all starts with the link to a post on X that has a video. In the real app you copy that link and paste it into this field. I already pasted an example for you.',
+        task: (
           <>
-            <p>
-              An archive of Twitter and X videos that you can search by meaning, not just by the
-              words someone happened to type.
-            </p>
-            <p>
-              Each video is watched by an AI, which writes a description and lists the people,
-              objects and speech it finds. That text is what the search runs against.
-            </p>
-            <p className={demo.reassure}>
-              Nothing here is saved, and no AI is called. Take as long as you like.
-            </p>
+            click <strong>Next</strong>, beside the link.
           </>
         ),
       },
-      search: {
-        tab: TAB_LABELS.search,
-        title: 'Finding a video',
-        intro: <p>Open to everyone, no account needed. Three modes:</p>,
-        definitions: [
-          {
-            term: 'Hybrid',
-            definition:
-              'Meaning and exact words together. A search for "cat" finds a video described as "orange tabby", and one whose title literally says cat.',
-          },
-          {
-            term: 'Semantic',
-            definition: 'Meaning only. Finds related videos that share no words with your search.',
-          },
-          { term: 'Exact', definition: 'Literal words only. Every word you type must appear.' },
-        ],
-        outro: (
+      options: {
+        title: 'What the AI looks at',
+        say: 'The video is described by an artificial intelligence (AI): it watches the video and writes down what it sees. Here you choose whether it looks at the scenes, listens to the audio, or both. The more it takes in, the easier the video is to find later.',
+        task: (
           <>
-            <p>
-              Under <strong>Advanced</strong> you can also set how strict the matching is, how many
-              results to return, and read the supported operators: <code>"exact phrase"</code>,{' '}
-              <code>-exclude</code> and <code>a or b</code>.
-            </p>
-            <p>
-              Each result carries a badge saying whether it matched by meaning, by words, or by
-              both.
-            </p>
+            click <strong>Run Analysis</strong>.
           </>
         ),
       },
-      ingest: {
-        tab: TAB_LABELS.ingest,
-        title: 'Adding a video',
-        body: (
-          <p>
-            This is the part that needs an account, because every analysis costs AI time. Try the
-            whole flow below with a real example.
-          </p>
+      analyzing: {
+        title: 'The AI is watching',
+        say: 'Now the AI watches the whole video and writes a summary of it. In the real app this takes about a minute, and this bar shows how far along it is. Here we do not have to wait.',
+        next: 'Skip the wait ▶',
+      },
+      review: {
+        title: 'Check what the AI wrote',
+        say: 'Done: the AI suggested a title and a description. It gets things wrong now and then, so nothing is kept before you check it. Click any field to fix it. This text is what the search will read later.',
+      },
+      save: {
+        title: 'Keep it',
+        say: 'When the text looks right, all that is left is saving. That is the moment the video enters the archive.',
+        task: (
+          <>
+            click <strong>Save</strong>, at the end of the form.
+          </>
         ),
+      },
+      saved: {
+        title: 'Video kept',
+        say: 'That is it! In the real app, from now on anyone could find this video. Each video the AI analyses uses up one of your analyses for the month: every account has a limit.',
       },
       manual: {
-        tab: `${TAB_LABELS.ingest} → Manual Input`,
-        title: 'Adding without the AI',
-        body: (
+        title: 'And without the AI?',
+        say: (
           <>
-            <p>
-              Tick <strong>Manual Input</strong> on the add screen and you get the same review form,
-              empty, to fill in yourself. No video is downloaded and no AI is called.
-            </p>
-            <p>Two reasons to use it:</p>
-            <ul className={demo.list}>
-              <li>
-                <strong>You ran out of analyses.</strong> Manual entries do not count against the
-                monthly limit, so the archive stays open to you.
-              </li>
-              <li>
-                <strong>You describe it better.</strong> A joke or a reference the AI misses is
-                exactly what makes a video findable later.
-              </li>
-            </ul>
-            <p className={demo.hint}>
-              Manually added videos are searchable like any other: the description you write is what
-              the search reads.
-            </p>
+            See this little box? With <strong>Manual Input</strong> ticked the AI is not used: you
+            write the title and the description yourself. It is for when your analyses for the
+            month run out, or when you can explain the video better than the AI would.
           </>
         ),
       },
-      library: {
-        tab: TAB_LABELS.myVideos,
-        title: 'What you contributed',
-        body: (
+      searchIntro: {
+        title: 'Now, finding one',
+        say: (
           <>
-            <p>
-              Everything you added, newest first, with a link back to the original post. Videos
-              belong to whoever indexed them.
-            </p>
-            <p>
-              The archive itself stays public: anyone can find your videos through search, with or
-              without an account.
-            </p>
+            This is the other half, and it needs no account: anyone can search. You write what you
+            remember of the video, in your own words. I already typed <strong>gato</strong>, which
+            is cat in Portuguese, for us to try.
+          </>
+        ),
+        task: (
+          <>
+            click <strong>Find Now</strong>.
+          </>
+        ),
+      },
+      results: {
+        title: 'What came up',
+        say: (
+          <>
+            Three videos. Look at the label next to each one: it tells you why that video came up.{' '}
+            <strong>words</strong> means its text has the word you typed. <strong>meaning</strong>{' '}
+            means it is about something similar, even without the word. That is how a giraffe got
+            here.
+          </>
+        ),
+      },
+      modes: {
+        title: 'Fine-tuning the search',
+        say: (
+          <>
+            The <strong>Advanced</strong> button opens the settings: search by the exact words
+            only, by meaning only, or by both, which is the default. Open it and play around: the
+            results below change as you go.
           </>
         ),
       },
       account: {
-        tab: '👤 Account',
-        title: 'Your account and limits',
-        body: (
-          <>
-            <p>
-              Sign up with an e-mail and a password. Each account gets a number of analyses per
-              month, shown as a bar on this tab and above the add form.
-            </p>
-            <p>
-              The limit exists because watching a video with an AI is the expensive part. Two things
-              worth knowing:
-            </p>
-            <ul className={demo.list}>
-              <li>
-                A failed analysis still counts, because the AI was already paid for by then.
-              </li>
-              <li>Adding a video manually, without the AI, does not count against it.</li>
-            </ul>
-            <p>The counter resets on the first day of each month.</p>
-          </>
-        ),
+        title: 'To keep videos, an account',
+        say: 'Searching is open to everyone. To keep videos you need an account, because every AI analysis has a cost. This tab is where you create yours and see how many analyses you have left this month.',
+        next: 'Finish ✓',
       },
-    },
-    demoSearch: {
-      tryIt: (query: string) => `Try it: search for “${query}”`,
-      inputLabel: 'Example search',
-      submit: 'Find Now',
-      badgeHint:
-        'Look at the badge on each result. The first contains the word and is about a cat, so it matched both ways. The second never says “gato” - a spinning giraffe came up because the search understood the idea. The third matched only on the word.',
-      modeHint: (
-        <>
-          In <strong>Exact</strong> mode the giraffe would disappear. In <strong>Semantic</strong>{' '}
-          mode the third one would.
-        </>
-      ),
-    },
-    demoUpload: {
-      step1: 'Step 1 - paste a link',
-      urlLabel: 'Example video URL',
-      step1Hint:
-        'Only twitter.com and x.com links are accepted. Scene and audio analysis are on by default, which is what fills the searchable metadata below.',
-      runAnalysis: 'Run Analysis',
-      step2: 'Step 2 - the AI watches the video',
-      step2Hint:
-        'The real thing downloads the video, sends it to Gemini and waits for a description. This tour skips that and uses a result captured earlier.',
-      step3: 'Step 3 - you review what the AI wrote',
-      step3Hint:
-        'Every field is editable. This is the human check before anything is indexed, and it is the same form the real flow uses.',
-      step4: 'Step 4 - indexed',
-      savedNotice: (
-        <>
-          <strong>Nothing was saved.</strong> In the real app this video would now be in the archive
-          and findable by anyone, and it would count as one of your monthly analyses.
-        </>
-      ),
-      again: 'Run it again',
-    },
+    } satisfies Record<GuideStepId, GuideStepCopy>,
   },
 };
 

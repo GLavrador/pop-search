@@ -1,5 +1,3 @@
-import demo from '../components/DemoTour/styles.module.css';
-import { TAB_LABELS } from '../constants/tabs';
 import type { Dictionary } from './en';
 
 export const pt: Dictionary = {
@@ -55,7 +53,7 @@ export const pt: Dictionary = {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',
     signIn: 'Entrar',
-    takeTour: '🎓 Fazer o tour',
+    openGuide: '▶ Me mostre como funciona',
   },
 
   footer: '© 1998 Pop Search Corp. - Todos os direitos reservados.',
@@ -290,7 +288,7 @@ export const pt: Dictionary = {
     email: 'E-mail',
     password: 'Senha',
     created: 'Conta criada. Se for preciso confirmar, veja sua caixa de entrada antes de entrar.',
-    tourInvite: 'Enquanto isso, conheça o app pelo tour. Não consome análise nem precisa de conta.',
+    guideInvite: 'Enquanto isso, deixe o assistente te mostrar o app. Não consome análise nem precisa de conta.',
     working: 'Processando...',
     toSignIn: 'Já tem conta? Entre',
     toSignUp: 'Ainda não tem conta? Crie uma',
@@ -342,174 +340,163 @@ export const pt: Dictionary = {
       'Os tokens são o que conta na cota do Google AI. As análises são o que limita cada conta.',
   },
 
-  tour: {
-    counter: (current: number, total: number) => `Passo ${current} de ${total}`,
-    back: '◀ Voltar',
-    next: 'Avançar ▶',
-    restart: '↺ Começar de novo',
+  guide: {
+    name: 'BIP-98',
+    poke: 'Cutucar o BIP-98',
+    beeps: ['Bip!', 'Bop.', 'Oi?', 'Ai!', 'Zzzt.'],
+    emotes: {
+      heavy: 'que pesado!',
+      sorry: 'ops, desculpa!',
+      knock: 'toc toc',
+      puzzled: 'ué?',
+    },
+    progress: (current: number, total: number) => `Passo ${current} de ${total}`,
+    back: '◂ voltar',
+    next: 'Entendi ▶',
+    skip: 'pular ▸',
+    skipTitle: 'Seguir sem fazer este passo',
+    yourTurn: 'Sua vez:',
+    close: 'Fechar o guia',
+    closeTitle: 'Fechar o guia. Dá para retomar de onde você parou.',
+    jumpTo: (step: number) => `Ir para o passo ${step}`,
+    paused: (current: number, total: number) => `Guia pausado no passo ${current} de ${total}.`,
+    resume: '▶ Retomar',
+    quit: 'encerrar guia',
+    offScript: (tab: string) => (
+      <>
+        Você saiu do roteiro. Esta parte do guia fica em <strong>{tab}</strong>.
+      </>
+    ),
+    offScriptAction: 'Me leve de volta',
+    invite: {
+      fresh: {
+        lead: 'Primeira vez aqui?',
+        text: 'Eu te mostro o app inteiro em dois minutos.',
+        start: '▶ Começar o guia',
+      },
+      again: {
+        lead: 'Quer rever?',
+        text: 'Eu te mostro o app de novo em dois minutos.',
+        start: '▶ Rever o guia',
+      },
+      dismissTitle: 'Recolher. O guia continua lá em cima, na barra de título.',
+    },
+    chip: {
+      label: 'Guia',
+      title: 'Guia: o BIP-98 te mostra o app',
+    },
+    profile: {
+      legend: 'Demonstração guiada',
+      note: 'Um passeio guardando um vídeo e encontrando ele de novo. Nada é salvo e nenhuma IA é chamada.',
+      start: '▶ Abrir o guia',
+    },
+    demo: {
+      badge: 'DEMO',
+      badgeTitle: 'Tela de treino. Nada daqui é enviado para lugar nenhum.',
+      saved: (
+        <>
+          <strong>Salvo, de mentirinha.</strong> Como isto é um treino, nada foi guardado de
+          verdade.
+        </>
+      ),
+    },
     steps: {
       welcome: {
-        tab: 'Bem-vindo',
-        title: 'O que é o Pop Search',
-        body: (
+        title: 'Oi! Eu sou o BIP-98',
+        say: 'O Pop Search guarda vídeos do X para você achar depois, só descrevendo o que acontece neles. Eu te mostro como em dois minutos. Isto é só um treino: nada do que a gente fizer aqui vai para o app de verdade.',
+        next: 'Vamos lá ▶',
+      },
+      paste: {
+        title: 'Guardar um vídeo',
+        say: 'Tudo começa com o link de um post do X que tenha vídeo. No app de verdade você copia esse link e cola neste campo. Aqui eu já colei um de exemplo.',
+        task: (
           <>
-            <p>
-              Um acervo de vídeos do Twitter e do X que você pode buscar por significado, não só
-              pelas palavras que alguém digitou.
-            </p>
-            <p>
-              Cada vídeo é assistido por uma IA, que escreve uma descrição e lista as pessoas, os
-              objetos e a fala que encontra. É esse texto que a busca consulta.
-            </p>
-            <p className={demo.reassure}>
-              Nada aqui é salvo, e nenhuma IA é chamada. Fique à vontade.
-            </p>
+            clique em <strong>Avançar</strong>, ao lado do link.
           </>
         ),
       },
-      search: {
-        tab: TAB_LABELS.search,
-        title: 'Encontrando um vídeo',
-        intro: <p>Aberto a todo mundo, sem precisar de conta. Três modos:</p>,
-        definitions: [
-          {
-            term: 'Híbrida',
-            definition:
-              'Significado e palavras exatas juntos. Uma busca por "gato" encontra um vídeo descrito como "felino laranja" e outro cujo título diz gato literalmente.',
-          },
-          {
-            term: 'Semântica',
-            definition:
-              'Só significado. Encontra vídeos relacionados que não têm nenhuma palavra em comum com a sua busca.',
-          },
-          {
-            term: 'Exata',
-            definition: 'Só palavras literais. Toda palavra que você digitar precisa aparecer.',
-          },
-        ],
-        outro: (
+      options: {
+        title: 'O que a IA vai olhar',
+        say: 'Quem descreve o vídeo é uma inteligência artificial (IA): ela assiste e escreve o que vê. Aqui você escolhe se ela olha as cenas, ouve o áudio, ou os dois. Quanto mais ela olhar, mais fácil achar o vídeo depois.',
+        task: (
           <>
-            <p>
-              Em <strong>Avançado</strong> você também define o rigor da correspondência, quantos
-              resultados devolver, e lê os operadores aceitos: <code>"frase exata"</code>,{' '}
-              <code>-excluir</code> e <code>a or b</code>.
-            </p>
-            <p>
-              Cada resultado traz um selo dizendo se ele foi encontrado por significado, por
-              palavras, ou pelos dois.
-            </p>
+            clique em <strong>Analisar</strong>.
           </>
         ),
       },
-      ingest: {
-        tab: TAB_LABELS.ingest,
-        title: 'Adicionando um vídeo',
-        body: (
-          <p>
-            Esta é a parte que precisa de conta, porque cada análise custa tempo de IA. Experimente
-            o fluxo inteiro abaixo com um exemplo real.
-          </p>
+      analyzing: {
+        title: 'A IA está assistindo',
+        say: 'Agora a IA assiste ao vídeo inteiro e escreve um resumo dele. No app de verdade isso leva mais ou menos um minuto, e esta barra mostra o andamento. Aqui a gente não precisa esperar.',
+        next: 'Pular a espera ▶',
+      },
+      review: {
+        title: 'Confira o que a IA escreveu',
+        say: 'Pronto: a IA sugeriu um título e uma descrição. Ela erra de vez em quando, então nada é guardado antes de você conferir. Clique em qualquer campo para corrigir. É esse texto que a busca vai ler depois.',
+      },
+      save: {
+        title: 'Guardar',
+        say: 'Quando o texto estiver bom, é só salvar. É nesse momento que o vídeo entra no arquivo.',
+        task: (
+          <>
+            clique em <strong>Salvar</strong>, no fim do formulário.
+          </>
         ),
+      },
+      saved: {
+        title: 'Vídeo guardado',
+        say: 'É isso! No app de verdade, a partir de agora qualquer pessoa conseguiria achar esse vídeo. Cada vídeo que a IA analisa gasta uma das suas análises do mês: toda conta tem um limite.',
       },
       manual: {
-        tab: `${TAB_LABELS.ingest} → Entrada manual`,
-        title: 'Adicionando sem a IA',
-        body: (
+        title: 'E sem a IA?',
+        say: (
           <>
-            <p>
-              Marque <strong>Entrada manual</strong> na tela de adicionar e você recebe o mesmo
-              formulário de revisão, vazio, para preencher você mesmo. Nenhum vídeo é baixado e
-              nenhuma IA é chamada.
-            </p>
-            <p>Dois motivos para usar:</p>
-            <ul className={demo.list}>
-              <li>
-                <strong>Suas análises acabaram.</strong> Entradas manuais não contam no limite
-                mensal, então o acervo continua aberto para você.
-              </li>
-              <li>
-                <strong>Você descreve melhor.</strong> Uma piada ou uma referência que a IA não
-                pega é justamente o que torna um vídeo encontrável depois.
-              </li>
-            </ul>
-            <p className={demo.hint}>
-              Vídeos adicionados à mão são buscáveis como qualquer outro: a descrição que você
-              escreve é o que a busca lê.
-            </p>
+            Reparou nesta caixinha? Com <strong>Entrada manual</strong> marcada a IA não é usada:
+            você mesmo escreve o título e a descrição. Serve para quando as suas análises do mês
+            acabarem, ou quando você explica o vídeo melhor do que a IA explicaria.
           </>
         ),
       },
-      library: {
-        tab: TAB_LABELS.myVideos,
-        title: 'O que você contribuiu',
-        body: (
+      searchIntro: {
+        title: 'Agora, encontrar',
+        say: (
           <>
-            <p>
-              Tudo o que você adicionou, do mais recente ao mais antigo, com link para o post
-              original. Os vídeos pertencem a quem os indexou.
-            </p>
-            <p>
-              O acervo em si continua público: qualquer pessoa encontra seus vídeos pela busca, com
-              ou sem conta.
-            </p>
+            Esta é a outra metade, e ela não pede conta: qualquer pessoa pode buscar. Você escreve
+            o que lembra do vídeo, do seu jeito. Eu já escrevi <strong>gato</strong> para a gente
+            testar.
+          </>
+        ),
+        task: (
+          <>
+            clique em <strong>Buscar</strong>.
+          </>
+        ),
+      },
+      results: {
+        title: 'O que apareceu',
+        say: (
+          <>
+            Três vídeos. Olhe a etiqueta ao lado de cada um: ela conta por que aquele vídeo
+            apareceu. <strong>palavras</strong> quer dizer que o texto dele tem a palavra que você
+            digitou. <strong>significado</strong> quer dizer que ele fala de algo parecido, mesmo
+            sem a palavra. Foi assim que uma girafa veio parar aqui.
+          </>
+        ),
+      },
+      modes: {
+        title: 'Para afinar a busca',
+        say: (
+          <>
+            O botão <strong>Avançado</strong> abre os ajustes: buscar só pelas palavras exatas, só
+            pelo significado, ou pelos dois, que é o padrão. Abra e mexa à vontade: os resultados
+            aqui embaixo mudam na hora.
           </>
         ),
       },
       account: {
-        tab: '👤 Conta',
-        title: 'Sua conta e os limites',
-        body: (
-          <>
-            <p>
-              Cadastre-se com e-mail e senha. Cada conta recebe um número de análises por mês,
-              mostrado como uma barra nesta aba e acima do formulário de adicionar.
-            </p>
-            <p>
-              O limite existe porque assistir a um vídeo com IA é a parte cara. Duas coisas que vale
-              saber:
-            </p>
-            <ul className={demo.list}>
-              <li>Uma análise que falha conta mesmo assim, porque a IA já foi paga.</li>
-              <li>Adicionar um vídeo à mão, sem a IA, não conta no limite.</li>
-            </ul>
-            <p>O contador zera no primeiro dia de cada mês.</p>
-          </>
-        ),
+        title: 'Para guardar vídeos, uma conta',
+        say: 'Buscar é aberto para todo mundo. Para guardar vídeos você precisa de uma conta, porque cada análise da IA tem um custo. É nesta aba que você cria a sua e vê quantas análises ainda tem no mês.',
+        next: 'Terminar ✓',
       },
-    },
-    demoSearch: {
-      tryIt: (query: string) => `Experimente: busque por “${query}”`,
-      inputLabel: 'Busca de exemplo',
-      submit: 'Buscar',
-      badgeHint:
-        'Repare no selo de cada resultado. O primeiro contém a palavra e é sobre um gato, então foi encontrado das duas formas. O segundo nunca diz “gato” - uma girafa rodando apareceu porque a busca entendeu a ideia. O terceiro foi encontrado só pela palavra.',
-      modeHint: (
-        <>
-          No modo <strong>Exata</strong> a girafa sumiria. No modo <strong>Semântica</strong>,
-          sumiria o terceiro.
-        </>
-      ),
-    },
-    demoUpload: {
-      step1: 'Passo 1 - cole um link',
-      urlLabel: 'URL de vídeo de exemplo',
-      step1Hint:
-        'Só links do twitter.com e do x.com são aceitos. As análises de cenário e de áudio vêm ligadas por padrão, e são elas que preenchem os metadados buscáveis abaixo.',
-      runAnalysis: 'Analisar',
-      step2: 'Passo 2 - a IA assiste ao vídeo',
-      step2Hint:
-        'De verdade, o app baixa o vídeo, manda para o Gemini e espera uma descrição. Este tour pula isso e usa um resultado capturado antes.',
-      step3: 'Passo 3 - você revisa o que a IA escreveu',
-      step3Hint:
-        'Todo campo é editável. Esta é a conferência humana antes de qualquer coisa ser indexada, e é o mesmo formulário que o fluxo real usa.',
-      step4: 'Passo 4 - indexado',
-      savedNotice: (
-        <>
-          <strong>Nada foi salvo.</strong> No app de verdade este vídeo já estaria no acervo e
-          encontrável por qualquer pessoa, e contaria como uma das suas análises do mês.
-        </>
-      ),
-      again: 'Rodar de novo',
     },
   },
 };

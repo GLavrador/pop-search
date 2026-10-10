@@ -1,0 +1,87 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.badge {
+  align-self: flex-start;
+  padding: 1px 7px;
+  background: var(--win-blue-title);
+  color: var(--win-light);
+  font-size: 0.68rem;
+  font-weight: bold;
+  letter-spacing: 0.09em;
+  cursor: help;
+}
+
+.spot {
+  outline: 2px dashed var(--win-blue-title);
+  outline-offset: 3px;
+}
+
+.tight {
+  width: fit-content;
+}
+
+.saved {
+  padding: 10px;
+  background: var(--win-warning-bg);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--win-tooltip-bg);
+  font-size: 0.95em;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Whatever the step is not about steps back, and cannot be clicked by mistake. */
+.dim {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+.spot,
+.dim {
+  transition: opacity 180ms ease-out;
+}
+
+/* The control to press on a doing step: the one navy button on the screen. */
+.act [data-aim],
+.act button[type='submit'] {
+  background: var(--win-blue-title);
+  color: var(--win-light);
+  animation: beckon 1.3s ease-out infinite;
+}
+
+@keyframes beckon {
+  from {
+    box-shadow: 0 0 0 0 rgba(0, 0, 128, 0.55);
+  }
+  to {
+    box-shadow: 0 0 0 8px rgba(0, 0, 128, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .act [data-aim],
+  .act button[type='submit'] {
+    animation: none;
+  }
+}

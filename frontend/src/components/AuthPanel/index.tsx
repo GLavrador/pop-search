@@ -9,10 +9,10 @@ import styles from './styles.module.css';
 type Mode = 'signIn' | 'signUp';
 
 interface AuthPanelProps {
-  onTakeTour?: () => void;
+  onStartGuide?: () => void;
 }
 
-export const AuthPanel = ({ onTakeTour }: AuthPanelProps) => {
+export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   const { isAuthenticated, displayName, signIn, signUp, signOut } = useAuth();
   const { setStatus } = useStatus();
   const { t } = useI18n();
@@ -44,6 +44,20 @@ export const AuthPanel = ({ onTakeTour }: AuthPanelProps) => {
           </button>
         </div>
         <QuotaMeter />
+
+        {onStartGuide && (
+          <>
+            <hr className={styles.divider} />
+            <div className={styles.guide}>
+              <p className={styles.guideLegend}>{t.guide.profile.legend}</p>
+              <p className={styles.guideNote}>{t.guide.profile.note}</p>
+              <button type="button" className="win95-btn" onClick={onStartGuide}>
+                {t.guide.profile.start}
+              </button>
+            </div>
+          </>
+        )}
+
         <hr className={styles.divider} />
         <LanguageSwitcher />
       </div>
@@ -139,11 +153,11 @@ export const AuthPanel = ({ onTakeTour }: AuthPanelProps) => {
       {notice && (
         <div className={styles.notice}>
           <p>{notice}</p>
-          {onTakeTour && (
+          {onStartGuide && (
             <div className={styles.noticeActions}>
-              <p>{t.auth.tourInvite}</p>
-              <button type="button" className="win95-btn" onClick={onTakeTour}>
-                {t.gate.takeTour}
+              <p>{t.auth.guideInvite}</p>
+              <button type="button" className="win95-btn" onClick={onStartGuide}>
+                {t.gate.openGuide}
               </button>
             </div>
           )}

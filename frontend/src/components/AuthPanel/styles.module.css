@@ -93,6 +93,26 @@
   border-bottom: 1px solid var(--win-light);
 }
 
+.guide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.guideLegend {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.guideNote {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--win-text-secondary);
+}
+
 .session {
   display: flex;
   align-items: center;

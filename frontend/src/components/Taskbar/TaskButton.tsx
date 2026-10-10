@@ -12,6 +12,7 @@ export const TaskButton = ({ icon, label, active, onClick }: TaskButtonProps) =>
     type="button"
     aria-pressed={active}
     onClick={onClick}
+    data-robot="task"
     className={`${styles.task} ${active ? styles.taskActive : ''}`}
   >
     <span className={styles.taskIcon}>{icon}</span>

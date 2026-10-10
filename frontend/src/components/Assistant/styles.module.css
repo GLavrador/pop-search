@@ -1,0 +1,754 @@
+.assistant {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-right: 2px;
+}
+
+/* The seat kept for the robot while it is off pointing at something. */
+.slot {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 53px;
+  margin-top: -6px;
+}
+
+.slotEmpty {
+  width: 0;
+  margin-right: -10px;
+}
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Moved every frame by the pilot, so it carries no transition of its own. */
+.craft {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  line-height: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  will-change: transform;
+  transform: translate3d(-200px, -200px, 0);
+}
+
+.emote {
+  position: absolute;
+  top: -15px;
+  left: 36px;
+  z-index: 2;
+  padding: 1px 6px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: bold;
+  line-height: 1.35;
+  color: var(--win-dark);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.emote[data-on] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.emote[data-flip] {
+  right: 36px;
+  left: auto;
+}
+
+.robot {
+  --robot-glow: #4fe3c1;
+
+  display: block;
+  width: 46px;
+  height: 53px;
+  overflow: visible;
+  fill: var(--win-gray);
+  stroke: var(--win-dark);
+  stroke-width: 2;
+  transform-origin: 50% 100%;
+  animation: bob 3.2s ease-in-out infinite;
+}
+
+.robotSmall {
+  width: 22px;
+  height: 26px;
+  flex: 0 0 auto;
+}
+
+.mini {
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+/* Banks with the flight; the pilot feeds --lean from the horizontal speed. */
+.rig {
+  transform-origin: 26px 40px;
+  rotate: var(--lean, 0deg);
+}
+
+/* Turns toward whatever it is looking at, and cocks sideways when puzzled. */
+.head {
+  transform-origin: 26px 34px;
+  translate: var(--turn, 0px) 0;
+  rotate: var(--tilt, 0deg);
+  transition: rotate 220ms ease-out;
+}
+
+.gaze {
+  translate: var(--look-x, 0px) var(--look-y, 0px);
+}
+
+.face,
+.pupil {
+  fill: var(--win-blue-title);
+}
+
+.pupil {
+  stroke: none;
+}
+
+.eye,
+.eyesWide circle,
+.eyesShut rect,
+.mouthFlat,
+.mouthOh,
+.led,
+.chest {
+  fill: var(--robot-glow);
+  stroke: none;
+}
+
+.eyesHappy path,
+.mouthSmile {
+  fill: none;
+  stroke: var(--robot-glow);
+  stroke-width: 2;
+  stroke-linecap: square;
+}
+
+.eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 4.6s ease-in-out infinite;
+}
+
+.eyeRight {
+  animation-delay: 0.07s;
+}
+
+.led {
+  animation: led 1.7s ease-in-out infinite;
+}
+
+.mouthFlat {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.armL,
+.armR,
+.legL,
+.legR {
+  transform-box: fill-box;
+  transition: transform 200ms ease-out;
+}
+
+.armL {
+  transform-origin: right center;
+}
+
+.armR {
+  transform-origin: left center;
+}
+
+.legL,
+.legR {
+  transform-origin: center top;
+}
+
+.jet {
+  fill: #ffb347;
+  stroke: #c2410c;
+  stroke-width: 1;
+  opacity: 0;
+  transform-origin: 26px 58px;
+  transition: opacity 120ms ease-out;
+}
+
+/* Faces: one set of eyes and one mouth shows at a time. */
+.eyesHappy,
+.eyesWide,
+.eyesShut,
+.mouthSmile,
+.mouthOh {
+  display: none;
+}
+
+[data-face='sleepy'] .eyesRound {
+  display: none;
+}
+
+[data-face='sleepy'] .eyesShut {
+  display: inline;
+}
+
+[data-face='sleepy'] .led {
+  animation-duration: 3.6s;
+}
+
+[data-face='happy'] .eyesRound,
+[data-face='happy'] .mouthFlat,
+[data-face='curious'] .eyesRound,
+[data-face='curious'] .mouthFlat,
+[data-face='wow'] .eyesRound,
+[data-face='wow'] .mouthFlat {
+  display: none;
+}
+
+[data-face='happy'] .eyesHappy,
+[data-face='happy'] .mouthSmile,
+[data-face='curious'] .eyesWide,
+[data-face='curious'] .mouthOh,
+[data-face='wow'] .eyesWide,
+[data-face='wow'] .mouthOh {
+  display: inline;
+}
+
+[data-face='curious'] .head {
+  --tilt: -9deg;
+}
+
+[data-face='wow'] .led {
+  animation-duration: 0.3s;
+}
+
+/* Speaking wins over any mouth the face had picked. */
+[data-talking] .mouthSmile,
+[data-talking] .mouthOh {
+  display: none;
+}
+
+[data-talking] .mouthFlat {
+  display: inline;
+  animation: talk 0.19s ease-in-out infinite;
+}
+
+/* Poses. */
+[data-pose='fly'] .jet {
+  opacity: 1;
+  animation: thrust 0.11s steps(2, jump-none) infinite;
+}
+
+[data-pose='fly'] .armL {
+  transform: rotate(22deg);
+}
+
+[data-pose='fly'] .armR {
+  transform: rotate(-22deg);
+}
+
+[data-pose='fly'] .legL {
+  transform: translateY(-1.5px) rotate(9deg);
+}
+
+[data-pose='fly'] .legR {
+  transform: translateY(-1.5px) rotate(-9deg);
+}
+
+[data-pose='point-down'] .armR {
+  transform: rotate(72deg);
+}
+
+[data-pose='point-up'] .armR {
+  transform: rotate(-72deg);
+}
+
+[data-pose='point-right'] .armR,
+[data-pose='point-left'] .armL {
+  transform: scaleX(1.7);
+}
+
+[data-pose='wave'] .armR {
+  animation: wave 0.55s ease-in-out infinite;
+}
+
+[data-pose='cheer'] .armL,
+[data-pose='peek'] .armL {
+  transform: rotate(56deg);
+}
+
+[data-pose='cheer'] .armR,
+[data-pose='peek'] .armR {
+  transform: rotate(-56deg);
+}
+
+[data-pose='cheer'] .robot {
+  animation: hop 0.46s ease-in-out infinite;
+}
+
+[data-pose='sit'] .robot {
+  animation: none;
+}
+
+[data-pose='sit'] .armL {
+  transform: rotate(-58deg);
+}
+
+[data-pose='sit'] .armR {
+  transform: rotate(58deg);
+}
+
+[data-pose='sit'] .legL {
+  animation: swing 0.9s ease-in-out infinite;
+}
+
+[data-pose='sit'] .legR {
+  animation: swing 0.9s ease-in-out infinite reverse;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes blink {
+  0%,
+  91%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes talk {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1.7);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(-58deg);
+  }
+}
+
+@keyframes swing {
+  0%,
+  100% {
+    transform: translateY(2px) rotate(-16deg);
+  }
+  50% {
+    transform: translateY(2px) rotate(16deg);
+  }
+}
+
+@keyframes thrust {
+  from {
+    transform: scaleY(0.55);
+  }
+  to {
+    transform: scaleY(1.15);
+  }
+}
+
+@keyframes led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot,
+  .eye,
+  .led,
+  .armR,
+  .legL,
+  .legR,
+  .jet,
+  [data-talking] .mouthFlat {
+    animation: none !important;
+  }
+
+  .head,
+  .armL,
+  .armR,
+  .legL,
+  .legR,
+  .emote {
+    transition: none;
+  }
+}
+
+.bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px 9px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  box-shadow: 2px 2px 0 0 var(--win-shadow-dark);
+}
+
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: -8px;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 8px solid var(--win-dark);
+}
+
+.bubble::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: -6px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 7px solid var(--win-tooltip-bg);
+}
+
+.bubbleAlone::before,
+.bubbleAlone::after {
+  display: none;
+}
+
+.title {
+  margin: 0 24px 4px 0;
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--win-blue-title);
+}
+
+.say {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+/* What to do in the app, set apart from what is merely being explained. */
+.task {
+  margin: 7px 0 0;
+  padding: 4px 9px;
+  border-left: 3px solid var(--win-blue-title);
+  background: rgba(0, 0, 128, 0.07);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.yourTurn {
+  font-weight: bold;
+  color: var(--win-blue-title);
+}
+
+/* The glyph is drawn, not typed: at this size a character all but vanishes. */
+.close {
+  flex: 0 0 auto;
+  position: relative;
+  width: 16px;
+  height: 14px;
+  padding: 0;
+  background: var(--win-gray);
+  border-top: 1px solid var(--win-light);
+  border-left: 1px solid var(--win-light);
+  border-right: 1px solid var(--win-dark);
+  border-bottom: 1px solid var(--win-dark);
+  cursor: default;
+}
+
+.bubble .close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.close::before,
+.close::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 3px;
+  width: 8px;
+  height: 2px;
+  background: var(--win-dark);
+}
+
+.close::before {
+  transform: rotate(45deg);
+}
+
+.close::after {
+  transform: rotate(-45deg);
+}
+
+.close:active {
+  border-top: 1px solid var(--win-dark);
+  border-left: 1px solid var(--win-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 9px;
+}
+
+.progress {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.track {
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* A thin bar to look at, with a taller invisible band around it to click. */
+.pip {
+  flex: 1;
+  min-width: 0;
+  height: 14px;
+  padding: 4px 0;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.16);
+  background-clip: content-box;
+  cursor: pointer;
+}
+
+.pipDone {
+  background-color: var(--win-blue-grad);
+}
+
+.pipHere {
+  background-color: var(--win-blue-title);
+}
+
+.count {
+  font-size: 0.72rem;
+  color: var(--win-text-secondary);
+  white-space: nowrap;
+}
+
+.moves {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.link {
+  padding: 2px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: var(--win-text-secondary);
+  text-decoration: underline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--win-blue-title);
+}
+
+/* The navy button is always the way forward, and there is only ever one. */
+:is(.assistant, .invite, .paused) .go {
+  min-width: 124px;
+  background: var(--win-blue-title);
+  color: var(--win-light);
+}
+
+.invite,
+.paused {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+  padding: 5px 8px 5px 10px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  box-shadow: 2px 2px 0 0 var(--win-shadow-dark);
+}
+
+.inviteText,
+.pausedText {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
+:is(.invite, .paused) .go {
+  min-width: 0;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .say,
+  .task {
+    font-size: 0.82rem;
+  }
+
+  .foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .moves {
+    justify-content: space-between;
+  }
+
+  .invite,
+  .paused {
+    flex-wrap: wrap;
+  }
+
+  .inviteText,
+  .pausedText {
+    flex: 1 1 60%;
+  }
+}
+
+/* The invitation is the one thing a visitor should not miss, so it is the loud one. */
+.invite {
+  gap: 11px;
+  padding: 8px 8px 8px 11px;
+}
+
+.robotMedium {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 37px;
+  margin: -13px 0 -3px;
+}
+
+.invite .inviteText {
+  font-size: 0.87rem;
+  line-height: 1.35;
+}
+
+.inviteLead {
+  color: var(--win-blue-title);
+}
+
+.invite .go {
+  padding: 5px 14px;
+  font-size: 0.86rem;
+}
+
+.inviteFresh .go {
+  animation: callout 1.4s ease-out infinite;
+}
+
+@keyframes callout {
+  from {
+    box-shadow: 0 0 0 0 rgba(0, 0, 128, 0.55);
+  }
+  to {
+    box-shadow: 0 0 0 8px rgba(0, 0, 128, 0);
+  }
+}
+
+.chip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+  margin-right: 6px;
+  padding: 0 6px 0 3px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: bold;
+  line-height: 1;
+  color: var(--win-dark);
+  cursor: pointer;
+}
+
+.chip .robotSmall {
+  width: 13px;
+  height: 15px;
+}
+
+.chip:hover .armR {
+  animation: wave 0.55s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .chip {
+    height: 20px;
+    font-size: 0.72rem;
+  }
+
+  .chip .robotSmall {
+    width: 16px;
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inviteFresh .go {
+    animation: none;
+  }
+}

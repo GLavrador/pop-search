@@ -5,9 +5,16 @@ interface TabStripProps<Id extends string> {
   tabs: readonly { id: Id; label: string }[];
   activeId: Id;
   onSelect: (id: Id) => void;
+  /** Lets the other tabs recede while something else is asking for attention. */
+  quiet?: boolean;
 }
 
-export const TabStrip = <Id extends string>({ tabs, activeId, onSelect }: TabStripProps<Id>) => {
+export const TabStrip = <Id extends string>({
+  tabs,
+  activeId,
+  onSelect,
+  quiet = false,
+}: TabStripProps<Id>) => {
   const strip = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: false, end: false });
 
@@ -37,7 +44,7 @@ export const TabStrip = <Id extends string>({ tabs, activeId, onSelect }: TabStr
   };
 
   return (
-    <div className={styles.bar}>
+    <div className={`${styles.bar} ${quiet ? styles.quiet : ''}`}>
       <div ref={strip} className={styles.strip} role="tablist">
         {tabs.map(({ id, label }) => (
           <button

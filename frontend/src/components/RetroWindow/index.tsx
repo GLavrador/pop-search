@@ -14,6 +14,8 @@ interface RetroWindowProps {
   onMinimize?: () => void;
   onMaximize?: () => void;
   onClose?: () => void;
+  /** Shown in the title bar, just before the window controls. */
+  aside?: ReactNode;
 }
 
 const SHAKE_MS = 340;
@@ -37,6 +39,7 @@ export const RetroWindow = ({
   onMinimize,
   onMaximize,
   onClose,
+  aside,
 }: RetroWindowProps) => {
   const { t } = useI18n();
   const frame = useRef<HTMLDivElement>(null);
@@ -61,6 +64,7 @@ export const RetroWindow = ({
         maximized ? styles.maximized : '',
       ].join(' ')}
       aria-hidden={hidden}
+      data-robot="window"
     >
       <div className={styles.titleBar}>
         <div className={styles.titleText}>
@@ -68,6 +72,7 @@ export const RetroWindow = ({
           {title}
         </div>
         <div className={styles.controls}>
+          {aside}
           <button
             className={styles.controlButton}
             aria-label={t.window.minimize}
