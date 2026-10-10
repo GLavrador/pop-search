@@ -149,7 +149,7 @@ const BRACE = 0.03;
 const MAX_BRACE = 24;
 const SNORE_EVERY = 9000;
 
-const LAYERS = { behind: '0', front: '', top: '120' };
+const LAYERS = { behind: '0', front: '' };
 
 const SQUASH = [
   { transform: 'scale(1.1, 0.86)' },
@@ -229,6 +229,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   let clock = 0;
   let measuredAt = 0;
   let arrangedAt = 0;
+  let tuckedAt = 0;
   let shifted = false;
   let balloonOn = false;
   let pokes = 0;
@@ -286,20 +287,43 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     idleFor: () => clock - lastInput,
   };
 
+  /** Keeps the short label on screen: near an edge it slides along instead of running off it. */
+  const tuck = () => {
+    tuckedAt = clock;
+    if (!pos) return;
+
+    const width = emote.offsetWidth;
+    const reach = Math.max(6, window.innerWidth - width - 6);
+    // Up against the top of the screen there is no room over its head: it goes beside it.
+    const beside = pos.y < 24;
+    const fitsRight = pos.x + size.w + 6 + width <= window.innerWidth - 6;
+    const left = beside
+      ? fitsRight
+        ? size.w + 6
+        : -width - 6
+      : clamp(pos.x + 36, 6, reach) - pos.x;
+
+    emote.toggleAttribute('data-beside', beside);
+    emote.style.left = `${Math.round(left)}px`;
+  };
+
   const say = (text: string, until: number) => {
     if (!text) return;
     emote.textContent = text;
-    // Behind the window a flipped label would be behind it too.
-    const flip = (pos?.x ?? 0) > window.innerWidth - 160 && leg?.layer !== 'behind';
-    emote.toggleAttribute('data-flip', flip);
-    emote.toggleAttribute('data-beside', (pos?.y ?? window.innerHeight) < 18);
     emote.setAttribute('data-on', '');
     emoteUntil = until;
+    tuck();
   };
 
   const hush = () => {
     emote.removeAttribute('data-on');
     emoteUntil = 0;
+  };
+
+  const label = (now: number) => {
+    if (!emoteUntil) return;
+    if (now >= emoteUntil) hush();
+    else if (now - tuckedAt > REMEASURE_EVERY) tuck();
   };
 
   /**
@@ -377,7 +401,6 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     return {
       at: onScreen({ x: right - size.w, y: bar.top - size.h + SEATED }),
       pose: 'sit',
-      layer: 'top',
     };
   };
 
@@ -392,7 +415,6 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
         y: bar.top - size.h + SEATED,
       }),
       pose: 'sit',
-      layer: 'top',
     };
   };
 
@@ -538,12 +560,12 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     setFlag('data-pose', pose);
     setFlag('data-face', now < flashUntil ? flash : look);
     setFlag('data-talking', null);
-    if (sky.style.zIndex !== LAYERS.top) sky.style.zIndex = LAYERS.top;
+    if (sky.style.zIndex !== LAYERS.front) sky.style.zIndex = LAYERS.front;
     if (balloonOn) {
       balloonOn = false;
       balloon.removeAttribute('data-on');
     }
-    if (emoteUntil && now >= emoteUntil) hush();
+    label(now);
   };
 
   /** In someone's hand it hangs from the pointer and swings with every move of it. */
@@ -748,10 +770,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     setFlag('data-face', now < flashUntil ? flash : flying ? 'neutral' : face);
     setFlag('data-talking', now < talkUntil ? '' : null);
 
-    const layer = leg.layer ?? perch?.layer;
-    const depth = layer === 'behind' ? 'behind' : !flying && layer === 'top' ? 'top' : 'front';
+    const depth = leg.layer === 'behind' ? 'behind' : 'front';
     if (sky.style.zIndex !== LAYERS[depth]) sky.style.zIndex = LAYERS[depth];
-    if (emoteUntil && now >= emoteUntil) hush();
+    label(now);
 
     if (!flying && leg.mission && mission?.cue === 'sleep' && now >= snoreAt) {
       say('z z z', now + 2800);

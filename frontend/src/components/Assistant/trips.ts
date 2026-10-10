@@ -21,7 +21,6 @@ export interface Stop {
   side?: Side;
   /** How it settles there, when the place itself decides it: a ledge is for sitting. */
   pose?: Pose;
-  layer?: 'top';
 }
 
 /** One stop: where to go, how to look once there, and how long to stay. */
@@ -35,7 +34,7 @@ export interface Leg {
   gaze?: Point | 'wander' | ((side?: Side) => Point | 'wander');
   emote?: () => string;
   hold: number;
-  layer?: 'behind' | 'top';
+  layer?: 'behind';
   /** Covers the distance in a fraction of the usual time. */
   swift?: boolean;
   /** Flies straight instead of taking an arc. */
@@ -253,7 +252,6 @@ export const TRIPS: Record<string, Trip> = {
           gaze: 'wander',
           emote: () => '♪',
           hold: 4200,
-          layer: 'top',
         },
       ];
     },
@@ -284,7 +282,6 @@ export const TRIPS: Record<string, Trip> = {
           face: 'happy',
           gaze: DOWN,
           hold: 1700,
-          layer: 'top',
           onLand: () => {
             scene.prank(8000);
             jump();
@@ -302,7 +299,6 @@ export const TRIPS: Record<string, Trip> = {
           gaze: AHEAD,
           emote: () => scene.emotes().sorry,
           hold: 1900,
-          layer: 'top',
         },
         {
           where,
@@ -310,7 +306,6 @@ export const TRIPS: Record<string, Trip> = {
           face: 'neutral',
           gaze: DOWN,
           hold: 1400,
-          layer: 'top',
           onLand: () =>
             jump(() => {
               if (!isOpen()) button.click();
@@ -335,7 +330,6 @@ export const TRIPS: Record<string, Trip> = {
           face: 'curious',
           gaze: DOWN,
           hold: 1500,
-          layer: 'top',
           onLand: () => {
             scene.move(HOP, 400);
             scene.after(520, () => scene.move(HOP, 400));
@@ -348,7 +342,6 @@ export const TRIPS: Record<string, Trip> = {
           gaze: 'wander',
           emote: () => scene.emotes().puzzled,
           hold: 1900,
-          layer: 'top',
         },
       ];
     },

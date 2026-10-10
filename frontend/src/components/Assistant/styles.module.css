@@ -23,7 +23,7 @@
 .sky {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 120;
   overflow: hidden;
   pointer-events: none;
 }
@@ -210,20 +210,9 @@
   transform: translateY(0);
 }
 
-.emote[data-flip] {
-  right: 36px;
-  left: auto;
-}
-
 /* Up against the top of the screen there is no room over its head. */
 .emote[data-beside] {
   top: 6px;
-  left: 50px;
-}
-
-.emote[data-beside][data-flip] {
-  right: 50px;
-  left: auto;
 }
 
 .robot {
