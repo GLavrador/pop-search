@@ -321,6 +321,16 @@ describe('the robot outside the guide', () => {
     ).toBeInTheDocument();
   });
 
+  it('should go and hide when the poking does not stop', async () => {
+    renderApp();
+
+    for (let i = 0; i < 8; i += 1) await user.click(theRobot());
+
+    expect(
+      screen.getByText(/^(that is it, I am hiding!|bye, I am off!|leave me be!)$/),
+    ).toBeInTheDocument();
+  });
+
   it('should not take the end of a drag for a poke', async () => {
     renderApp();
 

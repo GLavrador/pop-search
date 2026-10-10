@@ -14,6 +14,7 @@ export const TaskButton = ({ icon, label, active, onClick }: TaskButtonProps) =>
     aria-pressed={active}
     onClick={onClick}
     data-robot="task"
+    data-robot-zone="task"
     {...helpAt('taskbar.task')}
     className={`${styles.task} ${active ? styles.taskActive : ''}`}
   >

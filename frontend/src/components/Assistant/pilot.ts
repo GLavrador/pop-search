@@ -16,8 +16,10 @@ import {
   HOP,
   hide,
   landmark,
+  lurk,
   openWindow,
   planTrip,
+  stomp,
   type Emotes,
   type Face,
   type Leg,
@@ -53,7 +55,7 @@ export type Target = HTMLElement | (() => HTMLElement | null) | null;
 export type Move = 'jolt' | 'spin' | 'hop' | 'nod' | 'shake';
 
 /** The places it can be dropped on. Each one gets its own answer. */
-export type Zone = 'bin' | 'computer' | 'app' | 'clock' | 'start' | 'close' | 'roof';
+export type Zone = 'bin' | 'computer' | 'app' | 'clock' | 'start' | 'task' | 'close' | 'roof';
 
 export interface Mission {
   /** Changes whenever the robot has something new to say. */
@@ -160,9 +162,9 @@ const ROOF_REACH = 30;
 const ROOF_FOR = 9000;
 const HOVER_FOR = 4200;
 const DIZZY_FOR = 4500;
-const POKE_MEMORY = 3500;
+const POKE_MEMORY = 7000;
 const POKES_TO_COMPLAIN = 5;
-const POKES_TO_FLEE = 8;
+const POKES_TO_HIDE = 8;
 const BORED_AFTER = 240000;
 const ASLEEP_AFTER = 300000;
 const READING_FOR = 1800;
@@ -244,6 +246,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   let landing: { zone: Zone | null; hold: number } = { zone: null, hold: 0 };
   let shaking: Shaking = NOT_SHAKING;
   let dizzyUntil = 0;
+  let turned = 0;
+  let spun = '';
   let avertUntil = 0;
 
   let face: Face = 'neutral';
@@ -313,6 +317,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
         hiding: [],
         dizzy: [],
         enough: [],
+        lurk: [],
+        found: [],
         flip: [],
         roof: [],
         yawn: [],
@@ -676,6 +682,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     hang = null;
     tilt = 0;
     tiltRate = 0;
+    turned = 0;
+    spun = '';
     if (body) body.style.transform = '';
 
     leg = {
@@ -696,6 +704,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     holdUntil = now + hold;
     move(SQUASH, 300);
     if (scared) queue = hide(scene);
+    // Put on the app's own button it does its number there: it jumps until the window obeys.
+    if (zone === 'task') queue = stomp(scene);
   };
 
   /** Let go with some speed left: it fires its jets against it and leans back until it stops. */
@@ -878,6 +888,15 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     craft.style.setProperty('--look-y', `${(gaze.y * EYE_TRAVEL.y).toFixed(2)}px`);
     craft.style.setProperty('--turn', `${(gaze.x * HEAD_TURN).toFixed(2)}px`);
 
+    // In hiding it may be on its head or on its side. It turns once it has landed.
+    turned += ((flying ? 0 : (leg.turn ?? 0)) - turned) * Math.min(1, dt / 90);
+    const spin = Math.abs(turned) < 0.5 ? '' : `rotate(${turned.toFixed(1)}deg)`;
+    if (body && spin !== spun) {
+      spun = spin;
+      body.style.transformOrigin = '50% 50%';
+      body.style.transform = spin;
+    }
+
     const pose = perch?.pose ?? (typeof leg.pose === 'function' ? leg.pose(side) : leg.pose);
     setFlag('data-pose', flying ? 'fly' : pose);
     const resting = dozing ? 'sleepy' : face;
@@ -973,20 +992,36 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       }
 
       const now = present();
+
+      // Found in its hiding place, it slips round to another edge of the window.
+      if (leg?.turn !== undefined && !flight) {
+        const elsewhere = lurk(scene, perch?.side);
+        say(vary('found', scene.emotes().found), now + 1200);
+        if (elsewhere.length) {
+          queue = elsewhere;
+          holdUntil = now + 350;
+        }
+        return false;
+      }
+
       pokedAt = [...pokedAt.filter((at) => now - at < POKE_MEMORY), now];
 
-      // Poked over and over it objects, and if that does not work it gets out of reach.
+      // Poked over and over it objects, and if that does not work it goes and hides.
       if (pokedAt.length >= POKES_TO_COMPLAIN) {
-        const fleeing = pokedAt.length >= POKES_TO_FLEE;
         flash = 'worried';
         flashUntil = now + 1300;
-        say(vary('enough', scene.emotes().enough), now + 1600);
         move(SHAKE, 520);
-        if (fleeing) {
-          pokedAt = [];
-          wantTrick = true;
-          holdUntil = now + 500;
+        if (pokedAt.length < POKES_TO_HIDE) {
+          say(vary('enough', scene.emotes().enough), now + 1600);
+          return false;
         }
+
+        pokedAt = [];
+        say(vary('lurk', scene.emotes().lurk), now + 1400);
+        const refuge = lurk(scene);
+        if (refuge.length) queue = refuge;
+        else wantTrick = true;
+        holdUntil = now + 700;
         return false;
       }
 
@@ -1071,7 +1106,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       // Put on something it stays on it; thrown anywhere else it carries on for a bit.
       slide = zone || still ? { x: 0, y: 0 } : throwOf(trail, performance.now());
       // Wherever it ends up it stays a while, then goes back to what it was doing.
-      const stay = scared ? 450 : zone === 'roof' ? ROOF_FOR : zone ? 700 : HOVER_FOR;
+      const brief = zone === 'task' ? 350 : 700;
+      const stay = scared ? 450 : zone === 'roof' ? ROOF_FOR : zone ? brief : HOVER_FOR;
       landing = { zone, hold: Math.max(stay, dizzyUntil - now) };
       shaking = NOT_SHAKING;
       if (now >= dizzyUntil) hush();

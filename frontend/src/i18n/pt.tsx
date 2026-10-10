@@ -350,6 +350,8 @@ export const pt: Dictionary = {
       hiding: ['já passou?', 'ela já foi embora?', 'posso sair?'],
       dizzy: ['tô tonto...', 'para o mundo!', 'tá tudo girando...'],
       enough: ['chega!', 'para, faz cócegas!', 'ei, já deu!'],
+      lurk: ['chega, vou me esconder!', 'tchau, fui!', 'me deixa em paz!'],
+      found: ['me achou!', 'ops!', 'aqui não!'],
       flip: ['iupiii!', 'olha isso!', 'tcharam!'],
       roof: ['daqui eu vejo tudo', 'meu lugar preferido', 'que vista!'],
       yawn: ['uaaah...', 'que soninho...', 'cadê todo mundo?'],

@@ -53,6 +53,8 @@ export interface Leg {
   onLand?: () => void;
   /** The stop the current step asks for, as opposed to a trip of its own. */
   mission?: boolean;
+  /** Degrees its body is turned once there. Only a robot in hiding has one. */
+  turn?: number;
 }
 
 export interface Emotes {
@@ -65,6 +67,8 @@ export interface Emotes {
   hiding: readonly string[];
   dizzy: readonly string[];
   enough: readonly string[];
+  lurk: readonly string[];
+  found: readonly string[];
   flip: readonly string[];
   roof: readonly string[];
   yawn: readonly string[];
@@ -162,6 +166,122 @@ const onTaskbar = (button: HTMLElement, bar: HTMLElement, { size, onScreen }: Sc
       y: bar.getBoundingClientRect().top - size.h + 4,
     }),
   };
+};
+
+/**
+ * It jumps on the app's own button down there and really presses it, so the
+ * window goes away or comes back. It owns up, then jumps again to undo it.
+ */
+export const stomp = (scene: Scene): Leg[] => {
+  const button = landmark('task');
+  const bar = landmark('taskbar');
+  if (!button || !bar) return [];
+
+  const where = onTaskbar(button, bar, scene);
+  const isOpen = () => button.getAttribute('aria-pressed') === 'true';
+  const wasOpen = isOpen();
+  const jump = (onImpact?: () => void) => {
+    scene.move(HOP, 400);
+    scene.after(300, () => {
+      animate(button, FLASH, 420);
+      onImpact?.();
+    });
+  };
+  return [
+    {
+      where,
+      pose: 'stand',
+      face: 'happy',
+      gaze: DOWN,
+      hold: 1700,
+      onLand: () => {
+        scene.prank(8000);
+        jump();
+        scene.after(560, () => jump(() => button.click()));
+      },
+    },
+    {
+      where,
+      pose: 'stand',
+      face: 'wow',
+      gaze: AHEAD,
+      emote: () => scene.emotes().sorry,
+      hold: 1900,
+    },
+    {
+      where,
+      pose: 'stand',
+      face: 'neutral',
+      gaze: DOWN,
+      hold: 1400,
+      onLand: () =>
+        jump(() => {
+          if (isOpen() !== wasOpen) button.click();
+        }),
+    },
+  ];
+};
+
+const PEEKING = 25;
+
+/**
+ * Behind the window with just the top of its head and its eyes showing: over
+ * the top edge, under the bottom one on its head, or sideways at either side.
+ */
+export const lurk = ({ size }: Scene, avoid?: Side): Leg[] => {
+  const frame = boxOf(openWindow());
+  if (!frame) return [];
+
+  const floor = boxOf(landmark('taskbar'))?.top ?? window.innerHeight;
+  const along = (from: number, to: number, body: number) =>
+    from + 30 + Math.random() * Math.max(0, to - from - 60 - body);
+  const across = () => along(frame.left, frame.right, size.w);
+  const down = () => along(frame.top, frame.bottom, size.h);
+  // Turned on its side it is as wide as it is tall, about the same middle.
+  const sideways = (size.h - size.w) / 2;
+
+  const spots: (Stop & { side: Side; turn: number; fits: boolean })[] = [
+    {
+      side: 'above',
+      turn: 0,
+      at: { x: across(), y: frame.top - PEEKING },
+      fits: frame.top - PEEKING >= 2,
+    },
+    {
+      side: 'below',
+      turn: 180,
+      at: { x: across(), y: frame.bottom + PEEKING - size.h },
+      fits: frame.bottom + PEEKING <= floor - 2,
+    },
+    {
+      side: 'left',
+      turn: -90,
+      at: { x: frame.left - PEEKING + sideways, y: down() },
+      fits: frame.left - PEEKING >= 2,
+    },
+    {
+      side: 'right',
+      turn: 90,
+      at: { x: frame.right + PEEKING - sideways - size.w, y: down() },
+      fits: frame.right + PEEKING <= window.innerWidth - 2,
+    },
+  ];
+  const open = spots.filter((spot) => spot.fits);
+  const spot = pick(open.filter((candidate) => candidate.side !== avoid)) ?? pick(open);
+  if (!spot) return [];
+
+  return [
+    {
+      where: () => ({ at: spot.at, side: spot.side }),
+      pose: 'peek',
+      face: 'curious',
+      gaze: 'wander',
+      hold: 7000,
+      layer: 'behind',
+      swift: true,
+      turn: spot.turn,
+    },
+  ];
 };
 
 export const TRIPS: Record<string, Trip> = {
@@ -276,62 +396,10 @@ export const TRIPS: Record<string, Trip> = {
     },
   },
 
-  // It jumps on the app's own button down there and really presses it: the
-  // window drops to the taskbar. It owns up, then jumps again to bring it back.
   stomp: {
     odds: 0.35,
-    plan: (scene) => {
-      const button = landmark('task');
-      const bar = landmark('taskbar');
-      // Never while the user is in the middle of something: it takes the window away.
-      if (!button || !bar || scene.idleFor() < BUSY_FOR) return [];
-      const where = onTaskbar(button, bar, scene);
-      const isOpen = () => button.getAttribute('aria-pressed') === 'true';
-      const jump = (onImpact?: () => void) => {
-        scene.move(HOP, 400);
-        scene.after(300, () => {
-          animate(button, FLASH, 420);
-          onImpact?.();
-        });
-      };
-      return [
-        {
-          where,
-          pose: 'stand',
-          face: 'happy',
-          gaze: DOWN,
-          hold: 1700,
-          onLand: () => {
-            scene.prank(8000);
-            jump();
-            scene.after(560, () =>
-              jump(() => {
-                if (isOpen()) button.click();
-              }),
-            );
-          },
-        },
-        {
-          where,
-          pose: 'stand',
-          face: 'wow',
-          gaze: AHEAD,
-          emote: () => scene.emotes().sorry,
-          hold: 1900,
-        },
-        {
-          where,
-          pose: 'stand',
-          face: 'neutral',
-          gaze: DOWN,
-          hold: 1400,
-          onLand: () =>
-            jump(() => {
-              if (!isOpen()) button.click();
-            }),
-        },
-      ];
-    },
+    // Never on its own while the user is in the middle of something: it takes the window away.
+    plan: (scene) => (scene.idleFor() < BUSY_FOR ? [] : stomp(scene)),
   },
 
   // It tries the Start button too. Nothing opens, which puzzles it.

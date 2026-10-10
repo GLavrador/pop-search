@@ -344,6 +344,8 @@ export const en = {
       hiding: ['is it over?', 'is it gone?', 'can I come out?'],
       dizzy: ['so dizzy...', 'stop the world!', 'everything is spinning...'],
       enough: ['enough!', 'stop, that tickles!', 'hey, that will do!'],
+      lurk: ['that is it, I am hiding!', 'bye, I am off!', 'leave me be!'],
+      found: ['you found me!', 'oops!', 'not here!'],
       flip: ['wheee!', 'watch this!', 'ta-da!'],
       roof: ['I can see it all from here', 'my favourite spot', 'what a view!'],
       yawn: ['yaaawn...', 'so sleepy...', 'where did everyone go?'],

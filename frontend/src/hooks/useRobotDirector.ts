@@ -192,7 +192,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   /** Let go over something it has an opinion about. The bin and the roof need no words. */
   const dropped = useCallback(
     (zone: Zone | null) => {
-      if (!zone || zone === 'bin' || zone === 'roof') return;
+      if (!zone || zone === 'bin' || zone === 'roof' || zone === 'task') return;
 
       const turn = vary(`drop.${zone}`, [0, 1, 2]);
       const time = DROPS.clock()?.textContent?.trim() ?? '';
