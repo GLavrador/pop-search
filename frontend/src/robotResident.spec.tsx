@@ -178,6 +178,35 @@ describe('the robot outside the guide', () => {
     );
   });
 
+  it('should end "what is this" from the close button of its own balloon', async () => {
+    renderApp();
+    await press("What's this?");
+
+    await clickThrough(within(screen.getByRole('status')).getByRole('button', { name: 'Close' }));
+
+    expect(said()).not.toBeInTheDocument();
+    expect(document.querySelector('[data-help-layer]')).not.toBeInTheDocument();
+  });
+
+  it('should not take a click on its own balloon for a question', async () => {
+    renderApp();
+    await press("What's this?");
+
+    await clickThrough(within(screen.getByRole('status')).getByText(/Click on anything/));
+
+    expect(within(screen.getByRole('status')).getByText(/Click on anything/)).toBeInTheDocument();
+  });
+
+  it('should talk about itself without going anywhere when it is the thing clicked', async () => {
+    renderApp();
+    await press("What's this?");
+
+    await clickThrough(theRobot());
+
+    expect(within(screen.getByRole('status')).getByText(/That is me!/)).toBeInTheDocument();
+    expect(document.querySelector('[data-help-layer]')).not.toBeInTheDocument();
+  });
+
   it.each([
     ['Escape', () => user.keyboard('{Escape}')],
     ['a second press of the button', () => press("What's this?")],

@@ -22,10 +22,12 @@ export const HelpOverlay = ({ onPick, onCancel }: HelpOverlayProps) => {
     return () => document.removeEventListener('keydown', onKey);
   }, [onCancel]);
 
-  const under = (x: number, y: number): HTMLElement | 'toggle' | null => {
+  const under = (x: number, y: number): HTMLElement | 'toggle' | 'balloon' | null => {
     for (const node of document.elementsFromPoint?.(x, y) ?? []) {
       if (node.closest('[data-help-layer]')) continue;
-      if (node.closest('[data-help-toggle]')) return 'toggle';
+      // The balloon that announces the mode is not a thing to explain: its close button ends it.
+      if (node.closest('[data-help-toggle], [data-robot-dismiss]')) return 'toggle';
+      if (node.closest('[data-robot-says]')) return 'balloon';
       const marked = node.closest<HTMLElement>('[data-help]');
       if (marked) return marked;
     }
@@ -37,7 +39,7 @@ export const HelpOverlay = ({ onPick, onCancel }: HelpOverlayProps) => {
     if (!box) return;
 
     const hit = under(event.clientX, event.clientY);
-    if (!hit || hit === 'toggle') {
+    if (!hit || hit === 'toggle' || hit === 'balloon') {
       box.style.display = 'none';
       return;
     }
@@ -52,7 +54,7 @@ export const HelpOverlay = ({ onPick, onCancel }: HelpOverlayProps) => {
   const handleClick = (event: MouseEvent) => {
     const hit = under(event.clientX, event.clientY);
     if (hit === 'toggle') onCancel();
-    else onPick(hit);
+    else if (hit !== 'balloon') onPick(hit);
   };
 
   return (

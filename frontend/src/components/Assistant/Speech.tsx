@@ -17,6 +17,7 @@ export const Speech = ({ line, onDismiss }: SpeechProps) => {
       <button
         type="button"
         className={styles.close}
+        data-robot-dismiss
         title={t.robot.dismiss}
         aria-label={t.robot.dismiss}
         onClick={onDismiss}

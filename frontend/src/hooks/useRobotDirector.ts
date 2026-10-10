@@ -166,7 +166,9 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
 
   const explain = useCallback(
     (key: HelpKey, node: HTMLElement) => {
-      say({ rank: 'ask', copy: (t) => t.robot.help[key], cue: 'teach', target: node, ttl: null });
+      // Asked about itself it stays put: it cannot go and stand next to itself.
+      const target = key === 'robot' ? null : node;
+      say({ rank: 'ask', copy: (t) => t.robot.help[key], cue: 'teach', target, ttl: null });
     },
     [say],
   );
