@@ -9,6 +9,8 @@ export type Pose =
   | 'cheer'
   | 'sit'
   | 'peek'
+  | 'dangle'
+  | 'brake'
   | 'point-down'
   | 'point-up'
   | 'point-left'
@@ -48,6 +50,9 @@ export interface Emotes {
   sorry: string;
   knock: string;
   puzzled: string;
+  grabbed: string;
+  bin: string;
+  hiding: string;
 }
 
 /** What a trip may use of the robot and of the screen it lives on. */
@@ -535,6 +540,27 @@ export const TRIPS: Record<string, Trip> = {
       ];
     },
   },
+};
+
+/** Somewhere to cower: behind the far edge of the window, or half out of the screen. */
+export const hide = ({ size, emotes }: Scene): Leg[] => {
+  const frame = boxOf(openWindow());
+  const behind = frame !== null && window.innerWidth - frame.right > size.w * 0.6;
+  const at = behind
+    ? { x: frame.right - size.w * 0.42, y: frame.top + (frame.bottom - frame.top) * 0.3 }
+    : { x: window.innerWidth - size.w * 0.5, y: window.innerHeight * 0.35 };
+  return [
+    {
+      where: () => ({ at, side: 'right' }),
+      pose: 'peek',
+      face: 'worried',
+      gaze: { x: -1, y: -0.4 },
+      emote: () => emotes().hiding,
+      hold: 5200,
+      layer: behind ? 'behind' : undefined,
+      swift: true,
+    },
+  ];
 };
 
 /** Picks a trip by its odds, never the same one twice running. */

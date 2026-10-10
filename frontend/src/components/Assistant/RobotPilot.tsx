@@ -1,4 +1,11 @@
-import { useEffect, useImperativeHandle, useRef, type ReactNode, type RefObject } from 'react';
+import {
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  type PointerEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { Robot } from './Robot';
 import {
@@ -8,10 +15,13 @@ import {
   type Reaction,
   type Roam,
   type Target,
+  type Zone,
 } from './pilot';
 import type { Aim } from '../Demo/spotlight';
 import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
+
+const DRAG_AFTER = 6;
 
 /** The one-off things it can be asked to do, as opposed to where it should be. */
 export interface RobotHandle {
@@ -41,6 +51,8 @@ interface RobotPilotProps {
   handle?: RefObject<RobotHandle | null>;
   /** Takes the click. Without it a click is just a poke. */
   onPoke?: () => void;
+  /** It was dragged and let go, on one of the desktop icons or nowhere in particular. */
+  onDrop?: (zone: Zone | null) => void;
   /** What hangs over it: what it is saying, or its menu. */
   children?: ReactNode;
 }
@@ -59,6 +71,7 @@ export const RobotPilot = ({
   pinned = false,
   handle,
   onPoke,
+  onDrop,
   children,
 }: RobotPilotProps) => {
   const { t } = useI18n();
@@ -67,6 +80,8 @@ export const RobotPilot = ({
   const emote = useRef<HTMLSpanElement>(null);
   const balloon = useRef<HTMLDivElement>(null);
   const pilot = useRef<Pilot | null>(null);
+  const press = useRef<{ x: number; y: number; carrying: boolean } | null>(null);
+  const justDropped = useRef(false);
 
   useEffect(() => {
     if (!sky.current || !craft.current || !emote.current || !balloon.current) return;
@@ -115,8 +130,43 @@ export const RobotPilot = ({
   );
 
   const handleClick = () => {
+    // The click that ends a drag is not a click on the robot.
+    if (justDropped.current) {
+      justDropped.current = false;
+      return;
+    }
     const spent = pilot.current?.poke(onPoke !== undefined) ?? false;
     if (!spent) onPoke?.();
+  };
+
+  const handleDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return;
+    press.current = { x: event.clientX, y: event.clientY, carrying: false };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handleMove = (event: PointerEvent) => {
+    const start = press.current;
+    if (!start) return;
+
+    if (!start.carrying) {
+      if (Math.hypot(event.clientX - start.x, event.clientY - start.y) < DRAG_AFTER) return;
+      start.carrying = true;
+      pilot.current?.grab(start.x, start.y);
+    }
+    pilot.current?.drag(event.clientX, event.clientY);
+  };
+
+  const handleUp = () => {
+    const carrying = press.current?.carrying ?? false;
+    press.current = null;
+    if (!carrying) return;
+
+    justDropped.current = true;
+    setTimeout(() => {
+      justDropped.current = false;
+    }, 0);
+    onDrop?.(pilot.current?.release() ?? null);
   };
 
   return (
@@ -130,6 +180,10 @@ export const RobotPilot = ({
           title={label}
           aria-label={label}
           onClick={handleClick}
+          onPointerDown={handleDown}
+          onPointerMove={handleMove}
+          onPointerUp={handleUp}
+          onPointerCancel={handleUp}
         >
           <Robot />
         </button>

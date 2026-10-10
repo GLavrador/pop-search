@@ -7,7 +7,7 @@ import {
   type RobotEvent,
   type RobotVoice,
 } from '../context/robotContext';
-import type { Cue, Mission, Reaction, Target } from '../components/Assistant/pilot';
+import type { Cue, Mission, Reaction, Target, Zone } from '../components/Assistant/pilot';
 import type { RobotHandle } from '../components/Assistant/RobotPilot';
 import type { Aim } from '../components/Demo/spotlight';
 import type { Tab } from '../constants/tabs';
@@ -50,6 +50,10 @@ const LINE_SPEECH = 2200;
 const WAIT_BETWEEN_LINES = 18000;
 const REVISIT_CHATTER = 0.4;
 
+const icon = (zone: Zone) => () =>
+  document.querySelector<HTMLElement>(`[data-robot-zone="${zone}"]`);
+const ICONS = { computer: icon('computer'), app: icon('app') };
+const BESIDE_ICON: Aim = { from: 'right' };
 // Under the panel, so the balloon lands on the desktop and not on what the user needs next.
 const FROM_UNDER: Aim = { from: 'below', free: true };
 const PROGRESS = () => findHelp('ingest.progress');
@@ -118,6 +122,22 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   const explain = useCallback(
     (key: HelpKey, node: HTMLElement) => {
       say({ rank: 'ask', copy: (t) => t.robot.help[key], cue: 'teach', target: node, ttl: null });
+    },
+    [say],
+  );
+
+  /** Dropped on the bin it runs for it on its own; the other icons get a word. */
+  const dropped = useCallback(
+    (zone: Zone | null) => {
+      if (zone !== 'computer' && zone !== 'app') return;
+      say({
+        rank: 'react',
+        copy: (t) => ({ text: t.robot.drop[zone] }),
+        cue: zone === 'app' ? 'cheer' : 'teach',
+        target: ICONS[zone],
+        aim: BESIDE_ICON,
+        ttl: 6500,
+      });
     },
     [say],
   );
@@ -364,5 +384,6 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
     toggleHelp,
     stopHelp,
     pick,
+    dropped,
   };
 };

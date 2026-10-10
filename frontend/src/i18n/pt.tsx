@@ -345,6 +345,9 @@ export const pt: Dictionary = {
       sorry: 'ops, desculpa!',
       knock: 'toc toc',
       puzzled: 'ué?',
+      grabbed: 'eeei!',
+      bin: 'LIXO NÃO!!',
+      hiding: 'já passou?',
     },
     progress: (current: number, total: number) => `Passo ${current} de ${total}`,
     back: '◂ voltar',
@@ -579,6 +582,10 @@ export const pt: Dictionary = {
         text: 'Nem assim eu achei. Tente outras palavras, ou descreva a cena de outro jeito.',
       },
     },
+    drop: {
+      computer: 'Meu Computador? Mas a gente já está dentro dele!',
+      app: 'Pop Search! Esse aqui já é meu: eu moro nele.',
+    },
     whatsThis: {
       button: 'O que é isso?',
       title: 'O que é isso? Clique aqui e depois em qualquer coisa da tela.',
@@ -632,7 +639,7 @@ export const pt: Dictionary = {
       },
       robot: {
         title: 'BIP-98',
-        text: 'Esse sou eu! Moro aqui no Pop Search e explico o que você quiser.',
+        text: 'Esse sou eu! Moro aqui no Pop Search e explico o que você quiser. Também dá para me pegar e me arrastar pela tela.',
       },
       'guide.invite': {
         title: 'O guia',

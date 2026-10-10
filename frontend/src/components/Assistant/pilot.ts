@@ -14,15 +14,27 @@ import {
 } from './flight';
 import {
   HOP,
+  hide,
   landmark,
   openWindow,
   planTrip,
   type Emotes,
   type Face,
   type Leg,
+  type Pose,
   type Scene,
   type Stop,
 } from './trips';
+import {
+  angleOf,
+  coast,
+  hangFrom,
+  steady,
+  swing,
+  throwOf,
+  type Hang,
+  type Sample,
+} from './carry';
 import type { Aim } from '../Demo/spotlight';
 
 export type Cue = 'greet' | 'teach' | 'cheer' | 'rest' | 'watch' | 'worry' | 'sleep';
@@ -34,6 +46,9 @@ export type Roam = 'eager' | 'calm' | 'never';
 export type Target = HTMLElement | (() => HTMLElement | null) | null;
 
 export type Move = 'jolt' | 'spin' | 'hop' | 'nod' | 'shake';
+
+/** The desktop icons it can be dropped on. Each one gets its own answer. */
+export type Zone = 'bin' | 'computer' | 'app';
 
 export interface Mission {
   /** Changes whenever the robot has something new to say. */
@@ -80,6 +95,11 @@ export interface Pilot {
   pin: (on: boolean) => void;
   /** Sends it off on a trip right away. */
   trick: () => void;
+  /** Picked up by the pointer at that point of the screen. */
+  grab: (x: number, y: number) => void;
+  drag: (x: number, y: number) => void;
+  /** Let go. Says what it was dropped on, if anything. */
+  release: () => Zone | null;
   dispose: () => void;
 }
 
@@ -120,6 +140,13 @@ const SEATED = 9;
 const ROOST_INSET = 118;
 const BALLOON_GAP = 10;
 const BALLOON_LIFT = 23;
+const DROP_REACH = 14;
+// Wherever it is caught, it ends up held by the antenna.
+const HANDLE: Point = { x: 23, y: 4 };
+const TRAIL = 8;
+const BOUNCE = 0.45;
+const BRACE = 0.03;
+const MAX_BRACE = 24;
 const SNORE_EVERY = 9000;
 
 const LAYERS = { behind: '0', front: '', top: '120' };
@@ -162,6 +189,7 @@ const clamp = (value: number, low: number, high: number) => Math.min(Math.max(va
 
 export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts): Pilot => {
   const svg = craft.querySelector('svg');
+  const body = craft.querySelector<HTMLElement>('button');
   const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   const size = { w: craft.offsetWidth || ROBOT.w, h: craft.offsetHeight || ROBOT.h };
 
@@ -178,6 +206,16 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   let queue: Leg[] = [];
   let holdUntil = 0;
   let pinned = false;
+  let held: Point | null = null;
+  let hand: Point = { x: 0, y: 0 };
+  let grip: Point = HANDLE;
+  let hang: Hang | null = null;
+  let pivotWas: Point | null = null;
+  let trail: Sample[] = [];
+  let tilt = 0;
+  let tiltRate = 0;
+  let slide: Point | null = null;
+  let landing = { scared: false, hold: 0 };
 
   let face: Face = 'neutral';
   let flash: Face = 'wow';
@@ -230,7 +268,16 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     size,
     position: () => pos,
     onScreen,
-    emotes: () => mission?.emotes ?? { heavy: '', sorry: '', knock: '', puzzled: '' },
+    emotes: () =>
+      mission?.emotes ?? {
+        heavy: '',
+        sorry: '',
+        knock: '',
+        puzzled: '',
+        grabbed: '',
+        bin: '',
+        hiding: '',
+      },
     after: (ms, run) => later.push({ at: clock + ms, run }),
     move,
     prank: (ms) => {
@@ -464,6 +511,109 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     return true;
   };
 
+  const zoneAt = (at: Point): Zone | null => {
+    const x = at.x + size.w / 2;
+    const y = at.y + size.h / 2;
+    for (const node of document.querySelectorAll<HTMLElement>('[data-robot-zone]')) {
+      const box = node.getBoundingClientRect();
+      const inside =
+        x >= box.left - DROP_REACH &&
+        x <= box.right + DROP_REACH &&
+        y >= box.top - DROP_REACH &&
+        y <= box.bottom + DROP_REACH;
+      if (inside) return (node.dataset.robotZone as Zone | undefined) ?? null;
+    }
+    return null;
+  };
+
+  /** Out of its own hands: drawn where physics puts it, turned about the point it is held by. */
+  const toss = (now: number, pose: Pose, look: Face) => {
+    if (!pos) return;
+    craft.style.transform = `translate3d(${pos.x.toFixed(1)}px, ${pos.y.toFixed(1)}px, 0)`;
+    craft.style.setProperty('--lean', `${lean.toFixed(1)}deg`);
+    if (body) {
+      body.style.transformOrigin = `${grip.x.toFixed(1)}px ${grip.y.toFixed(1)}px`;
+      body.style.transform = `rotate(${tilt.toFixed(3)}rad)`;
+    }
+    setFlag('data-pose', pose);
+    setFlag('data-face', now < flashUntil ? flash : look);
+    setFlag('data-talking', null);
+    if (sky.style.zIndex !== LAYERS.top) sky.style.zIndex = LAYERS.top;
+    if (balloonOn) {
+      balloonOn = false;
+      balloon.removeAttribute('data-on');
+    }
+    if (emoteUntil && now >= emoteUntil) hush();
+  };
+
+  /** In someone's hand it hangs from the pointer and swings with every move of it. */
+  const carry = (now: number, dt: number) => {
+    if (!pos || !held) return;
+
+    const ease = Math.min(1, dt / 110);
+    held = { x: held.x + (HANDLE.x - held.x) * ease, y: held.y + (HANDLE.y - held.y) * ease };
+    grip = held;
+    pos = onScreen({ x: hand.x - held.x, y: hand.y - held.y });
+    lean -= lean * ease;
+
+    const pivot = { x: pos.x + held.x, y: pos.y + held.y };
+    if (!still) {
+      hang = swing(hang ?? hangFrom(pivot), pivotWas ?? pivot, pivot, dt);
+      const turned = angleOf(hang, pivot);
+      tiltRate = ((turned - tilt) / dt) * 1000;
+      tilt = turned;
+    }
+    pivotWas = pivot;
+
+    toss(now, 'dangle', 'wow');
+  };
+
+  /** Back on its own feet: whatever it was doing before is over, and this spot is home for now. */
+  const touchDown = (now: number) => {
+    if (!pos) return;
+    const here = pos;
+    const { scared, hold } = landing;
+
+    slide = null;
+    hang = null;
+    tilt = 0;
+    tiltRate = 0;
+    if (body) body.style.transform = '';
+
+    leg = {
+      where: () => ({ at: here }),
+      pose: 'stand',
+      face: scared ? 'worried' : 'neutral',
+      hold,
+    };
+    perch = { at: here };
+    face = leg.face;
+    holdUntil = now + hold;
+    move(SQUASH, 300);
+    if (scared) queue = hide(scene);
+  };
+
+  /** Let go with some speed left: it fires its jets against it and leans back until it stops. */
+  const settle = (now: number, dt: number) => {
+    if (!pos || !slide) return;
+
+    const next = coast(pos, slide, dt);
+    const inside = onScreen(next.at);
+    slide = {
+      x: inside.x === next.at.x ? next.speed.x : -next.speed.x * BOUNCE,
+      y: inside.y === next.at.y ? next.speed.y : -next.speed.y * BOUNCE,
+    };
+    pos = inside;
+
+    ({ angle: tilt, rate: tiltRate } = steady(tilt, tiltRate, dt));
+    const brace = clamp(-slide.x * BRACE, -MAX_BRACE, MAX_BRACE);
+    lean += (brace - lean) * Math.min(1, dt / 80);
+
+    const speed = Math.hypot(slide.x, slide.y);
+    toss(now, speed > 40 ? 'brake' : 'stand', speed > 320 ? 'wow' : 'neutral');
+    if (speed < 24 && Math.abs(tilt) < 0.03 && Math.abs(tiltRate) < 0.4) touchDown(now);
+  };
+
   const advance = (now: number) => {
     const roam = mission?.roam ?? 'never';
     const restless =
@@ -499,6 +649,15 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     if (!window.innerWidth || !window.innerHeight) return;
     const dt = clock ? clamp(now - clock, 1, 80) : 16;
     clock = now;
+
+    if (held) {
+      carry(now, dt);
+      return;
+    }
+    if (slide) {
+      settle(now, dt);
+      return;
+    }
 
     if (briefed) {
       queue = [];
@@ -679,6 +838,51 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     trick: () => {
       wantTrick = true;
       holdUntil = 0;
+    },
+
+    grab: (x, y) => {
+      const now = present();
+      pos ??= { x: x - size.w / 2, y: y - size.h / 2 };
+      hand = { x, y };
+      held = { x: x - pos.x, y: y - pos.y };
+      hang = null;
+      pivotWas = null;
+      trail = [];
+      slide = null;
+      flight = null;
+      queue = [];
+      later = [];
+      lastInput = now;
+      say(scene.emotes().grabbed, now + 1300);
+    },
+
+    drag: (x, y) => {
+      if (!held) return;
+      hand = { x, y };
+      pos = onScreen({ x: x - held.x, y: y - held.y });
+      trail = [...trail.slice(1 - TRAIL), { x, y, at: performance.now() }];
+    },
+
+    release: () => {
+      if (!held || !pos) return null;
+      held = null;
+
+      const now = present();
+      const zone = zoneAt(pos);
+      const scared = zone === 'bin';
+
+      // Put on an icon it stays on it; thrown anywhere else it carries on for a bit.
+      slide = zone || still ? { x: 0, y: 0 } : throwOf(trail, performance.now());
+      // Wherever it ends up it stays a moment, then goes back to what it was doing.
+      landing = { scared, hold: scared ? 450 : zone ? 700 : 2400 };
+
+      if (scared) {
+        flash = 'worried';
+        flashUntil = now + 1500;
+        say(scene.emotes().bin, now + 1500);
+        move(SHAKE, 520);
+      }
+      return zone;
     },
 
     dispose: () => {

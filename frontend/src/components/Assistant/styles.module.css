@@ -51,8 +51,13 @@
   background: none;
   border: none;
   line-height: 0;
-  cursor: pointer;
+  cursor: grab;
   pointer-events: auto;
+  touch-action: none;
+}
+
+[data-pose='dangle'] .body {
+  cursor: grabbing;
 }
 
 /* Hung over the robot by the pilot, which feeds --shift and --tail every few frames. */
@@ -480,8 +485,48 @@
   animation: hop 0.46s ease-in-out infinite;
 }
 
-[data-pose='sit'] .robot {
+[data-pose='sit'] .robot,
+[data-pose='dangle'] .robot,
+[data-pose='brake'] .robot {
   animation: none;
+}
+
+[data-pose='dangle'] .armL {
+  animation: flail 0.34s ease-in-out infinite;
+}
+
+[data-pose='dangle'] .armR {
+  animation: flailBack 0.34s ease-in-out infinite;
+}
+
+/* Jets against the slide, arms out for balance. */
+[data-pose='brake'] .jet {
+  opacity: 1;
+  animation: thrust 0.09s steps(2, jump-none) infinite;
+}
+
+[data-pose='brake'] .armL {
+  transform: rotate(34deg);
+}
+
+[data-pose='brake'] .armR {
+  transform: rotate(-34deg);
+}
+
+[data-pose='brake'] .legL {
+  transform: translateY(-1px) rotate(-14deg);
+}
+
+[data-pose='brake'] .legR {
+  transform: translateY(-1px) rotate(14deg);
+}
+
+[data-pose='dangle'] .legL {
+  animation: kick 0.3s ease-in-out infinite;
+}
+
+[data-pose='dangle'] .legR {
+  animation: kick 0.3s ease-in-out infinite reverse;
 }
 
 [data-pose='sit'] .armL {
@@ -561,6 +606,36 @@
   }
 }
 
+@keyframes flail {
+  0%,
+  100% {
+    transform: rotate(40deg);
+  }
+  50% {
+    transform: rotate(74deg);
+  }
+}
+
+@keyframes flailBack {
+  0%,
+  100% {
+    transform: rotate(-74deg);
+  }
+  50% {
+    transform: rotate(-40deg);
+  }
+}
+
+@keyframes kick {
+  0%,
+  100% {
+    transform: rotate(-24deg);
+  }
+  50% {
+    transform: rotate(24deg);
+  }
+}
+
 @keyframes thrust {
   from {
     transform: scaleY(0.55);
@@ -584,6 +659,7 @@
   .robot,
   .eye,
   .led,
+  .armL,
   .armR,
   .legL,
   .legR,

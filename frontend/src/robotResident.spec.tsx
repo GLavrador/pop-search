@@ -44,6 +44,20 @@ const clickThrough = async (node: Element) => {
   await user.click(document.querySelector('[data-help-layer]') as Element);
 };
 
+// The icon gets a place on screen, and the robot is carried from elsewhere onto it.
+const dropOn = async (icon: string | RegExp) => {
+  const box = { left: 300, top: 300, right: 360, bottom: 360, width: 60, height: 60 };
+  vi.spyOn(screen.getByRole('button', { name: icon }), 'getBoundingClientRect').mockReturnValue(
+    box as DOMRect,
+  );
+  const robot = screen.getByRole('button', { name: 'Poke BIP-98' });
+  await user.pointer([
+    { keys: '[MouseLeft>]', target: robot, coords: { clientX: 10, clientY: 10 } },
+    { target: robot, coords: { clientX: 330, clientY: 330 } },
+    { keys: '[/MouseLeft]', target: robot, coords: { clientX: 330, clientY: 330 } },
+  ]);
+};
+
 const openAdvanced = async () => {
   await user.click(tab('🔍 Search.exe'));
   await press('▼ Advanced');
@@ -171,6 +185,38 @@ describe('the robot outside the guide', () => {
 
     expect(said()).not.toBeInTheDocument();
     expect(document.querySelector('[data-help-layer]')).not.toBeInTheDocument();
+  });
+
+  it('should panic when it is dropped on the recycle bin', async () => {
+    renderApp();
+
+    await dropOn('Recycle Bin');
+
+    expect(screen.getByText('NOT THE BIN!!')).toBeInTheDocument();
+  });
+
+  it('should point out that everything already runs inside My Computer', async () => {
+    renderApp();
+
+    await dropOn('My Computer');
+
+    expect(within(screen.getByRole('status')).getByText(/already inside it/)).toBeInTheDocument();
+  });
+
+  it('should claim Pop Search as its own when dropped on it', async () => {
+    renderApp();
+
+    await dropOn(/Pop Search$/);
+
+    expect(within(screen.getByRole('status')).getByText(/already mine/)).toBeInTheDocument();
+  });
+
+  it('should not take the end of a drag for a poke', async () => {
+    renderApp();
+
+    await dropOn('Recycle Bin');
+
+    expect(screen.queryByText(/Beep!|Boop\.|Hm\?|Ouch\.|Zzzt\./)).not.toBeInTheDocument();
   });
 
   it('should keep the explanation while the user reads it or presses Escape to end it', async () => {

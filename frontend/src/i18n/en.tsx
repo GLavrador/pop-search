@@ -339,6 +339,9 @@ export const en = {
       sorry: 'oops, sorry!',
       knock: 'knock knock',
       puzzled: 'huh?',
+      grabbed: 'whoa!',
+      bin: 'NOT THE BIN!!',
+      hiding: 'is it over?',
     },
     progress: (current: number, total: number) => `Step ${current} of ${total}`,
     back: '◂ back',
@@ -572,6 +575,10 @@ export const en = {
         text: 'Still nothing. Try other words, or describe the scene another way.',
       },
     },
+    drop: {
+      computer: 'My Computer? But we are already inside it!',
+      app: 'Pop Search! This one is already mine: I live in it.',
+    },
     whatsThis: {
       button: "What's this?",
       title: "What's this? Click here, then on anything on screen.",
@@ -625,7 +632,7 @@ export const en = {
       } as HelpCopy,
       robot: {
         title: 'BIP-98',
-        text: 'That is me! I live here in Pop Search and explain whatever you want.',
+        text: 'That is me! I live here in Pop Search and explain whatever you want. You can also pick me up and drag me around the screen.',
       } as HelpCopy,
       'guide.invite': {
         title: 'The guide',
