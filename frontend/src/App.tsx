@@ -26,6 +26,7 @@ import { randomCat } from './constants/cats';
 import { Assistant } from './components/Assistant';
 import { GuidePaused } from './components/Assistant/Paused';
 import { GuideInvite } from './components/Assistant/Invite';
+import { GuideChip } from './components/Assistant/Chip';
 import { RobotPilot } from './components/Assistant/RobotPilot';
 import type { Cue } from './components/Assistant/pilot';
 import { DemoIngest } from './components/Demo/DemoIngest';
@@ -40,6 +41,15 @@ const CLICKS_TO_CLOSE = 5;
 const CLOSING_MS = 320;
 const INVITE_KEY = 'pop-search:guide-invite';
 
+// A visitor is always offered the guide: loudly at first, as a chip in the title
+// bar once they tuck the invitation away.
+type Invite = 'fresh' | 'seen' | 'tucked';
+
+const readInvite = (): Invite => {
+  const saved = localStorage.getItem(INVITE_KEY);
+  return saved === 'tucked' ? 'tucked' : saved ? 'seen' : 'fresh';
+};
+
 function AppContent() {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
   const [windowState, setWindowState] = useState<WindowState>('open');
@@ -48,12 +58,10 @@ function AppContent() {
   const closeClicks = useRef(0);
   const pendingCat = useRef<string | null>(null);
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
-  const { isAuthenticated, displayName } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
-  const [inviteTaken, setInviteTaken] = useState(
-    () => localStorage.getItem(INVITE_KEY) === 'taken',
-  );
+  const [invite, setInvite] = useState(readInvite);
   const [spotNode, setSpotNode] = useState<HTMLElement | null>(null);
   const reportSpot = useCallback((node: HTMLElement | null) => setSpotNode(node), []);
   const robotSeat = useRef<HTMLDivElement>(null);
@@ -115,15 +123,17 @@ function AppContent() {
   const searchStep = onStepTab && step?.tab === 'search' ? step : null;
   const cue: Cue = step?.id === 'welcome' ? 'greet' : step?.id === 'saved' ? 'cheer' : 'teach';
 
-  const takeInvite = () => {
-    setInviteTaken(true);
-    localStorage.setItem(INVITE_KEY, 'taken');
+  const keepInvite = (next: Invite) => {
+    setInvite(next);
+    localStorage.setItem(INVITE_KEY, next);
   };
 
   const startGuide = () => {
-    takeInvite();
+    if (invite === 'fresh') keepInvite('seen');
     guide.start();
   };
+
+  const offersGuide = !isAuthLoading && !isAuthenticated && guide.step === null;
 
   return (
     <div className={styles.appContainer}>
@@ -140,10 +150,15 @@ function AppContent() {
         onMinimize={() => setWindowState('minimized')}
         onMaximize={() => setIsMaximized((value) => !value)}
         onClose={handleClose}
+        aside={offersGuide && invite === 'tucked' ? <GuideChip onOpen={startGuide} /> : undefined}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
-          {!isAuthenticated && !inviteTaken && guide.step === null && (
-            <GuideInvite onStart={startGuide} onDismiss={takeInvite} />
+          {offersGuide && invite !== 'tucked' && (
+            <GuideInvite
+              returning={invite === 'seen'}
+              onStart={startGuide}
+              onDismiss={() => keepInvite('tucked')}
+            />
           )}
 
           {step && (

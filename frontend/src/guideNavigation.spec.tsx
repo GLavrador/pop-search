@@ -180,7 +180,7 @@ describe('guided demo navigation', () => {
     expect(screen.getByText('5/12')).toBeInTheDocument();
   });
 
-  it('should end on the last step and not invite again', async () => {
+  it('should end on the last step and keep offering the guide, on every tab', async () => {
     renderApp();
     await startGuide();
     await jumpTo(12);
@@ -188,7 +188,56 @@ describe('guided demo navigation', () => {
     await press('Finish ✓');
 
     expect(screen.queryByText('12/12')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '▶ See the guide again' })).toBeInTheDocument();
+
+    await user.click(tab('🔍 Search.exe'));
+
+    expect(screen.getByRole('button', { name: '▶ See the guide again' })).toBeInTheDocument();
+  });
+
+  it('should move into the title bar when tucked away, and still open the guide', async () => {
+    renderApp();
+    await user.click(await screen.findByRole('button', { name: /Tuck this away/ }));
+
     expect(screen.queryByRole('button', { name: /Start the guide/i })).not.toBeInTheDocument();
+
+    await user.click(tab('🔍 Search.exe'));
+    await press('Guide: let BIP-98 show you around');
+
+    expect(screen.getByText('Hi! I am BIP-98')).toBeInTheDocument();
+  });
+
+  it('should stay tucked away on the next visit', async () => {
+    localStorage.setItem('pop-search:guide-invite', 'tucked');
+    renderApp();
+
+    expect(
+      await screen.findByRole('button', { name: 'Guide: let BIP-98 show you around' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Start the guide/i })).not.toBeInTheDocument();
+  });
+
+  it('should leave signed in accounts alone: for them the guide lives in the profile', async () => {
+    mockGetSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'token-abc',
+          user: { id: 'user-1', email: 'ana@example.com', user_metadata: {} },
+        },
+      },
+    });
+    renderApp();
+
+    await screen.findByText('📁 My-Videos.exe');
+
+    expect(screen.queryByRole('button', { name: /Start the guide/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Guide: let BIP-98 show you around' }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: /👤/ }));
+
+    expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
   });
 
   it('should leave the real search untouched while it runs', async () => {

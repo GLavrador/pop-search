@@ -357,9 +357,21 @@ export const en = {
     ),
     offScriptAction: 'Take me back',
     invite: {
-      text: 'First time here? I can show you the whole app in two minutes.',
-      start: '▶ Start the guide',
-      dismissTitle: 'Hide this invitation',
+      fresh: {
+        lead: 'First time here?',
+        text: 'I can show you the whole app in two minutes.',
+        start: '▶ Start the guide',
+      },
+      again: {
+        lead: 'Want another look?',
+        text: 'I can show you the app again in two minutes.',
+        start: '▶ See the guide again',
+      },
+      dismissTitle: 'Tuck this away. The guide stays up in the title bar.',
+    },
+    chip: {
+      label: 'Guide',
+      title: 'Guide: let BIP-98 show you around',
     },
     profile: {
       legend: 'Guided demo',

@@ -369,9 +369,21 @@ export const pt: Dictionary = {
     ),
     offScriptAction: 'Me leve de volta',
     invite: {
-      text: 'Primeira vez aqui? Eu te mostro o app inteiro em dois minutos.',
-      start: '▶ Começar o guia',
-      dismissTitle: 'Esconder este convite',
+      fresh: {
+        lead: 'Primeira vez aqui?',
+        text: 'Eu te mostro o app inteiro em dois minutos.',
+        start: '▶ Começar o guia',
+      },
+      again: {
+        lead: 'Quer rever?',
+        text: 'Eu te mostro o app de novo em dois minutos.',
+        start: '▶ Rever o guia',
+      },
+      dismissTitle: 'Recolher. O guia continua lá em cima, na barra de título.',
+    },
+    chip: {
+      label: 'Guia',
+      title: 'Guia: o BIP-98 te mostra o app',
     },
     profile: {
       legend: 'Demonstração guiada',

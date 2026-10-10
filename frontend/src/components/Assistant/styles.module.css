@@ -667,3 +667,88 @@
     flex: 1 1 60%;
   }
 }
+
+/* The invitation is the one thing a visitor should not miss, so it is the loud one. */
+.invite {
+  gap: 11px;
+  padding: 8px 8px 8px 11px;
+}
+
+.robotMedium {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 37px;
+  margin: -13px 0 -3px;
+}
+
+.invite .inviteText {
+  font-size: 0.87rem;
+  line-height: 1.35;
+}
+
+.inviteLead {
+  color: var(--win-blue-title);
+}
+
+.invite .go {
+  padding: 5px 14px;
+  font-size: 0.86rem;
+}
+
+.inviteFresh .go {
+  animation: callout 1.4s ease-out infinite;
+}
+
+@keyframes callout {
+  from {
+    box-shadow: 0 0 0 0 rgba(0, 0, 128, 0.55);
+  }
+  to {
+    box-shadow: 0 0 0 8px rgba(0, 0, 128, 0);
+  }
+}
+
+.chip {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+  margin-right: 6px;
+  padding: 0 6px 0 3px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: bold;
+  line-height: 1;
+  color: var(--win-dark);
+  cursor: pointer;
+}
+
+.chip .robotSmall {
+  width: 13px;
+  height: 15px;
+}
+
+.chip:hover .armR {
+  animation: wave 0.55s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .chip {
+    height: 20px;
+    font-size: 0.72rem;
+  }
+
+  .chip .robotSmall {
+    width: 16px;
+    height: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inviteFresh .go {
+    animation: none;
+  }
+}
