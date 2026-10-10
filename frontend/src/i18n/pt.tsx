@@ -142,12 +142,8 @@ export const pt: Dictionary = {
     show: '▼ Avançado',
     modeLegend: 'Modo de busca',
     modeGroupLabel: 'Modo de busca',
-    modeHelp:
-      'Escolhe como um vídeo se qualifica como resultado: por significado, pelas palavras literais que você digitou, ou os dois.',
     thresholdLegend: 'Limiar de correspondência',
     thresholdLabel: 'Limiar de correspondência',
-    thresholdHelp:
-      'Controla o rigor da correspondência semântica (por significado). Valores mais altos devolvem menos resultados, porém mais precisos.',
     custom: ' (Personalizado)',
     scaleLow: 'Mais resultados',
     scaleHigh: 'Menos, mais rígido',

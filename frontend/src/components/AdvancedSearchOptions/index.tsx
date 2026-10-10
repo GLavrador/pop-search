@@ -2,6 +2,7 @@ import {useState} from 'react';
 import { findPresetByThreshold } from '../../constants/searchPresets';
 import { SEARCH_MODES, findSearchMode, type SearchMode } from '../../constants/searchModes';
 import { useI18n } from '../../i18n/languageContext';
+import { useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface AdvancedSearchOptionsProps {
@@ -17,6 +18,7 @@ interface AdvancedSearchOptionsProps {
 export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onLimitChange, mode, onModeChange, labelClassName }: AdvancedSearchOptionsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useI18n();
+  const robot = useRobot();
   const activePreset = findPresetByThreshold(threshold);
   const activeMode = findSearchMode(mode);
   const activeModeText = t.searchModes[activeMode.id];
@@ -39,14 +41,19 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
       {isOpen && (
         <div className={styles.panel}>
           <fieldset className={styles.group}>
-            <legend className={styles.legend}>{t.advanced.modeLegend}</legend>
-
-            <div className={styles.groupHeader}>
-              <span className={styles.modeHint}>{activeModeText.hint}</span>
-              <span className={styles.help} title={t.advanced.modeHelp}>
+            <legend className={styles.legend}>
+              {t.advanced.modeLegend}
+              <button
+                type="button"
+                className={styles.help}
+                aria-label={t.robot.ask(t.advanced.modeLegend)}
+                onClick={(event) => robot.explain('search.mode', event.currentTarget)}
+              >
                 i
-              </span>
-            </div>
+              </button>
+            </legend>
+
+            <span className={styles.modeHint}>{activeModeText.hint}</span>
 
             <div className={styles.modeButtons} role="group" aria-label={t.advanced.modeGroupLabel}>
               {SEARCH_MODES.map((option) => (
@@ -65,19 +72,25 @@ export const AdvancedSearchOptions = ({ threshold, onThresholdChange, limit, onL
           </fieldset>
 
           <fieldset className={styles.group} disabled={!thresholdApplies}>
-            <legend className={styles.legend}>{t.advanced.thresholdLegend}</legend>
-
-            <div className={styles.groupHeader}>
-              <span className={styles.value}>
-                {Math.round(threshold * 100)}%
-                <span className={styles.presetName}>
-                  {activePreset ? ` (${t.presets[activePreset.id].label})` : t.advanced.custom}
-                </span>
-              </span>
-              <span className={styles.help} title={t.advanced.thresholdHelp}>
+            {/* The legend is the one part of a disabled fieldset that stays usable. */}
+            <legend className={styles.legend}>
+              {t.advanced.thresholdLegend}
+              <button
+                type="button"
+                className={styles.help}
+                aria-label={t.robot.ask(t.advanced.thresholdLegend)}
+                onClick={(event) => robot.explain('search.threshold', event.currentTarget)}
+              >
                 i
+              </button>
+            </legend>
+
+            <span className={styles.value}>
+              {Math.round(threshold * 100)}%
+              <span className={styles.presetName}>
+                {activePreset ? ` (${t.presets[activePreset.id].label})` : t.advanced.custom}
               </span>
-            </div>
+            </span>
 
             <input
               type="range"

@@ -148,12 +148,8 @@ export const en = {
     show: '▼ Advanced',
     modeLegend: 'Search Mode',
     modeGroupLabel: 'Search mode',
-    modeHelp:
-      'Chooses how a video qualifies as a match: by meaning, by the literal words you typed, or both.',
     thresholdLegend: 'Match Threshold',
     thresholdLabel: 'Match threshold',
-    thresholdHelp:
-      'Controls how strict the semantic (meaning-based) matching is. Higher values return fewer but more precise results.',
     custom: ' (Custom)',
     scaleLow: 'More results',
     scaleHigh: 'Fewer, stricter',

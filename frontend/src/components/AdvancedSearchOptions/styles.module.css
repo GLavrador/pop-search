@@ -43,6 +43,10 @@
 
 .legend {
   float: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
   margin: 0 0 8px;
   padding: 0 0 4px;
@@ -56,15 +60,9 @@
   clear: both;
 }
 
-.groupHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 2px;
-}
-
 .value {
+  display: block;
+  margin-bottom: 2px;
   font-size: 0.9em;
   font-weight: bold;
 }
@@ -77,15 +75,27 @@
 .help {
   cursor: help;
   flex-shrink: 0;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
+  padding: 0;
   background-color: var(--win-blue-title);
+  border: none;
   color: var(--win-light);
   text-align: center;
-  line-height: 16px;
-  font-size: 0.75em;
+  line-height: 17px;
+  font-family: inherit;
+  font-size: 0.8rem;
   font-weight: bold;
+}
+
+.help:hover,
+.help:focus-visible {
+  background-color: var(--win-blue-grad);
+}
+
+.help:focus-visible {
+  outline: 1px dotted var(--win-dark);
+  outline-offset: 2px;
 }
 
 .slider {
@@ -166,6 +176,7 @@
 }
 
 .modeHint {
+  display: block;
   font-size: 0.8em;
   color: var(--win-text-secondary);
   line-height: 1.3;
