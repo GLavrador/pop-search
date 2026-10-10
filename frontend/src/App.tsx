@@ -138,9 +138,39 @@ function AppContent() {
             <GuideInvite onStart={startGuide} onDismiss={takeInvite} />
           )}
 
+          {step && (
+            <Assistant
+              index={guide.index}
+              total={guide.total}
+              copy={t.guide.steps[step.id]}
+              isFirst={guide.isFirst}
+              isLast={guide.isLast}
+              strayedFrom={strayedFrom}
+              onBack={guide.back}
+              onNext={guide.next}
+              onJump={guide.goTo}
+              onReturn={() => guide.goTo(guide.index)}
+              onHide={guide.hide}
+              onQuit={guide.quit}
+            />
+          )}
+
+          {guide.isPaused && (
+            <GuidePaused
+              index={guide.index}
+              total={guide.total}
+              onResume={() => guide.goTo(guide.index)}
+              onQuit={guide.quit}
+            />
+          )}
+
           <TabStrip tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
 
-          <div className={`${styles.contentArea} ${isMaximized ? styles.contentAreaMax : ''}`}>
+          <div
+            className={`${styles.contentArea} ${
+              isMaximized ? styles.contentAreaMax : guide.isVisible ? styles.contentAreaGuided : ''
+            }`}
+          >
             <div style={{ display: activeTab === 'ingest' ? 'block' : 'none' }}>
               {ingestStep && (
                 <DemoIngest
@@ -199,33 +229,6 @@ function AppContent() {
               <AuthPanel onStartGuide={startGuide} />
             </div>
           </div>
-
-          {step && (
-            <Assistant
-              index={guide.index}
-              total={guide.total}
-              copy={t.guide.steps[step.id]}
-              isFirst={guide.isFirst}
-              isLast={guide.isLast}
-              strayedFrom={strayedFrom}
-              onBack={guide.back}
-              onNext={guide.next}
-              onJump={guide.goTo}
-              onReturn={() => guide.goTo(guide.index)}
-              onHide={guide.hide}
-              onQuit={guide.quit}
-            />
-          )}
-
-          {guide.isPaused && (
-            <GuidePaused
-              index={guide.index}
-              total={guide.total}
-              onResume={() => guide.goTo(guide.index)}
-              onQuit={guide.quit}
-            />
-          )}
-
           <StatusBar />
         </div>
       </RetroWindow>
