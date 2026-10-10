@@ -155,9 +155,9 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
           <p>{notice}</p>
           {onStartGuide && (
             <div className={styles.noticeActions}>
-              <p>{t.auth.tourInvite}</p>
+              <p>{t.auth.guideInvite}</p>
               <button type="button" className="win95-btn" onClick={onStartGuide}>
-                {t.gate.takeTour}
+                {t.gate.openGuide}
               </button>
             </div>
           )}
