@@ -16,6 +16,7 @@ interface DemoSearchProps {
   stage: SearchStage;
   spot: Spot;
   onAdvance: () => void;
+  onSpot: (node: HTMLElement | null) => void;
 }
 
 // Same rule the backend applies: the threshold gates the vector branch only,
@@ -26,7 +27,7 @@ const qualifies = (result: SearchResult, mode: SearchMode, threshold: number) =>
   return byMeaning || byWords;
 };
 
-export const DemoSearch = ({ stage, spot, onAdvance }: DemoSearchProps) => {
+export const DemoSearch = ({ stage, spot, onSpot, onAdvance }: DemoSearchProps) => {
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [mode, setMode] = useState<SearchMode>(DEFAULT_SEARCH_MODE);
@@ -38,7 +39,7 @@ export const DemoSearch = ({ stage, spot, onAdvance }: DemoSearchProps) => {
     limit,
   );
 
-  const spotlight = useSpotlight(spot);
+  const spotlight = useSpotlight(spot, onSpot);
 
   return (
     <div className={styles.panel}>
@@ -71,7 +72,12 @@ export const DemoSearch = ({ stage, spot, onAdvance }: DemoSearchProps) => {
             aria-label={t.search.placeholder}
             className="win95-inset win95-input"
           />
-          <button type="button" className={`win95-btn ${search.submitButton}`} onClick={onAdvance}>
+          <button
+            type="button"
+            className={`win95-btn ${search.submitButton}`}
+            onClick={onAdvance}
+            data-aim
+          >
             {t.search.submit}
           </button>
         </div>

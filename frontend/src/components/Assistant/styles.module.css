@@ -13,18 +13,75 @@
   gap: 10px;
 }
 
-.avatar {
+/* The seat kept for the robot while it is off pointing at something. */
+.slot {
   flex: 0 0 auto;
-  position: relative;
+  width: 46px;
+  height: 53px;
   margin-top: -18px;
+}
+
+.slotEmpty {
+  width: 0;
+  margin-right: -10px;
+}
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Moved every frame by the pilot, so it carries no transition of its own. */
+.craft {
+  position: absolute;
+  top: 0;
+  left: 0;
   padding: 0;
   background: none;
   border: none;
   line-height: 0;
   cursor: pointer;
+  pointer-events: auto;
+  will-change: transform;
+  transform: translate3d(-200px, -200px, 0);
+}
+
+.emote {
+  position: absolute;
+  top: -15px;
+  left: 36px;
+  z-index: 2;
+  padding: 1px 6px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: bold;
+  line-height: 1.35;
+  color: var(--win-dark);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.emote[data-on] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.emote[data-flip] {
+  right: 36px;
+  left: auto;
 }
 
 .robot {
+  --robot-glow: #4fe3c1;
+
   display: block;
   width: 46px;
   height: 53px;
@@ -32,6 +89,7 @@
   fill: var(--win-gray);
   stroke: var(--win-dark);
   stroke-width: 2;
+  transform-origin: 50% 100%;
   animation: bob 3.2s ease-in-out infinite;
 }
 
@@ -41,16 +99,54 @@
   flex: 0 0 auto;
 }
 
-.face {
+.mini {
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+/* Banks with the flight; the pilot feeds --lean from the horizontal speed. */
+.rig {
+  transform-origin: 26px 40px;
+  rotate: var(--lean, 0deg);
+}
+
+/* Turns toward whatever it is looking at, and cocks sideways when puzzled. */
+.head {
+  transform-origin: 26px 34px;
+  translate: var(--turn, 0px) 0;
+  rotate: var(--tilt, 0deg);
+  transition: rotate 220ms ease-out;
+}
+
+.gaze {
+  translate: var(--look-x, 0px) var(--look-y, 0px);
+}
+
+.face,
+.pupil {
   fill: var(--win-blue-title);
 }
 
+.pupil {
+  stroke: none;
+}
+
 .eye,
-.mouth,
+.eyesWide circle,
+.mouthFlat,
+.mouthOh,
 .led,
 .chest {
-  fill: #4fe3c1;
+  fill: var(--robot-glow);
   stroke: none;
+}
+
+.eyesHappy path,
+.mouthSmile {
+  fill: none;
+  stroke: var(--robot-glow);
+  stroke-width: 2;
+  stroke-linecap: square;
 }
 
 .eye {
@@ -67,44 +163,157 @@
   animation: led 1.7s ease-in-out infinite;
 }
 
-.mouth {
+.mouthFlat {
   transform-box: fill-box;
   transform-origin: center;
 }
 
-.mouthTalking {
-  animation: talk 0.19s ease-in-out 9;
-}
-
-.armLeft,
-.armRight {
+.armL,
+.armR,
+.legL,
+.legR {
   transform-box: fill-box;
+  transition: transform 200ms ease-out;
 }
 
-.armLeft {
+.armL {
   transform-origin: right center;
-  animation: wave 0.62s ease-in-out 2 reverse;
 }
 
-.armRight {
+.armR {
   transform-origin: left center;
-  animation: wave 0.48s ease-in-out 3;
 }
 
-.beep {
-  position: absolute;
-  top: 4px;
-  left: 40px;
-  z-index: 2;
-  padding: 1px 6px;
-  background: var(--win-tooltip-bg);
-  border: 1px solid var(--win-dark);
-  font-size: 0.68rem;
-  font-weight: bold;
-  white-space: nowrap;
-  pointer-events: none;
+.legL,
+.legR {
+  transform-origin: center top;
+}
+
+.jet {
+  fill: #ffb347;
+  stroke: #c2410c;
+  stroke-width: 1;
   opacity: 0;
-  animation: beepUp 1.3s ease-out forwards;
+  transform-origin: 26px 58px;
+  transition: opacity 120ms ease-out;
+}
+
+/* Faces: one set of eyes and one mouth shows at a time. */
+.eyesHappy,
+.eyesWide,
+.mouthSmile,
+.mouthOh {
+  display: none;
+}
+
+[data-face='happy'] .eyesRound,
+[data-face='happy'] .mouthFlat,
+[data-face='curious'] .eyesRound,
+[data-face='curious'] .mouthFlat,
+[data-face='wow'] .eyesRound,
+[data-face='wow'] .mouthFlat {
+  display: none;
+}
+
+[data-face='happy'] .eyesHappy,
+[data-face='happy'] .mouthSmile,
+[data-face='curious'] .eyesWide,
+[data-face='curious'] .mouthOh,
+[data-face='wow'] .eyesWide,
+[data-face='wow'] .mouthOh {
+  display: inline;
+}
+
+[data-face='curious'] .head {
+  --tilt: -9deg;
+}
+
+[data-face='wow'] .led {
+  animation-duration: 0.3s;
+}
+
+/* Speaking wins over any mouth the face had picked. */
+[data-talking] .mouthSmile,
+[data-talking] .mouthOh {
+  display: none;
+}
+
+[data-talking] .mouthFlat {
+  display: inline;
+  animation: talk 0.19s ease-in-out infinite;
+}
+
+/* Poses. */
+[data-pose='fly'] .jet {
+  opacity: 1;
+  animation: thrust 0.11s steps(2, jump-none) infinite;
+}
+
+[data-pose='fly'] .armL {
+  transform: rotate(22deg);
+}
+
+[data-pose='fly'] .armR {
+  transform: rotate(-22deg);
+}
+
+[data-pose='fly'] .legL {
+  transform: translateY(-1.5px) rotate(9deg);
+}
+
+[data-pose='fly'] .legR {
+  transform: translateY(-1.5px) rotate(-9deg);
+}
+
+[data-pose='point-down'] .armR {
+  transform: rotate(72deg);
+}
+
+[data-pose='point-up'] .armR {
+  transform: rotate(-72deg);
+}
+
+[data-pose='point-right'] .armR,
+[data-pose='point-left'] .armL {
+  transform: scaleX(1.7);
+}
+
+[data-pose='wave'] .armR {
+  animation: wave 0.55s ease-in-out infinite;
+}
+
+[data-pose='cheer'] .armL,
+[data-pose='peek'] .armL {
+  transform: rotate(56deg);
+}
+
+[data-pose='cheer'] .armR,
+[data-pose='peek'] .armR {
+  transform: rotate(-56deg);
+}
+
+[data-pose='cheer'] .robot {
+  animation: hop 0.46s ease-in-out infinite;
+}
+
+[data-pose='sit'] .robot {
+  animation: none;
+}
+
+[data-pose='sit'] .armL {
+  transform: rotate(-58deg);
+}
+
+[data-pose='sit'] .armR {
+  transform: rotate(58deg);
+}
+
+[data-pose='sit'] .legL {
+  animation: swing 0.9s ease-in-out infinite;
+}
+
+[data-pose='sit'] .legR {
+  animation: swing 0.9s ease-in-out infinite reverse;
 }
 
 @keyframes bob {
@@ -114,6 +323,16 @@
   }
   50% {
     transform: translateY(-2px);
+  }
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-9px);
   }
 }
 
@@ -134,20 +353,36 @@
     transform: scaleY(0.4);
   }
   50% {
-    transform: scaleY(1.6);
+    transform: scaleY(1.7);
   }
 }
 
 @keyframes wave {
   0%,
   100% {
-    transform: rotate(0deg);
+    transform: rotate(-16deg);
   }
-  35% {
-    transform: rotate(-38deg);
+  50% {
+    transform: rotate(-58deg);
   }
-  70% {
-    transform: rotate(12deg);
+}
+
+@keyframes swing {
+  0%,
+  100% {
+    transform: translateY(2px) rotate(-16deg);
+  }
+  50% {
+    transform: translateY(2px) rotate(16deg);
+  }
+}
+
+@keyframes thrust {
+  from {
+    transform: scaleY(0.55);
+  }
+  to {
+    transform: scaleY(1.15);
   }
 }
 
@@ -161,34 +396,25 @@
   }
 }
 
-@keyframes beepUp {
-  0% {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  18% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(-6px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-13px);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .robot,
   .eye,
   .led,
-  .mouthTalking,
-  .armLeft,
-  .armRight,
-  .beep {
-    animation: none;
+  .armR,
+  .legL,
+  .legR,
+  .jet,
+  [data-talking] .mouthFlat {
+    animation: none !important;
+  }
+
+  .head,
+  .armL,
+  .armR,
+  .legL,
+  .legR,
+  .emote {
+    transition: none;
   }
 }
 
@@ -219,6 +445,11 @@
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
   border-right: 7px solid var(--win-tooltip-bg);
+}
+
+.bubbleAlone::before,
+.bubbleAlone::after {
+  display: none;
 }
 
 .title {

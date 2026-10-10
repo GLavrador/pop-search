@@ -13,15 +13,16 @@ interface DemoIngestProps {
   spot: Spot;
   onAdvance: () => void;
   onBack: () => void;
+  onSpot: (node: HTMLElement | null) => void;
 }
 
-export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) => {
+export const DemoIngest = ({ stage, spot, onSpot, onAdvance, onBack }: DemoIngestProps) => {
   const [manual, setManual] = useState(false);
   const [scenes, setScenes] = useState(true);
   const [audio, setAudio] = useState(true);
   const { t } = useI18n();
 
-  const spotlight = useSpotlight(spot);
+  const spotlight = useSpotlight(spot, onSpot);
 
   const body = (): ReactNode => {
     if (stage === 'options') {
@@ -54,7 +55,12 @@ export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) 
             <button type="button" className="win95-btn" onClick={onBack}>
               {t.common.back}
             </button>
-            <button type="button" className={`win95-btn ${ingest.runButton}`} onClick={onAdvance}>
+            <button
+              type="button"
+              className={`win95-btn ${ingest.runButton}`}
+              onClick={onAdvance}
+              data-aim
+            >
               {t.ingest.runAnalysis}
             </button>
           </div>
@@ -106,7 +112,12 @@ export const DemoIngest = ({ stage, spot, onAdvance, onBack }: DemoIngestProps) 
             className="win95-inset win95-input"
             aria-label={t.ingest.urlLabel}
           />
-          <button type="button" className={`win95-btn ${ingest.runButton}`} onClick={onAdvance}>
+          <button
+            type="button"
+            className={`win95-btn ${ingest.runButton}`}
+            onClick={onAdvance}
+            data-aim
+          >
             {manual ? t.ingest.openForm : t.ingest.next}
           </button>
         </div>

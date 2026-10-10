@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import type { RefObject } from 'react';
 import { useI18n } from '../../i18n/languageContext';
-import { Robot } from './Robot';
 import type { GuideStepCopy } from '../../constants/guide';
 import styles from './styles.module.css';
 
@@ -12,6 +11,10 @@ interface AssistantProps {
   isLast: boolean;
   /** Label of the step's own tab, set only while the user is looking elsewhere. */
   strayedFrom: string | null;
+  /** The robot flies in and out of this seat. */
+  robotSeat: RefObject<HTMLDivElement | null>;
+  /** True while it is off pointing at something, so the seat gives its width back. */
+  robotAway: boolean;
   onBack: () => void;
   onNext: () => void;
   onJump: (index: number) => void;
@@ -27,6 +30,8 @@ export const Assistant = ({
   isFirst,
   isLast,
   strayedFrom,
+  robotSeat,
+  robotAway,
   onBack,
   onNext,
   onJump,
@@ -35,27 +40,20 @@ export const Assistant = ({
   onQuit,
 }: AssistantProps) => {
   const { t } = useI18n();
-  const [pokes, setPokes] = useState(0);
 
   return (
     <div className={`win95-border ${styles.assistant}`}>
       <div className={styles.head}>
-        <button
-          type="button"
-          className={styles.avatar}
-          title={t.guide.poke}
-          aria-label={t.guide.poke}
-          onClick={() => setPokes((count) => count + 1)}
-        >
-          <Robot key={`${index}-${pokes}`} talking />
-          {pokes > 0 && (
-            <span key={pokes} className={styles.beep}>
-              {t.guide.beeps[pokes % t.guide.beeps.length]}
-            </span>
-          )}
-        </button>
+        <div
+          ref={robotSeat}
+          className={`${styles.slot} ${robotAway ? styles.slotEmpty : ''}`}
+          aria-hidden="true"
+        />
 
-        <div className={styles.bubble} aria-live="polite">
+        <div
+          className={`${styles.bubble} ${robotAway ? styles.bubbleAlone : ''}`}
+          aria-live="polite"
+        >
           <p className={styles.title}>{copy.title}</p>
 
           {strayedFrom ? (

@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './App.module.css';
 import './App.css';
 import { RetroWindow } from './components/RetroWindow';
@@ -26,8 +26,11 @@ import { randomCat } from './constants/cats';
 import { Assistant } from './components/Assistant';
 import { GuidePaused } from './components/Assistant/Paused';
 import { GuideInvite } from './components/Assistant/Invite';
+import { RobotPilot } from './components/Assistant/RobotPilot';
+import type { Cue } from './components/Assistant/pilot';
 import { DemoIngest } from './components/Demo/DemoIngest';
 import { DemoSearch } from './components/Demo/DemoSearch';
+import { AIMS } from './components/Demo/spotlight';
 import { useGuide } from './hooks/useGuide';
 import type { WindowState } from './components/RetroWindow';
 
@@ -51,6 +54,10 @@ function AppContent() {
   const [inviteTaken, setInviteTaken] = useState(
     () => localStorage.getItem(INVITE_KEY) === 'taken',
   );
+  const [spotNode, setSpotNode] = useState<HTMLElement | null>(null);
+  const reportSpot = useCallback((node: HTMLElement | null) => setSpotNode(node), []);
+  const robotSeat = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   useIdentityReset();
   useBackendWarmup();
   const { t } = useI18n();
@@ -106,6 +113,7 @@ function AppContent() {
     step !== null && !onStepTab ? (tabs.find((tab) => tab.id === step.tab)?.label ?? '') : null;
   const ingestStep = onStepTab && step?.tab === 'ingest' ? step : null;
   const searchStep = onStepTab && step?.tab === 'search' ? step : null;
+  const cue: Cue = step?.id === 'welcome' ? 'greet' : step?.id === 'saved' ? 'cheer' : 'teach';
 
   const takeInvite = () => {
     setInviteTaken(true);
@@ -146,6 +154,8 @@ function AppContent() {
               isFirst={guide.isFirst}
               isLast={guide.isLast}
               strayedFrom={strayedFrom}
+              robotSeat={robotSeat}
+              robotAway={spotNode !== null}
               onBack={guide.back}
               onNext={guide.next}
               onJump={guide.goTo}
@@ -167,6 +177,7 @@ function AppContent() {
           <TabStrip tabs={tabs} activeId={activeTab} onSelect={setActiveTab} />
 
           <div
+            ref={stage}
             className={`${styles.contentArea} ${
               isMaximized ? styles.contentAreaMax : guide.isVisible ? styles.contentAreaGuided : ''
             }`}
@@ -176,6 +187,7 @@ function AppContent() {
                 <DemoIngest
                   stage={ingestStep.ingest}
                   spot={ingestStep.spot}
+                  onSpot={reportSpot}
                   onAdvance={guide.next}
                   onBack={guide.back}
                 />
@@ -208,6 +220,7 @@ function AppContent() {
                 <DemoSearch
                   stage={searchStep.search}
                   spot={searchStep.spot}
+                  onSpot={reportSpot}
                   onAdvance={guide.next}
                 />
               )}
@@ -232,6 +245,17 @@ function AppContent() {
           <StatusBar />
         </div>
       </RetroWindow>
+
+      {guide.isVisible && windowState === 'open' && (
+        <RobotPilot
+          utterance={guide.index}
+          cue={cue}
+          home={robotSeat}
+          target={spotNode}
+          aim={step?.spot ? AIMS[step.spot] : null}
+          stage={stage}
+        />
+      )}
 
       <footer className={styles.footer}>
         <p>{t.footer}</p>

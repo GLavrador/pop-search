@@ -14,7 +14,9 @@ export const GuidePaused = ({ index, total, onResume, onQuit }: GuidePausedProps
 
   return (
     <div className={`win95-border ${styles.paused}`}>
-      <Robot className={styles.robotSmall} />
+      <span className={styles.mini}>
+        <Robot className={styles.robotSmall} />
+      </span>
       <span className={styles.pausedText}>{t.guide.paused(index + 1, total)}</span>
       <button type="button" className={`win95-btn ${styles.pausedButton}`} onClick={onResume}>
         {t.guide.resume}

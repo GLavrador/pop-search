@@ -12,7 +12,9 @@ export const GuideInvite = ({ onStart, onDismiss }: GuideInviteProps) => {
 
   return (
     <div className={`win95-border ${styles.invite}`}>
-      <Robot className={styles.robotSmall} talking />
+      <span className={styles.mini} data-pose="wave" data-face="happy">
+        <Robot className={styles.robotSmall} />
+      </span>
       <span className={styles.inviteText}>{t.guide.invite.text}</span>
       <button type="button" className={`win95-btn ${styles.inviteStart}`} onClick={onStart}>
         {t.guide.invite.start}
