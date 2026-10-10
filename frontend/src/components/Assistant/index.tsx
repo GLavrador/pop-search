@@ -79,7 +79,7 @@ export const Assistant = ({
             <p className={styles.say}>{t.guide.offScript(strayedFrom)}</p>
           ) : (
             <>
-              <p className={styles.say}>{copy.say}</p>
+              <div className={styles.say}>{copy.say}</div>
               {act && (
                 <p className={styles.task}>
                   <span className={styles.yourTurn}>{t.guide.yourTurn}</span> {copy.task}

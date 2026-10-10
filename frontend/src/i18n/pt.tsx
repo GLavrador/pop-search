@@ -142,12 +142,8 @@ export const pt: Dictionary = {
     show: '▼ Avançado',
     modeLegend: 'Modo de busca',
     modeGroupLabel: 'Modo de busca',
-    modeHelp:
-      'Escolhe como um vídeo se qualifica como resultado: por significado, pelas palavras literais que você digitou, ou os dois.',
     thresholdLegend: 'Limiar de correspondência',
     thresholdLabel: 'Limiar de correspondência',
-    thresholdHelp:
-      'Controla o rigor da correspondência semântica (por significado). Valores mais altos devolvem menos resultados, porém mais precisos.',
     custom: ' (Personalizado)',
     scaleLow: 'Mais resultados',
     scaleHigh: 'Menos, mais rígido',
@@ -349,6 +345,17 @@ export const pt: Dictionary = {
       sorry: 'ops, desculpa!',
       knock: 'toc toc',
       puzzled: 'ué?',
+      grabbed: ['eeei!', 'opa!', 'me solta!', 'uooou!'],
+      bin: ['LIXO NÃO!!', 'EU NÃO SOU LIXO!', 'SOCORRO!!'],
+      hiding: ['já passou?', 'ela já foi embora?', 'posso sair?'],
+      dizzy: ['tô tonto...', 'para o mundo!', 'tá tudo girando...'],
+      enough: ['chega!', 'para, faz cócegas!', 'ei, já deu!'],
+      lurk: ['chega, vou me esconder!', 'tchau, fui!', 'me deixa em paz!'],
+      found: ['me achou!', 'ops!', 'aqui não!'],
+      flip: ['iupiii!', 'olha isso!', 'tcharam!'],
+      roof: ['daqui eu vejo tudo', 'meu lugar preferido', 'que vista!'],
+      yawn: ['uaaah...', 'que soninho...', 'cadê todo mundo?'],
+      woke: ['ãh? acordei!', 'eu não tava dormindo!', 'opa, você voltou!'],
     },
     progress: (current: number, total: number) => `Passo ${current} de ${total}`,
     back: '◂ voltar',
@@ -403,7 +410,38 @@ export const pt: Dictionary = {
     steps: {
       welcome: {
         title: 'Oi! Eu sou o BIP-98',
-        say: 'O Pop Search guarda vídeos do X para você achar depois, só descrevendo o que acontece neles. Eu te mostro como em dois minutos. Isto é só um treino: nada do que a gente fizer aqui vai para o app de verdade.',
+        say: (
+          <>
+            Sou o robô que mora aqui dentro e ajuda quem está chegando. Antes de te mostrar onde
+            fica cada coisa, deixa eu te contar <strong>o que é o Pop Search</strong> e para que
+            ele serve. É rapidinho.
+          </>
+        ),
+        next: 'Me conta ▶',
+      },
+      about: {
+        title: 'O que é o Pop Search',
+        say: (
+          <>
+            Sabe aquele vídeo que você viu no X e depois nunca mais achou? O Pop Search é um
+            arquivo de vídeos feito para isso não acontecer. Ele funciona em três tempos:
+            <ol>
+              <li>
+                <strong>Você guarda</strong> Cola o link do post que tem o vídeo.
+              </li>
+              <li>
+                <strong>A IA assiste</strong> Uma inteligência artificial vê o vídeo e escreve o
+                que acontece nele.
+              </li>
+              <li>
+                <strong>Você acha</strong> Depois é só escrever o que lembra, tipo{' '}
+                <em>gato derrubando um copo</em>.
+              </li>
+            </ol>
+            Agora eu te mostro cada parte funcionando, numa tela de treino: nada do que a gente
+            fizer aqui vai para o app de verdade.
+          </>
+        ),
         next: 'Vamos lá ▶',
       },
       paste: {
@@ -496,6 +534,357 @@ export const pt: Dictionary = {
         title: 'Para guardar vídeos, uma conta',
         say: 'Buscar é aberto para todo mundo. Para guardar vídeos você precisa de uma conta, porque cada análise da IA tem um custo. É nesta aba que você cria a sua e vê quantas análises ainda tem no mês.',
         next: 'Terminar ✓',
+      },
+    },
+  },
+
+  robot: {
+    dismiss: 'Fechar',
+    ask: (what: string) => `O que é ${what}?`,
+    says: {
+      tabs: {
+        ingest: ['hora de guardar!', 'manda o link!', 'vídeo novo?'],
+        search: ['vamos procurar?', 'o que a gente procura?', 'eu acho para você!'],
+        library: ['sua coleção!', 'olha quanta coisa!', 'tudo guardado aqui'],
+        account: ['sua conta', 'seus dados ficam aqui', 'tudo certo por aqui'],
+        admin: ['os números!', 'hora da planilha', 'vamos ver as contas'],
+      },
+      searching: ['procurando...', 'deixa comigo...', 'vasculhando...'],
+      found: [
+        (count: number) => (count === 1 ? 'achei 1!' : `achei ${count}!`),
+        (count: number) => (count === 1 ? 'tem 1 aqui!' : `tem ${count} aqui!`),
+        (count: number) => (count === 1 ? 'olha, 1 vídeo!' : `olha, ${count} vídeos!`),
+      ],
+      searchFailed: ['ops, deu erro...', 'xi, falhou...', 'alguma coisa quebrou'],
+      copied: ['copiado!', 'tá na mão!', 'link copiado!'],
+      badLink: ['esse link não serve', 'isso não é um link', 'hm, link estranho'],
+      analysed: ['pronto!', 'terminou!', 'a IA acabou!'],
+      cancelled: ['ok, parei.', 'cancelado.', 'tudo bem, parou.'],
+      manual: ['eu confio em você!', 'capricha na descrição!', 'você escreve melhor mesmo'],
+      saved: ['guardado!', 'no acervo!', 'salvo, pode buscar!'],
+      saveFailed: ['não salvou...', 'xi, não gravou', 'tenta de novo?'],
+      hello: [
+        (name: string | null) => (name ? `oi, ${name}!` : 'oi!'),
+        (name: string | null) => (name ? `bem-vindo, ${name}!` : 'bem-vindo!'),
+        (name: string | null) => (name ? `que bom te ver, ${name}!` : 'que bom te ver!'),
+      ],
+      bye: ['até mais!', 'tchau!', 'volta logo!'],
+      language: ['agora em português!', 'português, então!', 'falando português!'],
+      closing: ['ei!', 'não fecha!', 'sério?', 'tem um gato aí...'],
+      reopened: ['ufa!', 'voltou!', 'que susto!'],
+      bigger: ['uau, que grande!', 'tela cheia!', 'espaço de sobra!'],
+      smaller: ['assim cabe melhor', 'tamanho normal', 'de volta ao cantinho'],
+      echo: [
+        (word: string) => `${word}?`,
+        (word: string) => `hm, ${word}?`,
+        (word: string) => `${word}, é?`,
+      ],
+      got: [
+        (word: string) => `ah, ${word}!`,
+        (word: string) => `${word}, entendi!`,
+        (word: string) => `era ${word}!`,
+      ],
+      quirks: {
+        cleared: ['ué, desistiu?', 'apagou tudo!', 'começar de novo, né?'],
+        shouting: ['não precisa gritar!', 'ai, meus ouvidos!', 'CALMA!'],
+        stuck: ['travou a tecla?', 'o teclado emperrou?', 'solta a tecla!'],
+        long: ['que busca comprida!', 'isso é uma redação?', 'haja fôlego!'],
+      },
+      caught: ['ops, eu não li nada!', 'eu não tava olhando!', 'não vi nada, juro!'],
+      hints: {
+        lone: [
+          (word: string) => `só "${word}"? tenta a Ampla!`,
+          () => 'uma palavra só? a Ampla acha mais',
+          (word: string) => `${word}... com a Ampla vem mais`,
+        ],
+        quoted: [
+          () => 'entre aspas é a frase exata!',
+          () => 'aspas? então é ao pé da letra',
+          () => 'frase exata, anotado!',
+        ],
+        quotedIgnored: [
+          () => 'no modo Semântica as aspas não valem',
+          () => 'aqui as aspas são só enfeite',
+          () => 'aspas não funcionam neste modo',
+        ],
+      },
+      title: {
+        good: ['gostei desse título!', 'a IA caprichou!', 'bom título, fácil de achar'],
+        short: [
+          'título curtinho: precisa de 5 palavras',
+          'só isso? a busca quer mais',
+          'hm, falta título aí',
+        ],
+        long: ['eita, que título comprido!', 'é título ou descrição?', 'título de respeito!'],
+      },
+      typed: {
+        cat: ['miau?', 'gato?! cadê?', 'é o de trás da janela?'],
+        robot: ['sou eu!!', 'me chamou?', 'robô? presente!'],
+        dog: ['au au!', 'de cachorro eu gosto', 'cadê o doguinho?'],
+        bin: ['não fala essa palavra!', 'lixo?! onde?!', 'credo...'],
+        home: ['você já está nele!', 'o melhor programa que tem!', 'essa é a minha casa!'],
+      },
+      press: {
+        next: ['boa, um link!', 'vamos ver esse vídeo', 'próximo passo!'],
+        back: ['voltando...', 'sem pressa', 'de volta ao link'],
+        manualOn: ['modo artesanal!', 'você escreve, eu assisto', 'sem IA desta vez'],
+        manualOff: ['a IA voltou!', 'deixa com a IA', 'modo automático'],
+        optionOn: ['mais detalhe!', 'boa, ela anota isso também', 'quanto mais, melhor'],
+        optionOff: ['mais rapidinho assim', 'ok, sem isso', 'menos coisa para ela ler'],
+        presetBroad: ['rede bem aberta!', 'vem tudo!', 'quanto mais, melhor'],
+        presetBalanced: ['o meio-termo', 'equilíbrio!', 'nem muito, nem pouco'],
+        presetPrecise: ['só os melhores', 'modo exigente', 'pente fino!'],
+        advancedOpen: ['os ajustes finos!', 'hora de fuçar', 'o painel de controle'],
+        advancedClose: ['tudo guardado', 'fechado!', 'ajustes no lugar'],
+        modeHybrid: ['os dois jeitos!', 'o melhor dos dois', 'o modo de sempre'],
+        modeSemantic: ['só pelo assunto', 'lendo nas entrelinhas', 'pelo sentido!'],
+        modeText: ['ao pé da letra', 'palavra por palavra', 'modo literal'],
+        limit: ['anotado!', 'trago essa quantidade', 'combinado'],
+        stricter: ['mais exigente!', 'só os bem parecidos', 'subindo a régua'],
+        looser: ['mais solto!', 'deixando entrar mais', 'baixando a régua'],
+        reviewCancel: ['tudo bem, joguei fora', 'fica para a próxima', 'ok, descartado'],
+        openVideo: ['boa escolha!', 'esse é bom', 'vai lá ver!'],
+        authSwitch: ['conta nova ou antiga?', 'tanto faz, eu espero', 'escolha à vontade'],
+        authSubmit: ['conferindo...', 'um instante...', 'batendo na porta...'],
+        gateSignIn: ['vem, é rapidinho', 'a conta é de graça', 'por aqui!'],
+        adminRange: ['outro período!', 'mudando a janela', 'recontando...'],
+      },
+    },
+    lines: {
+      watching: 'Vou ficar de olho. Costuma levar por volta de um minuto.',
+      waiting: [
+        'A IA assiste ao vídeo inteiro antes de escrever, por isso demora.',
+        'Vídeo longo leva mais tempo. Ainda está andando.',
+        'Quase lá, eu acho. Se cansar de esperar, dá para cancelar.',
+      ],
+      analysisFailed: {
+        text: 'A IA não conseguiu desta vez, e o motivo está na caixa vermelha. Você pode tentar de novo, ou escrever o título e a descrição você mesmo.',
+        action: 'Preencher eu mesmo',
+      },
+      emptyWiden: {
+        text: 'Não achei nada com essa precisão. Quer que eu procure de novo, aceitando vídeos menos parecidos?',
+        action: 'Tentar com Ampla',
+      },
+      emptyLoosen: {
+        text: 'Nenhum vídeo tem exatamente essas palavras. Quer que eu procure pelo significado também?',
+        action: 'Buscar por significado',
+      },
+      emptyStuck: {
+        text: 'Nem assim eu achei. Tente outras palavras, ou descreva a cena de outro jeito.',
+      },
+    },
+    drop: {
+      computer: [
+        'Meu Computador? Mas a gente já está dentro dele!',
+        'Me guardar no computador? Eu já moro nele, olha.',
+        'Abrir o Meu Computador de dentro do computador... deu um nó aqui.',
+      ],
+      app: [
+        'Pop Search! Esse aqui já é meu: eu moro nele.',
+        'Essa é a minha casa! Fui eu que arrumei tudo.',
+        'Pop Search, o melhor programa deste computador. Sou suspeito, eu sei.',
+      ],
+      clock: [
+        (time: string) => `São ${time}. O tempo voa quando a gente procura vídeo.`,
+        (time: string) => `Deixa eu ver... ${time}. Pontual como sempre.`,
+        (time: string) => `${time}! Já está na hora de guardar um vídeo novo.`,
+      ],
+      start: [
+        'Abre! Abre! ... Nada. Esse Iniciar nunca abriu.',
+        'Vou tentar de novo... não, continua sendo enfeite.',
+        'Um dia esse botão ainda abre. Hoje não.',
+      ],
+      close: [
+        'Cuidado com esse botão: dizem que tem um gato do outro lado.',
+        'O X? Eu não apertaria. Tem um gato esperando ali atrás.',
+        'Esse fecha a janela. E solta o gato.',
+      ],
+    },
+    whatsThis: {
+      button: 'O que é isso?',
+      title: 'O que é isso? Clique aqui e depois em qualquer coisa da tela.',
+      prompt: 'Clique em qualquer coisa da tela que eu explico o que é.',
+      unknown: 'Hm, sobre isso eu não sei dizer nada. Clique em outra coisa.',
+    },
+    help: {
+      'tab.ingest': {
+        title: 'Add-Video.exe',
+        text: 'É aqui que você guarda um vídeo: cola o link de um post do X, e a IA assiste e escreve o que acontece nele.',
+      },
+      'tab.search': {
+        title: 'Search.exe',
+        text: 'É aqui que você acha um vídeo guardado. Escreva o que lembra dele, do seu jeito, e eu procuro. Não precisa de conta.',
+      },
+      'tab.library': {
+        title: 'My-Videos.exe',
+        text: 'A lista dos vídeos que você mesmo guardou.',
+      },
+      'tab.account': {
+        title: 'Sua conta',
+        text: 'Aqui você entra ou cria a sua conta, vê quantas análises ainda tem no mês e troca o idioma.',
+      },
+      'tab.admin': {
+        title: 'Stats.exe',
+        text: 'Só administradores veem esta aba. Ela mostra quanto a IA foi usada, e por quem.',
+      },
+      status: {
+        title: 'Barra de status',
+        text: 'Conta o que o programa acabou de fazer: buscando, salvou, deu erro. Vale olhar aqui quando algo parecer parado.',
+      },
+      'window.buttons': {
+        title: 'Botões da janela',
+        text: 'Minimizar, maximizar e fechar. O de fechar é teimoso: precisa insistir. Dizem que tem um gato do outro lado.',
+      },
+      'taskbar.start': {
+        title: 'Iniciar',
+        text: 'Esse é só enfeite. Eu já pulei em cima dele várias vezes e nunca abriu nada.',
+      },
+      'taskbar.clock': {
+        title: 'Relógio',
+        text: 'A hora do seu computador. Eu passo aqui de vez em quando para conferir.',
+      },
+      'taskbar.task': {
+        title: 'Pop Search System',
+        text: 'O botão da janela. Clique para minimizar o programa, clique de novo para trazer de volta.',
+      },
+      'desktop.icon': {
+        title: 'Área de trabalho',
+        text: 'Os ícones são decoração. O do Pop Search abre o programa de novo se você fechar a janela.',
+      },
+      robot: {
+        title: 'BIP-98',
+        text: 'Esse sou eu! Moro aqui no Pop Search e explico o que você quiser. Também dá para me pegar e me arrastar pela tela.',
+      },
+      'guide.invite': {
+        title: 'O guia',
+        text: 'Um passeio de dois minutos em que eu te mostro o app inteiro numa tela de treino. Nada do que você fizer lá vale de verdade.',
+      },
+      'ingest.url': {
+        title: 'Link do vídeo',
+        text: 'Cole aqui o link de um post do X que tenha vídeo. Depois clique em Avançar para escolher o que a IA vai olhar.',
+      },
+      'ingest.manual': {
+        title: 'Entrada manual',
+        text: 'Com esta caixinha marcada a IA não é usada: você mesmo escreve o título e a descrição. Não gasta nenhuma das suas análises.',
+      },
+      'ingest.options': {
+        title: 'Opções de análise',
+        text: 'A IA sempre escreve um título e uma descrição. Aqui você escolhe se ela também anota o cenário e transcreve o áudio. Quanto mais ela anotar, mais fácil achar o vídeo depois.',
+      },
+      'ingest.progress': {
+        title: 'Análise em andamento',
+        text: 'A IA está assistindo ao vídeo inteiro. Costuma levar por volta de um minuto, mais para vídeos longos. Dá para cancelar.',
+      },
+      'ingest.error': {
+        title: 'A análise falhou',
+        text: 'A mensagem diz o que deu errado. Você pode tentar de novo, ou marcar Entrada manual e escrever você mesmo.',
+      },
+      'ingest.quota': {
+        title: 'Análises do mês',
+        text: 'Cada vídeo que a IA analisa gasta uma análise, e toda conta tem um limite por mês. Quando acaba, a Entrada manual continua funcionando.',
+      },
+      'ingest.gate': {
+        title: 'Precisa de conta',
+        text: 'Guardar vídeos usa a IA, que tem custo, por isso pede uma conta. Buscar continua aberto para todo mundo.',
+      },
+      'review.general': {
+        title: 'Título e descrição',
+        text: 'É este texto que a busca lê para achar o vídeo. A IA erra de vez em quando, então confira e corrija o que precisar antes de salvar.',
+      },
+      'review.scenes': {
+        title: 'Elementos de cenário',
+        text: 'Coisas que aparecem no vídeo, separadas por vírgula. Ajudam a achar o vídeo por um detalhe, como "tigela azul".',
+      },
+      'review.audio': {
+        title: 'Áudio',
+        text: 'O que é falado ou cantado no vídeo, e a música quando a IA reconhece. Serve para achar o vídeo por uma frase dita nele.',
+      },
+      'review.save': {
+        title: 'Salvar ou cancelar',
+        text: 'Salvar guarda o vídeo no acervo com o texto acima. Cancelar joga tudo fora e volta para o começo.',
+      },
+      'search.query': {
+        title: 'Sua busca',
+        text: 'Escreva o que lembra do vídeo, do seu jeito: uma cena, uma frase, um assunto. Depois clique em Buscar.',
+      },
+      'search.presets': {
+        title: 'Precisão',
+        text: 'O quanto um vídeo precisa se parecer com o que você escreveu. Ampla traz mais vídeos, Precisa só os mais parecidos. Se não vier nada, tente Ampla.',
+      },
+      'search.advanced': {
+        title: 'Avançado',
+        text: 'Abre os ajustes finos da busca: o modo, o limiar, os atalhos de escrita e quantos resultados vêm.',
+      },
+      'search.advancedOpen': {
+        title: 'Ocultar avançado',
+        text: 'Guarda os ajustes finos de volta. O que você escolheu neles continua valendo.',
+      },
+      'search.mode': {
+        title: 'Modo de busca',
+        text: (
+          <>
+            É o jeito que eu procuro. <strong>Híbrida</strong> usa os dois jeitos ao mesmo tempo e
+            é o padrão. <strong>Semântica</strong> procura pelo assunto, mesmo que as palavras do
+            vídeo sejam outras. <strong>Exata</strong> só traz vídeos com as palavras que você
+            digitou.
+          </>
+        ),
+      },
+      'search.threshold': {
+        title: 'Limiar de correspondência',
+        text: 'É o quanto um vídeo precisa se parecer com o que você escreveu para entrar na lista. Mais para a direita eu fico exigente e trago menos vídeos. Mais para a esquerda trago mais, alguns nem tão parecidos. Só vale para a busca por significado.',
+      },
+      'search.syntax': {
+        title: 'Sintaxe de busca',
+        text: 'Atalhos para a busca por palavras: aspas procuram a frase exata, um sinal de menos tira uma palavra, e "or" aceita qualquer uma das duas.',
+      },
+      'search.limit': {
+        title: 'Máximo de resultados',
+        text: 'Quantos vídeos eu trago de cada vez. Com menos, a lista fica curta e só com os melhores.',
+      },
+      'search.empty': {
+        title: 'Nada encontrado',
+        text: 'Nenhum vídeo passou no filtro. Tente a precisão Ampla, menos palavras, ou descreva de outro jeito.',
+      },
+      card: {
+        title: 'Um resultado',
+        text: 'Um vídeo do acervo: o título leva ao post original e o texto é o resumo guardado junto com ele.',
+      },
+      'card.origin': {
+        title: 'Por que apareceu',
+        text: 'A etiqueta conta o motivo: "palavras" quer dizer que o texto do vídeo tem o que você digitou, "significado" quer dizer que ele fala de algo parecido.',
+      },
+      'card.match': {
+        title: 'Match',
+        text: 'O quanto o assunto do vídeo se parece com a sua busca. Quanto mais perto de 100%, mais parecido.',
+      },
+      'card.copy': {
+        title: 'Link do post',
+        text: 'O endereço do post original no X. O botão Copiar deixa ele pronto para colar onde você quiser.',
+      },
+      library: {
+        title: 'Meus vídeos',
+        text: 'Tudo que você guardou com a sua conta. Clique no título de um vídeo para abrir o post original.',
+      },
+      'account.form': {
+        title: 'Entrar ou criar conta',
+        text: 'A conta é o que deixa você guardar vídeos. Buscar não precisa dela.',
+      },
+      'account.session': {
+        title: 'Sua conta',
+        text: 'Você está conectado. O botão Sair encerra a sessão neste navegador.',
+      },
+      'account.guide': {
+        title: 'Demonstração guiada',
+        text: 'Refaz o passeio comigo numa tela de treino. Não gasta análise e nada é salvo.',
+      },
+      language: {
+        title: 'Idioma',
+        text: 'Troca o idioma do programa inteiro, e o meu também.',
+      },
+      admin: {
+        title: 'Estatísticas',
+        text: 'O painel de quem administra o projeto: quanto a IA foi usada, quanto custou e por que as análises falharam.',
       },
     },
   },

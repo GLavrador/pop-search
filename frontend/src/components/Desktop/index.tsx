@@ -18,14 +18,17 @@ export const Desktop = ({ appIcon, appLabel, onOpenApp }: DesktopProps) => {
       <DesktopIcon
         art={<img src={recycleBinIcon} alt="" className={styles.image} />}
         label={t.desktop.recycleBin}
+        zone="bin"
       />
       <DesktopIcon
         art={<img src={computerIcon} alt="" className={styles.image} />}
         label={t.desktop.myComputer}
+        zone="computer"
       />
       <DesktopIcon
         art={<span className={styles.emoji}>{appIcon}</span>}
         label={appLabel}
+        zone="app"
         onOpen={onOpenApp}
       />
     </div>

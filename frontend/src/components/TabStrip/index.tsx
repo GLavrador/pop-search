@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import type { HelpKey } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface TabStripProps<Id extends string> {
-  tabs: readonly { id: Id; label: string }[];
+  tabs: readonly { id: Id; label: string; help?: HelpKey }[];
   activeId: Id;
   onSelect: (id: Id) => void;
   /** Lets the other tabs recede while something else is asking for attention. */
@@ -46,12 +47,13 @@ export const TabStrip = <Id extends string>({
   return (
     <div className={`${styles.bar} ${quiet ? styles.quiet : ''}`}>
       <div ref={strip} className={styles.strip} role="tablist">
-        {tabs.map(({ id, label }) => (
+        {tabs.map(({ id, label, help }) => (
           <button
             key={id}
             type="button"
             role="tab"
             aria-selected={activeId === id}
+            data-help={help}
             onClick={() => onSelect(id)}
             className={`${styles.tab} ${activeId === id ? styles.tabActive : ''}`}
           >

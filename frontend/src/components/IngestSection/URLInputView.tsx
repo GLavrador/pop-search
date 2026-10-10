@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt, useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 import { ProgressBar } from '../ProgressBar';
 
@@ -31,6 +32,7 @@ export const URLInputView = ({
   const [analyzeScenes, setAnalyzeScenes] = useState(true);
   const [analyzeAudio, setAnalyzeAudio] = useState(true);
   const { t } = useI18n();
+  const robot = useRobot();
 
   useEffect(() => {
     if (loading) {
@@ -45,6 +47,7 @@ export const URLInputView = ({
 
   const handleNext = () => {
     if (url.trim()) {
+      robot.notify({ kind: 'pressed', what: 'next' });
       setStep(2);
     }
   };
@@ -58,7 +61,7 @@ export const URLInputView = ({
       {step === 1 ? (
         <>
           <label className={styles.label}>{t.ingest.urlLabel}</label>
-          <div className={styles.inputRow}>
+          <div className={styles.inputRow} {...helpAt('ingest.url')}>
             <input
               type="text"
               className="win95-inset win95-input"
@@ -88,13 +91,16 @@ export const URLInputView = ({
             )}
           </div>
 
-          <div className={styles.manualToggle}>
+          <div className={styles.manualToggle} {...helpAt('ingest.manual')}>
             <input
               type="checkbox"
               id="manualModeCheckbox"
               className={styles.manualCheckbox}
               checked={manualMode}
-              onChange={(e) => onManualModeChange(e.target.checked)}
+              onChange={(e) => {
+                robot.notify({ kind: 'pressed', what: e.target.checked ? 'manualOn' : 'manualOff' });
+                onManualModeChange(e.target.checked);
+              }}
               disabled={loading}
             />
             <label htmlFor="manualModeCheckbox" className={styles.manualLabel}>
@@ -103,7 +109,7 @@ export const URLInputView = ({
           </div>
         </>
       ) : (
-        <div className={`win95-border ${styles.optionsContainer}`}>
+        <div className={`win95-border ${styles.optionsContainer}`} {...helpAt('ingest.options')}>
           <div className={styles.optionsTitle}>{t.ingest.optionsTitle}</div>
           <div className={styles.optionsDescription}>
             {t.ingest.optionsDescription}
@@ -120,7 +126,13 @@ export const URLInputView = ({
                   id={id}
                   className={styles.manualCheckbox}
                   checked={state}
-                  onChange={(e) => setter(e.target.checked)}
+                  onChange={(e) => {
+                    robot.notify({
+                      kind: 'pressed',
+                      what: e.target.checked ? 'optionOn' : 'optionOff',
+                    });
+                    setter(e.target.checked);
+                  }}
                   disabled={loading}
                 />
                 <label htmlFor={id} className={`${styles.manualLabel} ${styles.checkboxOptionLabel}`}>
@@ -133,7 +145,10 @@ export const URLInputView = ({
           <div className={styles.runAnalysisActions}>
             <button
               className="win95-btn"
-              onClick={() => setStep(1)}
+              onClick={() => {
+                robot.notify({ kind: 'pressed', what: 'back' });
+                setStep(1);
+              }}
               disabled={loading}
             >
               {t.common.back}
@@ -150,7 +165,7 @@ export const URLInputView = ({
       )}
 
       {showProgress && (
-        <div className={styles.progressRow}>
+        <div className={styles.progressRow} {...helpAt('ingest.progress')}>
           <div className={styles.progressContainer}>
             <ProgressBar loading={loading} />
 
@@ -168,7 +183,7 @@ export const URLInputView = ({
       )}
 
       {error && (
-        <div className="win95-border win95-error">
+        <div className="win95-border win95-error" {...helpAt('ingest.error')}>
           <span>⚠️</span>
           <strong>{error}</strong>
         </div>

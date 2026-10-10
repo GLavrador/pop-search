@@ -18,6 +18,8 @@ interface UseVideoSearchQueryReturn {
     isLoading: boolean;
     hasSearched: boolean;
     error: string | null;
+    /** Changes every time a search comes back, with results or with an error. */
+    settledAt: number;
 }
 
 export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
@@ -62,5 +64,6 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
         isLoading: query.isFetching,
         hasSearched,
         error: query.error ? getErrorMessage(query.error) : null,
+        settledAt: Math.max(query.dataUpdatedAt, query.errorUpdatedAt),
     };
 };

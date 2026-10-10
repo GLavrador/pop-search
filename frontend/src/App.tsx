@@ -28,11 +28,15 @@ import { GuidePaused } from './components/Assistant/Paused';
 import { GuideInvite } from './components/Assistant/Invite';
 import { GuideChip } from './components/Assistant/Chip';
 import { RobotPilot } from './components/Assistant/RobotPilot';
+import { Speech } from './components/Assistant/Speech';
+import { HelpOverlay } from './components/Assistant/HelpOverlay';
 import type { Cue } from './components/Assistant/pilot';
 import { DemoIngest } from './components/Demo/DemoIngest';
 import { DemoSearch } from './components/Demo/DemoSearch';
 import { AIMS } from './components/Demo/spotlight';
 import { useGuide } from './hooks/useGuide';
+import { useRobotDirector } from './hooks/useRobotDirector';
+import { RobotContext, helpAt, type HelpKey } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
 
 const WINDOW_ICON = '💻';
@@ -61,6 +65,9 @@ function AppContent() {
   const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
+  const robot = useRobotDirector({ guiding: guide.isVisible });
+  const { notify } = robot;
+  const wasSignedIn = useRef<boolean | null>(null);
   const [invite, setInvite] = useState(readInvite);
   const [spotNode, setSpotNode] = useState<HTMLElement | null>(null);
   const reportSpot = useCallback((node: HTMLElement | null) => setSpotNode(node), []);
@@ -68,7 +75,22 @@ function AppContent() {
   const stage = useRef<HTMLDivElement>(null);
   useIdentityReset();
   useBackendWarmup();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const spokenIn = useRef(language);
+
+  useEffect(() => {
+    if (isAuthLoading) return;
+    if (wasSignedIn.current !== null && wasSignedIn.current !== isAuthenticated) {
+      notify(isAuthenticated ? { kind: 'signedIn', name: displayName } : { kind: 'signedOut' });
+    }
+    wasSignedIn.current = isAuthenticated;
+  }, [isAuthLoading, isAuthenticated, displayName, notify]);
+
+  useEffect(() => {
+    if (spokenIn.current === language) return;
+    spokenIn.current = language;
+    notify({ kind: 'language' });
+  }, [language, notify]);
 
   useEffect(() => {
     if (windowState !== 'closing') return;
@@ -88,6 +110,7 @@ function AppContent() {
 
     if (closeClicks.current < CLICKS_TO_CLOSE) {
       setShakeKey((key) => key + 1);
+      notify({ kind: 'closeAttempt', attempt: closeClicks.current });
       return;
     }
 
@@ -103,16 +126,35 @@ function AppContent() {
     pendingCat.current = null;
     setCat(null);
     setWindowState('open');
+    notify({ kind: 'reopened' });
+  };
+
+  const selectTab = (tab: Tab) => {
+    if (tab !== activeTab) notify({ kind: 'tab', tab });
+    setActiveTab(tab);
+  };
+
+  const toggleMaximized = () => {
+    notify({ kind: 'maximized', on: !isMaximized });
+    setIsMaximized(!isMaximized);
   };
 
   const isClosed = windowState === 'closed';
 
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'ingest', label: TAB_LABELS.ingest },
-    { id: 'search', label: TAB_LABELS.search },
-    ...(isAuthenticated ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos }] : []),
-    ...(isAdmin ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats }] : []),
-    { id: 'account', label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn },
+  const tabs: { id: Tab; label: string; help: HelpKey }[] = [
+    { id: 'ingest', label: TAB_LABELS.ingest, help: 'tab.ingest' },
+    { id: 'search', label: TAB_LABELS.search, help: 'tab.search' },
+    ...(isAuthenticated
+      ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos, help: 'tab.library' as HelpKey }]
+      : []),
+    ...(isAdmin
+      ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats, help: 'tab.admin' as HelpKey }]
+      : []),
+    {
+      id: 'account',
+      label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn,
+      help: 'tab.account',
+    },
   ];
 
   const step = guide.isVisible ? guide.step : null;
@@ -135,7 +177,17 @@ function AppContent() {
 
   const offersGuide = !isAuthLoading && !isAuthenticated && guide.step === null;
 
-  return (
+  const brief = robot.briefOver(
+    step && {
+      utterance: guide.index,
+      cue,
+      target: spotNode,
+      aim: step.spot ? AIMS[step.spot] : null,
+      roam: 'eager',
+    },
+  );
+
+  const desktop = (
     <div className={styles.appContainer}>
       <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} onOpenApp={handleOpen} />
 
@@ -148,9 +200,11 @@ function AppContent() {
         maximized={isMaximized}
         shakeKey={shakeKey}
         onMinimize={() => setWindowState('minimized')}
-        onMaximize={() => setIsMaximized((value) => !value)}
+        onMaximize={toggleMaximized}
         onClose={handleClose}
         aside={offersGuide && invite === 'tucked' ? <GuideChip onOpen={startGuide} /> : undefined}
+        onHelp={robot.toggleHelp}
+        helping={robot.helping}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
           {offersGuide && invite !== 'tucked' && (
@@ -191,7 +245,7 @@ function AppContent() {
           <TabStrip
             tabs={tabs}
             activeId={activeTab}
-            onSelect={setActiveTab}
+            onSelect={selectTab}
             quiet={step !== null}
           />
 
@@ -209,14 +263,17 @@ function AppContent() {
                 {isAuthenticated ? (
                   <IngestSection />
                 ) : (
-                  <div className={styles.gate}>
+                  <div className={styles.gate} {...helpAt('ingest.gate')}>
                     <p><strong>{t.gate.title}</strong></p>
                     <p>{t.gate.body}</p>
                     <div className={styles.gateActions}>
                       <button
                         type="button"
                         className="win95-btn"
-                        onClick={() => setActiveTab('account')}
+                        onClick={() => {
+                          notify({ kind: 'pressed', what: 'gateSignIn' });
+                          setActiveTab('account');
+                        }}
                       >
                         {t.gate.signIn}
                       </button>
@@ -254,17 +311,20 @@ function AppContent() {
         </div>
       </RetroWindow>
 
-      {guide.isVisible && (windowState === 'open' || windowState === 'minimized') && (
-        <RobotPilot
-          utterance={guide.index}
-          cue={cue}
-          home={robotSeat}
-          target={spotNode}
-          aim={step?.spot ? AIMS[step.spot] : null}
-          parked={windowState === 'minimized'}
-          stage={stage}
-        />
-      )}
+      <RobotPilot
+        {...brief}
+        home={robotSeat}
+        parked={windowState === 'minimized'}
+        stage={stage}
+        label={t.guide.poke}
+        handle={robot.handle}
+        onGrab={robot.dismiss}
+        onDrop={robot.dropped}
+      >
+        {robot.line && <Speech line={robot.line} onDismiss={robot.dismiss} />}
+      </RobotPilot>
+
+      {robot.helping && <HelpOverlay onPick={robot.pick} onCancel={robot.stopHelp} />}
 
       <footer className={styles.footer}>
         <p>{t.footer}</p>
@@ -284,6 +344,8 @@ function AppContent() {
       </Taskbar>
     </div>
   );
+
+  return <RobotContext.Provider value={robot.voice}>{desktop}</RobotContext.Provider>;
 }
 
 function App() {

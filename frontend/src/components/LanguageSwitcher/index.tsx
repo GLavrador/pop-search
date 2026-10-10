@@ -1,4 +1,5 @@
 import { useI18n, type Language } from '../../i18n/languageContext';
+import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 export const LanguageSwitcher = () => {
@@ -10,7 +11,7 @@ export const LanguageSwitcher = () => {
   ];
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} {...helpAt('language')}>
       <span className={styles.label}>{t.language.label}</span>
 
       <div className={styles.buttonGroup} role="group" aria-label={t.language.label}>

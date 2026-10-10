@@ -1,6 +1,16 @@
 import type { Box, Point, Side, Size } from './flight';
+import type { Variety } from './variety';
 
-export type Face = 'neutral' | 'happy' | 'curious' | 'wow' | 'sleepy';
+export type Face =
+  | 'neutral'
+  | 'happy'
+  | 'curious'
+  | 'wow'
+  | 'sleepy'
+  | 'worried'
+  | 'dizzy'
+  | 'yawn'
+  | 'shy';
 
 export type Pose =
   | 'stand'
@@ -9,6 +19,9 @@ export type Pose =
   | 'cheer'
   | 'sit'
   | 'peek'
+  | 'dangle'
+  | 'brake'
+  | 'hover'
   | 'point-down'
   | 'point-up'
   | 'point-left'
@@ -17,6 +30,8 @@ export type Pose =
 export interface Stop {
   at: Point;
   side?: Side;
+  /** How it settles there, when the place itself decides it: a ledge is for sitting. */
+  pose?: Pose;
 }
 
 /** One stop: where to go, how to look once there, and how long to stay. */
@@ -27,10 +42,10 @@ export interface Leg {
   pose: Pose | ((side?: Side) => Pose);
   face: Face;
   /** Where the eyes rest, as a direction; 'wander' lets them drift. */
-  gaze?: Point | 'wander' | ((side?: Side) => Point);
+  gaze?: Point | 'wander' | ((side?: Side) => Point | 'wander');
   emote?: () => string;
   hold: number;
-  layer?: 'behind' | 'top';
+  layer?: 'behind';
   /** Covers the distance in a fraction of the usual time. */
   swift?: boolean;
   /** Flies straight instead of taking an arc. */
@@ -38,6 +53,8 @@ export interface Leg {
   onLand?: () => void;
   /** The stop the current step asks for, as opposed to a trip of its own. */
   mission?: boolean;
+  /** Degrees its body is turned once there. Only a robot in hiding has one. */
+  turn?: number;
 }
 
 export interface Emotes {
@@ -45,6 +62,17 @@ export interface Emotes {
   sorry: string;
   knock: string;
   puzzled: string;
+  grabbed: readonly string[];
+  bin: readonly string[];
+  hiding: readonly string[];
+  dizzy: readonly string[];
+  enough: readonly string[];
+  lurk: readonly string[];
+  found: readonly string[];
+  flip: readonly string[];
+  roof: readonly string[];
+  yawn: readonly string[];
+  woke: readonly string[];
 }
 
 /** What a trip may use of the robot and of the screen it lives on. */
@@ -59,6 +87,10 @@ export interface Scene {
   move: (frames: Keyframe[], duration: number) => void;
   /** Says the next change to the window is the robot's own doing, not a new errand. */
   prank: (ms: number) => void;
+  /** How long since the user last typed or clicked. */
+  idleFor: () => number;
+  /** Chooses among ways of saying one thing, never the same twice running. */
+  vary: Variety;
 }
 
 interface Trip {
@@ -70,8 +102,9 @@ interface Trip {
 
 const AHEAD: Point = { x: 0, y: 0 };
 const DOWN: Point = { x: 0, y: 1 };
+const BUSY_FOR = 12000;
 
-const HOP = [
+export const HOP = [
   { transform: 'translateY(0)' },
   { transform: 'translateY(-16px)', offset: 0.45 },
   { transform: 'translateY(0)' },
@@ -101,6 +134,11 @@ const pick = <T>(items: readonly T[]): T | undefined =>
   items[Math.floor(Math.random() * items.length)];
 export const landmark = (name: string) =>
   document.querySelector<HTMLElement>(`[data-robot="${name}"]`);
+/** The app window, unless it is minimized or closed: then there is nothing to stand on. */
+export const openWindow = () => {
+  const frame = landmark('window');
+  return frame?.getAttribute('aria-hidden') === 'true' ? null : frame;
+};
 const boxOf = (node: Element | null): Box | null => (node ? node.getBoundingClientRect() : null);
 const icons = () => [...document.querySelectorAll<HTMLElement>('[data-robot="icon"]')];
 const animate = (node: Element, frames: Keyframe[], duration: number) =>
@@ -128,6 +166,122 @@ const onTaskbar = (button: HTMLElement, bar: HTMLElement, { size, onScreen }: Sc
       y: bar.getBoundingClientRect().top - size.h + 4,
     }),
   };
+};
+
+/**
+ * It jumps on the app's own button down there and really presses it, so the
+ * window goes away or comes back. It owns up, then jumps again to undo it.
+ */
+export const stomp = (scene: Scene): Leg[] => {
+  const button = landmark('task');
+  const bar = landmark('taskbar');
+  if (!button || !bar) return [];
+
+  const where = onTaskbar(button, bar, scene);
+  const isOpen = () => button.getAttribute('aria-pressed') === 'true';
+  const wasOpen = isOpen();
+  const jump = (onImpact?: () => void) => {
+    scene.move(HOP, 400);
+    scene.after(300, () => {
+      animate(button, FLASH, 420);
+      onImpact?.();
+    });
+  };
+  return [
+    {
+      where,
+      pose: 'stand',
+      face: 'happy',
+      gaze: DOWN,
+      hold: 1700,
+      onLand: () => {
+        scene.prank(8000);
+        jump();
+        scene.after(560, () => jump(() => button.click()));
+      },
+    },
+    {
+      where,
+      pose: 'stand',
+      face: 'wow',
+      gaze: AHEAD,
+      emote: () => scene.emotes().sorry,
+      hold: 1900,
+    },
+    {
+      where,
+      pose: 'stand',
+      face: 'neutral',
+      gaze: DOWN,
+      hold: 1400,
+      onLand: () =>
+        jump(() => {
+          if (isOpen() !== wasOpen) button.click();
+        }),
+    },
+  ];
+};
+
+const PEEKING = 25;
+
+/**
+ * Behind the window with just the top of its head and its eyes showing: over
+ * the top edge, under the bottom one on its head, or sideways at either side.
+ */
+export const lurk = ({ size }: Scene, avoid?: Side): Leg[] => {
+  const frame = boxOf(openWindow());
+  if (!frame) return [];
+
+  const floor = boxOf(landmark('taskbar'))?.top ?? window.innerHeight;
+  const along = (from: number, to: number, body: number) =>
+    from + 30 + Math.random() * Math.max(0, to - from - 60 - body);
+  const across = () => along(frame.left, frame.right, size.w);
+  const down = () => along(frame.top, frame.bottom, size.h);
+  // Turned on its side it is as wide as it is tall, about the same middle.
+  const sideways = (size.h - size.w) / 2;
+
+  const spots: (Stop & { side: Side; turn: number; fits: boolean })[] = [
+    {
+      side: 'above',
+      turn: 0,
+      at: { x: across(), y: frame.top - PEEKING },
+      fits: frame.top - PEEKING >= 2,
+    },
+    {
+      side: 'below',
+      turn: 180,
+      at: { x: across(), y: frame.bottom + PEEKING - size.h },
+      fits: frame.bottom + PEEKING <= floor - 2,
+    },
+    {
+      side: 'left',
+      turn: -90,
+      at: { x: frame.left - PEEKING + sideways, y: down() },
+      fits: frame.left - PEEKING >= 2,
+    },
+    {
+      side: 'right',
+      turn: 90,
+      at: { x: frame.right + PEEKING - sideways - size.w, y: down() },
+      fits: frame.right + PEEKING <= window.innerWidth - 2,
+    },
+  ];
+  const open = spots.filter((spot) => spot.fits);
+  const spot = pick(open.filter((candidate) => candidate.side !== avoid)) ?? pick(open);
+  if (!spot) return [];
+
+  return [
+    {
+      where: () => ({ at: spot.at, side: spot.side }),
+      pose: 'peek',
+      face: 'curious',
+      gaze: 'wander',
+      hold: 7000,
+      layer: 'behind',
+      swift: true,
+      turn: spot.turn,
+    },
+  ];
 };
 
 export const TRIPS: Record<string, Trip> = {
@@ -237,70 +391,15 @@ export const TRIPS: Record<string, Trip> = {
           gaze: 'wander',
           emote: () => '♪',
           hold: 4200,
-          layer: 'top',
         },
       ];
     },
   },
 
-  // It jumps on the app's own button down there and really presses it: the
-  // window drops to the taskbar. It owns up, then jumps again to bring it back.
   stomp: {
     odds: 0.35,
-    plan: (scene) => {
-      const button = landmark('task');
-      const bar = landmark('taskbar');
-      if (!button || !bar) return [];
-      const where = onTaskbar(button, bar, scene);
-      const isOpen = () => button.getAttribute('aria-pressed') === 'true';
-      const jump = (onImpact?: () => void) => {
-        scene.move(HOP, 400);
-        scene.after(300, () => {
-          animate(button, FLASH, 420);
-          onImpact?.();
-        });
-      };
-      return [
-        {
-          where,
-          pose: 'stand',
-          face: 'happy',
-          gaze: DOWN,
-          hold: 1700,
-          layer: 'top',
-          onLand: () => {
-            scene.prank(8000);
-            jump();
-            scene.after(560, () =>
-              jump(() => {
-                if (isOpen()) button.click();
-              }),
-            );
-          },
-        },
-        {
-          where,
-          pose: 'stand',
-          face: 'wow',
-          gaze: AHEAD,
-          emote: () => scene.emotes().sorry,
-          hold: 1900,
-          layer: 'top',
-        },
-        {
-          where,
-          pose: 'stand',
-          face: 'neutral',
-          gaze: DOWN,
-          hold: 1400,
-          layer: 'top',
-          onLand: () =>
-            jump(() => {
-              if (!isOpen()) button.click();
-            }),
-        },
-      ];
-    },
+    // Never on its own while the user is in the middle of something: it takes the window away.
+    plan: (scene) => (scene.idleFor() < BUSY_FOR ? [] : stomp(scene)),
   },
 
   // It tries the Start button too. Nothing opens, which puzzles it.
@@ -318,7 +417,6 @@ export const TRIPS: Record<string, Trip> = {
           face: 'curious',
           gaze: DOWN,
           hold: 1500,
-          layer: 'top',
           onLand: () => {
             scene.move(HOP, 400);
             scene.after(520, () => scene.move(HOP, 400));
@@ -331,7 +429,6 @@ export const TRIPS: Record<string, Trip> = {
           gaze: 'wander',
           emote: () => scene.emotes().puzzled,
           hold: 1900,
-          layer: 'top',
         },
       ];
     },
@@ -340,7 +437,7 @@ export const TRIPS: Record<string, Trip> = {
   peek: {
     odds: 1,
     plan: ({ size }) => {
-      const frame = boxOf(landmark('window'));
+      const frame = boxOf(openWindow());
       if (!frame) return [];
       const height = frame.bottom - frame.top;
       const width = frame.right - frame.left;
@@ -380,7 +477,7 @@ export const TRIPS: Record<string, Trip> = {
     odds: 0.7,
     plan: ({ size, position }) => {
       const floor = (boxOf(landmark('taskbar'))?.top ?? window.innerHeight) - size.h - 6;
-      const frame = boxOf(landmark('window'));
+      const frame = boxOf(openWindow());
       const ceiling = frame && floor - frame.bottom > 10 ? frame.bottom + 2 : 8;
       if (floor <= ceiling) return [];
       const far = window.innerWidth - size.w - 10;
@@ -439,7 +536,7 @@ export const TRIPS: Record<string, Trip> = {
   rooftop: {
     odds: 0.7,
     plan: ({ size }) => {
-      const frame = landmark('window');
+      const frame = openWindow();
       if (!frame || frame.getBoundingClientRect().top < size.h) return [];
       return [
         {
@@ -461,7 +558,7 @@ export const TRIPS: Record<string, Trip> = {
   nap: {
     odds: 0.5,
     plan: ({ size }) => {
-      const frame = landmark('window');
+      const frame = openWindow();
       if (!frame || frame.getBoundingClientRect().top < size.h) return [];
       return [
         {
@@ -484,7 +581,7 @@ export const TRIPS: Record<string, Trip> = {
   knock: {
     odds: 0.6,
     plan: (scene) => {
-      const frame = boxOf(landmark('window'));
+      const frame = boxOf(openWindow());
       const at = frame
         ? { x: (frame.left + frame.right - scene.size.w) / 2, y: frame.top - 12 }
         : { x: (window.innerWidth - scene.size.w) / 2, y: window.innerHeight * 0.3 };
@@ -523,6 +620,27 @@ export const TRIPS: Record<string, Trip> = {
       ];
     },
   },
+};
+
+/** Somewhere to cower: behind the far edge of the window, or half out of the screen. */
+export const hide = ({ size, emotes, vary }: Scene): Leg[] => {
+  const frame = boxOf(openWindow());
+  const behind = frame !== null && window.innerWidth - frame.right > size.w * 0.6;
+  const at = behind
+    ? { x: frame.right - size.w * 0.42, y: frame.top + (frame.bottom - frame.top) * 0.3 }
+    : { x: window.innerWidth - size.w * 0.5, y: window.innerHeight * 0.35 };
+  return [
+    {
+      where: () => ({ at, side: 'right' }),
+      pose: 'peek',
+      face: 'worried',
+      gaze: { x: -1, y: -0.4 },
+      emote: () => vary('hiding', emotes().hiding),
+      hold: 5200,
+      layer: behind ? 'behind' : undefined,
+      swift: true,
+    },
+  ];
 };
 
 /** Picks a trip by its odds, never the same one twice running. */

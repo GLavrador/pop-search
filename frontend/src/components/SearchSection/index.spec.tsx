@@ -10,6 +10,7 @@ vi.mock('../../hooks/useVideoSearchQuery', () => ({
     results: [],
     isLoading: false,
     hasSearched: false,
+    settledAt: 0,
     error: null,
   })),
 }));
@@ -49,6 +50,7 @@ describe('SearchSection Component', () => {
       results: [],
       isLoading: false,
       hasSearched: false,
+      settledAt: 0,
       error: null,
     });
 
@@ -70,6 +72,7 @@ describe('SearchSection Component', () => {
       results: [],
       isLoading: false,
       hasSearched: false,
+      settledAt: 0,
       error: null,
     });
 
@@ -91,6 +94,7 @@ describe('SearchSection Component', () => {
       results: [],
       isLoading: false,
       hasSearched: false,
+      settledAt: 0,
       error: null,
     });
 
@@ -157,6 +161,7 @@ describe('SearchSection Component', () => {
       results: [],
       isLoading: false,
       hasSearched: false,
+      settledAt: 0,
       error: null,
     });
 
@@ -174,6 +179,7 @@ describe('SearchSection Component', () => {
       results: [],
       isLoading: false,
       hasSearched: true,
+      settledAt: 0,
       error: null,
     });
 
@@ -188,6 +194,7 @@ describe('SearchSection Component', () => {
       results: [],
       isLoading: false,
       hasSearched: true,
+      settledAt: 0,
       error: 'Database connection failed',
     });
 
@@ -202,6 +209,7 @@ describe('SearchSection Component', () => {
       results: [],
       isLoading: true,
       hasSearched: true,
+      settledAt: 0,
       error: null,
     });
 

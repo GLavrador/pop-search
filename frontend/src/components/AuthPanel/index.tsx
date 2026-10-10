@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useStatus } from '../../context/StatusContext';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt, useRobot } from '../../context/robotContext';
 import { QuotaMeter } from '../QuotaMeter';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import styles from './styles.module.css';
@@ -16,6 +17,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   const { isAuthenticated, displayName, signIn, signUp, signOut } = useAuth();
   const { setStatus } = useStatus();
   const { t } = useI18n();
+  const robot = useRobot();
 
   const [mode, setMode] = useState<Mode>('signIn');
   const [email, setEmail] = useState('');
@@ -28,7 +30,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   if (isAuthenticated) {
     return (
       <div className={`win95-border ${styles.panel}`}>
-        <div className={styles.session}>
+        <div className={styles.session} {...helpAt('account.session')}>
           <span className={styles.who}>
             {t.auth.signedInAs} <span className={styles.name}>{displayName}</span>
           </span>
@@ -48,7 +50,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
         {onStartGuide && (
           <>
             <hr className={styles.divider} />
-            <div className={styles.guide}>
+            <div className={styles.guide} {...helpAt('account.guide')}>
               <p className={styles.guideLegend}>{t.guide.profile.legend}</p>
               <p className={styles.guideNote}>{t.guide.profile.note}</p>
               <button type="button" className="win95-btn" onClick={onStartGuide}>
@@ -69,6 +71,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
     setError(null);
     setNotice(null);
     setIsBusy(true);
+    robot.notify({ kind: 'pressed', what: 'authSubmit' });
 
     const result =
       mode === 'signIn'
@@ -95,7 +98,11 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   const isSignUp = mode === 'signUp';
 
   return (
-    <form className={`win95-border ${styles.panel}`} onSubmit={handleSubmit}>
+    <form
+      className={`win95-border ${styles.panel}`}
+      onSubmit={handleSubmit}
+      {...helpAt('account.form')}
+    >
       <p className={styles.title}>{isSignUp ? t.auth.createAccount : t.auth.signIn}</p>
       <p className={styles.subtitle}>{t.auth.subtitle}</p>
 
@@ -175,6 +182,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
         className={styles.switch}
         disabled={isBusy}
         onClick={() => {
+          robot.notify({ kind: 'pressed', what: 'authSwitch' });
           setMode(isSignUp ? 'signIn' : 'signUp');
           setError(null);
           setNotice(null);

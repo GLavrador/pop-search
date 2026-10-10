@@ -8,6 +8,8 @@ export interface Aim {
   pick?: string;
   /** Where the robot would rather stand, when the usual place would cover something. */
   from?: Side;
+  /** Lets it step outside the panel, for when what it says should not cover the panel. */
+  free?: boolean;
 }
 
 export const AIMS: Record<NonNullable<Spot>, Aim> = {

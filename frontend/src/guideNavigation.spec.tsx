@@ -58,15 +58,33 @@ describe('guided demo navigation', () => {
     await startGuide();
 
     expect(screen.getByText('Hi! I am BIP-98')).toBeInTheDocument();
-    expect(screen.getByText('1/12')).toBeInTheDocument();
+    expect(screen.getByText('1/13')).toBeInTheDocument();
     expect(screen.getByText('DEMO')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Off we go ▶' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tell me ▶' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'skip ▸' })).not.toBeInTheDocument();
+  });
+
+  it('should say what the app is before it starts showing it', async () => {
+    renderApp();
+    await startGuide();
+
+    await press('Tell me ▶');
+
+    expect(screen.getByText('What Pop Search is')).toBeInTheDocument();
+    expect(screen.getByText('You keep it')).toBeInTheDocument();
+    expect(screen.getByText('The AI watches')).toBeInTheDocument();
+    expect(screen.getByText('You find it')).toBeInTheDocument();
+    expect(screen.getByText('2/13')).toBeInTheDocument();
+
+    await press('Off we go ▶');
+
+    expect(screen.getByText('Keeping a video')).toBeInTheDocument();
   });
 
   it('should hand the way forward to the app on a doing step', async () => {
     renderApp();
     await startGuide();
+    await press('Tell me ▶');
     await press('Off we go ▶');
 
     expect(screen.getByText('Keeping a video')).toBeInTheDocument();
@@ -78,6 +96,7 @@ describe('guided demo navigation', () => {
   it('should follow the user through the whole add flow', async () => {
     renderApp();
     await startGuide();
+    await press('Tell me ▶');
     await press('Off we go ▶');
 
     await press('Next');
@@ -94,13 +113,13 @@ describe('guided demo navigation', () => {
 
     await press('Save');
     expect(await screen.findByText('Video kept')).toBeInTheDocument();
-    expect(screen.getByText('7/12')).toBeInTheDocument();
+    expect(screen.getByText('8/13')).toBeInTheDocument();
   });
 
   it('should let a doing step be skipped', async () => {
     renderApp();
     await startGuide();
-    await jumpTo(2);
+    await jumpTo(3);
 
     await press('skip ▸');
 
@@ -108,10 +127,10 @@ describe('guided demo navigation', () => {
   });
 
   it.each([
-    [2, '[data-aim]'],
     [3, '[data-aim]'],
-    [6, 'button[type="submit"]'],
-    [9, '[data-aim]'],
+    [4, '[data-aim]'],
+    [7, 'button[type="submit"]'],
+    [10, '[data-aim]'],
   ])('should name the real control in the instruction of step %i', async (step, control) => {
     renderApp();
     await startGuide();
@@ -125,12 +144,12 @@ describe('guided demo navigation', () => {
   it('should rewind the add screen when stepping back', async () => {
     renderApp();
     await startGuide();
-    await jumpTo(7);
+    await jumpTo(8);
     expect(screen.getByText(/Saved, in pretend/)).toBeInTheDocument();
 
     for (let i = 0; i < 5; i += 1) await press('◂ back');
 
-    expect(screen.getByText('2/12')).toBeInTheDocument();
+    expect(screen.getByText('3/13')).toBeInTheDocument();
     expect(screen.queryByText(/Saved, in pretend/)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument();
   });
@@ -139,11 +158,11 @@ describe('guided demo navigation', () => {
     renderApp();
     await startGuide();
 
-    await jumpTo(10);
+    await jumpTo(11);
     expect(screen.getByText('What came up')).toBeInTheDocument();
     expect(tab('🔍 Search.exe')).toHaveAttribute('aria-selected', 'true');
 
-    await jumpTo(3);
+    await jumpTo(4);
     expect(screen.getByText('Analysis Options')).toBeInTheDocument();
     expect(tab('💿 Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
   });
@@ -151,12 +170,12 @@ describe('guided demo navigation', () => {
   it('should stand aside when the user opens another tab, keeping its place', async () => {
     renderApp();
     await startGuide();
-    await jumpTo(3);
+    await jumpTo(4);
 
     await user.click(tab('🔍 Search.exe'));
 
     expect(screen.queryByText('DEMO')).not.toBeInTheDocument();
-    expect(screen.getByText('3/12')).toBeInTheDocument();
+    expect(screen.getByText('4/13')).toBeInTheDocument();
 
     await press('Take me back');
 
@@ -167,27 +186,27 @@ describe('guided demo navigation', () => {
   it('should keep its place while closed and restore the same step', async () => {
     renderApp();
     await startGuide();
-    await jumpTo(5);
+    await jumpTo(6);
 
     await press('Close the guide');
 
     expect(screen.queryByText('DEMO')).not.toBeInTheDocument();
-    expect(screen.getByText('Guide paused on step 5 of 12.')).toBeInTheDocument();
+    expect(screen.getByText('Guide paused on step 6 of 13.')).toBeInTheDocument();
 
     await press('▶ Resume');
 
     expect(screen.getByText('Check what the AI wrote')).toBeInTheDocument();
-    expect(screen.getByText('5/12')).toBeInTheDocument();
+    expect(screen.getByText('6/13')).toBeInTheDocument();
   });
 
   it('should end on the last step and keep offering the guide, on every tab', async () => {
     renderApp();
     await startGuide();
-    await jumpTo(12);
+    await jumpTo(13);
 
     await press('Finish ✓');
 
-    expect(screen.queryByText('12/12')).not.toBeInTheDocument();
+    expect(screen.queryByText('13/13')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: '▶ See the guide again' })).toBeInTheDocument();
 
     await user.click(tab('🔍 Search.exe'));
@@ -270,7 +289,7 @@ describe('guided demo navigation', () => {
     await user.type(screen.getByPlaceholderText('Type to search...'), 'whales');
 
     await startGuide();
-    await jumpTo(10);
+    await jumpTo(11);
     await press('Close the guide');
     await press('end guide');
 

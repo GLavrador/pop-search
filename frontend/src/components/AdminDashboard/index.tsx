@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { RANGE_OPTIONS, useAdminStatsQuery } from '../../hooks/useAdminStatsQuery';
 import { useI18n } from '../../i18n/languageContext';
+import { helpAt, useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface CardProps {
@@ -22,6 +23,7 @@ export const AdminDashboard = () => {
   const [days, setDays] = useState<number>(30);
   const { isAdmin, stats, isLoading, error } = useAdminStatsQuery(days);
   const { t, locale } = useI18n();
+  const robot = useRobot();
 
   const n = (value: number) => value.toLocaleString(locale);
 
@@ -41,7 +43,7 @@ export const AdminDashboard = () => {
   const busiestDay = Math.max(1, ...stats.daily.map((point) => point.analyses));
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} {...helpAt('admin')}>
       <div className={styles.header}>
         <h2 className={styles.title}>{t.admin.title}</h2>
         <div className={styles.ranges} role="group" aria-label={t.admin.rangeLabel}>
@@ -50,7 +52,10 @@ export const AdminDashboard = () => {
               key={option}
               type="button"
               aria-pressed={days === option}
-              onClick={() => setDays(option)}
+              onClick={() => {
+                robot.notify({ kind: 'pressed', what: 'adminRange' });
+                setDays(option);
+              }}
               className={`win95-btn ${styles.rangeButton} ${days === option ? 'win95-btn-pressed' : ''}`}
             >
               {t.admin.range(option)}

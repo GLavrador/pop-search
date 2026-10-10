@@ -16,13 +16,27 @@ export const Robot = ({ className = '' }: RobotProps) => (
     focusable="false"
   >
     <g className={styles.rig}>
-      <g className={styles.jet}>
-        <path d="M16.5 58 L19 66 L21.5 58 Z" />
-        <path d="M30.5 58 L33 66 L35.5 58 Z" />
+      {/* Each flame belongs to its foot, so it points wherever the foot does. */}
+      <g className={styles.legL}>
+        <g className={styles.flame}>
+          <path d="M16.2 58 C16.2 62.4 18.1 63.8 19 67 C19.9 63.8 21.8 62.4 21.8 58 Z" />
+          <path
+            className={styles.flameCore}
+            d="M17.7 58 C17.7 60.6 18.6 61.4 19 63.4 C19.4 61.4 20.3 60.6 20.3 58 Z"
+          />
+        </g>
+        <rect x="15" y="54" width="8" height="4" />
       </g>
-
-      <rect className={styles.legL} x="15" y="54" width="8" height="4" />
-      <rect className={styles.legR} x="29" y="54" width="8" height="4" />
+      <g className={styles.legR}>
+        <g className={styles.flame}>
+          <path d="M30.2 58 C30.2 62.4 32.1 63.8 33 67 C33.9 63.8 35.8 62.4 35.8 58 Z" />
+          <path
+            className={styles.flameCore}
+            d="M31.7 58 C31.7 60.6 32.6 61.4 33 63.4 C33.4 61.4 34.3 60.6 34.3 58 Z"
+          />
+        </g>
+        <rect x="29" y="54" width="8" height="4" />
+      </g>
       <rect className={styles.armL} x="3" y="40" width="9" height="4.5" />
       <rect className={styles.armR} x="40" y="40" width="9" height="4.5" />
       <rect x="22.5" y="33" width="7" height="5" />
@@ -48,6 +62,14 @@ export const Robot = ({ className = '' }: RobotProps) => (
             <rect x="17" y="20.4" width="6" height="1.8" />
             <rect x="29" y="20.4" width="6" height="1.8" />
           </g>
+          <g className={styles.eyesDizzy}>
+            <path d="M19.2 20.5 a0.8 0.8 0 1 0 1.6 0 a1.6 1.6 0 1 0 -3.2 0 a2.5 2.5 0 1 0 5 0" />
+            <path d="M31.2 20.5 a0.8 0.8 0 1 0 1.6 0 a1.6 1.6 0 1 0 -3.2 0 a2.5 2.5 0 1 0 5 0" />
+          </g>
+          <g className={styles.brows}>
+            <path d="M17 17.4 L22.6 15.9" />
+            <path d="M29.4 15.9 L35 17.4" />
+          </g>
           <g className={styles.eyesWide}>
             <circle cx="20" cy="20.3" r="3.5" />
             <circle cx="32" cy="20.3" r="3.5" />
@@ -58,7 +80,18 @@ export const Robot = ({ className = '' }: RobotProps) => (
           <rect className={styles.mouthFlat} x="20" y="25.5" width="12" height="2.6" />
           <path className={styles.mouthSmile} d="M20.5 25 V28 H31.5 V25" />
           <rect className={styles.mouthOh} x="24" y="24.8" width="4" height="3.8" />
+          <path className={styles.mouthFrown} d="M20.5 28.4 V25.6 H31.5 V28.4" />
+          <path className={styles.mouthWavy} d="M20 27 l2 -1.7 l2 1.7 l2 -1.7 l2 1.7 l2 -1.7 l2 1.7" />
+          <rect className={styles.mouthYawn} x="22.5" y="23.5" width="7" height="5.6" />
         </g>
+      </g>
+
+      {/* Both arms up and a hand over each eye. Drawn last, to go in front of the face. */}
+      <g className={styles.hands}>
+        <path d="M8.3 40.5 L12.7 42.5 L21.9 22.4 L17.5 20.4 Z" />
+        <path d="M43.7 40.5 L39.3 42.5 L30.1 22.4 L34.5 20.4 Z" />
+        <rect x="16" y="17.4" width="8" height="6.2" />
+        <rect x="28" y="17.4" width="8" height="6.2" />
       </g>
     </g>
   </svg>
