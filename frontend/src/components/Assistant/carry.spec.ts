@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { angleOf, coast, hangFrom, steady, swing, throwOf, type Hang } from './carry';
+import {
+  NOT_SHAKING,
+  angleOf,
+  coast,
+  hangFrom,
+  isShaken,
+  shake,
+  steady,
+  swing,
+  throwOf,
+  type Hang,
+} from './carry';
 
 const FRAME = 16;
 
@@ -111,5 +122,48 @@ describe('carrying the robot', () => {
 
     expect(Math.min(...angles)).toBeLessThan(-0.05);
     expect(Math.abs(state.angle)).toBeLessThan(0.01);
+  });
+});
+
+describe('shaking the robot', () => {
+  const moved = (steps: [dx: number, at: number][]) =>
+    steps.reduce((state, [dx, at]) => shake(state, dx, at), NOT_SHAKING);
+
+  it('should take quick trips back and forth for a shaking', () => {
+    const state = moved([
+      [40, 0],
+      [-40, 80],
+      [40, 160],
+      [-40, 240],
+      [40, 320],
+      [-40, 400],
+    ]);
+
+    expect(isShaken(state, 400)).toBe(true);
+  });
+
+  it('should not mind being carried a long way in one direction', () => {
+    const state = moved(Array.from({ length: 30 }, (_, i): [number, number] => [25, i * 16]));
+
+    expect(isShaken(state, 480)).toBe(false);
+  });
+
+  it('should ignore the jitter of a hand that is barely moving', () => {
+    const state = moved(Array.from({ length: 30 }, (_, i): [number, number] => [i % 2 ? 3 : -3, i * 16]));
+
+    expect(isShaken(state, 480)).toBe(false);
+  });
+
+  it('should forget turns that happened too long ago', () => {
+    const state = moved([
+      [40, 0],
+      [-40, 1000],
+      [40, 2000],
+      [-40, 3000],
+      [40, 4000],
+      [-40, 5000],
+    ]);
+
+    expect(isShaken(state, 5000)).toBe(false);
   });
 });

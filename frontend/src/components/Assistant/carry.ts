@@ -108,3 +108,36 @@ export const steady = (angle: number, rate: number, dt: number): { angle: number
   }
   return { angle, rate };
 };
+
+/** A drag watched for the back and forth that makes it dizzy. */
+export interface Shaking {
+  heading: number;
+  /** How far it has gone the current way, in px. */
+  run: number;
+  /** When each change of direction happened. */
+  turns: readonly number[];
+}
+
+export const NOT_SHAKING: Shaking = { heading: 0, run: 0, turns: [] };
+
+const TURN_AFTER = 26;
+const SHAKE_WINDOW = 1400;
+const TURNS_TO_DIZZY = 5;
+
+/** Follows one more move of the pointer. A turn only counts after a real stretch one way. */
+export const shake = (state: Shaking, dx: number, at: number): Shaking => {
+  const heading = Math.sign(dx);
+  if (!heading) return state;
+  if (heading === state.heading || !state.heading) {
+    return { heading, run: state.run + Math.abs(dx), turns: state.turns };
+  }
+  const recent = state.turns.filter((turn) => at - turn <= SHAKE_WINDOW);
+  return {
+    heading,
+    run: Math.abs(dx),
+    turns: state.run >= TURN_AFTER ? [...recent, at] : recent,
+  };
+};
+
+export const isShaken = (state: Shaking, at: number) =>
+  state.turns.filter((turn) => at - turn <= SHAKE_WINDOW).length >= TURNS_TO_DIZZY;
