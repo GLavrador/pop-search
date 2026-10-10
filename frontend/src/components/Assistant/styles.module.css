@@ -145,8 +145,12 @@
   gap: 6px;
 }
 
+.actions :global(.win95-btn) {
+  min-width: 120px;
+}
+
 .advance {
-  min-width: 110px;
+  min-width: 140px;
 }
 
 .quit {
