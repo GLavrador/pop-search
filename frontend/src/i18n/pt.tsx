@@ -107,6 +107,7 @@ export const pt: Dictionary = {
   search: {
     placeholder: 'Digite para buscar...',
     submit: 'Buscar',
+    precision: (percent: number) => `Precisão ${percent}%`,
     loading: 'Consultando o banco...',
     emptyTitle: '0 encontrados.',
     emptyWithThreshold: (percent: number) => (

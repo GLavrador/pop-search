@@ -9,6 +9,7 @@ import { DEFAULT_LIMIT, DEFAULT_THRESHOLD, PRECISION_PRESETS } from "../../const
 import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from "../../constants/searchModes";
 import { useI18n } from "../../i18n/languageContext";
 import { helpAt, useRobot } from "../../context/robotContext";
+import { useSearchFacts } from "../../hooks/useSearchFacts";
 
 const BROADEST = Math.min(...PRECISION_PRESETS.map((preset) => preset.threshold));
 import styles from "./styles.module.css";
@@ -24,6 +25,8 @@ export const SearchSection = () => {
   const { t } = useI18n();
   const robot = useRobot();
   const toldAt = useRef(0);
+
+  useSearchFacts('search', mode, threshold);
 
   useEffect(() => {
     if (error) {

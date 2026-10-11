@@ -113,6 +113,7 @@ export const en = {
   search: {
     placeholder: 'Type to search...',
     submit: 'Find Now',
+    precision: (percent: number) => `Precision ${percent}%`,
     loading: 'Querying database...',
     emptyTitle: '0 found.',
     emptyWithThreshold: (percent: number) => (

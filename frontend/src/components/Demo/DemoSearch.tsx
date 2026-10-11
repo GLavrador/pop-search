@@ -6,6 +6,7 @@ import { DEMO_QUERY, DEMO_SEARCH_RESULTS } from '../../constants/demoVideo';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from '../../constants/searchModes';
 import { useI18n } from '../../i18n/languageContext';
+import { useSearchFacts } from '../../hooks/useSearchFacts';
 import { useSpotlight } from './spotlight';
 import type { GuideStep, GuideStepId } from '../../constants/guide';
 import type { SearchResult } from '../../types';
@@ -40,6 +41,8 @@ export const DemoSearch = ({ step, onGo, onSpot }: DemoSearchProps) => {
   );
 
   const spotlight = useSpotlight(step, onSpot);
+
+  useSearchFacts('searchDemo', mode, threshold);
 
   return (
     <div className={styles.panel}>
