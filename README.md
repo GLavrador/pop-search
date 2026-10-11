@@ -31,6 +31,8 @@ contribuir exige conta.
 - **Análise automática**: o Gemini assiste ao vídeo e escreve título, descrição,
   pessoas, elementos de cenário e transcrição do áudio
 - **Revisão humana**: nada é indexado antes de a pessoa conferir e editar
+- **Análise acompanhada**: a análise roda como tarefa, mostra em que passo está e
+  fica guardada até ser salva, mesmo que a pessoa feche a página
 - **Busca híbrida**: encontra por significado e por palavra exata, fundindo os
   dois rankings
 - **Entrada manual**: dá para catalogar um vídeo sem usar IA
@@ -223,9 +225,23 @@ Authorization: Bearer <token>
 Só aceita links de `twitter.com` e `x.com`. Consome uma análise da cota mensal.
 **5 req/min.**
 
-Respostas possíveis: `401` sem sessão, `429` sem cota, `503` se o serviço de IA
-ou o teto diário do projeto estiverem esgotados, `422` se a IA recusar o
-conteúdo, `504` no timeout.
+A resposta é imediata, `202` com a tarefa criada: a análise roda à parte e cada
+conta tem uma por vez. O andamento é lido da mesma rota:
+
+| Endpoint | O que faz |
+|---|---|
+| `GET /videos/analyze` | A análise da conta, ou `null`: `stage`, e `result` ou `error` quando termina |
+| `DELETE /videos/analyze` | Cancela a que está rodando, ou descarta a que terminou |
+
+`stage` passa por `queued`, `downloading`, `uploading`, `watching` e `writing`,
+e termina em `done` ou `failed`. Uma análise concluída fica guardada até o vídeo
+ser salvo, descartado ou outra análise começar.
+
+Recusas antes de a tarefa existir: `401` sem sessão, `409` se o vídeo já está no
+acervo (vem com o vídeo em `existing`, e não consome cota) ou se já há uma
+análise rodando, `429` sem cota, `503` se o teto diário do projeto estiver
+esgotado. Falhas da tarefa aparecem em `error.status`: `503` se o serviço de IA
+recusar a chamada, `422` se a IA recusar o conteúdo, `504` no timeout.
 
 ### Salvar vídeo - requer conta
 
@@ -242,7 +258,7 @@ Authorization: Bearer <token>
 ```
 
 Indexa o vídeo em nome de quem chamou. Não consome o limite de análises, mas gera
-um embedding. **10 req/min.**
+um embedding. Responde `409` se o vídeo já está no acervo. **10 req/min.**
 
 ### Conta
 
@@ -358,9 +374,11 @@ backend/
 │   ├── search.py            # Busca híbrida
 │   └── me.py                # Conta, cota e estatísticas
 ├── services/
-│   ├── ai.py                # Prompt e chamada ao Gemini
+│   ├── ai.py                # Prompt, esquema da resposta e chamada ao Gemini
+│   ├── archive.py           # Reconhece um vídeo que já está no acervo
 │   ├── downloader.py        # Download via yt-dlp
 │   ├── embedding.py         # Geração de embeddings
+│   ├── jobs.py              # A análise em andamento ou à espera de cada conta
 │   └── usage.py             # Cota, contabilidade e agregações
 └── tests/
 
