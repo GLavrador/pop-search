@@ -111,8 +111,9 @@ body {
   padding: 4px 6px;
   font-family: inherit;
   width: 100%;
-  border: none;
   outline: none;
+  box-shadow: inset 1px 1px 0 0 var(--win-dark),
+    inset -1px -1px 0 0 var(--win-shadow-light);
 }
 
 .win95-input:disabled {
