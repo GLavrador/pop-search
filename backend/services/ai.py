@@ -2,7 +2,7 @@ import json
 import asyncio
 import time
 from dataclasses import dataclass
-from typing import Optional
+from typing import Awaitable, Callable, Optional
 
 from core.logger import get_logger
 from core.gemini import get_genai, get_generation_model
@@ -221,17 +221,27 @@ async def analyze_video_content(
     analyze_scenes: bool = False,
     analyze_audio: bool = False,
     usage: Optional[TokenUsage] = None,
+    on_stage: Optional[Callable[[str], Awaitable[None]]] = None,
 ):
     """`usage` is filled in place rather than returned, so the caller still gets
-    the cost when the analysis raises."""
+    the cost when the analysis raises. `on_stage` is told each step as it begins.
+
+    The SDK's file calls block, so they run in threads: the server has to keep
+    answering whoever is watching the progress."""
     video_file = None
+
+    async def reached(stage: str) -> None:
+        if on_stage is not None:
+            await on_stage(stage)
 
     try:
         logger.info(f"Starting upload to Gemini: {video_path}")
-        
-        video_file = genai.upload_file(path=video_path)
+
+        await reached("uploading")
+        video_file = await asyncio.to_thread(genai.upload_file, path=video_path)
         logger.debug(f"File uploaded. URI: {video_file.uri}")
-        
+
+        await reached("watching")
         start_time = time.time()
         
         while video_file.state.name == "PROCESSING":
@@ -242,8 +252,8 @@ async def analyze_video_content(
             
             logger.debug(f"Video still processing... ({elapsed:.1f}s)")
             
-            await asyncio.sleep(2) 
-            video_file = genai.get_file(video_file.name)
+            await asyncio.sleep(2)
+            video_file = await asyncio.to_thread(genai.get_file, video_file.name)
 
         if video_file.state.name == "FAILED":
             logger.error(f"Gemini processing failed state: {video_file.state.name}")
@@ -252,7 +262,8 @@ async def analyze_video_content(
         logger.info(f"Video active. Sending prompt (Timeout: {GENERATION_TIMEOUT}s)...")
 
         system_prompt = get_system_prompt(analyze_scenes, analyze_audio)
-        
+
+        await reached("writing")
         response = await asyncio.wait_for(
             model.generate_content_async(
                 [system_prompt, video_file],
@@ -291,7 +302,7 @@ async def analyze_video_content(
     finally:
         if video_file is not None:
             try:
-                genai.delete_file(video_file.name)
+                await asyncio.to_thread(genai.delete_file, video_file.name)
                 logger.debug(f"Deleted uploaded file from Gemini: {video_file.name}")
             except Exception as e:
                 logger.warning(f"Failed to delete uploaded file from Gemini: {e}")

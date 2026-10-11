@@ -319,3 +319,39 @@ class TestFitToLimits:
             result = asyncio.run(analyze_video_content("fake.mp4", True, True))
 
         assert len(result["titulo_sugerido"]) <= MAX_TITULO_CHARS
+
+
+class TestStages:
+
+    def test_tells_each_step_as_it_begins(self):
+        uploaded = MagicMock()
+        uploaded.state.name = "ACTIVE"
+        seen = []
+
+        async def note(stage):
+            seen.append(stage)
+
+        async def _generate(*_args, **_kwargs):
+            seen.append("asked the model")
+            return _response(text='{"titulo_sugerido": "t", "descricao_completa": "d"}')
+
+        with patch("services.ai.genai") as mock_genai, patch("services.ai.model") as mock_model:
+            mock_genai.upload_file.side_effect = lambda **_: seen.append("sent the file") or uploaded
+            mock_model.generate_content_async = _generate
+
+            asyncio.run(analyze_video_content("fake.mp4", on_stage=note))
+
+        assert seen == ["uploading", "sent the file", "watching", "writing", "asked the model"]
+
+    def test_runs_without_anyone_listening(self):
+        uploaded = MagicMock()
+        uploaded.state.name = "ACTIVE"
+
+        async def _generate(*_args, **_kwargs):
+            return _response(text='{"titulo_sugerido": "t", "descricao_completa": "d"}')
+
+        with patch("services.ai.genai") as mock_genai, patch("services.ai.model") as mock_model:
+            mock_genai.upload_file.return_value = uploaded
+            mock_model.generate_content_async = _generate
+
+            assert asyncio.run(analyze_video_content("fake.mp4")) is not None
