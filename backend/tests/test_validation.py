@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from main import app
 from core.exceptions import validate_video_url, ALLOWED_DOMAINS, ContentBlockedError
+from tests.conftest import analyze
 
 client = TestClient(app)
 
@@ -61,9 +62,7 @@ class TestAnalysisDefaults:
             "metadados_estruturados": {},
         }
 
-        response = client.post(
-            "/videos/analyze", json={"url": "https://twitter.com/user/status/123"}
-        )
+        response = analyze(client, {"url": "https://twitter.com/user/status/123"})
 
         assert response.status_code == 200
         _path, analyze_scenes, analyze_audio, _tokens = mock_analyze.call_args[0]
@@ -75,7 +74,7 @@ class TestErrorHandling:
     def test_analyze_hides_internal_errors(self, mock_download):
         mock_download.side_effect = Exception("Sensitive database error: connection failed to postgres:5432")
         
-        response = client.post("/videos/analyze", json={"url": "https://twitter.com/user/status/123"})
+        response = analyze(client, {"url": "https://twitter.com/user/status/123"})
         
         assert response.status_code == 500
         assert "postgres" not in response.text
@@ -90,9 +89,7 @@ class TestErrorHandling:
         mock_download.return_value = "does-not-exist.mp4"
         mock_analyze.side_effect = ContentBlockedError("SAFETY")
 
-        response = client.post(
-            "/videos/analyze", json={"url": "https://twitter.com/user/status/123"}
-        )
+        response = analyze(client, {"url": "https://twitter.com/user/status/123"})
 
         assert response.status_code == 422
         assert "declined to describe" in response.text

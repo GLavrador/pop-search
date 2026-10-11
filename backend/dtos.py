@@ -127,6 +127,25 @@ class MyVideo(BaseModel):
     created_at: str
 
 
+AnalysisStage = Literal["queued", "downloading", "uploading", "watching", "writing", "done", "failed"]
+
+
+class AnalysisError(BaseModel):
+    status: int
+    detail: str
+
+
+class AnalysisJob(BaseModel):
+    id: str
+    url: str
+    stage: AnalysisStage
+    analyze_scenes: bool
+    analyze_audio: bool
+    result: Optional[VideoMetadataDTO] = None
+    error: Optional[AnalysisError] = None
+    created_at: str
+
+
 class ExistingVideo(BaseModel):
     id: str
     titulo_video: Optional[str] = None

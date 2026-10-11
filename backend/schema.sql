@@ -70,6 +70,28 @@ create table usage_events (
 
 create index usage_events_user_month_idx on usage_events (user_id, created_at desc);
 
+-- 4b. the analysis each user has in hand
+--
+-- One row per user, replaced when they start another: the analysis that is
+-- running, the one that failed, or the one that finished and waits to be saved.
+-- `id` names the run, so a cancelled run cannot write over the one after it.
+create table analysis_jobs (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  id uuid not null default gen_random_uuid(),
+  url text not null,
+  analyze_scenes boolean not null default true,
+  analyze_audio boolean not null default true,
+  stage text not null default 'queued'
+    check (stage in ('queued', 'downloading', 'uploading', 'watching', 'writing', 'done', 'failed')),
+  result jsonb,
+  error_status int,
+  error_detail text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create unique index analysis_jobs_id_idx on analysis_jobs (id);
+
 -- 5. main table
 create table videos (
   id uuid primary key default gen_random_uuid(),
@@ -128,6 +150,9 @@ alter table usage_events enable row level security;
 create policy "usage_events: owner can read"
   on usage_events for select
   using (auth.uid() = user_id);
+
+-- No policy at all: only the backend, through service_role, reads or writes it.
+alter table analysis_jobs enable row level security;
 
 alter table videos enable row level security;
 
