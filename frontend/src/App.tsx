@@ -307,7 +307,9 @@ function AppContent() {
               <AuthPanel onStartGuide={startGuide} />
             </div>
           </div>
-          <StatusBar />
+          <StatusBar
+            scope={activeTab === 'search' ? (searchStep ? 'searchDemo' : 'search') : null}
+          />
         </div>
       </RetroWindow>
 

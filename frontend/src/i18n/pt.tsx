@@ -71,7 +71,7 @@ export const pt: Dictionary = {
       label: 'Híbrida',
       hint: 'Significado e termos exatos juntos. Um vídeo é encontrado pelo que ele mostra ou pelas palavras que contém.',
       operatorScope:
-        'Estes operadores valem para a metade da busca por termos exatos. A metade por significado sempre lê o seu texto inteiro.',
+        'Valem para a parte da busca que procura as suas palavras. A parte que procura pelo significado lê o texto inteiro.',
     },
     semantic: {
       label: 'Semântica',
@@ -82,7 +82,7 @@ export const pt: Dictionary = {
     text: {
       label: 'Exata',
       hint: 'Só termos literais. O vídeo precisa conter todas as palavras que você digitou, em qualquer ordem.',
-      operatorScope: 'Estes operadores controlam a busca inteira.',
+      operatorScope: 'Aqui eles valem para a busca inteira.',
     },
   },
 
@@ -107,6 +107,7 @@ export const pt: Dictionary = {
   search: {
     placeholder: 'Digite para buscar...',
     submit: 'Buscar',
+    precision: (percent: number) => `Precisão ${percent}%`,
     loading: 'Consultando o banco...',
     emptyTitle: '0 encontrados.',
     emptyWithThreshold: (percent: number) => (
@@ -142,18 +143,17 @@ export const pt: Dictionary = {
     show: '▼ Avançado',
     modeLegend: 'Modo de busca',
     modeGroupLabel: 'Modo de busca',
-    thresholdLegend: 'Limiar de correspondência',
+    thresholdLegend: 'Ajuste fino da precisão',
     thresholdLabel: 'Limiar de correspondência',
-    custom: ' (Personalizado)',
-    scaleLow: 'Mais resultados',
-    scaleHigh: 'Menos, mais rígido',
+    scaleLow: 'Mais vídeos',
+    scaleHigh: 'Mais exigente',
     thresholdDisabled: (mode: string) => (
       <>
         Não usado no modo <strong>{mode}</strong>: a correspondência é literal, então nada é
         pontuado por similaridade.
       </>
     ),
-    syntaxLegend: 'Sintaxe de busca',
+    syntaxLegend: 'Atalhos de escrita',
     syntax: [
       {
         example: 'baleia bebê',
@@ -163,7 +163,7 @@ export const pt: Dictionary = {
       { example: 'baleia -orca', meaning: 'Contém a primeira, exclui a segunda.' },
       { example: 'baleia or golfinho', meaning: 'Qualquer uma das palavras basta.' },
     ],
-    resultsLegend: 'Resultados',
+    resultsLegend: 'Máximo de resultados',
     maxResults: 'Máximo de resultados por busca',
   },
 
@@ -813,7 +813,7 @@ export const pt: Dictionary = {
       },
       'search.advanced': {
         title: 'Avançado',
-        text: 'Abre os ajustes finos da busca: o modo, o limiar, os atalhos de escrita e quantos resultados vêm.',
+        text: 'Abre os ajustes finos da busca: o modo, a precisão exata, os atalhos de escrita e quantos resultados vêm.',
       },
       'search.advancedOpen': {
         title: 'Ocultar avançado',
@@ -831,11 +831,11 @@ export const pt: Dictionary = {
         ),
       },
       'search.threshold': {
-        title: 'Limiar de correspondência',
+        title: 'Ajuste fino da precisão',
         text: 'É o quanto um vídeo precisa se parecer com o que você escreveu para entrar na lista. Mais para a direita eu fico exigente e trago menos vídeos. Mais para a esquerda trago mais, alguns nem tão parecidos. Só vale para a busca por significado.',
       },
       'search.syntax': {
-        title: 'Sintaxe de busca',
+        title: 'Atalhos de escrita',
         text: 'Atalhos para a busca por palavras: aspas procuram a frase exata, um sinal de menos tira uma palavra, e "or" aceita qualquer uma das duas.',
       },
       'search.limit': {

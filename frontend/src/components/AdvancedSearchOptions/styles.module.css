@@ -1,75 +1,59 @@
-.header {
+.bar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
 }
 
-.headerLabel {
-  margin-bottom: 0;
+.quick {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .toggleButton {
-  padding: 2px 8px;
+  margin-left: auto;
+  padding: 3px 10px;
   font-size: 0.85em;
   min-width: 0;
 }
 
 .panel {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 5px;
-  margin: 8px 0 10px;
-  background: var(--win-light);
-  border-top: 2px solid var(--win-shadow-dark);
-  border-left: 2px solid var(--win-shadow-dark);
-  border-right: 2px solid var(--win-light);
-  border-bottom: 2px solid var(--win-light);
-  box-shadow: inset 1px 1px 0 0 var(--win-dark);
+  padding: 2px 12px;
+  background: var(--win-gray);
+  border: 1px solid var(--win-shadow-dark);
+  box-shadow: 1px 1px 0 0 var(--win-light), inset 1px 1px 0 0 var(--win-light);
 }
 
 .group {
+  display: flow-root;
   margin: 0;
   min-width: 0;
-  padding: 8px 12px 12px;
-  overflow: hidden;
-  background: var(--win-gray);
-  border-top: 2px solid var(--win-light);
-  border-left: 2px solid var(--win-light);
-  border-right: 2px solid var(--win-shadow-dark);
-  border-bottom: 2px solid var(--win-shadow-dark);
+  padding: 11px 0;
+  border: none;
+}
+
+.group + .group {
+  border-top: 1px solid var(--win-shadow-dark);
+  box-shadow: inset 0 1px 0 0 var(--win-light);
 }
 
 .legend {
   float: left;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-  margin: 0 0 8px;
-  padding: 0 0 4px;
+  gap: 7px;
+  width: 204px;
+  min-height: 27px;
+  padding: 0 12px 0 0;
   font-size: 0.88rem;
   font-weight: bold;
-  color: var(--win-blue-title);
-  border-bottom: 1px solid var(--win-shadow-dark);
+  line-height: 1.25;
+  color: var(--win-dark);
 }
 
-.legend + * {
-  clear: both;
-}
-
-.value {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 0.9em;
-  font-weight: bold;
-}
-
-.presetName {
-  font-weight: normal;
-  font-style: italic;
+.field {
+  display: flow-root;
+  min-width: 0;
 }
 
 .help {
@@ -98,12 +82,70 @@
   outline-offset: 2px;
 }
 
+.choices {
+  display: flex;
+  gap: 4px;
+}
+
+.short {
+  max-width: 210px;
+}
+
+.choice {
+  flex: 1 1 0;
+  padding: 3px 10px;
+  font-size: 0.85em;
+  min-width: 0;
+}
+
+.note,
+.unavailable {
+  margin: 7px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--win-text-dark);
+}
+
+.unavailable {
+  margin-top: 4px;
+  color: var(--win-error-text);
+}
+
+.gauge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 27px;
+}
+
+.end {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--win-text-dark);
+}
+
+.readout {
+  flex-shrink: 0;
+  width: 46px;
+  padding: 3px 0;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-align: center;
+  background: var(--win-light);
+  border-top: 1px solid var(--win-shadow-dark);
+  border-left: 1px solid var(--win-shadow-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 0 var(--win-dark);
+}
+
 .slider {
   appearance: none;
   -webkit-appearance: none;
-  width: 100%;
+  flex: 1 1 0;
+  min-width: 60px;
   height: 22px;
-  margin: 2px 0 0;
+  margin: 0;
   padding: 0;
   background: transparent;
   cursor: pointer;
@@ -154,69 +196,17 @@
   outline-offset: 2px;
 }
 
-.scale {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2px;
-  font-size: 0.75em;
-  color: var(--win-text-secondary);
-}
-
-.modeButtons {
-  display: flex;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.modeButton {
-  flex: 1;
-  padding: 3px 10px;
-  font-size: 0.85em;
-  min-width: 0;
-}
-
-.modeHint {
-  display: block;
-  font-size: 0.8em;
-  color: var(--win-text-secondary);
-  line-height: 1.3;
-}
-
 /*
  * A disabled fieldset natively disables every control inside it, so the slider
  * stops responding without any extra wiring. The dimming is only the visual
  * half of that.
  */
-.group:disabled .slider,
-.group:disabled .value,
-.group:disabled .scale {
+.group:disabled .gauge {
   opacity: 0.45;
 }
 
-.disabledNote {
-  margin: 8px 0 0;
-  font-size: 0.78em;
-  line-height: 1.35;
-  color: var(--win-text-secondary);
-  opacity: 1;
-}
-
-.syntaxScope {
-  margin: 2px 0 0;
-  font-size: 0.78em;
-  line-height: 1.35;
-  color: var(--win-text-secondary);
-}
-
-.syntaxUnavailable {
-  margin: 2px 0 0;
-  font-size: 0.78em;
-  line-height: 1.35;
-  color: var(--win-error-text);
-}
-
 .syntaxList {
-  margin: 8px 0 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -225,17 +215,17 @@
 .syntaxRow {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
 }
 
 .syntaxExample {
   flex-shrink: 0;
-  width: 148px;
-  padding: 1px 4px;
+  width: 152px;
+  padding: 2px 5px;
   background: var(--win-light);
   border: 1px solid var(--win-tag-border);
   font-family: 'Courier New', monospace;
-  font-size: 0.78em;
+  font-size: 0.8rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -243,27 +233,44 @@
 
 .syntaxMeaning {
   margin: 0;
-  font-size: 0.78em;
-  line-height: 1.3;
-  color: var(--win-text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--win-text-dark);
 }
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
+@media (max-width: 640px) {
+  .legend {
+    width: 100%;
+    min-height: 0;
+    margin-bottom: 7px;
+    padding-right: 0;
+  }
 
-.rowLabel {
-  margin-bottom: 0;
-  font-size: 0.9em;
-  font-weight: normal;
-}
+  .field {
+    clear: both;
+  }
 
-.select {
-  padding: 2px;
-  font-size: 0.9em;
-  width: 80px;
-  height: 24px;
+  .gauge {
+    flex-wrap: wrap;
+    gap: 2px 10px;
+  }
+
+  .slider {
+    order: -1;
+    flex: 1 1 calc(100% - 60px);
+  }
+
+  .readout {
+    order: -1;
+  }
+
+  .far {
+    margin-left: auto;
+  }
+
+  .syntaxRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
 }

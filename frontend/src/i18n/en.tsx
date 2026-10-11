@@ -77,7 +77,7 @@ export const en = {
       label: 'Hybrid',
       hint: 'Meaning and exact terms combined. A video is found either by what it shows or by the words it contains.',
       operatorScope:
-        'These steer the exact-terms half of the search. The meaning half always reads your full text.',
+        'These apply to the part of the search that looks for your words. The part that looks for meaning reads your whole text.',
     },
     semantic: {
       label: 'Semantic',
@@ -88,7 +88,7 @@ export const en = {
     text: {
       label: 'Exact',
       hint: 'Literal terms only. A video must contain every word you typed, in any order.',
-      operatorScope: 'These control the entire search.',
+      operatorScope: 'Here they apply to the entire search.',
     },
   },
 
@@ -113,6 +113,7 @@ export const en = {
   search: {
     placeholder: 'Type to search...',
     submit: 'Find Now',
+    precision: (percent: number) => `Precision ${percent}%`,
     loading: 'Querying database...',
     emptyTitle: '0 found.',
     emptyWithThreshold: (percent: number) => (
@@ -148,25 +149,24 @@ export const en = {
     show: '▼ Advanced',
     modeLegend: 'Search Mode',
     modeGroupLabel: 'Search mode',
-    thresholdLegend: 'Match Threshold',
+    thresholdLegend: 'Precision fine-tuning',
     thresholdLabel: 'Match threshold',
-    custom: ' (Custom)',
-    scaleLow: 'More results',
-    scaleHigh: 'Fewer, stricter',
+    scaleLow: 'More videos',
+    scaleHigh: 'Pickier',
     thresholdDisabled: (mode: string) => (
       <>
         Not used in <strong>{mode}</strong> mode: matching is literal, so nothing is scored by
         similarity.
       </>
     ),
-    syntaxLegend: 'Search Syntax',
+    syntaxLegend: 'Writing shortcuts',
     syntax: [
       { example: 'baleia bebê', meaning: 'Both words required. Every extra word narrows the search.' },
       { example: '"baleia assassina"', meaning: 'That exact phrase, in that order.' },
       { example: 'baleia -orca', meaning: 'Contains the first, excludes the second.' },
       { example: 'baleia or golfinho', meaning: 'Either word is enough.' },
     ],
-    resultsLegend: 'Results',
+    resultsLegend: 'Max results',
     maxResults: 'Max results per search',
   },
 
@@ -806,7 +806,7 @@ export const en = {
       } as HelpCopy,
       'search.advanced': {
         title: 'Advanced',
-        text: 'Opens the fine settings of the search: the mode, the threshold, the writing shortcuts and how many results come back.',
+        text: 'Opens the fine settings of the search: the mode, the exact precision, the writing shortcuts and how many results come back.',
       } as HelpCopy,
       'search.advancedOpen': {
         title: 'Hide advanced',
@@ -823,11 +823,11 @@ export const en = {
         ),
       } as HelpCopy,
       'search.threshold': {
-        title: 'Match threshold',
+        title: 'Precision fine-tuning',
         text: 'How closely a video has to resemble what you wrote to make the list. Further right I get picky and bring fewer videos. Further left I bring more, some of them not that close. It only applies to searching by meaning.',
       } as HelpCopy,
       'search.syntax': {
-        title: 'Search syntax',
+        title: 'Writing shortcuts',
         text: 'Shortcuts for searching by words: quotes look for the exact phrase, a minus sign leaves a word out, and "or" accepts either one.',
       } as HelpCopy,
       'search.limit': {

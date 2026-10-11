@@ -24,6 +24,8 @@ export const DEFAULT_THRESHOLD = 0.6;
 
 export const DEFAULT_LIMIT = 5;
 
+export const RESULT_LIMITS = [5, 10, 20] as const;
+
 /** Returns the preset matching the given threshold, or null for a custom value. */
 export const findPresetByThreshold = (threshold: number): PrecisionPreset | null =>
   PRECISION_PRESETS.find((preset) => Math.abs(preset.threshold - threshold) < 0.001) ?? null;

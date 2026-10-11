@@ -6,6 +6,7 @@ import { DEMO_QUERY, DEMO_SEARCH_RESULTS } from '../../constants/demoVideo';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from '../../constants/searchModes';
 import { useI18n } from '../../i18n/languageContext';
+import { useSearchFacts } from '../../hooks/useSearchFacts';
 import { useSpotlight } from './spotlight';
 import type { GuideStep, GuideStepId } from '../../constants/guide';
 import type { SearchResult } from '../../types';
@@ -41,6 +42,8 @@ export const DemoSearch = ({ step, onGo, onSpot }: DemoSearchProps) => {
 
   const spotlight = useSpotlight(step, onSpot);
 
+  useSearchFacts('searchDemo', mode, threshold);
+
   return (
     <div className={styles.panel}>
       <span className={styles.badge} title={t.guide.demo.badgeTitle}>
@@ -48,7 +51,29 @@ export const DemoSearch = ({ step, onGo, onSpot }: DemoSearchProps) => {
       </span>
 
       <div className={search.searchForm}>
-        <div {...spotlight('advanced', styles.stack)}>
+        <div className={search.query}>
+          <span className={search.label}>{t.advanced.queryLabel}</span>
+
+          <div {...spotlight('query', search.inputRow)}>
+            <input
+              type="text"
+              readOnly
+              value={DEMO_QUERY}
+              aria-label={t.search.placeholder}
+              className="win95-inset win95-input"
+            />
+            <button
+              type="button"
+              className={`win95-btn ${search.submitButton}`}
+              onClick={() => onGo('results')}
+              data-aim
+            >
+              {t.search.submit}
+            </button>
+          </div>
+        </div>
+
+        <div {...spotlight(['advanced', 'presets'], styles.stack)}>
           <AdvancedSearchOptions
             threshold={threshold}
             onThresholdChange={setThreshold}
@@ -56,34 +81,13 @@ export const DemoSearch = ({ step, onGo, onSpot }: DemoSearchProps) => {
             onLimitChange={setLimit}
             mode={mode}
             onModeChange={setMode}
-            labelClassName={search.label}
-          />
-        </div>
-
-        <div {...spotlight('presets')}>
-          <PrecisionPresets
-            threshold={threshold}
-            onThresholdChange={setThreshold}
-            disabled={!thresholdApplies}
-          />
-        </div>
-
-        <div {...spotlight('query', search.inputRow)}>
-          <input
-            type="text"
-            readOnly
-            value={DEMO_QUERY}
-            aria-label={t.search.placeholder}
-            className="win95-inset win95-input"
-          />
-          <button
-            type="button"
-            className={`win95-btn ${search.submitButton}`}
-            onClick={() => onGo('results')}
-            data-aim
           >
-            {t.search.submit}
-          </button>
+            <PrecisionPresets
+              threshold={threshold}
+              onThresholdChange={setThreshold}
+              disabled={!thresholdApplies}
+            />
+          </AdvancedSearchOptions>
         </div>
       </div>
 
