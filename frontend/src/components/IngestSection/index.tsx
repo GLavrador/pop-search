@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useVideoAnalysisMutation } from '../../hooks/useVideoAnalysisMutation';
+import { useAnalysisJob } from '../../hooks/useAnalysisJob';
 import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
 import type { VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
 import { QuotaMeter } from '../QuotaMeter';
 import { URLInputView } from './URLInputView';
+import { DraftNotice } from './DraftNotice';
 import { createVideoUrlInputSchema } from '../../schemas/videoMetadata';
 import { useI18n } from '../../i18n/languageContext';
 import { useRobot } from '../../context/robotContext';
@@ -26,18 +27,37 @@ const createEmptyMetadata = (url: string): VideoMetadata => ({
   }
 });
 
+const EVERY_FIELD = { analyzeScenes: true, analyzeAudio: true };
+
 export const IngestSection = () => {
   const [url, setUrl] = useState('');
   const [manualMode, setManualMode] = useState(false);
   const [manualData, setManualData] = useState<VideoMetadata | null>(null);
-  const { analyze, reset, isLoading, data, error } = useVideoAnalysisMutation();
+  const analysis = useAnalysisJob();
+  const { isLoading, stage, data, draft, duplicate, error } = analysis;
   const { setStatus } = useStatus();
   const { t } = useI18n();
   const robot = useRobot();
+  const toldLoading = useRef(false);
   const toldData = useRef<VideoMetadata | undefined>(undefined);
   const toldError = useRef<string | null>(null);
+  const toldDraft = useRef<string | null>(null);
+  const toldDuplicate = useRef<string | null>(null);
 
-  const [analyticsOptions, setAnalyticsOptions] = useState({ analyzeScenes: true, analyzeAudio: true });
+  // The link of the analysis in hand: after a reload the field starts empty.
+  const jobUrl = analysis.url ?? url;
+
+  // Told from here, not from the button: an analysis found still running after
+  // a reload is one to keep watch over as well.
+  useEffect(() => {
+    if (isLoading === toldLoading.current) return;
+    toldLoading.current = isLoading;
+    if (isLoading) robot.notify({ kind: 'analysisStarted' });
+  }, [isLoading, robot]);
+
+  useEffect(() => {
+    if (stage) setStatus(t.ingest.status.stage(t.ingest.stages[stage]));
+  }, [stage, setStatus, t.ingest.status, t.ingest.stages]);
 
   useEffect(() => {
     if (data === toldData.current) return;
@@ -54,12 +74,31 @@ export const IngestSection = () => {
     robot.notify({
       kind: 'analysisFailed',
       manual: () => {
-        setManualData(createEmptyMetadata(url));
-        setAnalyticsOptions({ analyzeScenes: true, analyzeAudio: true });
+        setManualData(createEmptyMetadata(jobUrl));
         setStatus(t.ingest.status.manual);
       },
     });
-  }, [error, robot, url, setStatus, t.ingest.status.manual]);
+  }, [error, robot, jobUrl, setStatus, t.ingest.status.manual]);
+
+  useEffect(() => {
+    const id = draft?.id ?? null;
+    if (id === toldDraft.current) return;
+    toldDraft.current = id;
+    if (!id) return;
+
+    setStatus(t.ingest.status.draft, 5000);
+    robot.notify({ kind: 'draftFound' });
+  }, [draft, robot, setStatus, t.ingest.status.draft]);
+
+  useEffect(() => {
+    const id = duplicate?.id ?? null;
+    if (id === toldDuplicate.current) return;
+    toldDuplicate.current = id;
+    if (!id) return;
+
+    setStatus(t.ingest.status.duplicate, 5000);
+    robot.notify({ kind: 'analysisDuplicate' });
+  }, [duplicate, robot, setStatus, t.ingest.status.duplicate]);
 
   useEffect(() => {
     if (data) {
@@ -86,18 +125,22 @@ export const IngestSection = () => {
 
   const handleAnalyze = (options: { analyzeScenes: boolean; analyzeAudio: boolean }) => {
     if (!performValidation()) return;
-    setAnalyticsOptions(options);
-    setStatus(t.ingest.status.analysing);
-    robot.notify({ kind: 'analysisStarted' });
-    analyze(url, options);
+    analysis.start(url, options);
   };
 
   const handleOpenManualForm = () => {
     if (!performValidation()) return;
     setManualData(createEmptyMetadata(url));
-    setAnalyticsOptions({ analyzeScenes: true, analyzeAudio: true }); // By default show all in manual mode
     setStatus(t.ingest.status.manual);
     robot.notify({ kind: 'manualOpened' });
+  };
+
+  const backToStart = () => {
+    // Also lets go of a failure already read, or it would greet the next link.
+    analysis.close();
+    setManualData(null);
+    setUrl('');
+    setStatus(t.ingest.status.reset, 3000);
   };
 
   const handleSave = async (finalData: VideoMetadata) => {
@@ -106,7 +149,8 @@ export const IngestSection = () => {
         await saveVideo(finalData);
         setStatus(t.ingest.status.saved, 5000);
         robot.notify({ kind: 'saved' });
-        handleCancelReview();
+        // Nothing to discard: saving already cleared the analysis on the server.
+        backToStart();
       } catch (err: unknown) {
         console.error("Failed to save video to database:", err);
         setStatus(t.ingest.status.saveFailed, 5000);
@@ -115,19 +159,24 @@ export const IngestSection = () => {
   };
 
   const handleCancelLoading = () => {
-    reset();
+    analysis.discard();
     setStatus(t.ingest.status.cancelled, 3000);
     robot.notify({ kind: 'analysisCancelled' });
   };
 
   const handleCancelReview = () => {
-    reset();
-    setManualData(null);
-    setUrl('');
-    setStatus(t.ingest.status.reset, 3000);
+    if (!manualData) analysis.discard();
+    backToStart();
   };
 
-  const formDataToReview = data || manualData;
+  const handleDiscardDraft = () => {
+    analysis.discard();
+    setStatus(t.ingest.status.discarded, 3000);
+  };
+
+  // What the user typed in by hand comes first: it is the newer of the two.
+  const formDataToReview = manualData || data;
+  const shownFields = manualData ? EVERY_FIELD : (analysis.options ?? EVERY_FIELD);
 
   if (formDataToReview) {
     return (
@@ -136,9 +185,18 @@ export const IngestSection = () => {
           initialData={formDataToReview}
           onSave={handleSave}
           onCancel={handleCancelReview}
-          showScenes={analyticsOptions.analyzeScenes}
-          showAudio={analyticsOptions.analyzeAudio}
+          showScenes={shownFields.analyzeScenes}
+          showAudio={shownFields.analyzeAudio}
         />
+      </div>
+    );
+  }
+
+  if (draft) {
+    return (
+      <div className={styles.ingestContainer}>
+        <QuotaMeter />
+        <DraftNotice draft={draft} onResume={analysis.resume} onDiscard={handleDiscardDraft} />
       </div>
     );
   }
@@ -147,13 +205,15 @@ export const IngestSection = () => {
     <div className={styles.ingestContainer}>
       <QuotaMeter />
       <URLInputView
-        url={url}
+        url={isLoading ? jobUrl : url}
         onUrlChange={setUrl}
         onAnalyze={handleAnalyze}
         onOpenManualForm={handleOpenManualForm}
         onCancel={handleCancelLoading}
         loading={isLoading}
+        stage={stage}
         error={error}
+        duplicate={duplicate}
         manualMode={manualMode}
         onManualModeChange={setManualMode}
       />

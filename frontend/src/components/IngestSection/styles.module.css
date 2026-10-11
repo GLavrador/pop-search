@@ -37,7 +37,35 @@
   display: flex;
   gap: 10px;
   flex: 1;
-  align-items: center;
+  align-items: flex-end;
+}
+
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  background: var(--win-tooltip-bg);
+}
+
+.noticeSubject {
+  font-weight: bold;
+  color: var(--win-blue-title);
+  overflow-wrap: anywhere;
+}
+
+.noticeFoot {
+  font-size: 0.8rem;
+  color: var(--win-text-secondary);
+}
+
+.noticeActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .cancelButton {

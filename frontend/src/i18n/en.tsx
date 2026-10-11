@@ -220,7 +220,32 @@ export const en = {
     scenes: 'Scenes elements',
     audio: 'Audio transcription',
     runAnalysis: 'Run Analysis',
+    progressLabel: 'Analysis progress',
+    stages: {
+      queued: 'Getting ready',
+      downloading: 'Downloading the video from X',
+      uploading: 'Sending the video to the AI',
+      watching: 'The AI is watching the video',
+      writing: 'The AI is writing the description',
+    },
+    duplicate: {
+      title: 'This video is already in the archive.',
+      body: 'Nothing was taken from your quota.',
+      added: (date: string) => `Added on ${date}.`,
+      open: 'Open the post',
+    },
+    draft: {
+      title: 'You left an analysis unsaved',
+      body: 'The AI has already described this video. Pick it up where you left off, or discard it: a discarded analysis does not go back to your quota.',
+      analysed: (date: string) => `Analysed on ${date}.`,
+      resume: 'Continue the review',
+      discard: 'Discard',
+    },
     status: {
+      stage: (step: string) => `${step}...`,
+      draft: 'An analysis is waiting to be saved.',
+      duplicate: 'This video is already in the archive.',
+      discarded: 'Analysis discarded.',
       analysed: 'Analysis finished successfully. Please review data below.',
       failed: 'Analysis failed. Check the error box for details.',
       invalid: (reason: string) => `Error: ${reason}`,
@@ -237,6 +262,7 @@ export const en = {
       rateLimited: 'Too many requests. Please wait a moment.',
       unauthorized: 'Sign in to analyze videos.',
       generic: 'Failed to analyze video.',
+      lost: 'I lost contact with the server in the middle of the analysis. It may have carried on there: wait a little and reload the page before trying again.',
     },
   },
 
@@ -553,6 +579,8 @@ export const en = {
       badLink: ['that link will not do', 'that is not a link', 'hm, odd link'],
       analysed: ['done!', 'finished!', 'the AI is through!'],
       cancelled: ['ok, stopped.', 'cancelled.', 'fine, it stopped.'],
+      duplicate: ['I already have that one!', 'that one is kept already', 'seen it, kept it!'],
+      draft: ['you left one unfinished!', 'I kept your analysis', 'this one is still waiting'],
       manual: ['I trust you!', 'make it a good one!', 'you write better anyway'],
       saved: ['kept!', 'in the archive!', 'saved, go search for it!'],
       saveFailed: ['it did not save...', 'uh oh, not saved', 'try again?'],
@@ -766,7 +794,15 @@ export const en = {
       } as HelpCopy,
       'ingest.progress': {
         title: 'Analysis under way',
-        text: 'The AI is watching the whole video. It usually takes about a minute, longer for long videos. You can cancel.',
+        text: 'The list shows which step the analysis is at: downloading the video, sending it to the AI, the AI watching it and then writing. It usually takes about a minute, longer for long videos. You can cancel, and you can leave and come back later.',
+      } as HelpCopy,
+      'ingest.duplicate': {
+        title: 'Repeated video',
+        text: 'Someone has already kept this video, so it is not analysed again and nothing leaves your quota. It already shows up in the search.',
+      } as HelpCopy,
+      'ingest.draft': {
+        title: 'Unsaved analysis',
+        text: 'An analysis that finished and was not saved is kept here. Continue the review to save it, or discard it to analyse another video.',
       } as HelpCopy,
       'ingest.error': {
         title: 'The analysis failed',

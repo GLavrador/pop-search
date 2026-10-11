@@ -332,6 +332,14 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           hush('analysis');
           react({ emote: vary('cancelled', says.cancelled) });
           break;
+        case 'analysisDuplicate':
+          setWatching(false);
+          hush('analysis');
+          react({ face: 'curious', emote: vary('duplicate', says.duplicate), move: 'nod' });
+          break;
+        case 'draftFound':
+          react({ face: 'happy', emote: vary('draft', says.draft) });
+          break;
         case 'manualOpened':
           hush('analysis');
           react({ face: 'happy', emote: vary('manual', says.manual) });

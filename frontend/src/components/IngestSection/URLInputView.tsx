@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
+import type { AnalysisStage, ExistingVideo } from '../../types';
 import styles from './styles.module.css';
-import { ProgressBar } from '../ProgressBar';
+import { StageProgress } from '../StageProgress';
 
 interface URLInputViewProps {
   url: string;
@@ -11,10 +12,19 @@ interface URLInputViewProps {
   onOpenManualForm: () => void;
   onCancel: () => void;
   loading: boolean;
+  /** The step a running analysis is at. */
+  stage?: AnalysisStage | null;
   error: string | null;
+  /** The archived video the link turned out to be a copy of. */
+  duplicate?: ExistingVideo | null;
   manualMode: boolean;
   onManualModeChange: (value: boolean) => void;
 }
+
+const formatDate = (value: string, locale: string): string => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(locale);
+};
 
 export const URLInputView = ({
   url,
@@ -23,27 +33,17 @@ export const URLInputView = ({
   onOpenManualForm,
   onCancel,
   loading,
+  stage = null,
   error,
+  duplicate = null,
   manualMode,
   onManualModeChange
 }: URLInputViewProps) => {
-  const [showProgress, setShowProgress] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [analyzeScenes, setAnalyzeScenes] = useState(true);
   const [analyzeAudio, setAnalyzeAudio] = useState(true);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const robot = useRobot();
-
-  useEffect(() => {
-    if (loading) {
-      setShowProgress(true);
-    } else {
-      const timer = setTimeout(() => {
-        setShowProgress(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [loading]);
 
   const handleNext = () => {
     if (url.trim()) {
@@ -164,21 +164,35 @@ export const URLInputView = ({
         </div>
       )}
 
-      {showProgress && (
+      {loading && (
         <div className={styles.progressRow} {...helpAt('ingest.progress')}>
           <div className={styles.progressContainer}>
-            <ProgressBar loading={loading} />
+            <StageProgress stage={stage ?? 'queued'} />
 
-            {loading && (
-              <button
-                type="button"
-                onClick={onCancel}
-                className={`win95-btn ${styles.cancelButton}`}
-              >
-                {t.common.cancel}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`win95-btn ${styles.cancelButton}`}
+            >
+              {t.common.cancel}
+            </button>
           </div>
+        </div>
+      )}
+
+      {duplicate && (
+        <div className={`win95-border ${styles.notice}`} aria-live="polite" {...helpAt('ingest.duplicate')}>
+          <strong>{t.ingest.duplicate.title}</strong>
+          <span>{t.ingest.duplicate.body}</span>
+          <span className={styles.noticeSubject}>
+            {duplicate.titulo_video || duplicate.url_original}
+          </span>
+          <span className={styles.noticeFoot}>
+            {t.ingest.duplicate.added(formatDate(duplicate.created_at, locale))}{' '}
+            <a href={duplicate.url_original.trim()} target="_blank" rel="noopener noreferrer">
+              {t.ingest.duplicate.open}
+            </a>
+          </span>
         </div>
       )}
 

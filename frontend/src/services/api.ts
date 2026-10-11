@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type {
+  AnalysisJob,
   VideoMetadata,
   SearchParams,
   SearchResult,
@@ -34,19 +35,42 @@ export const warmUpBackend = (): void => {
   api.get('/').catch(() => {});
 };
 
-const ANALYZE_TIMEOUT_MS = 240_000;
-
-export const analyzeVideo = async (
+export const startAnalysis = async (
   url: string,
   options: { analyzeScenes: boolean; analyzeAudio: boolean },
-  signal: AbortSignal
-): Promise<VideoMetadata> => {
-  const response = await api.post<VideoMetadata>('/videos/analyze', {
+): Promise<AnalysisJob> => {
+  const response = await api.post<AnalysisJob | VideoMetadata>('/videos/analyze', {
     url,
     analyze_scenes: options.analyzeScenes,
     analyze_audio: options.analyzeAudio
-  }, { signal, timeout: ANALYZE_TIMEOUT_MS });
-  return response.data;
+  });
+  const answer = response.data;
+
+  // A backend from before analyses became jobs answers with the finished
+  // analysis itself. Read as a job, it would be waited on for ever.
+  if (!('stage' in answer)) {
+    return {
+      id: 'direct',
+      url,
+      stage: 'done',
+      analyze_scenes: options.analyzeScenes,
+      analyze_audio: options.analyzeAudio,
+      result: answer,
+      error: null,
+      created_at: new Date().toISOString(),
+    };
+  }
+
+  return answer;
+};
+
+export const getAnalysis = async (signal?: AbortSignal): Promise<AnalysisJob | null> => {
+  const response = await api.get<AnalysisJob | null>('/videos/analyze', { signal });
+  return response.data ?? null;
+};
+
+export const discardAnalysis = async (): Promise<void> => {
+  await api.delete('/videos/analyze');
 };
 
 export const saveVideo = async (data: VideoMetadata): Promise<void> => {

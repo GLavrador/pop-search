@@ -24,6 +24,36 @@ export interface VideoMetadata {
   metadados_estruturados: MetadadosEstruturados;
 }
 
+export type AnalysisStage =
+  | 'queued'
+  | 'downloading'
+  | 'uploading'
+  | 'watching'
+  | 'writing'
+  | 'done'
+  | 'failed';
+
+export type RunningStage = Exclude<AnalysisStage, 'done' | 'failed'>;
+
+/** The analysis a user has in hand: running, failed, or finished and unsaved. */
+export interface AnalysisJob {
+  id: string;
+  url: string;
+  stage: AnalysisStage;
+  analyze_scenes: boolean;
+  analyze_audio: boolean;
+  result: VideoMetadata | null;
+  error: { status: number; detail: string } | null;
+  created_at: string;
+}
+
+export interface ExistingVideo {
+  id: string;
+  titulo_video?: string | null;
+  url_original: string;
+  created_at: string;
+}
+
 export interface SearchResult {
   id: string;
   titulo_video: string;

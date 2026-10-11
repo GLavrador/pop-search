@@ -37,6 +37,8 @@ export type RobotEvent =
   | { kind: 'analysisDone'; title: string }
   | { kind: 'analysisFailed'; manual: () => void }
   | { kind: 'analysisCancelled' }
+  | { kind: 'analysisDuplicate' }
+  | { kind: 'draftFound' }
   | { kind: 'manualOpened' }
   | { kind: 'saved' }
   | { kind: 'saveFailed' }
