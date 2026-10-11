@@ -127,6 +127,13 @@ class MyVideo(BaseModel):
     created_at: str
 
 
+class ExistingVideo(BaseModel):
+    id: str
+    titulo_video: Optional[str] = None
+    url_original: str
+    created_at: str
+
+
 class SearchResult(BaseModel):
     id: str
     titulo_video: str

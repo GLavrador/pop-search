@@ -1,11 +1,12 @@
 import os
 import asyncio
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from services.embedding import create_embedding
 from services.ai import analyze_video_content, TokenUsage
 from services.downloader import download_video
-from dtos import VideoMetadataDTO
+from dtos import ExistingVideo, VideoMetadataDTO
 from db import supabase
 from core.logger import get_logger
 from core.limiter import limiter
@@ -16,6 +17,7 @@ from core.exceptions import (
     ServiceQuotaExhaustedError,
 )
 from core.auth import CurrentUser
+from services.archive import find_existing
 from services.usage import get_project_usage, get_quota, record_event
 from asyncio import TimeoutError as AsyncTimeoutError
 
@@ -37,10 +39,27 @@ class VideoAnalysisRequest(BaseModel):
         return v
 
 
+def _already_archived(existing: dict, detail: str) -> JSONResponse:
+    return JSONResponse(
+        status_code=409,
+        content={"detail": detail, "existing": ExistingVideo(**existing).model_dump()},
+    )
+
+
 @router.post("/analyze")
 @limiter.limit("5/minute")
 async def analyze_from_url(request: Request, body: VideoAnalysisRequest, user_id: str = CurrentUser):
     logger.info(f"Analysis requested by {user_id} for URL: {body.url} (Scenes: {body.analyze_scenes}, Audio: {body.analyze_audio})")
+
+    # Before the quota: a copy is refused whatever the user has left, and
+    # finding out here costs them nothing.
+    existing = await find_existing(body.url)
+    if existing:
+        logger.info(f"Already archived as {existing['id']}: {body.url}")
+        return _already_archived(
+            existing,
+            "This video is already in the archive. Nothing was taken from your quota.",
+        )
 
     quota = await get_quota(user_id)
     if quota.is_exhausted:
@@ -150,6 +169,11 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
     
     if not metadata.url_original:
         raise HTTPException(status_code=400, detail="url_original is required for saving")
+
+    existing = await find_existing(metadata.url_original)
+    if existing:
+        logger.info(f"Refusing to save a copy of {existing['id']}: {metadata.url_original}")
+        return _already_archived(existing, "This video is already in the archive.")
 
     try:
         loop = asyncio.get_event_loop()

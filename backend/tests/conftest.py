@@ -51,6 +51,13 @@ def quota_available():
 
 
 @pytest.fixture(autouse=True)
+def nothing_archived():
+    """No link is a copy by default."""
+    with patch("routers.videos.find_existing", new=AsyncMock(return_value=None)):
+        yield
+
+
+@pytest.fixture(autouse=True)
 def no_real_database():
     """An unmocked query passes locally, where credentials work, and fails in CI,
     where they are fake. This makes it fail where the mistake was made."""
@@ -64,6 +71,7 @@ def no_real_database():
     guard.table.side_effect = refuse
 
     with patch("services.usage.supabase", guard), \
+         patch("services.archive.supabase", guard), \
          patch("routers.me.supabase", guard), \
          patch("routers.videos.supabase", guard), \
          patch("routers.search.supabase", guard):
