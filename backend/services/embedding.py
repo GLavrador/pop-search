@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from core.logger import get_logger
 from core.gemini import get_genai, EMBEDDING_MODEL
 from dtos import VideoMetadataDTO
@@ -86,18 +88,28 @@ def create_embedding(data: VideoMetadataDTO) -> list[float]:
         raise e
 
 
+QUERY_CACHE_SIZE = 256
+
+
+# The same text always embeds to the same vector, and a search is repeated with
+# every change of precision or mode. A failed call raises, so it is not kept.
+@lru_cache(maxsize=QUERY_CACHE_SIZE)
+def _embed_query(text: str) -> tuple[float, ...]:
+    logger.debug(f"Embedding query text: {text[:50]}...")
+    result = genai.embed_content(
+        model=EMBEDDING_MODEL,
+        content=text,
+        task_type="retrieval_query",
+        output_dimensionality=768
+    )
+    return tuple(result['embedding'])
+
+
 # No truncation needed here: SearchRequest.query is already capped at 500
 # characters by validation, well under the model's input limit.
 def embed_query(text: str) -> list[float]:
     try:
-        logger.debug(f"Embedding query text: {text[:50]}...")
-        result = genai.embed_content(
-            model=EMBEDDING_MODEL,
-            content=text,
-            task_type="retrieval_query",
-            output_dimensionality=768
-        )
-        return result['embedding']
+        return list(_embed_query(" ".join(text.split())))
     except Exception as e:
         logger.error(f"Failed to embed query: {e}")
         raise e
