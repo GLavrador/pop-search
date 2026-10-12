@@ -36,6 +36,11 @@ contribuir exige conta.
 - **Busca híbrida**: encontra por significado e por palavra exata, fundindo os
   dois rankings
 - **Entrada manual**: dá para catalogar um vídeo sem usar IA
+- **O post junto do vídeo**: a miniatura e o texto do post no X são lidos de
+  graça durante o download. A miniatura aparece nos resultados; o texto vira um
+  campo do formulário e só entra na busca se a pessoa o deixar lá
+- **Meus vídeos**: quem adicionou um vídeo pode corrigir o que foi escrito sobre
+  ele ou tirá-lo do acervo
 - **Contas com limite mensal**: contribuir exige cadastro; buscar não
 - **Assistente guiado**: um assistente conduz o visitante pelas telas de verdade,
   com uma adição de vídeo e uma busca de mentira, sem conta e sem chamada de IA
@@ -207,7 +212,9 @@ Content-Type: application/json
 ```
 
 Cada resultado traz `similarity`, `text_rank` e `score`, o que permite saber se
-casou por significado, por palavra ou pelos dois. **20 req/min.**
+casou por significado, por palavra ou pelos dois, e o `post` de onde o vídeo veio
+(`texto` e `miniatura`), quando ele foi guardado. Quem postou não é guardado.
+**20 req/min.**
 
 ### Analisar vídeo - requer conta
 
@@ -253,12 +260,22 @@ Authorization: Bearer <token>
   "titulo_sugerido": "...",
   "descricao_completa": "...",
   "url_original": "https://x.com/...",
-  "metadados_estruturados": { ... }
+  "metadados_estruturados": { ... },
+  "post": { "texto": "...", "miniatura": "https://pbs.twimg.com/..." }
 }
 ```
 
 Indexa o vídeo em nome de quem chamou. Não consome o limite de análises, mas gera
 um embedding. Responde `409` se o vídeo já está no acervo. **10 req/min.**
+
+O `post` é opcional e é guardado como chega: o `texto` é o que a pessoa deixou no
+formulário, e a `miniatura` só é aceita se for uma imagem servida pelo próprio X.
+Salvar nunca consulta o X. Ele vem pronto no resultado da análise; para um vídeo
+descrito à mão, o formulário o pede à parte:
+
+| Endpoint | O que faz |
+|---|---|
+| `POST /videos/post` | Recebe `{ "url": ... }` e devolve o `post` do link, ou `null`. Só links do X. **20 req/min** |
 
 ### Conta
 
@@ -266,9 +283,15 @@ um embedding. Responde `409` se o vídeo já está no acervo. **10 req/min.**
 |---|---|
 | `GET /me/quota` | Análises usadas, limite, renovação e tokens do mês |
 | `GET /me/videos` | Os próprios vídeos, mais recentes primeiro |
+| `PUT /me/videos/{id}` | Corrige título, descrição e detalhes de um vídeo seu, e refaz o embedding |
+| `DELETE /me/videos/{id}` | Tira um vídeo seu do acervo |
 | `GET /me/is-admin` | Se a conta é administradora |
 | `GET /me/all-usage` | Consumo por conta *(admin)* |
 | `GET /me/admin/stats?days=30` | Estatísticas do projeto, 7/30/90 dias *(admin)* |
+
+Editar recebe o mesmo corpo de salvar. Do `post`, só o `texto` pode ser reescrito
+ou apagado; o link e a miniatura do vídeo não mudam. As duas rotas respondem
+`404` para um vídeo que não é de quem chamou. **20 req/min** cada.
 
 ## Testes
 
@@ -376,10 +399,12 @@ backend/
 ├── services/
 │   ├── ai.py                # Prompt, esquema da resposta e chamada ao Gemini
 │   ├── archive.py           # Reconhece um vídeo que já está no acervo
-│   ├── downloader.py        # Download via yt-dlp
+│   ├── downloader.py        # Download via yt-dlp e leitura do post
 │   ├── embedding.py         # Geração de embeddings
 │   ├── jobs.py              # A análise em andamento ou à espera de cada conta
 │   └── usage.py             # Cota, contabilidade e agregações
+├── scripts/
+│   └── backfill_posts.py    # Preenche a miniatura de vídeos salvos antes de ela existir
 └── tests/
 
 frontend/src/
