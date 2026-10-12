@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from services.embedding import create_embedding
 from services.ai import analyze_video_content, TokenUsage
-from services.downloader import Download, download_video
-from dtos import AnalysisError, AnalysisJob, ExistingVideo, VideoMetadataDTO
+from services.downloader import Download, download_video, fetch_post
+from dtos import AnalysisError, AnalysisJob, ExistingVideo, PostInfo, VideoMetadataDTO
 from db import supabase
 from core.logger import get_logger
 from core.limiter import limiter
@@ -29,11 +29,11 @@ router = APIRouter(prefix="/videos", tags=["Videos"])
 
 INTERNAL_ERROR = "An internal error occurred while processing the video. Please try again."
 
+POST_LOOKUP_TIMEOUT = 15
 
-class VideoAnalysisRequest(BaseModel):
+
+class VideoLink(BaseModel):
     url: str
-    analyze_scenes: bool = True
-    analyze_audio: bool = True
 
     @field_validator('url')
     @classmethod
@@ -41,6 +41,11 @@ class VideoAnalysisRequest(BaseModel):
         if not validate_video_url(v):
             raise ValueError(f"URL must be from {' or '.join(ALLOWED_DOMAINS)}")
         return v
+
+
+class VideoAnalysisRequest(VideoLink):
+    analyze_scenes: bool = True
+    analyze_audio: bool = True
 
 
 def _already_archived(existing: dict, detail: str) -> JSONResponse:
@@ -286,6 +291,22 @@ async def discard_analysis(request: Request, user_id: str = CurrentUser):
         task.cancel()
 
     return Response(status_code=204)
+
+
+@router.post("/post", response_model=Optional[PostInfo])
+@limiter.limit("20/minute")
+async def look_up_post(request: Request, body: VideoLink, user_id: str = CurrentUser):
+    """The text and the picture of a post, for the form of a video that is being
+    described by hand. Asked for apart from the save, which never waits on X, and
+    only of X: the model refuses any other link."""
+    try:
+        loop = asyncio.get_event_loop()
+        return await asyncio.wait_for(
+            loop.run_in_executor(None, fetch_post, body.url), timeout=POST_LOOKUP_TIMEOUT
+        )
+    except Exception as e:
+        logger.warning(f"Could not look up the post of {body.url}: {e}")
+        return None
 
 
 @router.post("")

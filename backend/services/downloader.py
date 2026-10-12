@@ -14,6 +14,7 @@ logger = get_logger("services.downloader")
 DOWNLOAD_DIR = "temp_downloads"
 MAX_FILESIZE_MB = 100
 SOCKET_TIMEOUT = 30
+POST_SOCKET_TIMEOUT = 10
 
 # X ends the text of a post with a short link to its own media.
 SHORT_LINK = re.compile(r"\s*https://t\.co/\w+")
@@ -62,6 +63,22 @@ def read_post(info: dict) -> Optional[PostInfo]:
         return None
 
     return post if post.texto or post.miniatura else None
+
+
+def fetch_post(url: str) -> Optional[PostInfo]:
+    """The post without its video, for a video that was described by hand."""
+    ydl_opts = {
+        'quiet': True,
+        'no_warnings': True,
+        'socket_timeout': POST_SOCKET_TIMEOUT,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            return read_post(ydl.extract_info(url, download=False))
+    except Exception as e:
+        logger.warning(f"Could not fetch the post of {url}: {e}")
+        return None
 
 
 def download_video(url: str) -> Download:

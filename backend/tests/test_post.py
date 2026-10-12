@@ -1,3 +1,4 @@
+import time
 from unittest.mock import patch
 
 import pytest
@@ -193,6 +194,64 @@ class TestSaving:
         client.post("/videos", json={**VIDEO, "post": {**POST, **ACCOUNT}})
 
         assert payload()["post"] == POST
+
+
+@patch("routers.videos.fetch_post")
+class TestLookingItUp:
+    """For a video described by hand: nothing was downloaded, so the form asks."""
+
+    def test_answers_with_the_post_of_the_link(self, mock_fetch):
+        mock_fetch.return_value = PostInfo(**POST)
+
+        response = client.post("/videos/post", json={"url": URL})
+
+        assert response.status_code == 200
+        assert response.json() == POST
+        mock_fetch.assert_called_once_with(URL)
+
+    def test_answers_with_nothing_when_x_shows_nothing(self, mock_fetch):
+        mock_fetch.return_value = None
+
+        response = client.post("/videos/post", json={"url": URL})
+
+        assert response.status_code == 200
+        assert response.json() is None
+
+    def test_does_not_wait_for_ever(self, mock_fetch):
+        mock_fetch.side_effect = lambda _url: time.sleep(0.3)
+
+        with patch("routers.videos.POST_LOOKUP_TIMEOUT", 0.05):
+            response = client.post("/videos/post", json={"url": URL})
+
+        assert response.status_code == 200
+        assert response.json() is None
+
+    @pytest.mark.parametrize("address", [
+        "https://example.com/watch/1",
+        "http://169.254.169.254/latest/meta-data",
+        "https://x.com.example.com/a/status/1",
+    ])
+    def test_never_fetches_a_link_that_is_not_from_x(self, mock_fetch, address):
+        """The fetch would follow the link wherever it points."""
+        response = client.post("/videos/post", json={"url": address})
+
+        assert response.status_code == 422
+        mock_fetch.assert_not_called()
+
+    def test_requires_a_session(self, mock_fetch, anonymous):
+        assert client.post("/videos/post", json={"url": URL}).status_code == 401
+        mock_fetch.assert_not_called()
+
+    def test_is_never_asked_by_a_save(self, mock_fetch):
+        """Saving used to stop and ask X, and took several seconds for it."""
+        with patch("routers.videos.supabase") as mock_supabase, \
+             patch("routers.videos.create_embedding", return_value=[0.1] * 768):
+            _saved(mock_supabase)
+
+            response = client.post("/videos", json=VIDEO)
+
+        assert response.status_code == 200
+        mock_fetch.assert_not_called()
 
 
 class TestReadingItBack:
