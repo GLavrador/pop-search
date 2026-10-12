@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from services.embedding import create_embedding
 from services.ai import analyze_video_content, TokenUsage
-from services.downloader import download_video
+from services.downloader import Download, download_video
 from dtos import AnalysisError, AnalysisJob, ExistingVideo, VideoMetadataDTO
 from db import supabase
 from core.logger import get_logger
@@ -93,7 +93,7 @@ def _remove(path: Optional[str]) -> None:
         logger.warning(f"Could not remove temp file {path}: {e}")
 
 
-async def _download(url: str) -> str:
+async def _download(url: str) -> Download:
     loop = asyncio.get_event_loop()
     download = loop.run_in_executor(None, download_video, url)
 
@@ -102,7 +102,7 @@ async def _download(url: str) -> str:
     except asyncio.CancelledError:
         # The thread cannot be stopped, so its file is removed when it lands.
         download.add_done_callback(
-            lambda landed: None if landed.cancelled() or landed.exception() else _remove(landed.result())
+            lambda landed: None if landed.cancelled() or landed.exception() else _remove(landed.result().path)
         )
         raise
 
@@ -128,7 +128,8 @@ async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -
 
     try:
         await reached("downloading")
-        video_path = await _download(body.url)
+        download = await _download(body.url)
+        video_path = download.path
 
         charged = True
         analysis_result = await analyze_video_content(
@@ -144,6 +145,7 @@ async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -
             analysis_result["metadados_estruturados"] = {}
 
         analysis_result["url_original"] = body.url
+        analysis_result["post"] = download.post
 
         try:
             dto = VideoMetadataDTO(**analysis_result)
@@ -309,6 +311,7 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
             "descricao_completa": metadata.descricao_completa,
             "url_original": metadata.url_original,
             "metadados_estruturados": metadata.metadados_estruturados.model_dump(),
+            "post": metadata.post.to_store() if metadata.post else None,
             "embedding": vector
         }
 

@@ -125,7 +125,7 @@ async def list_my_videos(request: Request, user_id: str = CurrentUser):
     def query():
         return (
             supabase.table("videos")
-            .select("id, titulo_video, descricao_completa, url_original, created_at")
+            .select("id, titulo_video, descricao_completa, url_original, created_at, post")
             .eq("user_id", user_id)
             .order("created_at", desc=True)
             .limit(MAX_VIDEOS)

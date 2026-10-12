@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Literal, Optional
+
+from core.exceptions import validate_image_url
 
 MAX_TITULO_CHARS = 200
 MAX_DESCRICAO_CHARS = 5000
@@ -10,6 +12,28 @@ MAX_PAPEL_CHARS = 100
 MAX_ELEMENTOS_CENARIO = 50
 MAX_TRANSCRICAO_CHARS = 5000
 MAX_MUSICA_CHARS = 200
+MAX_POST_TEXTO_CHARS = 2000
+
+
+class PostInfo(BaseModel):
+    """What is kept of the post a video came from. Who posted it is not."""
+    texto: str = Field("", max_length=MAX_POST_TEXTO_CHARS, description="Text the author wrote")
+    miniatura: Optional[str] = Field(None, max_length=2048, description="Thumbnail of the video")
+
+    @field_validator("texto")
+    @classmethod
+    def trimmed(cls, v: str) -> str:
+        return v.strip()
+
+    # Dropped rather than refused: a post without its picture is still a post.
+    @field_validator("miniatura")
+    @classmethod
+    def only_from_x(cls, v: Optional[str]) -> Optional[str]:
+        return v if v and validate_image_url(v) else None
+
+    def to_store(self) -> Optional[dict]:
+        """Nothing at all, rather than an empty post, when neither is there."""
+        return self.model_dump() if self.texto or self.miniatura else None
 
 
 class Pessoa(BaseModel):
@@ -48,6 +72,7 @@ class VideoMetadataDTO(BaseModel):
         description="Original video URL"
     )
     metadados_estruturados: MetadadosEstruturados
+    post: Optional[PostInfo] = None
 
 
 SearchMode = Literal["hybrid", "semantic", "text"]
@@ -125,6 +150,7 @@ class MyVideo(BaseModel):
     descricao_completa: Optional[str] = None
     url_original: str
     created_at: str
+    post: Optional[PostInfo] = None
 
 
 AnalysisStage = Literal["queued", "downloading", "uploading", "watching", "writing", "done", "failed"]
@@ -163,4 +189,5 @@ class SearchResult(BaseModel):
     similarity: float = Field(..., ge=-1.0, le=1.0)
     text_rank: float = Field(0.0, description="ts_rank_cd score, 0.0 if no text match")
     score: float = Field(0.0, description="Fused RRF score used for ordering")
+    post: Optional[PostInfo] = None
 

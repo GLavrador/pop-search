@@ -32,10 +32,30 @@ def validate_video_url(url: str) -> bool:
     try:
         parsed = urlparse(url)
         hostname = parsed.hostname or ""
-        
+
         return any(
             hostname == domain or hostname.endswith(f".{domain}")
             for domain in ALLOWED_DOMAINS
+        )
+    except Exception:
+        return False
+
+
+IMAGE_DOMAINS = [
+    "twimg.com",
+]
+
+
+def validate_image_url(url: str) -> bool:
+    """Whether an image is served by X itself. Every visitor's browser loads the
+    thumbnail of a result, so it must not be an address a user could choose."""
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname or ""
+
+        return parsed.scheme == "https" and any(
+            hostname == domain or hostname.endswith(f".{domain}")
+            for domain in IMAGE_DOMAINS
         )
     except Exception:
         return False

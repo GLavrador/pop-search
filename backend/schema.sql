@@ -101,11 +101,15 @@ create table videos (
   titulo_video text,
   descricao_completa text,
   metadados_estruturados jsonb,
+  -- What is kept of the post: {texto, miniatura}. Read while the video is
+  -- downloaded; null for a video saved before that. Who posted is not kept.
+  post jsonb,
 -- Creates new vector
   embedding vector(768),
   -- Full-text column backing the lexical branch of the hybrid search.
   -- Only jsonb VALUES are indexed, never the keys.
-  -- Weights: A = title, B = description, C = structured metadata.
+  -- Weights: A = title, B = description and the text of the post,
+  -- C = structured metadata.
   fts tsvector generated always as (
     setweight(
       to_tsvector('portuguese_unaccent', coalesce(titulo_video, '')),
@@ -113,6 +117,10 @@ create table videos (
     ) ||
     setweight(
       to_tsvector('portuguese_unaccent', coalesce(descricao_completa, '')),
+      'B'
+    ) ||
+    setweight(
+      to_tsvector('portuguese_unaccent', coalesce(post ->> 'texto', '')),
       'B'
     ) ||
     setweight(
@@ -196,7 +204,8 @@ returns table (
   url_original text,
   similarity float,
   text_rank float,
-  score float
+  score float,
+  post jsonb
 )
 language sql
 stable
@@ -258,7 +267,8 @@ as $$
     v.url_original,
     f.sim,
     f.trank,
-    f.fused_score
+    f.fused_score,
+    v.post
   from fused f
   join videos v on v.id = f.video_id
   where f.passes_vector or f.passes_text

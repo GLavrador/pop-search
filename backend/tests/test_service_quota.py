@@ -8,7 +8,7 @@ from core.exceptions import ServiceQuotaExhaustedError
 from main import app
 from services import usage
 from services.usage import ProjectUsage
-from tests.conftest import TEST_USER_ID, analyze
+from tests.conftest import DOWNLOADED, TEST_USER_ID, analyze
 
 client = TestClient(app)
 
@@ -69,7 +69,7 @@ class TestServiceExhaustion:
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
     def test_reports_a_refused_call_as_a_service_problem(self, mock_download, mock_analyze):
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.side_effect = ServiceQuotaExhaustedError("429 quota exceeded")
 
         response = analyze(client, ANALYZE_BODY)
@@ -82,7 +82,7 @@ class TestServiceExhaustion:
     def test_does_not_charge_for_a_call_that_never_ran(self, mock_download, mock_analyze):
         """Regression: this used to consume one of the user's analyses and
         surface as a generic 500, at the exact moment the project was in trouble."""
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.side_effect = ServiceQuotaExhaustedError("429 quota exceeded")
         recorder = AsyncMock()
 
@@ -95,7 +95,7 @@ class TestServiceExhaustion:
     @patch("routers.videos.download_video")
     def test_a_genuine_failure_is_still_charged(self, mock_download, mock_analyze):
         """Only a refusal is free. An error after the model ran still cost."""
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.side_effect = Exception("something else broke")
         recorder = AsyncMock()
 
