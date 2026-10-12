@@ -430,15 +430,17 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
 /** The way in: through the boot screen, with the robot building the desktop, or straight. */
 type Starting = 'boot' | 'setup' | null;
 
-const firstStart = (): Starting => {
+const firstStart = (rebooted: boolean): Starting => {
+  // After a crash the machine restarts, and a restart goes through the boot screen.
+  if (rebooted) return 'boot';
   if (sessionStorage.getItem(BOOTED_KEY) !== null) return null;
   // The first time in a tab the robot builds the desktop. The boot screen is the still way in.
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'boot' : 'setup';
 };
 
-function Startup() {
+function Startup({ rebooted }: { rebooted: boolean }) {
   const server = useServerWake();
-  const [starting, setStarting] = useState(firstStart);
+  const [starting, setStarting] = useState(() => firstStart(rebooted));
 
   // The colour the page was first painted in has done its job once this draws over
   // it. Left on, it would be what shows behind the blue as the robot clears it.
@@ -459,11 +461,13 @@ function App() {
   return (
     <LanguageProvider>
       <BlueScreen>
-        <AuthProvider>
-          <StatusProvider>
-            <Startup />
-          </StatusProvider>
-        </AuthProvider>
+        {(restarts) => (
+          <AuthProvider>
+            <StatusProvider>
+              <Startup rebooted={restarts > 0} />
+            </StatusProvider>
+          </AuthProvider>
+        )}
       </BlueScreen>
     </LanguageProvider>
   );

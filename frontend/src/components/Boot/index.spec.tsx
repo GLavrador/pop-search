@@ -2,7 +2,16 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { AuthContext, type AuthContextType } from '../../context/authContext';
 import type { ServerStatus } from '../../hooks/useServerWake';
+import {
+  BOOT_LEAVE_MS,
+  BOOT_LEAVE_UNANSWERED_MS,
+  BOOT_LINE_EVERY_MS,
+  BOOT_PATIENCE_MS,
+} from '../../constants/startup';
 import { Boot } from './index';
+
+// Four checks, the first of them on screen from the start.
+const ALL_SHOWN = 3 * BOOT_LINE_EVERY_MS;
 
 const WAKING: ServerStatus = { state: 'waking', tookMs: null };
 const AWAKE: ServerStatus = { state: 'awake', tookMs: 320 };
@@ -48,7 +57,7 @@ describe('Boot', () => {
     expect(screen.getByText('Program')).toBeInTheDocument();
     expect(screen.queryByText('Server')).not.toBeInTheDocument();
 
-    pass(450);
+    pass(ALL_SHOWN);
 
     expect(screen.getByText('Language').parentElement).toHaveTextContent('English');
     expect(screen.getByText('Session').parentElement).toHaveTextContent('visitor');
@@ -58,7 +67,7 @@ describe('Boot', () => {
   it('should count in seconds an answer that took that long', () => {
     renderBoot({ state: 'awake', tookMs: 14230 });
 
-    pass(450);
+    pass(ALL_SHOWN);
 
     expect(screen.getByText('Server').parentElement).toHaveTextContent('OK, in 14.2 s');
   });
@@ -66,18 +75,18 @@ describe('Boot', () => {
   it('should go in shortly after everything has answered', () => {
     const { onDone } = renderBoot(AWAKE);
 
-    pass(450);
+    pass(ALL_SHOWN);
     expect(screen.getByText('Starting Pop Search...')).toBeInTheDocument();
     expect(onDone).not.toHaveBeenCalled();
 
-    pass(450);
+    pass(BOOT_LEAVE_MS);
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
   it('should name whoever is signed in', () => {
     renderBoot(AWAKE, auth({ displayName: 'Ana', isAuthenticated: true }));
 
-    pass(450);
+    pass(ALL_SHOWN);
 
     expect(screen.getByText('Session').parentElement).toHaveTextContent('Ana');
   });
@@ -94,11 +103,11 @@ describe('Boot', () => {
   it('should say why it is waiting when the server is asleep', () => {
     const { onDone, face } = renderBoot(WAKING);
 
-    pass(450);
+    pass(ALL_SHOWN);
     expect(screen.getByText('Server').parentElement).toHaveTextContent('calling...');
     expect(face()).toBe('sleepy');
 
-    pass(2000);
+    pass(1000);
 
     expect(screen.getByText('Server').parentElement).toHaveTextContent('waking up, 2 s');
     expect(screen.getByText(/The server sleeps when nobody is using it/)).toBeInTheDocument();
@@ -121,11 +130,11 @@ describe('Boot', () => {
   it('should go in without a server that takes too long', () => {
     const { onDone } = renderBoot(WAKING);
 
-    pass(5000);
+    pass(BOOT_PATIENCE_MS);
     expect(screen.getByText(/Going in without it/)).toBeInTheDocument();
     expect(onDone).not.toHaveBeenCalled();
 
-    pass(1400);
+    pass(BOOT_LEAVE_UNANSWERED_MS);
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
@@ -141,7 +150,7 @@ describe('Boot', () => {
     act(() => {
       document.dispatchEvent(new Event('visibilitychange'));
     });
-    pass(450);
+    pass(ALL_SHOWN);
 
     expect(screen.getByText('Server')).toBeInTheDocument();
     state.mockRestore();

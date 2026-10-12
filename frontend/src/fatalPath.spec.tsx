@@ -16,6 +16,12 @@ vi.mock('./lib/supabase', () => ({
   },
 }));
 
+vi.mock('./constants/startup', async (original) => ({
+  ...(await original<typeof import('./constants/startup')>()),
+  BOOT_LINE_EVERY_MS: 5,
+  BOOT_LEAVE_MS: 10,
+}));
+
 vi.mock('./services/api', () => ({
   pingServer: vi.fn().mockResolvedValue(undefined),
   getIsAdmin: vi.fn().mockResolvedValue(false),
@@ -78,14 +84,19 @@ describe('searching for the path that took Windows 98 down', () => {
     expect(screen.queryByText(SEARCH_TAB)).not.toBeInTheDocument();
   });
 
-  it('should bring the program back on a key', async () => {
+  it('should restart through the boot screen on a key, and come back to the desktop', async () => {
     renderApp();
     await searchFor('c:\\con\\con');
 
     fireEvent.keyDown(window, { key: 'a' });
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.getByText(SEARCH_TAB)).toBeInTheDocument();
+    expect(screen.getByText('Pop Search BIOS 1.0')).toBeInTheDocument();
+    expect(screen.queryByText(SEARCH_TAB)).not.toBeInTheDocument();
+
+    expect(await screen.findByText(SEARCH_TAB)).toBeInTheDocument();
+    expect(screen.queryByText('Pop Search BIOS 1.0')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-rebuild]')).toBeNull();
   });
 
   it('should search as usual for anything that only resembles it', async () => {

@@ -49,7 +49,7 @@ describe('BlueScreen', () => {
       'A fatal error has occurred and Pop Search had to stop:',
     );
     expect(screen.getByText('TypeError: the list is not a list')).toBeInTheDocument();
-    expect(screen.getByText('Press any key to open Pop Search again.')).toBeInTheDocument();
+    expect(screen.getByText('Press any key to restart Pop Search.')).toBeInTheDocument();
     expect(screen.getByText(/I will switch it all back on/)).toBeInTheDocument();
   });
 
@@ -70,6 +70,25 @@ describe('BlueScreen', () => {
 
     expect(screen.getByText('the program')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('should tell the program how many times it has been restarted', () => {
+    broken = new Error('once');
+    render(
+      <BlueScreen>
+        {(restarts) => (
+          <>
+            <Program />
+            <p>restarted {restarts} times</p>
+          </>
+        )}
+      </BlueScreen>,
+    );
+    broken = null;
+
+    anyKey();
+
+    expect(screen.getByText('restarted 1 times')).toBeInTheDocument();
   });
 
   it('should open the program again on a click', () => {
@@ -102,7 +121,7 @@ describe('BlueScreen', () => {
 
     anyKey();
 
-    expect(screen.getByText('The error came back right after reopening.')).toBeInTheDocument();
+    expect(screen.getByText('The error came back right after restarting.')).toBeInTheDocument();
     expect(screen.getByText('Press any key to reload the whole page.')).toBeInTheDocument();
     expect(reload).not.toHaveBeenCalled();
 

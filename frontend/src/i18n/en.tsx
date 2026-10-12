@@ -78,9 +78,9 @@ export const en = {
 
   crash: {
     lead: 'A fatal error has occurred and Pop Search had to stop:',
-    reopen: 'Press any key to open Pop Search again.',
+    reopen: 'Press any key to restart Pop Search.',
     kept: 'Videos already saved are still saved. What was only on screen is lost.',
-    again: 'The error came back right after reopening.',
+    again: 'The error came back right after restarting.',
     reload: 'Press any key to reload the whole page.',
     goOn: 'Press any key to continue',
     robot: 'Uh oh. That was not meant to happen. Press a key and I will switch it all back on.',
