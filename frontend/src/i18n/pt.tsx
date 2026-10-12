@@ -141,6 +141,7 @@ export const pt: Dictionary = {
     submit: 'Buscar',
     precision: (percent: number) => `Precisão ${percent}%`,
     loading: 'Consultando o banco...',
+    conCon: 'C:\\CON\\CON derrubava o Windows 98 de verdade. Aqui também derruba.',
     emptyTitle: '0 encontrados.',
     emptyWithThreshold: (percent: number) => (
       <>

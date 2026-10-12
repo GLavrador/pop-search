@@ -10,8 +10,11 @@ import { DEFAULT_SEARCH_MODE, findSearchMode, type SearchMode } from "../../cons
 import { useI18n } from "../../i18n/languageContext";
 import { helpAt, useRobot } from "../../context/robotContext";
 import { useSearchFacts } from "../../hooks/useSearchFacts";
+import { useFatal } from "../../hooks/useFatal";
 
 const BROADEST = Math.min(...PRECISION_PRESETS.map((preset) => preset.threshold));
+// The path that took Windows 98 down for real. It does the same here, on purpose.
+const FATAL_PATH = /^c:\\con\\con$/i;
 import styles from "./styles.module.css";
 
 export const SearchSection = () => {
@@ -24,6 +27,7 @@ export const SearchSection = () => {
   const { setStatus } = useStatus();
   const { t } = useI18n();
   const robot = useRobot();
+  const crash = useFatal();
   const toldAt = useRef(0);
 
   useSearchFacts('search', mode, threshold);
@@ -98,6 +102,11 @@ export const SearchSection = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+
+    if (FATAL_PATH.test(query.trim())) {
+      crash(new Error(t.search.conCon));
+      return;
+    }
 
     const isNewSearch = search(query, threshold, limit, mode);
     if (isNewSearch) {

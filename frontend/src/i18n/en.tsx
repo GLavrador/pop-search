@@ -147,6 +147,7 @@ export const en = {
     submit: 'Find Now',
     precision: (percent: number) => `Precision ${percent}%`,
     loading: 'Querying database...',
+    conCon: 'C:\\CON\\CON really did bring Windows 98 down. It does the same here.',
     emptyTitle: '0 found.',
     emptyWithThreshold: (percent: number) => (
       <>
