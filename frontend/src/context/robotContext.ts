@@ -51,7 +51,10 @@ export type RobotEvent =
   | { kind: 'language' }
   | { kind: 'closeAttempt'; attempt: number }
   | { kind: 'reopened' }
-  | { kind: 'maximized'; on: boolean };
+  | { kind: 'maximized'; on: boolean }
+  | { kind: 'serverWaking' }
+  | { kind: 'serverAwake' }
+  | { kind: 'serverDown' };
 
 export interface RobotVoice {
   /** Has it explain a control, standing next to `node`. */

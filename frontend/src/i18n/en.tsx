@@ -619,6 +619,7 @@ export const en = {
       language: ['now in English!', 'English it is!', 'speaking English!'],
       closing: ['hey!', 'do not close it!', 'really?', 'there is a cat in there...'],
       reopened: ['phew!', 'it is back!', 'what a scare!'],
+      serverAwake: ['the server is up!', 'there, it woke up!', 'full speed now!'],
       bigger: ['wow, so big!', 'full screen!', 'room to spare!'],
       smaller: ['that fits better', 'regular size', 'back to my corner'],
       echo: [
@@ -743,6 +744,12 @@ export const en = {
       },
       emptyStuck: {
         text: 'Still nothing. Try other words, or describe the scene another way.',
+      },
+      serverWaking: {
+        text: 'The server is still waking up: it sleeps when nobody is using it. The first search may take up to a minute.',
+      },
+      serverDown: {
+        text: 'The server did not answer. Searching and keeping videos may not work for now. Try reloading the page in a little while.',
       },
     },
     drop: {

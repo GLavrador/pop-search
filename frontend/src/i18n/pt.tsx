@@ -626,6 +626,7 @@ export const pt: Dictionary = {
       language: ['agora em português!', 'português, então!', 'falando português!'],
       closing: ['ei!', 'não fecha!', 'sério?', 'tem um gato aí...'],
       reopened: ['ufa!', 'voltou!', 'que susto!'],
+      serverAwake: ['o servidor acordou!', 'pronto, ele acordou!', 'agora vai rápido!'],
       bigger: ['uau, que grande!', 'tela cheia!', 'espaço de sobra!'],
       smaller: ['assim cabe melhor', 'tamanho normal', 'de volta ao cantinho'],
       echo: [
@@ -750,6 +751,12 @@ export const pt: Dictionary = {
       },
       emptyStuck: {
         text: 'Nem assim eu achei. Tente outras palavras, ou descreva a cena de outro jeito.',
+      },
+      serverWaking: {
+        text: 'O servidor ainda está acordando: ele dorme quando ninguém usa. A primeira busca pode demorar até um minuto.',
+      },
+      serverDown: {
+        text: 'O servidor não respondeu. Buscar e guardar vídeos pode não funcionar por enquanto. Tente recarregar a página daqui a pouco.',
       },
     },
     drop: {

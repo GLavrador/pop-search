@@ -12,7 +12,7 @@ import { MyVideos } from './components/MyVideos';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { useIdentityReset } from './hooks/useIdentityReset';
-import { useServerWake } from './hooks/useServerWake';
+import { useServerWake, type ServerState } from './hooks/useServerWake';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
@@ -38,6 +38,7 @@ import { useGuide } from './hooks/useGuide';
 import { useRobotDirector } from './hooks/useRobotDirector';
 import { RobotContext, helpAt, type HelpKey } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
+import { SERVER_NOTICE_MS } from './constants/startup';
 
 const WINDOW_ICON = '💻';
 const APP_NAME = 'Pop Search';
@@ -74,9 +75,10 @@ function AppContent() {
   const robotSeat = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   useIdentityReset();
-  useServerWake();
+  const server = useServerWake();
   const { t, language } = useI18n();
   const spokenIn = useRef(language);
+  const toldServer = useRef<ServerState | null>(null);
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -91,6 +93,24 @@ function AppContent() {
     spokenIn.current = language;
     notify({ kind: 'language' });
   }, [language, notify]);
+
+  // A quick answer needs no word. A slow one is explained, and so is its end.
+  useEffect(() => {
+    if (toldServer.current === server.state) return;
+
+    if (server.state === 'waking') {
+      const id = setTimeout(() => {
+        toldServer.current = 'waking';
+        notify({ kind: 'serverWaking' });
+      }, SERVER_NOTICE_MS);
+      return () => clearTimeout(id);
+    }
+
+    const waited = toldServer.current === 'waking';
+    toldServer.current = server.state;
+    if (server.state === 'down') notify({ kind: 'serverDown' });
+    else if (waited) notify({ kind: 'serverAwake' });
+  }, [server.state, notify]);
 
   useEffect(() => {
     if (windowState !== 'closing') return;
