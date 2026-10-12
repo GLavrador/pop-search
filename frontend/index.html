@@ -6,12 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pop Search</title>
     <script>
-      // Dark from the first paint when the boot screen is about to play.
-      if (!sessionStorage.getItem('pop-search:booted')) document.documentElement.dataset.boot = '';
+      // The colour of the first paint, when the page is about to start up: blue under
+      // the robot building the desktop, black under the boot screen that stands in for it.
+      if (!sessionStorage.getItem('pop-search:booted')) {
+        const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.documentElement.dataset.boot = calm ? 'boot' : 'setup';
+      }
     </script>
     <style>
-      html[data-boot] body {
+      html[data-boot='boot'] body {
         background: #000;
+      }
+
+      html[data-boot='setup'] body {
+        background: #0000aa;
       }
     </style>
   </head>

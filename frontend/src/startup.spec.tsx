@@ -1,9 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockGetSession = vi.fn();
 const pingServer = vi.fn();
+const pace = vi.hoisted(() => ({ value: 0.002 }));
 
 vi.mock('./lib/supabase', () => ({
   supabase: {
@@ -21,6 +22,13 @@ vi.mock('./constants/startup', async (original) => ({
   BOOT_PATIENCE_MS: 150,
   BOOT_LEAVE_MS: 10,
   BOOT_LEAVE_UNANSWERED_MS: 20,
+}));
+
+vi.mock('./constants/rebuild', () => ({
+  get REBUILD_PACE() {
+    return pace.value;
+  },
+  SWALLOW_MS: 20,
 }));
 
 vi.mock('./services/api', () => ({
@@ -42,6 +50,7 @@ import App from './App';
 
 const BOOTED = 'pop-search:booted';
 const BIOS = 'Pop Search BIOS 1.0';
+const BUILDING = 'A robot is building the desktop from nothing.';
 const SEARCH_TAB = '🔍 Search.exe';
 
 const renderApp = () => {
@@ -53,7 +62,27 @@ const renderApp = () => {
   );
 };
 
-const asleep = () => pingServer.mockReturnValue(new Promise<void>(() => {}));
+const frame = () => document.querySelector('[data-robot="window"]') as HTMLElement;
+const building = () => document.querySelector('[data-rebuild]');
+const theRobot = () => screen.queryByRole('button', { name: 'Poke BIP-98' });
+const unbuilt = () => document.querySelectorAll('[data-robot="icon"][data-built]');
+
+const expectDesktopReady = () => {
+  expect(building()).toBeNull();
+  expect(screen.queryByText(BUILDING, { exact: false })).not.toBeInTheDocument();
+  expect(unbuilt()).toHaveLength(0);
+  expect(document.querySelector('[data-robot="taskbar"]')).not.toHaveAttribute('data-start');
+  expect(frame()).toHaveAttribute('aria-hidden', 'false');
+  expect(theRobot()).toBeInTheDocument();
+  expect(sessionStorage.getItem(BOOTED)).not.toBeNull();
+};
+
+const askForLessMovement = () =>
+  vi
+    .spyOn(window, 'matchMedia')
+    .mockImplementation(
+      (media) => ({ matches: media.includes('reduce'), media }) as unknown as MediaQueryList,
+    );
 
 describe('starting up', () => {
   beforeEach(() => {
@@ -61,6 +90,11 @@ describe('starting up', () => {
     localStorage.clear();
     mockGetSession.mockResolvedValue({ data: { session: null } });
     pingServer.mockResolvedValue(undefined);
+    pace.value = 0.002;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('in a tab that has not started yet', () => {
@@ -68,19 +102,84 @@ describe('starting up', () => {
       sessionStorage.removeItem(BOOTED);
     });
 
-    it('should begin on the boot screen and open the desktop once the server answers', async () => {
+    it('should open on a blue screen with nothing but the name of the program on it', async () => {
+      pace.value = 1;
+      renderApp();
+
+      const blue = document.querySelector('[aria-hidden="true"][class*="tile"]') as HTMLElement;
+      expect(blue).toHaveTextContent(/^Pop Search$/);
+      expect(screen.getByRole('status')).toHaveTextContent(BUILDING);
+      expect(screen.queryByText(BIOS)).not.toBeInTheDocument();
+      expect(unbuilt()).toHaveLength(3);
+      expect(document.querySelector('[data-robot="taskbar"]')).toHaveAttribute('data-start', 'none');
+      expect(document.querySelector('[data-robot="clock"]')).toBeNull();
+      expect(frame()).toHaveAttribute('aria-hidden', 'true');
+      expect(theRobot()).not.toBeInTheDocument();
+      expect(sessionStorage.getItem(BOOTED)).toBeNull();
+    });
+
+    it('should leave the desktop, not the colour of the first paint, behind the blue', () => {
+      pace.value = 1;
+      document.documentElement.dataset.boot = 'setup';
+
+      renderApp();
+
+      expect(building()).not.toBeNull();
+      expect(document.documentElement).not.toHaveAttribute('data-boot');
+    });
+
+    it('should have the robot say there is nothing yet, and that it will make it all', async () => {
+      pace.value = 0.3;
+      renderApp();
+
+      expect(
+        await screen.findByText('Nothing here yet. Leave it to me: I will make it all!', {}, { timeout: 3000 }),
+      ).toBeInTheDocument();
+    });
+
+    it('should have the robot build the desktop and leave the program open', async () => {
+      renderApp();
+
+      await waitFor(() => expect(building()).toBeNull(), { timeout: 12000 });
+
+      expectDesktopReady();
+    }, 15000);
+
+    it('should go straight to the desktop on any key', () => {
+      pace.value = 1;
+      renderApp();
+
+      fireEvent.keyDown(window, { key: 'a' });
+
+      expectDesktopReady();
+    });
+
+    it('should go straight to the desktop on a click anywhere', () => {
+      pace.value = 1;
+      renderApp();
+
+      fireEvent.click(building() as Element);
+
+      expectDesktopReady();
+    });
+
+    it('should start on the boot screen instead for whoever asked for less movement', async () => {
+      askForLessMovement();
       renderApp();
 
       expect(screen.getByText(BIOS)).toBeInTheDocument();
+      expect(building()).toBeNull();
       expect(screen.queryByText(SEARCH_TAB)).not.toBeInTheDocument();
 
       expect(await screen.findByText(SEARCH_TAB)).toBeInTheDocument();
       expect(screen.queryByText(BIOS)).not.toBeInTheDocument();
+      expect(building()).toBeNull();
       expect(sessionStorage.getItem(BOOTED)).not.toBeNull();
     });
 
-    it('should let a key skip the wait for a server that is asleep', () => {
-      asleep();
+    it('should let a key skip the boot screen while the server sleeps', () => {
+      askForLessMovement();
+      pingServer.mockReturnValue(new Promise<void>(() => {}));
       renderApp();
       expect(screen.getByText(BIOS)).toBeInTheDocument();
 
@@ -89,14 +188,6 @@ describe('starting up', () => {
       expect(screen.getByText(SEARCH_TAB)).toBeInTheDocument();
       expect(screen.queryByText(BIOS)).not.toBeInTheDocument();
     });
-
-    it('should go in on its own when the server takes too long', async () => {
-      asleep();
-      renderApp();
-
-      expect(await screen.findByText(/Going in without it/)).toBeInTheDocument();
-      expect(await screen.findByText(SEARCH_TAB)).toBeInTheDocument();
-    });
   });
 
   it('should go straight to the desktop in a tab that has already started', () => {
@@ -104,5 +195,7 @@ describe('starting up', () => {
 
     expect(screen.getByText(SEARCH_TAB)).toBeInTheDocument();
     expect(screen.queryByText(BIOS)).not.toBeInTheDocument();
+    expect(building()).toBeNull();
+    expect(frame()).toHaveAttribute('aria-hidden', 'false');
   });
 });
