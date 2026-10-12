@@ -280,6 +280,9 @@ export const pt: Dictionary = {
     descriptionLabel: 'Descrição completa',
     descriptionHint: '(mín. 20 palavras)',
     sourceLabel: 'URL de origem (somente leitura)',
+    postLegend: 'Post original',
+    postLabel: 'Texto do post',
+    postHint: '(opcional, entra na busca)',
     scenesLegend: 'Elementos de cenário',
     scenesLabel: 'Elementos de cenário (separados por vírgula)',
     scenesPlaceholder: 'mesa de cozinha, tigela azul, janela',
@@ -848,6 +851,10 @@ export const pt: Dictionary = {
       'review.general': {
         title: 'Título e descrição',
         text: 'É este texto que a busca lê para achar o vídeo. A IA erra de vez em quando, então confira e corrija o que precisar antes de salvar.',
+      },
+      'review.post': {
+        title: 'Texto do post',
+        text: 'O que estava escrito no post lá no X. Se ficar aqui, a busca também procura neste texto. Pode corrigir ou apagar: ele não aparece nos resultados.',
       },
       'review.scenes': {
         title: 'Elementos de cenário',

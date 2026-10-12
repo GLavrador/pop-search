@@ -58,4 +58,5 @@ export const DEMO_VIDEO: VideoMetadata = {
       artista: 'Olivia O’Brien',
     },
   },
+  post: DEMO_POST,
 };

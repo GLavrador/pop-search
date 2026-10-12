@@ -274,6 +274,9 @@ export const en = {
     descriptionLabel: 'Full Description',
     descriptionHint: '(min. 20 words)',
     sourceLabel: 'Source URL (Read-only)',
+    postLegend: 'Original post',
+    postLabel: 'Text of the post',
+    postHint: '(optional, the search reads it)',
     scenesLegend: 'Scene Elements',
     scenesLabel: 'Scene Elements (comma separated)',
     scenesPlaceholder: 'mesa de cozinha, tigela azul, janela',
@@ -841,6 +844,10 @@ export const en = {
       'review.general': {
         title: 'Title and description',
         text: 'This is the text the search reads to find the video. The AI gets things wrong now and then, so check it and fix what needs fixing before you save.',
+      } as HelpCopy,
+      'review.post': {
+        title: 'Text of the post',
+        text: 'What was written in the post on X. If it stays here, the search looks through this text too. You can correct it or clear it: it is not shown in the results.',
       } as HelpCopy,
       'review.scenes': {
         title: 'Scene elements',
