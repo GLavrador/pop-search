@@ -2,7 +2,7 @@ import asyncio
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 
 from core.auth import CurrentUser
 from core.limiter import limiter
@@ -187,6 +187,18 @@ def _update_mine(video_id: str, user_id: str, changes: dict) -> Optional[dict]:
     return rows[0] if rows else None
 
 
+def _delete_mine(video_id: str, user_id: str) -> bool:
+    rows = (
+        supabase.table("videos")
+        .delete()
+        .eq("id", video_id)
+        .eq("user_id", user_id)
+        .execute()
+        .data
+    ) or []
+    return bool(rows)
+
+
 @router.put("/videos/{video_id}", response_model=MyVideo)
 @limiter.limit("20/minute")
 async def edit_my_video(
@@ -240,3 +252,22 @@ async def edit_my_video(
             detail="An internal error occurred while saving your changes. Please try again.",
         )
 
+
+@router.delete("/videos/{video_id}", status_code=204)
+@limiter.limit("20/minute")
+async def delete_my_video(request: Request, video_id: uuid.UUID, user_id: str = CurrentUser):
+    try:
+        loop = asyncio.get_event_loop()
+        deleted = await loop.run_in_executor(None, _delete_mine, str(video_id), user_id)
+    except Exception as e:
+        logger.exception(f"Failed to delete video {video_id} for {user_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while deleting the video. Please try again.",
+        )
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail=VIDEO_NOT_FOUND)
+
+    logger.info(f"Video {video_id} deleted by {user_id}")
+    return Response(status_code=204)

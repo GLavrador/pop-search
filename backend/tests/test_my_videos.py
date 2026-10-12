@@ -36,13 +36,14 @@ SAVED = {
 }
 
 
-def _mine(mock_supabase, stored=STORED, saved=SAVED):
+def _mine(mock_supabase, stored=STORED, saved=SAVED, deleted=True):
     """A library holding one video, or none of the caller's when `stored` is None."""
     table = mock_supabase.table.return_value
     owned = lambda action: action.return_value.eq.return_value.eq.return_value
 
     owned(table.select).limit.return_value.execute.return_value.data = [stored] if stored else []
     owned(table.update).execute.return_value.data = [saved] if saved else []
+    owned(table.delete).execute.return_value.data = [{"id": VIDEO_ID}] if deleted else []
     return table
 
 
@@ -179,6 +180,38 @@ class TestEditing:
 
     def test_requires_a_session(self, mock_supabase, _embedding, anonymous):
         assert client.put(f"/me/videos/{VIDEO_ID}", json=CHANGES).status_code == 401
+
+
+@patch("routers.me.supabase")
+class TestDeleting:
+
+    def test_removes_the_video(self, mock_supabase):
+        table = _mine(mock_supabase)
+
+        response = client.delete(f"/me/videos/{VIDEO_ID}")
+
+        assert response.status_code == 204
+        assert _filters(table.delete) == [("id", VIDEO_ID), ("user_id", TEST_USER_ID)]
+
+    def test_is_not_found_for_a_video_of_someone_else(self, mock_supabase):
+        _mine(mock_supabase, deleted=False)
+
+        assert client.delete(f"/me/videos/{VIDEO_ID}").status_code == 404
+
+    def test_hides_the_cause_of_a_failure(self, mock_supabase):
+        mock_supabase.table.side_effect = RuntimeError("connection refused")
+
+        response = client.delete(f"/me/videos/{VIDEO_ID}")
+
+        assert response.status_code == 500
+        assert "connection refused" not in response.text
+
+    def test_refuses_an_id_that_is_not_one(self, mock_supabase):
+        assert client.delete("/me/videos/not-an-id").status_code == 422
+        mock_supabase.table.assert_not_called()
+
+    def test_requires_a_session(self, mock_supabase, anonymous):
+        assert client.delete(f"/me/videos/{VIDEO_ID}").status_code == 401
 
 
 @patch("routers.me.supabase")
