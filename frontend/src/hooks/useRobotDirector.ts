@@ -66,6 +66,8 @@ const PRESS_FACES: Partial<Record<PressKey, Face>> = {
   stricter: 'curious',
   authSubmit: 'curious',
   reviewCancel: 'neutral',
+  editCancel: 'neutral',
+  removeAsk: 'worried',
   back: 'neutral',
 };
 
@@ -371,6 +373,12 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           break;
         case 'saveFailed':
           react({ face: 'worried', emote: vary('saveFailed', says.saveFailed), move: 'shake' });
+          break;
+        case 'videoRemoved':
+          react({ face: 'neutral', emote: vary('removed', says.removed), move: 'nod' });
+          break;
+        case 'videoRemoveFailed':
+          react({ face: 'worried', emote: vary('removeFailed', says.removeFailed), move: 'shake' });
           break;
         case 'signedIn':
           react({ face: 'happy', emote: vary('hello', says.hello)(event.name), move: 'hop' });

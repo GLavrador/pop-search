@@ -21,6 +21,7 @@ genai = get_genai()
 MAX_EMBEDDING_CHARS = 5000
 
 DESCRIPTION_CHARS = 1800
+POST_CHARS = 400
 PEOPLE_CHARS = 700
 ELEMENTS_CHARS = 500
 AUDIO_CHARS = 1200
@@ -39,6 +40,9 @@ def generate_searchable_text(data: VideoMetadataDTO) -> str:
         f"Title: {data.titulo_sugerido}",
         f"Description: {_truncate(data.descricao_completa, DESCRIPTION_CHARS, 'description')}",
     ]
+
+    if data.post and data.post.texto:
+        parts.append(f"Post: {_truncate(data.post.texto, POST_CHARS, 'post')}")
 
     meta = data.metadados_estruturados
 

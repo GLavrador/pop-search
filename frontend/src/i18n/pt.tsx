@@ -207,6 +207,26 @@ export const pt: Dictionary = {
     ),
     title: 'Meus vídeos',
     count: (n: number) => `${n} indexado(s)`,
+    edit: 'Editar',
+    editOf: (title: string) => `Editar "${title}"`,
+    remove: 'Excluir',
+    removeOf: (title: string) => `Excluir "${title}"`,
+    editing: 'Editando o vídeo',
+    confirm: {
+      question: 'Excluir este vídeo do acervo? Não dá para desfazer.',
+      yes: 'Sim, excluir',
+      removing: 'Excluindo...',
+    },
+    status: {
+      editing: 'Mude o que precisar e salve.',
+      editCancelled: 'Edição cancelada. O vídeo ficou como estava.',
+      saving: 'Salvando as alterações...',
+      saved: 'Alterações salvas.',
+      saveFailed: 'Erro: não foi possível salvar as alterações. Tente de novo.',
+      removing: 'Excluindo o vídeo...',
+      removed: 'Vídeo excluído do acervo.',
+      removeFailed: 'Erro: não foi possível excluir o vídeo. Tente de novo.',
+    },
     errors: {
       expired: 'Sua sessão expirou. Entre de novo.',
       rateLimited: 'Requisições demais. Espere um minuto e tente de novo.',
@@ -280,6 +300,9 @@ export const pt: Dictionary = {
     descriptionLabel: 'Descrição completa',
     descriptionHint: '(mín. 20 palavras)',
     sourceLabel: 'URL de origem (somente leitura)',
+    postLegend: 'Post original',
+    postLabel: 'Texto do post',
+    postHint: '(opcional, entra na busca)',
     scenesLegend: 'Elementos de cenário',
     scenesLabel: 'Elementos de cenário (separados por vírgula)',
     scenesPlaceholder: 'mesa de cozinha, tigela azul, janela',
@@ -592,6 +615,8 @@ export const pt: Dictionary = {
       manual: ['eu confio em você!', 'capricha na descrição!', 'você escreve melhor mesmo'],
       saved: ['guardado!', 'no acervo!', 'salvo, pode buscar!'],
       saveFailed: ['não salvou...', 'xi, não gravou', 'tenta de novo?'],
+      removed: ['foi embora', 'um a menos', 'tirei do acervo'],
+      removeFailed: ['não consegui tirar...', 'xi, ele ficou', 'tenta de novo?'],
       hello: [
         (name: string | null) => (name ? `oi, ${name}!` : 'oi!'),
         (name: string | null) => (name ? `bem-vindo, ${name}!` : 'bem-vindo!'),
@@ -672,6 +697,10 @@ export const pt: Dictionary = {
         stricter: ['mais exigente!', 'só os bem parecidos', 'subindo a régua'],
         looser: ['mais solto!', 'deixando entrar mais', 'baixando a régua'],
         reviewCancel: ['tudo bem, joguei fora', 'fica para a próxima', 'ok, descartado'],
+        editVideo: ['vamos arrumar', 'hora do retoque', 'o que vai mudar?'],
+        editCancel: ['ficou como estava', 'nada mudou', 'ok, deixei quieto'],
+        removeAsk: ['tem certeza?', 'vai apagar mesmo?', 'esse não volta...'],
+        removeCancel: ['ufa!', 'ele fica!', 'boa, continua guardado'],
         openVideo: ['boa escolha!', 'esse é bom', 'vai lá ver!'],
         authSwitch: ['conta nova ou antiga?', 'tanto faz, eu espero', 'escolha à vontade'],
         authSubmit: ['conferindo...', 'um instante...', 'batendo na porta...'],
@@ -849,6 +878,10 @@ export const pt: Dictionary = {
         title: 'Título e descrição',
         text: 'É este texto que a busca lê para achar o vídeo. A IA erra de vez em quando, então confira e corrija o que precisar antes de salvar.',
       },
+      'review.post': {
+        title: 'Texto do post',
+        text: 'O que estava escrito no post lá no X. Se ficar aqui, a busca também procura neste texto. Pode corrigir ou apagar: ele não aparece nos resultados.',
+      },
       'review.scenes': {
         title: 'Elementos de cenário',
         text: 'Coisas que aparecem no vídeo, separadas por vírgula. Ajudam a achar o vídeo por um detalhe, como "tigela azul".',
@@ -923,6 +956,14 @@ export const pt: Dictionary = {
       library: {
         title: 'Meus vídeos',
         text: 'Tudo que você guardou com a sua conta. Clique no título de um vídeo para abrir o post original.',
+      },
+      'library.actions': {
+        title: 'Editar ou excluir',
+        text: 'Editar abre o que está guardado sobre o vídeo para você corrigir. Excluir tira o vídeo do acervo de vez, depois de você confirmar.',
+      },
+      'library.save': {
+        title: 'Salvar ou cancelar',
+        text: 'Salvar grava as mudanças, e a busca passa a achar o vídeo pelo texto novo. Cancelar deixa o vídeo como estava.',
       },
       'account.form': {
         title: 'Entrar ou criar conta',

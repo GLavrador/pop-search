@@ -4,6 +4,7 @@ from dtos import (
     Pessoa, 
     AudioInfo, 
     MetadadosEstruturados, 
+    PostInfo,
     VideoMetadataDTO
 )
 from services.embedding import MAX_EMBEDDING_CHARS, generate_searchable_text
@@ -121,6 +122,7 @@ class TestSearchableTextTruncation:
                 elementos_cenario=["E" * 1000 for _ in range(50)],
                 audio=AudioInfo(transcricao="A" * 5000),
             ),
+            post=PostInfo(texto="X" * 2000),
         )
 
     def test_worst_case_payload_stays_within_budget(self):
@@ -135,6 +137,7 @@ class TestSearchableTextTruncation:
 
         assert "Title:" in text
         assert "Description:" in text
+        assert "Post:" in text
         assert "People:" in text
         assert "Elements:" in text
         assert "Audio:" in text

@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAnalysisJob } from '../../hooks/useAnalysisJob';
 import { useStatus } from '../../context/StatusContext';
-import { saveVideo } from '../../services/api';
+import { lookUpPost, saveVideo } from '../../services/api';
 import type { RunningStage, VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
 import { QuotaMeter } from '../QuotaMeter';
@@ -34,6 +35,7 @@ export const IngestSection = () => {
   const [manualMode, setManualMode] = useState(false);
   const [manualData, setManualData] = useState<VideoMetadata | null>(null);
   const analysis = useAnalysisJob();
+  const queryClient = useQueryClient();
   const { isLoading, stage, data, draft, duplicate, error } = analysis;
   const { setStatus } = useStatus();
   const { t } = useI18n();
@@ -72,20 +74,33 @@ export const IngestSection = () => {
     if (data) robot.notify({ kind: 'analysisDone', title: data.titulo_sugerido });
   }, [data, robot]);
 
+  const openManualForm = useCallback(
+    (link: string) => {
+      setManualData(createEmptyMetadata(link));
+      setStatus(t.ingest.status.manual);
+
+      // Asked for apart, so the form never waits on X: the text of the post
+      // lands in its field when it arrives, unless one was typed there first.
+      lookUpPost(link)
+        .then((post) => {
+          if (!post) return;
+          setManualData((current) =>
+            current && current.url_original === link && !current.post ? { ...current, post } : current,
+          );
+        })
+        .catch(() => {});
+    },
+    [setStatus, t.ingest.status.manual],
+  );
+
   // The way out it offers is the manual form, opened on the link that just failed.
   useEffect(() => {
     if (error === toldError.current) return;
     toldError.current = error;
     if (!error) return;
 
-    robot.notify({
-      kind: 'analysisFailed',
-      manual: () => {
-        setManualData(createEmptyMetadata(jobUrl));
-        setStatus(t.ingest.status.manual);
-      },
-    });
-  }, [error, robot, jobUrl, setStatus, t.ingest.status.manual]);
+    robot.notify({ kind: 'analysisFailed', manual: () => openManualForm(jobUrl) });
+  }, [error, robot, jobUrl, openManualForm]);
 
   useEffect(() => {
     const id = draft?.id ?? null;
@@ -137,8 +152,7 @@ export const IngestSection = () => {
 
   const handleOpenManualForm = () => {
     if (!performValidation()) return;
-    setManualData(createEmptyMetadata(url));
-    setStatus(t.ingest.status.manual);
+    openManualForm(url);
     robot.notify({ kind: 'manualOpened' });
   };
 
@@ -154,6 +168,8 @@ export const IngestSection = () => {
       try {
         setStatus(t.ingest.status.saving);
         await saveVideo(finalData);
+        // The library stays mounted behind its tab, so it would never ask again.
+        queryClient.invalidateQueries({ queryKey: ['myVideos'] });
         setStatus(t.ingest.status.saved, 5000);
         robot.notify({ kind: 'saved' });
         // Nothing to discard: saving already cleared the analysis on the server.

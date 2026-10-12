@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useId, useMemo, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { VideoMetadata } from "../../types";
@@ -6,6 +6,7 @@ import { createVideoMetadataFormSchema, type VideoMetadataForm } from "../../sch
 import { transformFormDataToMetadata } from "../../utils/transformers";
 import { useI18n } from "../../i18n/languageContext";
 import { helpAt, useRobot } from "../../context/robotContext";
+import { Thumbnail } from "../Post/Thumbnail";
 import styles from "./styles.module.css";
 
 interface ReviewFormProps {
@@ -14,7 +15,11 @@ interface ReviewFormProps {
   onCancel: () => void;
   showScenes?: boolean;
   showAudio?: boolean;
+  /** Changing a video already kept, where cancelling throws nothing away. */
+  editing?: boolean;
 }
+
+const MAX_POST_TEXT = 2000;
 
 const toFormData = (data: VideoMetadata): VideoMetadataForm => ({
   ...data,
@@ -24,7 +29,7 @@ const toFormData = (data: VideoMetadata): VideoMetadataForm => ({
   },
 });
 
-export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, showAudio = true }: ReviewFormProps) => {
+export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, showAudio = true, editing = false }: ReviewFormProps) => {
   const { t } = useI18n();
   const robot = useRobot();
   const schema = useMemo(() => createVideoMetadataFormSchema(t.validation), [t]);
@@ -38,9 +43,19 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
     resolver: zodResolver(schema),
   });
 
+  const post = initialData.post;
+  const postFieldId = useId();
+  // The text that came with the video, until something is typed over it.
+  const [typedPost, setTypedPost] = useState<string | null>(null);
+  const postText = typedPost ?? post?.texto ?? '';
+
   const onSubmit: SubmitHandler<VideoMetadataForm> = async (data) => {
     const processedData = transformFormDataToMetadata(data);
-    await onSave(processedData);
+    // Only what was left in the field is kept. The picture goes back as it came.
+    await onSave({
+      ...processedData,
+      post: { texto: postText.trim(), miniatura: post?.miniatura ?? null },
+    });
   };
 
   return (
@@ -84,6 +99,28 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
             className="win95-inset win95-input"
             disabled
           />
+        </div>
+      </fieldset>
+
+      <fieldset className={styles.groupFrame} {...helpAt('review.post')}>
+        <legend className={styles.legend}>{t.review.postLegend}</legend>
+
+        <div className={styles.post}>
+          {post?.miniatura && <Thumbnail src={post.miniatura} />}
+          <div className={`${styles.formGroup} ${styles.postField}`}>
+            <label className={styles.label} htmlFor={postFieldId}>
+              {t.review.postLabel}
+              <span className={styles.hint}>{t.review.postHint}</span>
+            </label>
+            <textarea
+              id={postFieldId}
+              className={`win95-inset win95-input ${styles.textarea}`}
+              rows={2}
+              maxLength={MAX_POST_TEXT}
+              value={postText}
+              onChange={(event) => setTypedPost(event.target.value)}
+            />
+          </div>
         </div>
       </fieldset>
 
@@ -134,11 +171,11 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
         </fieldset>
       )}
 
-      <div className={styles.actions} {...helpAt('review.save')}>
+      <div className={styles.actions} {...helpAt(editing ? 'library.save' : 'review.save')}>
         <button
           type="button"
           onClick={() => {
-            robot.notify({ kind: 'pressed', what: 'reviewCancel' });
+            robot.notify({ kind: 'pressed', what: editing ? 'editCancel' : 'reviewCancel' });
             onCancel();
           }}
           className="win95-btn"

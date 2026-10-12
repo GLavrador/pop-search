@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type {
   AnalysisJob,
+  PostInfo,
   VideoMetadata,
   SearchParams,
   SearchResult,
@@ -77,6 +78,12 @@ export const saveVideo = async (data: VideoMetadata): Promise<void> => {
   await api.post('/videos', data);
 };
 
+/** The text and the picture of the post behind a link, or null when X shows none. */
+export const lookUpPost = async (url: string): Promise<PostInfo | null> => {
+  const response = await api.post<PostInfo | null>('/videos/post', { url });
+  return response.data ?? null;
+};
+
 export const getMyQuota = async (signal?: AbortSignal): Promise<QuotaStatus> => {
   const response = await api.get<QuotaStatus>('/me/quota', { signal });
   return response.data;
@@ -103,6 +110,15 @@ export const getAdminStats = async (
 export const getMyVideos = async (signal?: AbortSignal): Promise<MyVideo[]> => {
   const response = await api.get<MyVideo[]>('/me/videos', { signal });
   return response.data;
+};
+
+export const updateVideo = async (id: string, data: VideoMetadata): Promise<MyVideo> => {
+  const response = await api.put<MyVideo>(`/me/videos/${id}`, data);
+  return response.data;
+};
+
+export const deleteVideo = async (id: string): Promise<void> => {
+  await api.delete(`/me/videos/${id}`);
 };
 
 export const searchVideos = async (

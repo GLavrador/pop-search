@@ -1,6 +1,12 @@
-import type { VideoMetadata, SearchResult } from '../types';
+import type { PostInfo, VideoMetadata, SearchResult } from '../types';
 
 export const DEMO_QUERY = 'gato';
+
+const DEMO_POST: PostInfo = {
+  texto: 'Thanks kitty!',
+  miniatura:
+    'https://pbs.twimg.com/amplify_video_thumb/2085904873753919488/img/YAHX7d_oRH4ppPeX.jpg?name=small',
+};
 
 /** Chosen to show all three badges: one match by both routes, one by meaning alone, one by words alone. */
 export const DEMO_SEARCH_RESULTS: SearchResult[] = [
@@ -13,6 +19,7 @@ export const DEMO_SEARCH_RESULTS: SearchResult[] = [
     similarity: 0.78,
     text_rank: 0.91,
     score: 0.039,
+    post: DEMO_POST,
   },
   {
     id: 'demo-2',
@@ -51,4 +58,5 @@ export const DEMO_VIDEO: VideoMetadata = {
       artista: 'Olivia O’Brien',
     },
   },
+  post: DEMO_POST,
 };

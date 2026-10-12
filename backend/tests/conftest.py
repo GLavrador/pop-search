@@ -8,11 +8,14 @@ from core.auth import current_user
 from core.limiter import limiter
 from main import app
 from services import jobs
+from services.downloader import Download
 from services.usage import ProjectUsage, Quota
 
 TEST_USER_ID = "00000000-0000-4000-8000-000000000001"
 TEST_QUOTA = Quota(used=0, limit=20, resets_at="2026-09-01T00:00:00+00:00")
 TEST_PROJECT = ProjectUsage(analyses_today=0, daily_limit=100)
+
+DOWNLOADED = Download("does-not-exist.mp4")
 
 
 @pytest.fixture(autouse=True)

@@ -31,6 +31,7 @@ vi.mock('./services/api', () => ({
   }),
   getMyQuota: vi.fn().mockResolvedValue({ used: 0, limit: 20, remaining: 20, resets_at: '2026-09-01', tokens_this_month: 0 }),
   saveVideo: vi.fn(),
+  lookUpPost: vi.fn().mockResolvedValue(null),
   startAnalysis: vi.fn(),
   getAnalysis: vi.fn().mockResolvedValue(null),
   discardAnalysis: vi.fn().mockResolvedValue(undefined),

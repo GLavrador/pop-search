@@ -71,6 +71,18 @@
   padding-left: 2px;
 }
 
+.post {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.postField {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
 .gridRow {
   display: grid;
   grid-template-columns: 1fr 1fr;

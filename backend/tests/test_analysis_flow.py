@@ -7,7 +7,7 @@ from core.exceptions import ContentBlockedError
 from main import app
 from routers import videos
 from routers.videos import VideoAnalysisRequest, launch as real_launch
-from tests.conftest import TEST_USER_ID, FakeJobs, analyze
+from tests.conftest import DOWNLOADED, TEST_USER_ID, FakeJobs, analyze
 
 client = TestClient(app)
 
@@ -61,7 +61,7 @@ class TestStarting:
         assert job_store.rows[TEST_USER_ID]["url"] == URL
 
     @patch("routers.videos.analyze_video_content", new=_analysis_with_steps)
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_takes_the_place_of_an_analysis_left_unsaved(self, _download, job_store):
         analyze(client, BODY)
 
@@ -81,7 +81,7 @@ class TestStarting:
 class TestProgress:
 
     @patch("routers.videos.analyze_video_content", new=_analysis_with_steps)
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_passes_through_every_step_in_order(self, _download, job_store):
         analyze(client, BODY)
 
@@ -90,7 +90,7 @@ class TestProgress:
         ]
 
     @patch("routers.videos.analyze_video_content")
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_stops_at_the_step_that_failed(self, _download, mock_analyze, job_store):
         mock_analyze.side_effect = ContentBlockedError("SAFETY")
 
@@ -109,7 +109,7 @@ class TestReading:
         assert response.json() is None
 
     @patch("routers.videos.analyze_video_content", new=_analysis_with_steps)
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_keeps_a_finished_analysis_until_it_is_saved(self, _download):
         """What used to be lost by leaving the page before saving."""
         analyze(client, BODY)
@@ -122,7 +122,7 @@ class TestReading:
         assert again["error"] is None
 
     @patch("routers.videos.analyze_video_content")
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_says_why_an_analysis_failed(self, _download, mock_analyze):
         mock_analyze.side_effect = asyncio.TimeoutError()
         analyze(client, BODY)
@@ -141,7 +141,7 @@ class TestReading:
 class TestDiscarding:
 
     @patch("routers.videos.analyze_video_content", new=_analysis_with_steps)
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_forgets_a_finished_analysis(self, _download):
         analyze(client, BODY)
 
@@ -171,7 +171,7 @@ class TestSavingTheResult:
     @patch("routers.videos.supabase")
     @patch("routers.videos.create_embedding", return_value=[0.1] * 768)
     @patch("routers.videos.analyze_video_content", new=_analysis_with_steps)
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_clears_the_analysis_it_came_from(self, _download, _embedding, mock_supabase):
         mock_supabase.table.return_value.insert.return_value.execute.return_value = (
             ("data", [{"id": "video-1"}]),
@@ -187,7 +187,7 @@ class TestSavingTheResult:
     @patch("routers.videos.supabase")
     @patch("routers.videos.create_embedding", return_value=[0.1] * 768)
     @patch("routers.videos.analyze_video_content", new=_analysis_with_steps)
-    @patch("routers.videos.download_video", return_value="does-not-exist.mp4")
+    @patch("routers.videos.download_video", return_value=DOWNLOADED)
     def test_leaves_the_analysis_of_another_link_alone(self, _download, _embedding, mock_supabase):
         """A video typed in by hand must not cost the analysis waiting beside it."""
         mock_supabase.table.return_value.insert.return_value.execute.return_value = (
@@ -240,7 +240,7 @@ class TestCancelling:
 
             with patch("routers.videos.jobs", FakeJobs()), \
                  patch("routers.videos.record_event", new=recorder), \
-                 patch("routers.videos.download_video", return_value="does-not-exist.mp4"), \
+                 patch("routers.videos.download_video", return_value=DOWNLOADED), \
                  patch("routers.videos.analyze_video_content", new=stuck), \
                  patch("routers.videos._remove") as removed:
                 task = asyncio.create_task(
@@ -255,7 +255,7 @@ class TestCancelling:
         removed = asyncio.run(scenario())
 
         recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "cancelled", 0, 0, 0)
-        removed.assert_called_once_with("does-not-exist.mp4")
+        removed.assert_called_once_with(DOWNLOADED.path)
 
 
 class TestLaunch:

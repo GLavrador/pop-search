@@ -44,6 +44,8 @@ export type RobotEvent =
   | { kind: 'manualOpened' }
   | { kind: 'saved' }
   | { kind: 'saveFailed' }
+  | { kind: 'videoRemoved' }
+  | { kind: 'videoRemoveFailed' }
   | { kind: 'signedIn'; name: string | null }
   | { kind: 'signedOut' }
   | { kind: 'language' }

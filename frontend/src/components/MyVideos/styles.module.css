@@ -30,15 +30,55 @@
 
 .row {
   display: flex;
-  gap: 10px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 8px;
   padding: 8px;
   background: var(--win-light);
   border: 1px dotted var(--win-shadow-dark);
 }
 
-.icon {
+.video {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.side {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+.action {
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+.action:active {
+  padding: 3px 7px 1px 9px;
+}
+
+.confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--win-warning-bg);
+  border: 1px solid var(--win-shadow-dark);
+}
+
+.question {
+  font-size: 0.85rem;
 }
 
 .body {
@@ -87,4 +127,21 @@
   font-weight: bold;
   background: var(--win-warning-bg);
   color: var(--win-error-text);
+}
+
+@media (max-width: 600px) {
+  .video {
+    flex-wrap: wrap;
+  }
+
+  .body {
+    flex-basis: 0;
+  }
+
+  .side {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
 }

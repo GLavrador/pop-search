@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from main import app
 from core.exceptions import validate_video_url, ALLOWED_DOMAINS, ContentBlockedError
-from tests.conftest import analyze
+from tests.conftest import DOWNLOADED, analyze
 
 client = TestClient(app)
 
@@ -55,7 +55,7 @@ class TestAnalysisDefaults:
         """A request without flags must still produce a searchable video: with
         them off, the structured metadata feeding the search index is never
         generated at all."""
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.return_value = {
             "titulo_sugerido": "Um titulo valido",
             "descricao_completa": "Uma descricao suficientemente longa para validar",
@@ -86,7 +86,7 @@ class TestErrorHandling:
     def test_blocked_content_is_reported_as_such(self, mock_download, mock_analyze):
         """A safety filter is not an internal error: the link is fine and the
         user can tell the difference, so it must not collapse into a 500."""
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.side_effect = ContentBlockedError("SAFETY")
 
         response = analyze(client, {"url": "https://twitter.com/user/status/123"})

@@ -27,6 +27,15 @@ describe('VideoCard Component', () => {
     expect(screen.getByText('This is a summary of the test video.')).toBeInTheDocument();
   });
 
+  it('should show the picture of the video, and not what its post said', () => {
+    const post = { texto: 'dia de meia maluca', miniatura: 'https://pbs.twimg.com/a.jpg' };
+
+    const { container } = render(<VideoCard data={{ ...mockData, post }} />);
+
+    expect(container.querySelector('img')).toHaveAttribute('src', 'https://pbs.twimg.com/a.jpg');
+    expect(screen.queryByText(/dia de meia maluca/)).not.toBeInTheDocument();
+  });
+
   it('should display the similarity score as a percentage', () => {
     render(<VideoCard data={mockData} />);
 

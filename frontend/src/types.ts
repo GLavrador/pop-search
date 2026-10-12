@@ -17,11 +17,18 @@ export interface MetadadosEstruturados {
   audio: AudioInfo;
 }
 
+/** What is kept of the post a video came from. Who posted it is not. */
+export interface PostInfo {
+  texto: string;
+  miniatura: string | null;
+}
+
 export interface VideoMetadata {
   titulo_sugerido: string;
   descricao_completa: string;
   url_original?: string;
   metadados_estruturados: MetadadosEstruturados;
+  post?: PostInfo | null;
 }
 
 export type AnalysisStage =
@@ -65,6 +72,7 @@ export interface SearchResult {
   text_rank?: number;
   /** Fused RRF score used for ordering. */
   score?: number;
+  post?: PostInfo | null;
 }
 
 export interface QuotaStatus {
@@ -127,6 +135,13 @@ export interface MyVideo {
   descricao_completa?: string;
   url_original: string;
   created_at: string;
+  post?: PostInfo | null;
+  /** As stored: a video from before a field existed comes without it. */
+  metadados_estruturados?: {
+    pessoas?: Pessoa[];
+    elementos_cenario?: string[];
+    audio?: Partial<AudioInfo>;
+  } | null;
 }
 
 export interface SearchParams {

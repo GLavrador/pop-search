@@ -47,18 +47,8 @@ export const SearchSection = () => {
     }
   }, [threshold, limit, mode]);
 
-  useEffect(() => {
-    if (!isLoading && hasSearched && !error) {
-      const count = results.length;
-      if (count === 0) {
-        setStatus(t.search.status.none, 5000);
-      } else {
-        setStatus(t.search.status.found(count), 5000);
-      }
-    }
-  }, [isLoading, hasSearched, error, results.length, setStatus, t.search.status]);
-
-  // Once per search that comes back, however often the settings around it change.
+  // Once per search that comes back, however often the settings around it
+  // change, and not when a video is edited or deleted under the list.
   useEffect(() => {
     if (isLoading || !hasSearched || settledAt === toldAt.current) return;
     toldAt.current = settledAt;
@@ -67,8 +57,12 @@ export const SearchSection = () => {
       robot.notify({ kind: 'searchFailed' });
       return;
     }
-    if (results.length > 0) {
-      robot.notify({ kind: 'searchFound', count: results.length });
+
+    const count = results.length;
+    setStatus(count === 0 ? t.search.status.none : t.search.status.found(count), 5000);
+
+    if (count > 0) {
+      robot.notify({ kind: 'searchFound', count });
       return;
     }
 

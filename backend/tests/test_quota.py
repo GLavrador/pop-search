@@ -8,7 +8,7 @@ from core.exceptions import ContentBlockedError
 from main import app
 from services import usage
 from services.usage import Quota
-from tests.conftest import TEST_USER_ID, analyze
+from tests.conftest import DOWNLOADED, TEST_USER_ID, analyze
 
 client = TestClient(app)
 
@@ -71,7 +71,7 @@ class TestUsageRecording:
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
     def test_records_a_successful_analysis(self, mock_download, mock_analyze):
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.return_value = {
             "titulo_sugerido": "Um titulo valido",
             "descricao_completa": "Uma descricao suficientemente longa para validar",
@@ -89,7 +89,7 @@ class TestUsageRecording:
     @patch("routers.videos.download_video")
     def test_still_charges_a_blocked_analysis_and_says_why(self, mock_download, mock_analyze):
         """The tokens were spent even though the user got nothing back."""
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.side_effect = ContentBlockedError("SAFETY")
         recorder = AsyncMock()
 
@@ -104,7 +104,7 @@ class TestUsageRecording:
     def test_records_a_timeout_with_its_reason(self, mock_download, mock_analyze):
         import asyncio
 
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
         mock_analyze.side_effect = asyncio.TimeoutError()
         recorder = AsyncMock()
 
@@ -117,7 +117,7 @@ class TestUsageRecording:
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
     def test_stores_the_tokens_the_analysis_reported(self, mock_download, mock_analyze):
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
 
         async def fill_usage(_path, _scenes, _audio, usage, **_):
             usage.prompt, usage.output, usage.total = 8451, 609, 10890
@@ -142,7 +142,7 @@ class TestUsageRecording:
     def test_stores_the_tokens_of_a_failed_analysis(self, mock_download, mock_analyze):
         """The whole reason usage is filled in place: a blocked video still
         burned its input tokens, and a return value never arrives."""
-        mock_download.return_value = "does-not-exist.mp4"
+        mock_download.return_value = DOWNLOADED
 
         async def burn_then_fail(_path, _scenes, _audio, usage, **_):
             usage.prompt, usage.output, usage.total = 8000, 0, 8523
