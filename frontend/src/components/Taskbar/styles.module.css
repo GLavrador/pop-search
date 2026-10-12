@@ -126,3 +126,41 @@
   font-size: 0.78rem;
   white-space: nowrap;
 }
+
+/* The bar before its Start button is put on, and the button the moment it is. */
+.taskbar[data-start='none'] .start,
+.taskbar[data-start='none'] .divider {
+  visibility: hidden;
+}
+
+.taskbar[data-start='new'] .start {
+  animation: land 0.26s ease-out;
+}
+
+@keyframes land {
+  from {
+    transform: scale(1.35) translateY(-6px);
+  }
+}
+
+/* Being built: the box with nothing in it yet, then an hour nobody set. */
+.tray[data-clock='frame'] .clock {
+  visibility: hidden;
+}
+
+.tray[data-clock='unset'] .clock {
+  animation: unset 0.5s steps(1) infinite;
+}
+
+@keyframes unset {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tray[data-clock='unset'] .clock,
+  .taskbar[data-start='new'] .start {
+    animation: none;
+  }
+}

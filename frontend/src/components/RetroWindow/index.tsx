@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';
+import type { Slide } from '../Rebuild/stage';
 import styles from './styles.module.css';
 
 export type WindowState = 'open' | 'minimized' | 'closing' | 'closed';
@@ -20,6 +21,8 @@ interface RetroWindowProps {
   /** Adds the "what's this?" button; `helping` is true while it is armed. */
   onHelp?: () => void;
   helping?: boolean;
+  /** How much of it is still rolled up from the bottom, while it is being opened by hand. */
+  shut?: Slide | null;
 }
 
 const SHAKE_MS = 340;
@@ -46,6 +49,7 @@ export const RetroWindow = ({
   aside,
   onHelp,
   helping = false,
+  shut = null,
 }: RetroWindowProps) => {
   const { t } = useI18n();
   const frame = useRef<HTMLDivElement>(null);
@@ -70,6 +74,14 @@ export const RetroWindow = ({
         maximized ? styles.maximized : '',
       ].join(' ')}
       aria-hidden={hidden}
+      style={
+        shut
+          ? {
+              clipPath: `inset(0 0 ${shut.by * 100}% 0)`,
+              transition: `clip-path ${shut.ms}ms ease-out`,
+            }
+          : undefined
+      }
       data-robot="window"
       data-maximized={maximized || undefined}
     >
