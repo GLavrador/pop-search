@@ -419,6 +419,16 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           hush('server');
           react({ face: 'happy', emote: vary('serverAwake', says.serverAwake), move: 'hop' });
           break;
+        case 'iconDropped':
+          react({ face: 'curious', emote: vary('iconDropped', says.iconDropped) });
+          break;
+        case 'binThreat':
+          react({ face: 'angry', emote: vary('binThreat', says.binThreat), move: 'jolt' });
+          break;
+        case 'appTrashed':
+          put(null);
+          react({ face: 'wow', emote: vary('appTrashed', says.appTrashed), move: 'jolt', ms: 900 });
+          break;
         case 'serverDown':
           say({
             rank: 'react',

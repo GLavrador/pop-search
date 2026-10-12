@@ -27,6 +27,175 @@
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  transition: transform 180ms ease-out;
+}
+
+/* Over the window while one of them is in the air, still under the taskbar. */
+.desktop:has([data-carried]) {
+  z-index: 50;
+}
+
+.icon[data-carried] {
+  position: relative;
+  z-index: 1;
+  opacity: 0.85;
+  transition: none;
+}
+
+.icon[data-swallowed] {
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 260ms ease-in, opacity 260ms ease-in;
+}
+
+/*
+ * Being built: nothing, then an outline, a third of the picture with each of
+ * three blows, and last its name, written out from the left as the picture settles.
+ */
+.icon[data-built] {
+  transition: none;
+}
+
+.icon[data-built='0'] {
+  visibility: hidden;
+}
+
+.icon[data-built='1'] .art,
+.icon[data-built='2'] .art,
+.icon[data-built='3'] .art {
+  outline: 1px dashed var(--win-light);
+  outline-offset: 2px;
+}
+
+.icon[data-built='1'] .art > * {
+  visibility: hidden;
+}
+
+.icon[data-built='2'] .art > * {
+  clip-path: inset(66% 0 0 0);
+}
+
+.icon[data-built='3'] .art > * {
+  clip-path: inset(33% 0 0 0);
+}
+
+.icon[data-built='1'] .label,
+.icon[data-built='2'] .label,
+.icon[data-built='3'] .label,
+.icon[data-built='4'] .label {
+  visibility: hidden;
+}
+
+.icon[data-built='5'] .label {
+  animation: written 0.3s steps(9, end) both;
+}
+
+.icon[data-built='5'] .art {
+  animation: settle 0.26s ease-out;
+}
+
+@keyframes written {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes settle {
+  from {
+    transform: scale(1.3);
+  }
+}
+
+/* Each blow of the hammer is felt. Two names, taken in turn, make the jolt play again. */
+.icon[data-built='2'],
+.icon[data-built='4'] {
+  animation: joltOnce 0.16s ease-out;
+}
+
+.icon[data-built='3'] {
+  animation: joltAgain 0.16s ease-out;
+}
+
+@keyframes joltOnce {
+  40% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes joltAgain {
+  40% {
+    transform: translateY(3px);
+  }
+}
+
+/* Being polished: the picture brightens and a glint turns at its corner. */
+.icon[data-shining] .art {
+  position: relative;
+  animation: gleam 0.5s ease-in-out infinite;
+}
+
+.icon[data-shining] .art::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  width: 13px;
+  height: 13px;
+  background: var(--win-light);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: glint 0.5s ease-in-out infinite;
+}
+
+@keyframes gleam {
+  50% {
+    filter: brightness(1.35);
+  }
+}
+
+@keyframes glint {
+  0%,
+  100% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1) rotate(45deg);
+    opacity: 1;
+  }
+}
+
+.icon[data-aimed] .art {
+  filter: brightness(0.6) sepia(1) hue-rotate(190deg) saturate(4);
+}
+
+.icon[data-aimed] .label,
+.icon[data-pressed] .label {
+  background: var(--win-blue-title);
+  outline: 1px dotted var(--win-light);
+  text-shadow: none;
+}
+
+.icon[data-pressed] .art {
+  filter: brightness(0.6) sepia(1) hue-rotate(190deg) saturate(4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon,
+  .icon[data-swallowed] {
+    transition: none;
+  }
+
+  .icon[data-built],
+  .icon[data-built] .art,
+  .icon[data-built] .label,
+  .icon[data-shining] .art,
+  .icon[data-shining] .art::after {
+    animation: none;
+  }
 }
 
 .art {

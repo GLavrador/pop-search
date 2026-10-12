@@ -653,6 +653,9 @@ export const en = {
       closing: ['hey!', 'do not close it!', 'really?', 'there is a cat in there...'],
       reopened: ['phew!', 'it is back!', 'what a scare!'],
       serverAwake: ['the server is up!', 'there, it woke up!', 'full speed now!'],
+      iconDropped: ['it always goes back', 'stubborn icons', 'it likes it there'],
+      binThreat: ['do NOT!', 'not in there!!', 'do not even think about it!'],
+      appTrashed: ['WHAT DID YOU DO?!', 'NOOOO!', 'MY HOUSE!!'],
       bigger: ['wow, so big!', 'full screen!', 'room to spare!'],
       smaller: ['that fits better', 'regular size', 'back to my corner'],
       echo: [
@@ -861,7 +864,7 @@ export const en = {
       } as HelpCopy,
       'desktop.icon': {
         title: 'Desktop',
-        text: 'The icons are decoration. The Pop Search one opens the program again if you close the window.',
+        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window. Just do not drop it in the Recycle Bin.',
       } as HelpCopy,
       robot: {
         title: 'BIP-98',

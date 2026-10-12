@@ -660,6 +660,9 @@ export const pt: Dictionary = {
       closing: ['ei!', 'não fecha!', 'sério?', 'tem um gato aí...'],
       reopened: ['ufa!', 'voltou!', 'que susto!'],
       serverAwake: ['o servidor acordou!', 'pronto, ele acordou!', 'agora vai rápido!'],
+      iconDropped: ['ele sempre volta', 'ícone teimoso', 'ele gosta dali'],
+      binThreat: ['NÃO!', 'aí não!!', 'nem pense nisso!'],
+      appTrashed: ['O QUE VOCÊ FEZ?!', 'NÃÃÃO!', 'MINHA CASA!!'],
       bigger: ['uau, que grande!', 'tela cheia!', 'espaço de sobra!'],
       smaller: ['assim cabe melhor', 'tamanho normal', 'de volta ao cantinho'],
       echo: [
@@ -868,7 +871,7 @@ export const pt: Dictionary = {
       },
       'desktop.icon': {
         title: 'Área de trabalho',
-        text: 'Os ícones são decoração. O do Pop Search abre o programa de novo se você fechar a janela.',
+        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela. Só não solte ele na Lixeira.',
       },
       robot: {
         title: 'BIP-98',
