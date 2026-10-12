@@ -30,6 +30,7 @@ vi.mock('./services/api', () => ({
     tokens_this_month: 0,
   }),
   saveVideo: vi.fn(),
+  lookUpPost: vi.fn().mockResolvedValue(null),
   startAnalysis: (...args: unknown[]) => startAnalysis(...args),
   getAnalysis: vi.fn().mockResolvedValue(null),
   discardAnalysis: vi.fn().mockResolvedValue(undefined),

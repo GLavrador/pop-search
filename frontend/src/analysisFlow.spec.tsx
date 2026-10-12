@@ -8,6 +8,7 @@ const mockGetSession = vi.fn();
 const startAnalysis = vi.fn();
 const discardAnalysis = vi.fn();
 const saveVideo = vi.fn();
+const lookUpPost = vi.fn();
 
 // What the server would answer when asked for the user's analysis.
 let onServer: AnalysisJob | null = null;
@@ -42,6 +43,7 @@ vi.mock('./services/api', () => ({
     tokens_this_month: 0,
   }),
   saveVideo: (...args: unknown[]) => saveVideo(...args),
+  lookUpPost: (...args: unknown[]) => lookUpPost(...args),
   startAnalysis: (...args: unknown[]) => startAnalysis(...args),
   getAnalysis: () => (serverDown ? Promise.reject(new Error('down')) : Promise.resolve(onServer)),
   discardAnalysis: (...args: unknown[]) => discardAnalysis(...args),
@@ -137,6 +139,7 @@ describe('following an analysis', () => {
       return Promise.resolve();
     });
     saveVideo.mockResolvedValue(undefined);
+    lookUpPost.mockResolvedValue(null);
   });
 
   it('should show the step the analysis is at, and the ones behind it', async () => {
@@ -396,5 +399,94 @@ describe('following an analysis', () => {
 
     expect(discardAnalysis).toHaveBeenCalledOnce();
     expect(await screen.findByPlaceholderText('https://...')).toBeInTheDocument();
+  });
+});
+
+describe('describing a video by hand', () => {
+  const POST = { texto: 'look at this whale', miniatura: 'https://pbs.twimg.com/a.jpg' };
+
+  const postField = () => screen.findByLabelText(/Text of the post/);
+
+  const openForm = async () => {
+    await user.type(await screen.findByPlaceholderText('https://...'), LINK);
+    await user.click(screen.getByLabelText('Manual Input'));
+    await press('Open Form');
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    onServer = null;
+    serverDown = false;
+    mockGetSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'token-abc',
+          user: { id: 'user-1', email: 'ana@example.com', user_metadata: {} },
+        },
+      },
+    });
+    saveVideo.mockResolvedValue(undefined);
+  });
+
+  /** Asking X takes seconds. It used to happen inside the save, which waited for it. */
+  it('should open the form at once, and fill in the text of the post when it arrives', async () => {
+    let arrive: (post: typeof POST) => void = () => {};
+    lookUpPost.mockReturnValue(new Promise((resolve) => (arrive = resolve)));
+    renderApp();
+
+    await openForm();
+
+    expect(lookUpPost).toHaveBeenCalledWith(LINK);
+    expect(await postField()).toHaveValue('');
+
+    arrive(POST);
+
+    await waitFor(async () => expect(await postField()).toHaveValue('look at this whale'));
+  });
+
+  it('should not write over a text typed while the post was on its way', async () => {
+    let arrive: (post: typeof POST) => void = () => {};
+    lookUpPost.mockReturnValue(new Promise((resolve) => (arrive = resolve)));
+    renderApp();
+    await openForm();
+
+    await user.type(await postField(), 'my own words');
+    arrive(POST);
+
+    await waitFor(() =>
+      expect(document.querySelector('img[src="https://pbs.twimg.com/a.jpg"]')).toBeInTheDocument(),
+    );
+    expect(await postField()).toHaveValue('my own words');
+  });
+
+  it('should leave the field empty when X has nothing to show', async () => {
+    lookUpPost.mockRejectedValue(new Error('refused'));
+    renderApp();
+
+    await openForm();
+
+    expect(await postField()).toHaveValue('');
+  });
+
+  it('should save the text only as it was left in the field', async () => {
+    lookUpPost.mockResolvedValue(POST);
+    renderApp();
+    await openForm();
+    await waitFor(async () => expect(await postField()).toHaveValue('look at this whale'));
+
+    await user.clear(await postField());
+    await user.type(document.querySelector('input[name="titulo_sugerido"]')!, TITLE);
+    await user.type(
+      document.querySelector('textarea[name="descricao_completa"]')!,
+      RESULT.descricao_completa,
+    );
+    await press('Save');
+
+    await waitFor(() =>
+      expect(saveVideo).toHaveBeenCalledWith(
+        expect.objectContaining({ post: { texto: '', miniatura: POST.miniatura } }),
+      ),
+    );
   });
 });

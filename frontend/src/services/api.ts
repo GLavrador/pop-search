@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type {
   AnalysisJob,
+  PostInfo,
   VideoMetadata,
   SearchParams,
   SearchResult,
@@ -75,6 +76,12 @@ export const discardAnalysis = async (): Promise<void> => {
 
 export const saveVideo = async (data: VideoMetadata): Promise<void> => {
   await api.post('/videos', data);
+};
+
+/** The text and the picture of the post behind a link, or null when X shows none. */
+export const lookUpPost = async (url: string): Promise<PostInfo | null> => {
+  const response = await api.post<PostInfo | null>('/videos/post', { url });
+  return response.data ?? null;
 };
 
 export const getMyQuota = async (signal?: AbortSignal): Promise<QuotaStatus> => {

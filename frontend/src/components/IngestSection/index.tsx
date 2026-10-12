@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAnalysisJob } from '../../hooks/useAnalysisJob';
 import { useStatus } from '../../context/StatusContext';
-import { saveVideo } from '../../services/api';
+import { lookUpPost, saveVideo } from '../../services/api';
 import type { RunningStage, VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
 import { QuotaMeter } from '../QuotaMeter';
@@ -72,20 +72,33 @@ export const IngestSection = () => {
     if (data) robot.notify({ kind: 'analysisDone', title: data.titulo_sugerido });
   }, [data, robot]);
 
+  const openManualForm = useCallback(
+    (link: string) => {
+      setManualData(createEmptyMetadata(link));
+      setStatus(t.ingest.status.manual);
+
+      // Asked for apart, so the form never waits on X: the text of the post
+      // lands in its field when it arrives, unless one was typed there first.
+      lookUpPost(link)
+        .then((post) => {
+          if (!post) return;
+          setManualData((current) =>
+            current && current.url_original === link && !current.post ? { ...current, post } : current,
+          );
+        })
+        .catch(() => {});
+    },
+    [setStatus, t.ingest.status.manual],
+  );
+
   // The way out it offers is the manual form, opened on the link that just failed.
   useEffect(() => {
     if (error === toldError.current) return;
     toldError.current = error;
     if (!error) return;
 
-    robot.notify({
-      kind: 'analysisFailed',
-      manual: () => {
-        setManualData(createEmptyMetadata(jobUrl));
-        setStatus(t.ingest.status.manual);
-      },
-    });
-  }, [error, robot, jobUrl, setStatus, t.ingest.status.manual]);
+    robot.notify({ kind: 'analysisFailed', manual: () => openManualForm(jobUrl) });
+  }, [error, robot, jobUrl, openManualForm]);
 
   useEffect(() => {
     const id = draft?.id ?? null;
@@ -137,8 +150,7 @@ export const IngestSection = () => {
 
   const handleOpenManualForm = () => {
     if (!performValidation()) return;
-    setManualData(createEmptyMetadata(url));
-    setStatus(t.ingest.status.manual);
+    openManualForm(url);
     robot.notify({ kind: 'manualOpened' });
   };
 
