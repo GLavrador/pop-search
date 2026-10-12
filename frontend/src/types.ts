@@ -136,6 +136,12 @@ export interface MyVideo {
   url_original: string;
   created_at: string;
   post?: PostInfo | null;
+  /** As stored: a video from before a field existed comes without it. */
+  metadados_estruturados?: {
+    pessoas?: Pessoa[];
+    elementos_cenario?: string[];
+    audio?: Partial<AudioInfo>;
+  } | null;
 }
 
 export interface SearchParams {

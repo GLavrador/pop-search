@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ReviewForm } from './index';
 import type { VideoMetadata } from '../../types';
+import { RobotContext } from '../../context/robotContext';
 import { vi } from 'vitest'; 
 
 const mockData: VideoMetadata = {
@@ -79,6 +80,19 @@ describe('ReviewForm Component', () => {
 
       expect(screen.queryByText(/larissa|ilfillorosso/)).not.toBeInTheDocument();
     });
+  });
+
+  it('should not tell the robot something was thrown away when an edit is cancelled', () => {
+    const notify = vi.fn();
+
+    render(
+      <RobotContext.Provider value={{ explain: vi.fn(), notify }}>
+        <ReviewForm initialData={mockData} onSave={async () => {}} onCancel={() => {}} editing />
+      </RobotContext.Provider>,
+    );
+    fireEvent.click(screen.getByText('Cancel'));
+
+    expect(notify).toHaveBeenCalledWith({ kind: 'pressed', what: 'editCancel' });
   });
 
   it('should convert comma-separated strings back to arrays on submit', async () => {

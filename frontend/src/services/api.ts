@@ -112,6 +112,15 @@ export const getMyVideos = async (signal?: AbortSignal): Promise<MyVideo[]> => {
   return response.data;
 };
 
+export const updateVideo = async (id: string, data: VideoMetadata): Promise<MyVideo> => {
+  const response = await api.put<MyVideo>(`/me/videos/${id}`, data);
+  return response.data;
+};
+
+export const deleteVideo = async (id: string): Promise<void> => {
+  await api.delete(`/me/videos/${id}`);
+};
+
 export const searchVideos = async (
   { query, limit = DEFAULT_LIMIT, threshold = DEFAULT_THRESHOLD, mode = DEFAULT_SEARCH_MODE }: SearchParams,
   signal?: AbortSignal

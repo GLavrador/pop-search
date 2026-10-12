@@ -201,6 +201,26 @@ export const en = {
     ),
     title: 'My Videos',
     count: (n: number) => `${n} indexed`,
+    edit: 'Edit',
+    editOf: (title: string) => `Edit "${title}"`,
+    remove: 'Delete',
+    removeOf: (title: string) => `Delete "${title}"`,
+    editing: 'Editing the video',
+    confirm: {
+      question: 'Delete this video from the archive? This cannot be undone.',
+      yes: 'Yes, delete',
+      removing: 'Deleting...',
+    },
+    status: {
+      editing: 'Change what you need and save.',
+      editCancelled: 'Edit cancelled. The video is as it was.',
+      saving: 'Saving your changes...',
+      saved: 'Changes saved.',
+      saveFailed: 'Error: Failed to save your changes. Please try again.',
+      removing: 'Deleting the video...',
+      removed: 'Video deleted from the archive.',
+      removeFailed: 'Error: Failed to delete the video. Please try again.',
+    },
     errors: {
       expired: 'Your session expired. Sign in again.',
       rateLimited: 'Too many requests. Wait a minute and try again.',
@@ -588,6 +608,8 @@ export const en = {
       manual: ['I trust you!', 'make it a good one!', 'you write better anyway'],
       saved: ['kept!', 'in the archive!', 'saved, go search for it!'],
       saveFailed: ['it did not save...', 'uh oh, not saved', 'try again?'],
+      removed: ['off it goes', 'one fewer', 'out of the archive'],
+      removeFailed: ['I could not remove it...', 'uh oh, it stayed', 'try again?'],
       hello: [
         (name: string | null) => (name ? `hi, ${name}!` : 'hi!'),
         (name: string | null) => (name ? `welcome, ${name}!` : 'welcome!'),
@@ -668,6 +690,10 @@ export const en = {
         stricter: ['pickier!', 'only the close ones', 'raising the bar'],
         looser: ['looser!', 'letting more in', 'lowering the bar'],
         reviewCancel: ['fine, thrown away', 'maybe next time', 'ok, it is gone'],
+        editVideo: ['let us tidy it up', 'time for a touch-up', 'what is changing?'],
+        editCancel: ['left as it was', 'nothing changed', 'ok, I let it be'],
+        removeAsk: ['are you sure?', 'really delete it?', 'this one does not come back...'],
+        removeCancel: ['phew!', 'it stays!', 'good, still kept'],
         openVideo: ['good pick!', 'that one is good', 'go and see!'],
         authSwitch: ['new account or old?', 'either way, I wait', 'take your pick'],
         authSubmit: ['checking...', 'one moment...', 'knocking on the door...'],
@@ -922,6 +948,14 @@ export const en = {
       library: {
         title: 'My videos',
         text: 'Everything you kept with your account. Click the title of a video to open the original post.',
+      } as HelpCopy,
+      'library.actions': {
+        title: 'Edit or delete',
+        text: 'Edit opens what is kept about the video so you can correct it. Delete takes the video out of the archive for good, after you confirm.',
+      } as HelpCopy,
+      'library.save': {
+        title: 'Save or cancel',
+        text: 'Save writes the changes, and the search starts finding the video by the new text. Cancel leaves the video as it was.',
       } as HelpCopy,
       'account.form': {
         title: 'Sign in or create an account',

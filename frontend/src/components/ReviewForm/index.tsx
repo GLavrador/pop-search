@@ -15,6 +15,8 @@ interface ReviewFormProps {
   onCancel: () => void;
   showScenes?: boolean;
   showAudio?: boolean;
+  /** Changing a video already kept, where cancelling throws nothing away. */
+  editing?: boolean;
 }
 
 const MAX_POST_TEXT = 2000;
@@ -27,7 +29,7 @@ const toFormData = (data: VideoMetadata): VideoMetadataForm => ({
   },
 });
 
-export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, showAudio = true }: ReviewFormProps) => {
+export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, showAudio = true, editing = false }: ReviewFormProps) => {
   const { t } = useI18n();
   const robot = useRobot();
   const schema = useMemo(() => createVideoMetadataFormSchema(t.validation), [t]);
@@ -169,11 +171,11 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
         </fieldset>
       )}
 
-      <div className={styles.actions} {...helpAt('review.save')}>
+      <div className={styles.actions} {...helpAt(editing ? 'library.save' : 'review.save')}>
         <button
           type="button"
           onClick={() => {
-            robot.notify({ kind: 'pressed', what: 'reviewCancel' });
+            robot.notify({ kind: 'pressed', what: editing ? 'editCancel' : 'reviewCancel' });
             onCancel();
           }}
           className="win95-btn"
