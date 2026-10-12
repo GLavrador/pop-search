@@ -12,7 +12,7 @@ import { MyVideos } from './components/MyVideos';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { useIdentityReset } from './hooks/useIdentityReset';
-import { useBackendWarmup } from './hooks/useBackendWarmup';
+import { useServerWake } from './hooks/useServerWake';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
@@ -74,7 +74,7 @@ function AppContent() {
   const robotSeat = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   useIdentityReset();
-  useBackendWarmup();
+  useServerWake();
   const { t, language } = useI18n();
   const spokenIn = useRef(language);
 

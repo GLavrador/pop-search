@@ -12,6 +12,7 @@ import type {
 } from '../types';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
+import { SERVER_ATTEMPT_TIMEOUT_MS } from '../constants/startup';
 import { supabase } from '../lib/supabase';
 
 const api = axios.create({
@@ -32,8 +33,9 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-export const warmUpBackend = (): void => {
-  api.get('/').catch(() => {});
+/** Resolves once the server answers, and fails when it does not. */
+export const pingServer = async (signal?: AbortSignal): Promise<void> => {
+  await api.get('/', { signal, timeout: SERVER_ATTEMPT_TIMEOUT_MS });
 };
 
 export const startAnalysis = async (

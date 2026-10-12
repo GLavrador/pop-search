@@ -1,0 +1,3 @@
+export const SERVER_RETRY_MS = 2000;
+export const SERVER_ATTEMPT_TIMEOUT_MS = 30000;
+export const SERVER_GIVE_UP_MS = 120000;

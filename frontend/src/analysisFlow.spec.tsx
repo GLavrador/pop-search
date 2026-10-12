@@ -31,7 +31,7 @@ vi.mock('./constants/analysis', () => ({
 }));
 
 vi.mock('./services/api', () => ({
-  warmUpBackend: vi.fn(),
+  pingServer: vi.fn().mockResolvedValue(undefined),
   getIsAdmin: vi.fn().mockResolvedValue(false),
   getMyVideos: vi.fn().mockResolvedValue([]),
   getAdminStats: vi.fn(),
