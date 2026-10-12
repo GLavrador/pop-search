@@ -39,6 +39,7 @@ import { useRobotDirector } from './hooks/useRobotDirector';
 import { RobotContext, helpAt, type HelpKey } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
 import { Boot } from './components/Boot';
+import { BlueScreen } from './components/BlueScreen';
 import { BOOTED_KEY, SERVER_NOTICE_MS } from './constants/startup';
 
 const WINDOW_ICON = '💻';
@@ -386,11 +387,13 @@ function Startup() {
 function App() {
   return (
     <LanguageProvider>
-      <AuthProvider>
-        <StatusProvider>
-          <Startup />
-        </StatusProvider>
-      </AuthProvider>
+      <BlueScreen>
+        <AuthProvider>
+          <StatusProvider>
+            <Startup />
+          </StatusProvider>
+        </AuthProvider>
+      </BlueScreen>
     </LanguageProvider>
   );
 }

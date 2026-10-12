@@ -70,6 +70,17 @@ export const pt: Dictionary = {
     skip: 'Pressione qualquer tecla, ou toque na tela, para entrar agora.',
   },
 
+  crash: {
+    lead: 'Um erro fatal aconteceu e o Pop Search precisou parar:',
+    reopen: 'Pressione qualquer tecla para abrir o Pop Search de novo.',
+    kept: 'Os vídeos já salvos continuam salvos. O que estava só na tela se perdeu.',
+    again: 'O erro voltou logo depois de reabrir.',
+    reload: 'Pressione qualquer tecla para recarregar a página inteira.',
+    goOn: 'Pressione qualquer tecla para continuar',
+    robot: 'Xi. Isso não era para acontecer. Aperte uma tecla que eu ligo tudo de novo.',
+    robotAgain: 'De novo?! Então vamos recarregar a página inteira.',
+  },
+
   gate: {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',
