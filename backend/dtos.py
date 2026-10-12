@@ -151,6 +151,8 @@ class MyVideo(BaseModel):
     url_original: str
     created_at: str
     post: Optional[PostInfo] = None
+    # As stored, unchecked: a video saved under older limits must still be listed.
+    metadados_estruturados: Optional[dict] = None
 
 
 AnalysisStage = Literal["queued", "downloading", "uploading", "watching", "writing", "done", "failed"]

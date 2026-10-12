@@ -1,4 +1,6 @@
 import asyncio
+import uuid
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -6,7 +8,16 @@ from core.auth import CurrentUser
 from core.limiter import limiter
 from core.logger import get_logger
 from db import supabase
-from dtos import AdminStatsReport, MyVideo, ProjectUsageReport, QuotaStatus, UserUsageRow
+from dtos import (
+    AdminStatsReport,
+    MyVideo,
+    PostInfo,
+    ProjectUsageReport,
+    QuotaStatus,
+    UserUsageRow,
+    VideoMetadataDTO,
+)
+from services.embedding import create_embedding
 from services.usage import (
     get_admin_stats,
     get_all_usage,
@@ -20,6 +31,12 @@ logger = get_logger("routers.me")
 router = APIRouter(prefix="/me", tags=["Me"])
 
 MAX_VIDEOS = 200
+
+VIDEO_COLUMNS = (
+    "id, titulo_video, descricao_completa, url_original, created_at, post, metadados_estruturados"
+)
+
+VIDEO_NOT_FOUND = "This video is not in your library."
 
 
 @router.get("/quota", response_model=QuotaStatus)
@@ -125,7 +142,7 @@ async def list_my_videos(request: Request, user_id: str = CurrentUser):
     def query():
         return (
             supabase.table("videos")
-            .select("id, titulo_video, descricao_completa, url_original, created_at, post")
+            .select(VIDEO_COLUMNS)
             .eq("user_id", user_id)
             .order("created_at", desc=True)
             .limit(MAX_VIDEOS)
@@ -142,3 +159,84 @@ async def list_my_videos(request: Request, user_id: str = CurrentUser):
             status_code=500,
             detail="An internal error occurred while loading your videos. Please try again.",
         )
+
+# service_role ignores RLS, so the user_id filter on each of these is the only
+# thing keeping one user's hands off another's videos.
+def _find_mine(video_id: str, user_id: str) -> Optional[dict]:
+    rows = (
+        supabase.table("videos")
+        .select("id, url_original, post")
+        .eq("id", video_id)
+        .eq("user_id", user_id)
+        .limit(1)
+        .execute()
+        .data
+    ) or []
+    return rows[0] if rows else None
+
+
+def _update_mine(video_id: str, user_id: str, changes: dict) -> Optional[dict]:
+    rows = (
+        supabase.table("videos")
+        .update(changes)
+        .eq("id", video_id)
+        .eq("user_id", user_id)
+        .execute()
+        .data
+    ) or []
+    return rows[0] if rows else None
+
+
+@router.put("/videos/{video_id}", response_model=MyVideo)
+@limiter.limit("20/minute")
+async def edit_my_video(
+    request: Request, video_id: uuid.UUID, changes: VideoMetadataDTO, user_id: str = CurrentUser
+):
+    """Rewrites what a video says, the text of its post included. Its link and
+    its picture stay as they were saved."""
+    loop = asyncio.get_event_loop()
+
+    try:
+        stored = await loop.run_in_executor(None, _find_mine, str(video_id), user_id)
+        if stored is None:
+            raise HTTPException(status_code=404, detail=VIDEO_NOT_FOUND)
+
+        # A request that says nothing of the post leaves its text as it is.
+        kept = stored.get("post") or {}
+        post = PostInfo(
+            texto=changes.post.texto if changes.post else kept.get("texto") or "",
+            miniatura=kept.get("miniatura"),
+        )
+
+        edited = VideoMetadataDTO(
+            titulo_sugerido=changes.titulo_sugerido,
+            descricao_completa=changes.descricao_completa,
+            url_original=stored["url_original"],
+            metadados_estruturados=changes.metadados_estruturados,
+            post=post,
+        )
+
+        # The search finds a video by its embedding, so new words need a new one.
+        vector = await loop.run_in_executor(None, create_embedding, edited)
+
+        saved = await loop.run_in_executor(None, _update_mine, str(video_id), user_id, {
+            "titulo_video": edited.titulo_sugerido,
+            "descricao_completa": edited.descricao_completa,
+            "metadados_estruturados": edited.metadados_estruturados.model_dump(),
+            "post": post.to_store(),
+            "embedding": vector,
+        })
+        if saved is None:
+            raise HTTPException(status_code=404, detail=VIDEO_NOT_FOUND)
+
+        logger.info(f"Video {video_id} edited by {user_id}")
+        return saved
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Failed to edit video {video_id} for {user_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while saving your changes. Please try again.",
+        )
+
