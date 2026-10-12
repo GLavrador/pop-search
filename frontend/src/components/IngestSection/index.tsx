@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAnalysisJob } from '../../hooks/useAnalysisJob';
 import { useStatus } from '../../context/StatusContext';
 import { saveVideo } from '../../services/api';
-import type { VideoMetadata } from '../../types';
+import type { RunningStage, VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
 import { QuotaMeter } from '../QuotaMeter';
 import { URLInputView } from './URLInputView';
@@ -39,6 +39,7 @@ export const IngestSection = () => {
   const { t } = useI18n();
   const robot = useRobot();
   const toldLoading = useRef(false);
+  const toldStage = useRef<RunningStage | null>(null);
   const toldData = useRef<VideoMetadata | undefined>(undefined);
   const toldError = useRef<string | null>(null);
   const toldDraft = useRef<string | null>(null);
@@ -58,6 +59,12 @@ export const IngestSection = () => {
   useEffect(() => {
     if (stage) setStatus(t.ingest.status.stage(t.ingest.stages[stage]));
   }, [stage, setStatus, t.ingest.status, t.ingest.stages]);
+
+  useEffect(() => {
+    if (stage === toldStage.current) return;
+    toldStage.current = stage;
+    if (stage && stage !== 'queued') robot.notify({ kind: 'analysisStage', stage });
+  }, [stage, robot]);
 
   useEffect(() => {
     if (data === toldData.current) return;

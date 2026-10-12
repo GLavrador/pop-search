@@ -672,7 +672,28 @@ export const en = {
       },
     },
     lines: {
-      watching: 'I will keep an eye on it. It usually takes about a minute.',
+      steps: {
+        downloading: [
+          'I am fetching the video from X. The whole analysis usually takes about a minute.',
+          'First I download the video from X. That is the quick part.',
+          'Pulling the video over from X. I will keep an eye on it all.',
+        ],
+        uploading: [
+          'Got the video! Now I take it to the AI.',
+          'Downloaded. I am handing the video to the AI.',
+          'The video is on its way to the AI now.',
+        ],
+        watching: [
+          'The AI is watching. It sees the whole video before it writes.',
+          'Movie time: the AI is watching the video from start to finish.',
+          'Over to the AI now. It watches everything, scene by scene.',
+        ],
+        writing: [
+          'It has finished watching and is already writing.',
+          'Nearly there: the AI is writing the title and the description.',
+          'The AI picked up the pen. The description is coming.',
+        ],
+      },
       waiting: [
         'The AI watches the whole video before it writes, that is why it takes a while.',
         'A long video takes longer. It is still going.',

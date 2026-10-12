@@ -11,6 +11,7 @@ const saveVideo = vi.fn();
 
 // What the server would answer when asked for the user's analysis.
 let onServer: AnalysisJob | null = null;
+let serverDown = false;
 
 vi.mock('./lib/supabase', () => ({
   supabase: {
@@ -24,6 +25,7 @@ vi.mock('./lib/supabase', () => ({
 
 vi.mock('./constants/analysis', () => ({
   ANALYSIS_POLL_MS: 20,
+  ANALYSIS_LOST_AFTER_MS: 150,
   ANALYSIS_STEPS: ['downloading', 'uploading', 'watching', 'writing'],
 }));
 
@@ -41,7 +43,7 @@ vi.mock('./services/api', () => ({
   }),
   saveVideo: (...args: unknown[]) => saveVideo(...args),
   startAnalysis: (...args: unknown[]) => startAnalysis(...args),
-  getAnalysis: () => Promise.resolve(onServer),
+  getAnalysis: () => (serverDown ? Promise.reject(new Error('down')) : Promise.resolve(onServer)),
   discardAnalysis: (...args: unknown[]) => discardAnalysis(...args),
   searchVideos: vi.fn().mockResolvedValue([]),
   getAllUsage: vi.fn(),
@@ -117,6 +119,7 @@ describe('following an analysis', () => {
     vi.clearAllMocks();
     localStorage.clear();
     onServer = null;
+    serverDown = false;
     mockGetSession.mockResolvedValue({
       data: {
         session: {
@@ -235,6 +238,52 @@ describe('following an analysis', () => {
     expect(await screen.findByText('The AI service took too long to respond.')).toBeInTheDocument();
     expect(discardAnalysis).toHaveBeenCalled();
     expect(progress()).not.toBeInTheDocument();
+  });
+
+  it('should stop waiting, and say so, when news of the analysis stops coming', async () => {
+    renderApp();
+    await runAnalysis();
+    await currentStep().catch(() => null);
+
+    serverDown = true;
+
+    expect(await screen.findByText(/I lost contact with the server/)).toBeInTheDocument();
+    expect(progress()).not.toBeInTheDocument();
+  });
+
+  it('should go back to following the analysis when the news comes back', async () => {
+    renderApp();
+    await runAnalysis();
+    serverDown = true;
+    await screen.findByText(/I lost contact with the server/);
+
+    onServer = job('writing');
+    serverDown = false;
+
+    await waitFor(async () =>
+      expect(await currentStep()).toHaveTextContent('The AI is writing the description'),
+    );
+    expect(screen.queryByText(/I lost contact with the server/)).not.toBeInTheDocument();
+  });
+
+  it('should have the robot say each step once as it begins', async () => {
+    renderApp();
+    await runAnalysis();
+    const balloon = () => within(screen.getByRole('status'));
+
+    expect(
+      balloon().getByText(
+        /usually takes about a minute|That is the quick part|keep an eye on it all/,
+      ),
+    ).toBeInTheDocument();
+
+    onServer = job('watching');
+
+    await waitFor(() =>
+      expect(
+        balloon().getByText(/sees the whole video|Movie time|scene by scene/),
+      ).toBeInTheDocument(),
+    );
   });
 
   it('should show the video already kept when the link is a copy', async () => {

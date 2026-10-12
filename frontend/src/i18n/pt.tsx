@@ -679,7 +679,28 @@ export const pt: Dictionary = {
       },
     },
     lines: {
-      watching: 'Vou ficar de olho. Costuma levar por volta de um minuto.',
+      steps: {
+        downloading: [
+          'Vou buscar o vídeo lá no X. A análise toda normalmente leva um minuto.',
+          'Primeiro eu baixo o vídeo do X. É rapidinho.',
+          'Puxando o vídeo do X para cá. Fico de olho em tudo.',
+        ],
+        uploading: [
+          'Vídeo comigo, agora mando para o outro robô.',
+          'Baixei. Estou mandando o vídeo para a IA.',
+          'Agora o vídeo está viajando até a IA.',
+        ],
+        watching: [
+          'A IA tá assistindo. Ela vê o vídeo inteiro antes de escrever.',
+          'Sessão de cinema: a IA está vendo o vídeo do começo ao fim.',
+          'Agora é com ela. A IA assiste a tudo, cena por cena.',
+        ],
+        writing: [
+          'Ela terminou de assistir e já está escrevendo.',
+          'Falta pouco: a IA está escrevendo o título e a descrição.',
+          'A IA pegou a caneta. Já, já sai a descrição.',
+        ],
+      },
       waiting: [
         'A IA assiste ao vídeo inteiro antes de escrever, por isso demora.',
         'Vídeo longo leva mais tempo. Ainda está andando.',

@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { Dictionary } from '../i18n/en';
 import type { Tab } from '../constants/tabs';
+import type { AnalysisStep } from '../constants/analysis';
 import type { SearchMode } from '../constants/searchModes';
 
 export type HelpKey = keyof Dictionary['robot']['help'];
@@ -34,6 +35,7 @@ export type RobotEvent =
   | { kind: 'copied' }
   | { kind: 'urlRejected' }
   | { kind: 'analysisStarted' }
+  | { kind: 'analysisStage'; stage: AnalysisStep }
   | { kind: 'analysisDone'; title: string }
   | { kind: 'analysisFailed'; manual: () => void }
   | { kind: 'analysisCancelled' }

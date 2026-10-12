@@ -459,7 +459,11 @@ describe('the robot reacting to the app', () => {
 
     await runAnalysis();
 
-    expect((await balloon()).getByText(/keep an eye on it/)).toBeInTheDocument();
+    expect(
+      (await balloon()).getByText(
+        /usually takes about a minute|That is the quick part|keep an eye on it all/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it('should speak up when the AI fails, and open the manual form on request', async () => {
