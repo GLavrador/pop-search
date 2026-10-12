@@ -49,6 +49,94 @@ export const pt: Dictionary = {
     catAlt: 'Um gato',
   },
 
+  boot: {
+    title: 'Pop Search BIOS 1.0',
+    maker: 'Copyright (C) 1998, Pop Search Corp.',
+    program: 'Programa',
+    language: 'Idioma',
+    languageName: 'Português',
+    session: 'Sessão',
+    server: 'Servidor',
+    ok: 'OK',
+    checking: 'verificando...',
+    visitor: 'visitante',
+    calling: 'chamando...',
+    waking: (seconds: number) => `acordando, ${seconds} s`,
+    awake: (time: string) => `OK, em ${time}`,
+    down: 'sem resposta',
+    asleep: 'O servidor dorme quando ninguém usa. Acordar leva até um minuto.',
+    goingIn: 'Entrando sem ele. O robô avisa quando o servidor acordar.',
+    starting: 'Iniciando o Pop Search...',
+    skip: 'Pressione qualquer tecla, ou toque na tela, para entrar agora.',
+  },
+
+  crash: {
+    lead: 'Um erro fatal aconteceu e o Pop Search precisou parar:',
+    reopen: 'Pressione qualquer tecla para reiniciar o Pop Search.',
+    kept: 'Os vídeos já salvos continuam salvos. O que estava só na tela se perdeu.',
+    again: 'O erro voltou logo depois de reiniciar.',
+    reload: 'Pressione qualquer tecla para recarregar a página inteira.',
+    goOn: 'Pressione qualquer tecla para continuar',
+    robot: 'Xi. Isso não era para acontecer. Aperte uma tecla que eu ligo tudo de novo.',
+    robotAgain: 'De novo?! Então vamos recarregar a página inteira.',
+  },
+
+  rebuild: {
+    crash: {
+      lead: 'Uma operação ilegal foi executada por você: o Pop Search foi jogado na Lixeira.',
+      code: 'ERRO 0xL1X0: PROGRAMA_NAO_E_LIXO',
+      steps: [
+        'Não se joga o programa na Lixeira. É como jogar a casa no lixo da cozinha.',
+        'A área de trabalho foi junto: ícones, barra de tarefas, relógio, tudo.',
+      ],
+      hold: 'Não pressione nenhuma tecla. O responsável já está a caminho',
+    },
+    setup: {
+      spoken: 'Pop Search. Um robô está construindo a área de trabalho do zero. Pressione qualquer tecla para pular.',
+    },
+    says: {
+      disbelief: 'Não. Não, não, NÃO. Eu não acredito nisso.',
+      gone: 'Sumiu tudo. TUDO. Ficou só esse azul.',
+      who: 'Quem foi que jogou o Pop Search na LIXEIRA?! Eu MORO aí dentro!',
+      fine: 'Tá bom, tá bom. Eu monto tudo de novo. Mas você fica olhando.',
+      done: 'Pronto, tudo de volta no lugar. E programa NÃO é lixo. Combinado?',
+      hello: 'Não tem nada aqui ainda. Deixa comigo: eu faço tudo!',
+    },
+    emotes: {
+      no: 'não...',
+      noIcons: 'cadê os ícones?',
+      noBar: 'e a barra?!',
+      noClock: 'nem o relógio?!',
+      one: 'uma lixeira...',
+      two: 'um computador...',
+      polish: 'essa aqui com carinho',
+      three: 'e a minha casa!',
+      bar: 'agora, a barra',
+      heave: 'hnnngh!',
+      slip: 'escorregou!',
+      heaveAgain: 'de novo...',
+      slipAgain: 'ah, é assim?!',
+      barUp: 'AGORA VAI!',
+      phew: 'ufa...',
+      start: 'e o Iniciar, de enfeite',
+      hammer: 'toc toc toc',
+      unset: '12:00? não.',
+      ticking: 'pronto, funcionando!',
+      shoo: 'xô, azul!',
+      shooMore: 'sai, sai, sai!',
+      clean: 'limpinho!',
+      knock: 'abre!',
+      knockHard: 'ABRE!!',
+      pull: 'hnnnngh!!',
+      slipped: 'não, não, não!',
+      pullHard: 'SÓ... MAIS... UM...',
+      open: 'abriu!',
+      ready: 'é todo seu!',
+    },
+    skip: 'pular ▸▸',
+    skipTitle: 'Pular a reconstrução (Esc)',
+  },
+
   gate: {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',
@@ -109,6 +197,7 @@ export const pt: Dictionary = {
     submit: 'Buscar',
     precision: (percent: number) => `Precisão ${percent}%`,
     loading: 'Consultando o banco...',
+    conCon: 'C:\\CON\\CON derrubava o Windows 98 de verdade. Aqui também derruba.',
     emptyTitle: '0 encontrados.',
     emptyWithThreshold: (percent: number) => (
       <>
@@ -626,6 +715,10 @@ export const pt: Dictionary = {
       language: ['agora em português!', 'português, então!', 'falando português!'],
       closing: ['ei!', 'não fecha!', 'sério?', 'tem um gato aí...'],
       reopened: ['ufa!', 'voltou!', 'que susto!'],
+      serverAwake: ['o servidor acordou!', 'pronto, ele acordou!', 'agora vai rápido!'],
+      iconDropped: ['ele sempre volta', 'ícone teimoso', 'ele gosta dali'],
+      binThreat: ['NÃO!', 'aí não!!', 'nem pense nisso!'],
+      appTrashed: ['O QUE VOCÊ FEZ?!', 'NÃÃÃO!', 'MINHA CASA!!'],
       bigger: ['uau, que grande!', 'tela cheia!', 'espaço de sobra!'],
       smaller: ['assim cabe melhor', 'tamanho normal', 'de volta ao cantinho'],
       echo: [
@@ -751,6 +844,12 @@ export const pt: Dictionary = {
       emptyStuck: {
         text: 'Nem assim eu achei. Tente outras palavras, ou descreva a cena de outro jeito.',
       },
+      serverWaking: {
+        text: 'O servidor ainda está acordando: ele dorme quando ninguém usa. A primeira busca pode demorar até um minuto.',
+      },
+      serverDown: {
+        text: 'O servidor não respondeu. Buscar e guardar vídeos pode não funcionar por enquanto. Tente recarregar a página daqui a pouco.',
+      },
     },
     drop: {
       computer: [
@@ -828,7 +927,7 @@ export const pt: Dictionary = {
       },
       'desktop.icon': {
         title: 'Área de trabalho',
-        text: 'Os ícones são decoração. O do Pop Search abre o programa de novo se você fechar a janela.',
+        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela. Só não solte ele na Lixeira.',
       },
       robot: {
         title: 'BIP-98',

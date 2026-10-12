@@ -40,7 +40,7 @@ export interface Line {
   target: Target;
   aim?: Aim;
   /** Lets whatever it was about take it back: a new search drops the last one's advice. */
-  topic?: 'search' | 'analysis';
+  topic?: 'search' | 'analysis' | 'server';
   /** Gone after this long on its own; null stays until dismissed. */
   ttl: number | null;
 }
@@ -403,6 +403,40 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           react({
             face: event.on ? 'wow' : 'neutral',
             emote: event.on ? vary('bigger', says.bigger) : vary('smaller', says.smaller),
+          });
+          break;
+        case 'serverWaking':
+          say({
+            rank: 'tip',
+            topic: 'server',
+            copy: ({ robot }) => robot.lines.serverWaking,
+            cue: 'teach',
+            target: null,
+            ttl: 12000,
+          });
+          break;
+        case 'serverAwake':
+          hush('server');
+          react({ face: 'happy', emote: vary('serverAwake', says.serverAwake), move: 'hop' });
+          break;
+        case 'iconDropped':
+          react({ face: 'curious', emote: vary('iconDropped', says.iconDropped) });
+          break;
+        case 'binThreat':
+          react({ face: 'angry', emote: vary('binThreat', says.binThreat), move: 'jolt' });
+          break;
+        case 'appTrashed':
+          put(null);
+          react({ face: 'wow', emote: vary('appTrashed', says.appTrashed), move: 'jolt', ms: 900 });
+          break;
+        case 'serverDown':
+          say({
+            rank: 'react',
+            topic: 'server',
+            copy: ({ robot }) => robot.lines.serverDown,
+            cue: 'worry',
+            target: null,
+            ttl: 14000,
           });
           break;
       }

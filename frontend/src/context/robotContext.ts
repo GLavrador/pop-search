@@ -51,7 +51,15 @@ export type RobotEvent =
   | { kind: 'language' }
   | { kind: 'closeAttempt'; attempt: number }
   | { kind: 'reopened' }
-  | { kind: 'maximized'; on: boolean };
+  | { kind: 'maximized'; on: boolean }
+  | { kind: 'serverWaking' }
+  | { kind: 'serverAwake' }
+  | { kind: 'serverDown' }
+  /** An icon of the desktop was let go, and went back to its place. */
+  | { kind: 'iconDropped' }
+  /** The program's icon is being held over the bin. */
+  | { kind: 'binThreat' }
+  | { kind: 'appTrashed' };
 
 export interface RobotVoice {
   /** Has it explain a control, standing next to `node`. */

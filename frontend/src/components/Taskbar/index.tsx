@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';
+import type { ClockState, Slide } from '../Rebuild/stage';
 import logo from '../../assets/windows-98-logo.png';
 import styles from './styles.module.css';
 
@@ -17,12 +18,43 @@ const useClock = (locale: string): string => {
   return now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 };
 
-export const Taskbar = ({ children }: { children?: ReactNode }) => {
+interface TaskbarProps {
+  children?: ReactNode;
+  /** How far under the edge of the screen it is, while it is being pulled back up. */
+  sunk?: Slide;
+  /** False while the bar is up but its Start button has not been put on yet. */
+  start?: boolean;
+  clock?: ClockState;
+  /** Nothing on it answers: something else has the screen. */
+  frozen?: boolean;
+}
+
+export const Taskbar = ({
+  children,
+  sunk,
+  start = true,
+  clock = 'on',
+  frozen = false,
+}: TaskbarProps) => {
   const { t, locale } = useI18n();
   const time = useClock(locale);
+  const moved = sunk !== undefined && (sunk.by !== 0 || sunk.ms !== 0);
 
   return (
-    <div className={styles.taskbar} data-robot="taskbar">
+    <div
+      className={styles.taskbar}
+      data-robot="taskbar"
+      data-start={start ? (frozen ? 'new' : undefined) : 'none'}
+      inert={frozen}
+      style={
+        moved
+          ? {
+              transform: `translateY(${sunk.by * 100}%)`,
+              transition: `transform ${sunk.ms}ms ease-out`,
+            }
+          : undefined
+      }
+    >
       <button
         type="button"
         className={styles.start}
@@ -38,16 +70,18 @@ export const Taskbar = ({ children }: { children?: ReactNode }) => {
 
       <div className={styles.tasks}>{children}</div>
 
-      <div className={styles.tray}>
-        <span
-          className={styles.clock}
-          data-robot="clock"
-          data-robot-zone="clock"
-          {...helpAt('taskbar.clock')}
-        >
-          {time}
-        </span>
-      </div>
+      {clock !== 'none' && (
+        <div className={styles.tray} data-clock={clock}>
+          <span
+            className={styles.clock}
+            data-robot="clock"
+            data-robot-zone="clock"
+            {...helpAt('taskbar.clock')}
+          >
+            {clock === 'on' ? time : clock === 'unset' ? '12:00' : '--:--'}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

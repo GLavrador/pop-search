@@ -1,0 +1,319 @@
+/* Under the icons, the window and the taskbar, over the wallpaper and the footer. */
+.blue {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.spoken {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tile {
+  position: absolute;
+  overflow: hidden;
+  transition: transform 650ms cubic-bezier(0.2, 0.6, 0.4, 1), opacity 650ms ease-in,
+    filter 120ms linear;
+}
+
+/* Shooed: it runs the way it was pushed, paler so it shows against the blue still there. */
+.tile[data-fled] {
+  z-index: 1;
+  transform: translate(calc(var(--fx) * 34vmax), calc(var(--fy) * 34vmax))
+    rotate(calc(var(--spin) * 1deg)) scale(0.35);
+  opacity: 0;
+  filter: brightness(1.6);
+}
+
+.pane {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(16px, 5vw, 48px);
+  background: #0000aa;
+  font-family: 'Lucida Console', 'Courier New', monospace;
+  font-size: clamp(0.82rem, 2.7vw, 1.05rem);
+  line-height: 1.5;
+  color: var(--win-light);
+}
+
+.pane .hold {
+  margin-top: 2em;
+  text-align: center;
+}
+
+/* Over everything, the taskbar and the robot's own sky included. It also takes every click. */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  overflow: hidden;
+  cursor: default;
+}
+
+.actor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46px;
+  height: 53px;
+  line-height: 0;
+  transition-property: transform;
+  will-change: transform;
+}
+
+/* The robot and what it holds, which turn round together. */
+.body {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 53px;
+}
+
+.body[data-flip] {
+  transform: scaleX(-1);
+}
+
+/* Both tools turn on the robot's shoulder, in step with the arm that holds them. */
+.swing,
+.sweep {
+  position: absolute;
+  top: 37.4px;
+  left: 35.4px;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+}
+
+.swing {
+  animation: swing 0.36s ease-in infinite;
+}
+
+.sweep {
+  animation: sweep 0.26s ease-in-out infinite;
+}
+
+.hammer {
+  position: absolute;
+  top: -7px;
+  left: 6px;
+  width: 22px;
+  height: 14px;
+  overflow: visible;
+  fill: var(--win-shadow-dark);
+  stroke: var(--win-dark);
+  stroke-width: 1.2;
+}
+
+.duster {
+  position: absolute;
+  top: -9px;
+  left: 6px;
+  width: 32px;
+  height: 18px;
+  overflow: visible;
+  stroke: var(--win-dark);
+  stroke-width: 1.1;
+}
+
+.handle {
+  fill: #a5682a;
+}
+
+/* Fly off the face of the hammer at the bottom of each blow. */
+.sparks {
+  fill: none;
+  stroke: #ffe27a;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: sparks 0.36s linear infinite;
+}
+
+/* Dust, coming off the feathers. */
+.puff {
+  fill: var(--win-light);
+  stroke: none;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: puff 0.52s ease-out infinite;
+}
+
+.puff + .puff {
+  animation-delay: 0.26s;
+}
+
+.feathers {
+  fill: #ffd24d;
+  stroke: #8a5a00;
+  stroke-linejoin: round;
+}
+
+.quills {
+  fill: none;
+  stroke: #c98a00;
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+.emote {
+  position: absolute;
+  top: -22px;
+  left: 38px;
+  padding: 2px 8px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  font-size: 0.88rem;
+  font-weight: bold;
+  line-height: 1.35;
+  color: var(--win-dark);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.emote[data-on] {
+  opacity: 1;
+  transform: none;
+}
+
+.emote[data-flip] {
+  right: 38px;
+  left: auto;
+}
+
+.emote:empty {
+  visibility: hidden;
+}
+
+.says {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  margin: 0;
+  padding: 9px 12px 10px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.45);
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: var(--win-dark);
+}
+
+.says::before,
+.says::after {
+  content: '';
+  position: absolute;
+  left: var(--tail, 50%);
+  border-style: solid;
+  border-color: transparent;
+  border-width: 8px 7px 0;
+  translate: -7px 0;
+}
+
+.says::before {
+  top: 100%;
+  border-top-color: var(--win-dark);
+}
+
+.says::after {
+  top: calc(100% - 2px);
+  border-top-color: var(--win-tooltip-bg);
+}
+
+.says[data-hang='drop'] {
+  top: calc(100% + 16px);
+  bottom: auto;
+}
+
+.says[data-hang='drop']::before,
+.says[data-hang='drop']::after {
+  top: auto;
+  border-width: 0 7px 8px;
+  border-top-color: transparent;
+}
+
+.says[data-hang='drop']::before {
+  bottom: 100%;
+  border-bottom-color: var(--win-dark);
+}
+
+.says[data-hang='drop']::after {
+  bottom: calc(100% - 2px);
+  border-bottom-color: var(--win-tooltip-bg);
+}
+
+.skip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  min-width: 0;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+}
+
+@keyframes swing {
+  0%,
+  100% {
+    transform: rotate(-70deg);
+  }
+  55% {
+    transform: rotate(50deg);
+  }
+}
+
+@keyframes sparks {
+  0%,
+  50%,
+  82%,
+  100% {
+    opacity: 0;
+  }
+  56%,
+  72% {
+    opacity: 1;
+  }
+}
+
+@keyframes puff {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(5px, -2px) scale(1.9);
+  }
+}
+
+@keyframes sweep {
+  0%,
+  100% {
+    transform: rotate(20deg);
+  }
+  50% {
+    transform: rotate(62deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .emote {
+    transition: none;
+  }
+
+  .swing,
+  .sweep,
+  .sparks,
+  .puff {
+    animation: none;
+  }
+}

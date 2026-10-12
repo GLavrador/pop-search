@@ -10,11 +10,20 @@ export type Face =
   | 'worried'
   | 'dizzy'
   | 'yawn'
-  | 'shy';
+  | 'shy'
+  | 'angry'
+  | 'aghast'
+  | 'stern'
+  | 'strain'
+  | 'phew';
 
 export type Pose =
   | 'stand'
   | 'fly'
+  | 'heave'
+  | 'tug'
+  | 'hammer'
+  | 'dust'
   | 'wave'
   | 'cheer'
   | 'sit'

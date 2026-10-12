@@ -55,6 +55,94 @@ export const en = {
     catAlt: 'A cat',
   },
 
+  boot: {
+    title: 'Pop Search BIOS 1.0',
+    maker: 'Copyright (C) 1998, Pop Search Corp.',
+    program: 'Program',
+    language: 'Language',
+    languageName: 'English',
+    session: 'Session',
+    server: 'Server',
+    ok: 'OK',
+    checking: 'checking...',
+    visitor: 'visitor',
+    calling: 'calling...',
+    waking: (seconds: number) => `waking up, ${seconds} s`,
+    awake: (time: string) => `OK, in ${time}`,
+    down: 'no answer',
+    asleep: 'The server sleeps when nobody is using it. Waking up takes up to a minute.',
+    goingIn: 'Going in without it. The robot will tell you when the server is up.',
+    starting: 'Starting Pop Search...',
+    skip: 'Press any key, or tap the screen, to go in now.',
+  },
+
+  crash: {
+    lead: 'A fatal error has occurred and Pop Search had to stop:',
+    reopen: 'Press any key to restart Pop Search.',
+    kept: 'Videos already saved are still saved. What was only on screen is lost.',
+    again: 'The error came back right after restarting.',
+    reload: 'Press any key to reload the whole page.',
+    goOn: 'Press any key to continue',
+    robot: 'Uh oh. That was not meant to happen. Press a key and I will switch it all back on.',
+    robotAgain: 'Again?! Then let us reload the whole page.',
+  },
+
+  rebuild: {
+    crash: {
+      lead: 'An illegal operation was performed by you: Pop Search was thrown in the Recycle Bin.',
+      code: 'ERROR 0xB1N: PROGRAM_IS_NOT_RUBBISH',
+      steps: [
+        'A program does not go in the Recycle Bin. That is like putting the house in the kitchen bin.',
+        'The desktop went with it: icons, taskbar, clock, the lot.',
+      ],
+      hold: 'Do not press any key. Somebody is already on the way',
+    },
+    setup: {
+      spoken: 'Pop Search. A robot is building the desktop from nothing. Press any key to skip.',
+    },
+    says: {
+      disbelief: 'No. No, no, NO. I do not believe this.',
+      gone: 'It is all gone. ALL of it. Nothing left but this blue.',
+      who: 'Who threw Pop Search in the BIN?! I LIVE in there!',
+      fine: 'Fine, fine. I will put it all back together. But you are going to watch.',
+      done: 'There, everything back in its place. And a program is NOT rubbish. Deal?',
+      hello: 'Nothing here yet. Leave it to me: I will make it all!',
+    },
+    emotes: {
+      no: 'no...',
+      noIcons: 'where are the icons?',
+      noBar: 'and the taskbar?!',
+      noClock: 'not even the clock?!',
+      one: 'one bin...',
+      two: 'one computer...',
+      polish: 'this one with care',
+      three: 'and my house!',
+      bar: 'now, the bar',
+      heave: 'hnnngh!',
+      slip: 'it slipped!',
+      heaveAgain: 'again...',
+      slipAgain: 'oh, like that, is it?!',
+      barUp: 'THIS TIME!',
+      phew: 'phew...',
+      start: 'and Start, just for show',
+      hammer: 'tap tap tap',
+      unset: '12:00? no.',
+      ticking: 'there, ticking!',
+      shoo: 'shoo, blue!',
+      shooMore: 'off you go!',
+      clean: 'spotless!',
+      knock: 'open up!',
+      knockHard: 'OPEN UP!!',
+      pull: 'hnnnngh!!',
+      slipped: 'no, no, no!',
+      pullHard: 'ONE... MORE...',
+      open: 'it is open!',
+      ready: 'all yours!',
+    },
+    skip: 'skip ▸▸',
+    skipTitle: 'Skip the rebuilding (Esc)',
+  },
+
   gate: {
     title: 'An account is required to add videos.',
     body: 'Indexing a video runs it through the AI, so it is limited to signed-in users. Searching the archive stays open to everyone.',
@@ -115,6 +203,7 @@ export const en = {
     submit: 'Find Now',
     precision: (percent: number) => `Precision ${percent}%`,
     loading: 'Querying database...',
+    conCon: 'C:\\CON\\CON really did bring Windows 98 down. It does the same here.',
     emptyTitle: '0 found.',
     emptyWithThreshold: (percent: number) => (
       <>
@@ -619,6 +708,10 @@ export const en = {
       language: ['now in English!', 'English it is!', 'speaking English!'],
       closing: ['hey!', 'do not close it!', 'really?', 'there is a cat in there...'],
       reopened: ['phew!', 'it is back!', 'what a scare!'],
+      serverAwake: ['the server is up!', 'there, it woke up!', 'full speed now!'],
+      iconDropped: ['it always goes back', 'stubborn icons', 'it likes it there'],
+      binThreat: ['do NOT!', 'not in there!!', 'do not even think about it!'],
+      appTrashed: ['WHAT DID YOU DO?!', 'NOOOO!', 'MY HOUSE!!'],
       bigger: ['wow, so big!', 'full screen!', 'room to spare!'],
       smaller: ['that fits better', 'regular size', 'back to my corner'],
       echo: [
@@ -744,6 +837,12 @@ export const en = {
       emptyStuck: {
         text: 'Still nothing. Try other words, or describe the scene another way.',
       },
+      serverWaking: {
+        text: 'The server is still waking up: it sleeps when nobody is using it. The first search may take up to a minute.',
+      },
+      serverDown: {
+        text: 'The server did not answer. Searching and keeping videos may not work for now. Try reloading the page in a little while.',
+      },
     },
     drop: {
       computer: [
@@ -821,7 +920,7 @@ export const en = {
       } as HelpCopy,
       'desktop.icon': {
         title: 'Desktop',
-        text: 'The icons are decoration. The Pop Search one opens the program again if you close the window.',
+        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window. Just do not drop it in the Recycle Bin.',
       } as HelpCopy,
       robot: {
         title: 'BIP-98',

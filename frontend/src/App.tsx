@@ -12,7 +12,7 @@ import { MyVideos } from './components/MyVideos';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { useIdentityReset } from './hooks/useIdentityReset';
-import { useBackendWarmup } from './hooks/useBackendWarmup';
+import { useServerWake, type ServerState, type ServerStatus } from './hooks/useServerWake';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
@@ -38,6 +38,12 @@ import { useGuide } from './hooks/useGuide';
 import { useRobotDirector } from './hooks/useRobotDirector';
 import { RobotContext, helpAt, type HelpKey } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
+import { Boot } from './components/Boot';
+import { BlueScreen } from './components/BlueScreen';
+import { Rebuild } from './components/Rebuild';
+import { BlueTiles } from './components/Rebuild/BlueTiles';
+import { useRebuild } from './components/Rebuild/useRebuild';
+import { BOOTED_KEY, SERVER_NOTICE_MS } from './constants/startup';
 
 const WINDOW_ICON = '💻';
 const APP_NAME = 'Pop Search';
@@ -54,9 +60,16 @@ const readInvite = (): Invite => {
   return saved === 'tucked' ? 'tucked' : saved ? 'seen' : 'fresh';
 };
 
-function AppContent() {
+interface AppContentProps {
+  server: ServerStatus;
+  /** The page has just opened: the robot builds the desktop before anything else. */
+  intro: boolean;
+  onIntroEnd: () => void;
+}
+
+function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
-  const [windowState, setWindowState] = useState<WindowState>('open');
+  const [windowState, setWindowState] = useState<WindowState>(intro ? 'closed' : 'open');
   const [isMaximized, setIsMaximized] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
   const closeClicks = useRef(0);
@@ -74,9 +87,29 @@ function AppContent() {
   const robotSeat = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   useIdentityReset();
-  useBackendWarmup();
   const { t, language } = useI18n();
   const spokenIn = useRef(language);
+  const toldServer = useRef<ServerState | null>(null);
+
+  const { hide: hideGuide } = guide;
+  const { stopHelp, dismiss } = robot;
+  const rebuild = useRebuild({
+    intro,
+    onWreck: () => {
+      hideGuide();
+      stopHelp();
+      dismiss();
+      closeClicks.current = 0;
+      pendingCat.current = null;
+      setCat(null);
+      setWindowState('closed');
+    },
+    onOpenWindow: () => setWindowState('open'),
+    onEnd: (kind) => {
+      if (kind === 'setup') onIntroEnd();
+    },
+  });
+  const wrecked = rebuild.view.phase === 'show';
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -91,6 +124,25 @@ function AppContent() {
     spokenIn.current = language;
     notify({ kind: 'language' });
   }, [language, notify]);
+
+  // A quick answer needs no word. A slow one is explained, and so is its end.
+  // Not while the desktop is being built: the robot is busy and nobody would hear.
+  useEffect(() => {
+    if (wrecked || toldServer.current === server.state) return;
+
+    if (server.state === 'waking') {
+      const id = setTimeout(() => {
+        toldServer.current = 'waking';
+        notify({ kind: 'serverWaking' });
+      }, SERVER_NOTICE_MS);
+      return () => clearTimeout(id);
+    }
+
+    const waited = toldServer.current === 'waking';
+    toldServer.current = server.state;
+    if (server.state === 'down') notify({ kind: 'serverDown' });
+    else if (waited) notify({ kind: 'serverAwake' });
+  }, [server.state, notify, wrecked]);
 
   useEffect(() => {
     if (windowState !== 'closing') return;
@@ -189,7 +241,19 @@ function AppContent() {
 
   const desktop = (
     <div className={styles.appContainer}>
-      <Desktop appIcon={WINDOW_ICON} appLabel={APP_NAME} onOpenApp={handleOpen} />
+      <BlueTiles blue={rebuild.blue} kind={rebuild.view.kind} />
+
+      <Desktop
+        appIcon={WINDOW_ICON}
+        appLabel={APP_NAME}
+        onOpenApp={handleOpen}
+        built={rebuild.view.built}
+        swallowed={rebuild.view.phase === 'swallowing'}
+        pressed={rebuild.view.pressed}
+        shining={rebuild.view.shining}
+        frozen={wrecked}
+        onTrashApp={rebuild.trash}
+      />
 
       {isClosed && cat && <CatReveal image={cat.image} phrase={cat.phrase} />}
 
@@ -205,6 +269,7 @@ function AppContent() {
         aside={offersGuide && invite === 'tucked' ? <GuideChip onOpen={startGuide} /> : undefined}
         onHelp={robot.toggleHelp}
         helping={robot.helping}
+        shut={rebuild.view.shut}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
           {offersGuide && invite !== 'tucked' && (
@@ -313,26 +378,38 @@ function AppContent() {
         </div>
       </RetroWindow>
 
-      <RobotPilot
-        {...brief}
-        home={robotSeat}
-        parked={windowState === 'minimized'}
-        stage={stage}
-        label={t.guide.poke}
-        handle={robot.handle}
-        onGrab={robot.dismiss}
-        onDrop={robot.dropped}
-      >
-        {robot.line && <Speech line={robot.line} onDismiss={robot.dismiss} />}
-      </RobotPilot>
+      {/* While the desktop is being rebuilt the robot is in the show, not at home. */}
+      {wrecked ? (
+        <Rebuild cast={rebuild.cast} kind={rebuild.view.kind} onSkip={rebuild.skip} />
+      ) : (
+        <RobotPilot
+          {...brief}
+          home={robotSeat}
+          parked={windowState === 'minimized'}
+          stage={stage}
+          label={t.guide.poke}
+          handle={robot.handle}
+          onGrab={robot.dismiss}
+          onDrop={robot.dropped}
+        >
+          {robot.line && <Speech line={robot.line} onDismiss={robot.dismiss} />}
+        </RobotPilot>
+      )}
 
-      {robot.helping && <HelpOverlay onPick={robot.pick} onCancel={robot.stopHelp} />}
+      {!wrecked && robot.helping && (
+        <HelpOverlay onPick={robot.pick} onCancel={robot.stopHelp} />
+      )}
 
       <footer className={styles.footer}>
         <p>{t.footer}</p>
       </footer>
 
-      <Taskbar>
+      <Taskbar
+        sunk={rebuild.view.taskbar}
+        start={rebuild.view.start}
+        clock={rebuild.view.clock}
+        frozen={wrecked}
+      >
         {windowState !== 'closing' && !isClosed && (
           <TaskButton
             icon={WINDOW_ICON}
@@ -350,14 +427,48 @@ function AppContent() {
   return <RobotContext.Provider value={robot.voice}>{desktop}</RobotContext.Provider>;
 }
 
+/** The way in: through the boot screen, with the robot building the desktop, or straight. */
+type Starting = 'boot' | 'setup' | null;
+
+const firstStart = (rebooted: boolean): Starting => {
+  // After a crash the machine restarts, and a restart goes through the boot screen.
+  if (rebooted) return 'boot';
+  if (sessionStorage.getItem(BOOTED_KEY) !== null) return null;
+  // The first time in a tab the robot builds the desktop. The boot screen is the still way in.
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'boot' : 'setup';
+};
+
+function Startup({ rebooted }: { rebooted: boolean }) {
+  const server = useServerWake();
+  const [starting, setStarting] = useState(() => firstStart(rebooted));
+
+  // The colour the page was first painted in has done its job once this draws over
+  // it. Left on, it would be what shows behind the blue as the robot clears it.
+  useEffect(() => {
+    delete document.documentElement.dataset.boot;
+  }, []);
+
+  const enter = useCallback(() => {
+    sessionStorage.setItem(BOOTED_KEY, '1');
+    setStarting(null);
+  }, []);
+
+  if (starting === 'boot') return <Boot server={server} onDone={enter} />;
+  return <AppContent server={server} intro={starting === 'setup'} onIntroEnd={enter} />;
+}
+
 function App() {
   return (
     <LanguageProvider>
-      <AuthProvider>
-        <StatusProvider>
-          <AppContent />
-        </StatusProvider>
-      </AuthProvider>
+      <BlueScreen>
+        {(restarts) => (
+          <AuthProvider>
+            <StatusProvider>
+              <Startup rebooted={restarts > 0} />
+            </StatusProvider>
+          </AuthProvider>
+        )}
+      </BlueScreen>
     </LanguageProvider>
   );
 }

@@ -19,6 +19,10 @@ vi.mock('./hooks/useMyVideosQuery', () => ({
   useMyVideosQuery: () => ({ videos: [], isLoading: false, error: null }),
 }));
 
+vi.mock('./hooks/useServerWake', () => ({
+  useServerWake: () => ({ state: 'awake', tookMs: 0 }),
+}));
+
 import App from './App';
 
 const signedIn = () =>

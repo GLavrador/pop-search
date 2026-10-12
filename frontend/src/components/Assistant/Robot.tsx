@@ -70,6 +70,18 @@ export const Robot = ({ className = '' }: RobotProps) => (
             <path d="M17 17.4 L22.6 15.9" />
             <path d="M29.4 15.9 L35 17.4" />
           </g>
+          <g className={styles.browsAngry}>
+            <path d="M16.6 15.9 L22.8 18" />
+            <path d="M29.2 18 L35.4 15.9" />
+          </g>
+          <g className={styles.browsStern}>
+            <path d="M16.8 16.9 H23.2" />
+            <path d="M28.8 16.9 H35.2" />
+          </g>
+          <g className={styles.eyesTight}>
+            <path d="M17.6 18.3 L22.4 20.6 L17.6 22.9" />
+            <path d="M34.4 18.3 L29.6 20.6 L34.4 22.9" />
+          </g>
           <g className={styles.eyesWide}>
             <circle cx="20" cy="20.3" r="3.5" />
             <circle cx="32" cy="20.3" r="3.5" />
@@ -83,7 +95,23 @@ export const Robot = ({ className = '' }: RobotProps) => (
           <path className={styles.mouthFrown} d="M20.5 28.4 V25.6 H31.5 V28.4" />
           <path className={styles.mouthWavy} d="M20 27 l2 -1.7 l2 1.7 l2 -1.7 l2 1.7 l2 -1.7 l2 1.7" />
           <rect className={styles.mouthYawn} x="22.5" y="23.5" width="7" height="5.6" />
+          <path
+            className={styles.mouthGrit}
+            d="M20.5 24.7 H31.5 V28.3 H20.5 Z M24.2 24.7 V28.3 M27.8 24.7 V28.3"
+          />
         </g>
+        <path
+          className={styles.sweat}
+          d="M47 11.5 C48.5 13.7 49 14.5 49 15.3 a2 2 0 0 1 -4 0 C45 14.5 45.5 13.7 47 11.5 Z"
+        />
+      </g>
+
+      {/* Both arms up and a hand on each side of the head: it cannot believe what it sees. */}
+      <g className={styles.handsOnHead}>
+        <path d="M8 41 L12.5 42 L9.6 15.5 L5.1 14.5 Z" />
+        <path d="M44 41 L39.5 42 L42.4 15.5 L46.9 14.5 Z" />
+        <rect x="3.5" y="9" width="7.5" height="6.5" />
+        <rect x="41" y="9" width="7.5" height="6.5" />
       </g>
 
       {/* Both arms up and a hand over each eye. Drawn last, to go in front of the face. */}

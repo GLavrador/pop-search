@@ -342,16 +342,20 @@
   stroke: none;
 }
 
-.hands {
+.hands,
+.handsOnHead {
   display: none;
 }
 
-[data-face='shy'] .hands {
+[data-face='shy'] .hands,
+[data-face='aghast'] .handsOnHead {
   display: inline;
 }
 
 [data-face='shy'] .armL,
-[data-face='shy'] .armR {
+[data-face='shy'] .armR,
+[data-face='aghast'] .armL,
+[data-face='aghast'] .armR {
   opacity: 0;
 }
 
@@ -386,18 +390,122 @@
   stroke: none;
 }
 
+.browsAngry path,
+.browsStern path,
+.eyesTight path {
+  fill: none;
+  stroke: var(--robot-glow);
+  stroke-width: 1.8;
+  stroke-linecap: square;
+}
+
+.mouthGrit {
+  fill: none;
+  stroke: var(--robot-glow);
+  stroke-width: 1.1;
+}
+
+.sweat {
+  fill: #9ee2ff;
+  stroke: none;
+}
+
 /* Faces: one set of eyes and one mouth shows at a time. */
 .eyesHappy,
 .eyesWide,
 .eyesShut,
 .eyesDizzy,
+.eyesTight,
 .brows,
+.browsAngry,
+.browsStern,
 .mouthSmile,
 .mouthOh,
 .mouthFrown,
 .mouthWavy,
-.mouthYawn {
+.mouthYawn,
+.mouthGrit,
+.sweat {
   display: none;
+}
+
+/* Cross enough to change colour. */
+[data-face='angry'] .robot {
+  --robot-glow: #ff7a5c;
+}
+
+[data-face='angry'] .mouthFlat {
+  display: none;
+}
+
+[data-face='angry'] .browsAngry,
+[data-face='angry'] .mouthFrown {
+  display: inline;
+}
+
+[data-face='angry'] .eyesRound {
+  translate: 0 1.2px;
+}
+
+[data-face='angry'] .led {
+  animation-duration: 0.3s;
+}
+
+[data-face='stern'] .browsStern {
+  display: inline;
+}
+
+[data-face='stern'] .eyesRound {
+  translate: 0 0.8px;
+}
+
+[data-face='strain'] .eyesRound,
+[data-face='strain'] .mouthFlat,
+[data-face='phew'] .eyesRound,
+[data-face='phew'] .mouthFlat {
+  display: none;
+}
+
+[data-face='strain'] .eyesTight,
+[data-face='strain'] .mouthGrit,
+[data-face='strain'] .sweat,
+[data-face='phew'] .eyesShut,
+[data-face='phew'] .mouthOh,
+[data-face='phew'] .sweat {
+  display: inline;
+}
+
+[data-face='strain'] .sweat {
+  animation: drip 0.7s ease-in infinite;
+}
+
+/* Eyes and mouth wide open, head going from side to side between its hands. */
+[data-face='aghast'] .eyesRound,
+[data-face='aghast'] .mouthFlat {
+  display: none;
+}
+
+[data-face='aghast'] .eyesWide,
+[data-face='aghast'] .mouthYawn {
+  display: inline;
+}
+
+[data-face='aghast'] .mouthYawn {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wail 0.5s ease-in-out infinite;
+}
+
+[data-face='aghast'] .head {
+  animation: disbelief 0.5s ease-in-out infinite;
+}
+
+[data-face='aghast'] .led {
+  animation-duration: 0.25s;
+}
+
+[data-face='strain'] .led {
+  animation-duration: 0.2s;
 }
 
 [data-face='dizzy'] .eyesRound,
@@ -484,6 +592,11 @@
 [data-talking] .mouthFlat {
   display: inline;
   animation: talk 0.19s ease-in-out infinite;
+}
+
+/* Aghast, it wails what it has to say: the open mouth stays. */
+[data-face='aghast'][data-talking] .mouthFlat {
+  display: none;
 }
 
 /* Poses. */
@@ -639,6 +752,123 @@
 
 [data-pose='sit'] .legR {
   animation: swing 0.9s ease-in-out infinite reverse;
+}
+
+/* Pulling up on something that will not come: arms straight down, full jets and a tremble. */
+[data-pose='heave'] .armL {
+  transform: rotate(-78deg);
+}
+
+[data-pose='heave'] .armR {
+  transform: rotate(78deg);
+}
+
+[data-pose='heave'] .flame {
+  opacity: 1;
+  scale: 1 1.5;
+  animation: thrust 0.11s steps(2, jump-none) infinite;
+}
+
+[data-pose='heave'] .robot,
+[data-pose='tug'] .robot {
+  animation: shudder 0.11s linear infinite;
+}
+
+/* Hanging by its hands from something it is pulling down. */
+[data-pose='tug'] .armL {
+  transform: rotate(64deg);
+}
+
+[data-pose='tug'] .armR {
+  transform: rotate(-64deg);
+}
+
+[data-pose='tug'] .legL {
+  animation: kick 0.3s ease-in-out infinite;
+}
+
+[data-pose='tug'] .legR {
+  animation: kick 0.3s ease-in-out infinite reverse;
+}
+
+/* A tool in its right hand. Whatever draws the tool turns it by these same keyframes. */
+[data-pose='hammer'] .armR {
+  animation: hammer 0.36s ease-in infinite;
+}
+
+[data-pose='dust'] .armR {
+  animation: dust 0.26s ease-in-out infinite;
+}
+
+[data-pose='dust'] .armL {
+  transform: rotate(-30deg);
+}
+
+[data-pose='hammer'] .flame,
+[data-pose='dust'] .flame {
+  opacity: 1;
+  animation: glow 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes shudder {
+  0%,
+  100% {
+    transform: translateX(-0.9px);
+  }
+  50% {
+    transform: translateX(0.9px);
+  }
+}
+
+@keyframes hammer {
+  0%,
+  100% {
+    transform: rotate(-70deg);
+  }
+  55% {
+    transform: rotate(50deg);
+  }
+}
+
+@keyframes dust {
+  0%,
+  100% {
+    transform: rotate(20deg);
+  }
+  50% {
+    transform: rotate(62deg);
+  }
+}
+
+@keyframes wail {
+  0%,
+  100% {
+    transform: scaleY(0.8);
+  }
+  50% {
+    transform: scaleY(1.15);
+  }
+}
+
+@keyframes disbelief {
+  0%,
+  100% {
+    rotate: -6deg;
+  }
+  50% {
+    rotate: 6deg;
+  }
+}
+
+@keyframes drip {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(7px);
+    opacity: 0;
+  }
 }
 
 @keyframes bob {
@@ -820,6 +1050,9 @@
   .robot,
   .eye,
   .eyesDizzy path,
+  .sweat,
+  .head,
+  .mouthYawn,
   .led,
   .armL,
   .armR,

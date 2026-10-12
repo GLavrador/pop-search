@@ -47,6 +47,17 @@ contribuir exige conta.
 - **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
   qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
   falha da IA, vídeo salvo) e pode ser arrastado pela tela
+- **Abertura com o robô montando tudo**: na primeira vez em cada aba, o BIP-98
+  constrói a área de trabalho à vista (ícones a martelo, barra de tarefas,
+  relógio, o azul espanado) e abre o programa. Qualquer tecla pula
+- **Tela azul e reinício**: um erro que derrubaria a tela vira uma tela azul, e
+  uma tecla reinicia pela tela de boot, em que cada linha é uma verificação de
+  verdade (sessão, servidor). O boot também é a entrada de quem pediu menos
+  movimento ao sistema
+- **Área de trabalho que reage**: os ícones podem ser arrastados e voltam para o
+  lugar. Soltar o do Pop Search na Lixeira derruba tudo numa tela azul: o robô
+  não acredita, procura o que sumiu, reclama e reconstrói tudo peça por peça,
+  com direito a barra de tarefas que escorrega e janela aberta à força
 
 ## Como a busca funciona
 
