@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
+import type { AnalysisStage, ExistingVideo } from '../../types';
 import styles from './styles.module.css';
-import { ProgressBar } from '../ProgressBar';
+import { StageProgress } from '../StageProgress';
+import { DuplicateNotice } from './DuplicateNotice';
 
 interface URLInputViewProps {
   url: string;
@@ -11,7 +13,12 @@ interface URLInputViewProps {
   onOpenManualForm: () => void;
   onCancel: () => void;
   loading: boolean;
+  /** The step a running analysis is at. */
+  stage?: AnalysisStage | null;
   error: string | null;
+  /** The archived video the link turned out to be a copy of. */
+  duplicate?: ExistingVideo | null;
+  onDismissDuplicate?: () => void;
   manualMode: boolean;
   onManualModeChange: (value: boolean) => void;
 }
@@ -23,27 +30,18 @@ export const URLInputView = ({
   onOpenManualForm,
   onCancel,
   loading,
+  stage = null,
   error,
+  duplicate = null,
+  onDismissDuplicate = () => {},
   manualMode,
   onManualModeChange
 }: URLInputViewProps) => {
-  const [showProgress, setShowProgress] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [analyzeScenes, setAnalyzeScenes] = useState(true);
   const [analyzeAudio, setAnalyzeAudio] = useState(true);
   const { t } = useI18n();
   const robot = useRobot();
-
-  useEffect(() => {
-    if (loading) {
-      setShowProgress(true);
-    } else {
-      const timer = setTimeout(() => {
-        setShowProgress(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [loading]);
 
   const handleNext = () => {
     if (url.trim()) {
@@ -164,23 +162,23 @@ export const URLInputView = ({
         </div>
       )}
 
-      {showProgress && (
+      {loading && (
         <div className={styles.progressRow} {...helpAt('ingest.progress')}>
           <div className={styles.progressContainer}>
-            <ProgressBar loading={loading} />
+            <StageProgress stage={stage ?? 'queued'} />
 
-            {loading && (
-              <button
-                type="button"
-                onClick={onCancel}
-                className={`win95-btn ${styles.cancelButton}`}
-              >
-                {t.common.cancel}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`win95-btn ${styles.cancelButton}`}
+            >
+              {t.common.cancel}
+            </button>
           </div>
         </div>
       )}
+
+      {duplicate && <DuplicateNotice video={duplicate} onDismiss={onDismissDuplicate} />}
 
       {error && (
         <div className="win95-border win95-error" {...helpAt('ingest.error')}>

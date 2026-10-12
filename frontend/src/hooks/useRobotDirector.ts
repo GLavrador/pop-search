@@ -15,6 +15,7 @@ import { createVariety } from '../components/Assistant/variety';
 import type { RobotHandle } from '../components/Assistant/RobotPilot';
 import type { Aim } from '../components/Demo/spotlight';
 import type { Tab } from '../constants/tabs';
+import type { AnalysisStep } from '../constants/analysis';
 import { findSearchMode } from '../constants/searchModes';
 import { PRECISION_PRESETS } from '../constants/searchPresets';
 import { useReadingAlong } from './useReadingAlong';
@@ -103,7 +104,9 @@ const plain = (text: string) =>
     .replace(/[\u0300-\u036f]/g, '');
 // Under the panel, so the balloon lands on the desktop and not on what the user needs next.
 const FROM_UNDER: Aim = { from: 'below', free: true };
-const PROGRESS = () => findHelp('ingest.progress');
+// The bar, not the list of steps above it: that is the thing to sit on.
+const PROGRESS = () =>
+  findHelp('ingest.progress')?.querySelector<HTMLElement>('[role="progressbar"]') ?? null;
 const ERROR_BOX = () => findHelp('ingest.error');
 const EMPTY_BOX = () => findHelp('search.empty');
 const SEARCH_FIELD = () => findHelp('search.query')?.querySelector<HTMLElement>('input') ?? null;
@@ -140,6 +143,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   const pressed = useRef<{ what: PressKey | null; at: number }>({ what: null, at: 0 });
   const noticed = useRef(new Set<TypedWord>());
   const vary = useMemo(() => createVariety(), []);
+  const toldStep = useRef<AnalysisStep | null>(null);
   const live = useRef({ guiding, t });
 
   useEffect(() => {
@@ -215,6 +219,25 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
       if (zone === 'start') {
         [900, 1500].forEach((ms) => setTimeout(() => handle.current?.react({ move: 'hop' }), ms));
       }
+    },
+    [say, vary],
+  );
+
+  // Each step of an analysis gets a word, once, in one of its wordings.
+  const sayStep = useCallback(
+    (step: AnalysisStep) => {
+      if (toldStep.current === step) return;
+      toldStep.current = step;
+
+      const turn = vary(`step.${step}`, [0, 1, 2]);
+      say({
+        rank: 'react',
+        topic: 'analysis',
+        copy: ({ robot }) => ({ text: robot.lines.steps[step][turn % robot.lines.steps[step].length] }),
+        cue: 'watch',
+        target: PROGRESS,
+        ttl: 7000,
+      });
     },
     [say, vary],
   );
@@ -299,14 +322,12 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           break;
         case 'analysisStarted':
           setWatching(true);
-          say({
-            rank: 'react',
-            topic: 'analysis',
-            copy: ({ robot }) => ({ text: robot.lines.watching }),
-            cue: 'watch',
-            target: PROGRESS,
-            ttl: 6500,
-          });
+          // The download begins at once, before the first news of it arrives.
+          toldStep.current = null;
+          sayStep('downloading');
+          break;
+        case 'analysisStage':
+          sayStep(event.stage);
           break;
         case 'analysisDone':
           setWatching(false);
@@ -331,6 +352,14 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           setWatching(false);
           hush('analysis');
           react({ emote: vary('cancelled', says.cancelled) });
+          break;
+        case 'analysisDuplicate':
+          setWatching(false);
+          hush('analysis');
+          react({ face: 'curious', emote: vary('duplicate', says.duplicate), move: 'nod' });
+          break;
+        case 'draftFound':
+          react({ face: 'happy', emote: vary('draft', says.draft) });
           break;
         case 'manualOpened':
           hush('analysis');
@@ -370,7 +399,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
           break;
       }
     },
-    [hush, put, react, review, say, stopReading, typed, vary],
+    [hush, put, react, review, say, sayStep, stopReading, typed, vary],
   );
 
   const stopHelp = useCallback(() => {

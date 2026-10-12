@@ -226,7 +226,33 @@ export const pt: Dictionary = {
     scenes: 'Elementos de cenário',
     audio: 'Transcrição do áudio',
     runAnalysis: 'Analisar',
+    progressLabel: 'Andamento da análise',
+    stages: {
+      queued: 'Preparando',
+      downloading: 'Baixando o vídeo do X',
+      uploading: 'Enviando o vídeo para a IA',
+      watching: 'A IA está assistindo ao vídeo',
+      writing: 'A IA está escrevendo a descrição',
+    },
+    duplicate: {
+      title: 'Esse vídeo já está no acervo.',
+      body: 'Nada foi descontado da sua cota.',
+      added: (date: string) => `Adicionado em ${date}`,
+      open: 'Abrir o post',
+      dismiss: 'Fechar o aviso',
+    },
+    draft: {
+      title: 'Você deixou uma análise sem salvar',
+      body: 'A IA já descreveu este vídeo. Continue de onde parou, ou descarte: uma análise descartada não volta para a sua cota.',
+      analysed: (date: string) => `Analisado em ${date}.`,
+      resume: 'Continuar a revisão',
+      discard: 'Descartar',
+    },
     status: {
+      stage: (step: string) => `${step}...`,
+      draft: 'Há uma análise esperando para ser salva.',
+      duplicate: 'Esse vídeo já está no acervo.',
+      discarded: 'Análise descartada.',
       analysed: 'Análise concluída. Revise os dados abaixo.',
       failed: 'A análise falhou. Veja os detalhes na caixa de erro.',
       invalid: (reason: string) => `Erro: ${reason}`,
@@ -243,6 +269,7 @@ export const pt: Dictionary = {
       rateLimited: 'Requisições demais. Espere um momento.',
       unauthorized: 'Entre na sua conta para analisar vídeos.',
       generic: 'Não foi possível analisar o vídeo.',
+      lost: 'Perdi o contato com o servidor no meio da análise. Ela pode ter continuado por lá: espere um pouco e recarregue a página antes de tentar de novo.',
     },
   },
 
@@ -560,6 +587,8 @@ export const pt: Dictionary = {
       badLink: ['esse link não serve', 'isso não é um link', 'hm, link estranho'],
       analysed: ['pronto!', 'terminou!', 'a IA acabou!'],
       cancelled: ['ok, parei.', 'cancelado.', 'tudo bem, parou.'],
+      duplicate: ['esse eu já tenho!', 'esse já está guardado', 'já vi, já guardei!'],
+      draft: ['você deixou uma pela metade!', 'guardei a sua análise', 'essa ainda está esperando'],
       manual: ['eu confio em você!', 'capricha na descrição!', 'você escreve melhor mesmo'],
       saved: ['guardado!', 'no acervo!', 'salvo, pode buscar!'],
       saveFailed: ['não salvou...', 'xi, não gravou', 'tenta de novo?'],
@@ -651,7 +680,28 @@ export const pt: Dictionary = {
       },
     },
     lines: {
-      watching: 'Vou ficar de olho. Costuma levar por volta de um minuto.',
+      steps: {
+        downloading: [
+          'Vou buscar o vídeo lá no X. A análise toda normalmente leva um minuto.',
+          'Primeiro eu baixo o vídeo do X. É rapidinho.',
+          'Puxando o vídeo do X para cá. Fico de olho em tudo.',
+        ],
+        uploading: [
+          'Vídeo comigo, agora mando para o outro robô.',
+          'Baixei. Estou mandando o vídeo para a IA.',
+          'Agora o vídeo está viajando até a IA.',
+        ],
+        watching: [
+          'A IA tá assistindo. Ela vê o vídeo inteiro antes de escrever.',
+          'Sessão de cinema: a IA está vendo o vídeo do começo ao fim.',
+          'Agora é com ela. A IA assiste a tudo, cena por cena.',
+        ],
+        writing: [
+          'Ela terminou de assistir e já está escrevendo.',
+          'Falta pouco: a IA está escrevendo o título e a descrição.',
+          'A IA pegou a caneta. Já, já sai a descrição.',
+        ],
+      },
       waiting: [
         'A IA assiste ao vídeo inteiro antes de escrever, por isso demora.',
         'Vídeo longo leva mais tempo. Ainda está andando.',
@@ -773,7 +823,15 @@ export const pt: Dictionary = {
       },
       'ingest.progress': {
         title: 'Análise em andamento',
-        text: 'A IA está assistindo ao vídeo inteiro. Costuma levar por volta de um minuto, mais para vídeos longos. Dá para cancelar.',
+        text: 'A lista mostra em que passo a análise está: baixar o vídeo, mandar para a IA, ela assistir e depois escrever. Costuma levar por volta de um minuto, mais para vídeos longos. Dá para cancelar, e dá para sair e voltar depois.',
+      },
+      'ingest.duplicate': {
+        title: 'Vídeo repetido',
+        text: 'Alguém já guardou este vídeo, então ele não é analisado de novo e nada sai da sua cota. Ele já aparece na busca.',
+      },
+      'ingest.draft': {
+        title: 'Análise sem salvar',
+        text: 'Uma análise que terminou e não foi salva fica guardada aqui. Continue a revisão para salvar, ou descarte para analisar outro vídeo.',
       },
       'ingest.error': {
         title: 'A análise falhou',

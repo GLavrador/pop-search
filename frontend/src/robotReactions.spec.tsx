@@ -4,7 +4,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockGetSession = vi.fn();
-const analyzeVideo = vi.fn();
+const startAnalysis = vi.fn();
 const searchVideos = vi.fn();
 
 vi.mock('./lib/supabase', () => ({
@@ -30,7 +30,9 @@ vi.mock('./services/api', () => ({
     tokens_this_month: 0,
   }),
   saveVideo: vi.fn(),
-  analyzeVideo: (...args: unknown[]) => analyzeVideo(...args),
+  startAnalysis: (...args: unknown[]) => startAnalysis(...args),
+  getAnalysis: vi.fn().mockResolvedValue(null),
+  discardAnalysis: vi.fn().mockResolvedValue(undefined),
   searchVideos: (...args: unknown[]) => searchVideos(...args),
   getAllUsage: vi.fn(),
 }));
@@ -71,14 +73,23 @@ const LONE = (word: string) => [
 ];
 
 const analysed = (title: string) => ({
-  titulo_sugerido: title,
-  descricao_completa:
-    'A whale jumps out of the sea and lands with a huge splash right beside a small boat full of people.',
-  url_original: 'https://x.com/a/status/1',
-  metadados_estruturados: {
-    pessoas: [],
-    elementos_cenario: [],
-    audio: { transcricao: '', musica: null, artista: null },
+  id: 'job-1',
+  url: 'https://x.com/a/status/1',
+  stage: 'done',
+  analyze_scenes: true,
+  analyze_audio: true,
+  error: null,
+  created_at: '2026-10-11T12:00:00+00:00',
+  result: {
+    titulo_sugerido: title,
+    descricao_completa:
+      'A whale jumps out of the sea and lands with a huge splash right beside a small boat full of people.',
+    url_original: 'https://x.com/a/status/1',
+    metadados_estruturados: {
+      pessoas: [],
+      elementos_cenario: [],
+      audio: { transcricao: '', musica: null, artista: null },
+    },
   },
 });
 const BROAD = ['net wide open!', 'bring them all!', 'the more the merrier'];
@@ -278,7 +289,7 @@ describe('the robot reacting to the app', () => {
     'should read the title the AI wrote and say it is %s',
     async (_, title, lines) => {
       signIn();
-      analyzeVideo.mockResolvedValue(analysed(title));
+      startAnalysis.mockResolvedValue(analysed(title));
       renderApp();
 
       await runAnalysis();
@@ -443,17 +454,21 @@ describe('the robot reacting to the app', () => {
 
   it('should keep watch while the AI works', async () => {
     signIn();
-    analyzeVideo.mockReturnValue(new Promise(() => {}));
+    startAnalysis.mockReturnValue(new Promise(() => {}));
     renderApp();
 
     await runAnalysis();
 
-    expect((await balloon()).getByText(/keep an eye on it/)).toBeInTheDocument();
+    expect(
+      (await balloon()).getByText(
+        /normally takes a minute|It is quick|keep an eye on it all/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it('should speak up when the AI fails, and open the manual form on request', async () => {
     signIn();
-    analyzeVideo.mockRejectedValue({ response: { status: 500 } });
+    startAnalysis.mockRejectedValue({ response: { status: 500 } });
     renderApp();
 
     await runAnalysis();

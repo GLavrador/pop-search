@@ -5,19 +5,22 @@ MAX_TITULO_CHARS = 200
 MAX_DESCRICAO_CHARS = 5000
 MAX_PESSOAS = 20
 MAX_PESSOA_DESCRICAO_CHARS = 500
+MIN_PESSOA_DESCRICAO_CHARS = 3
+MAX_PAPEL_CHARS = 100
 MAX_ELEMENTOS_CENARIO = 50
 MAX_TRANSCRICAO_CHARS = 5000
+MAX_MUSICA_CHARS = 200
 
 
 class Pessoa(BaseModel):
-    descricao: str = Field(..., min_length=3, max_length=MAX_PESSOA_DESCRICAO_CHARS, description="Physical description")
-    papel: Optional[str] = Field(None, max_length=100, description="Role in video if identifiable")
+    descricao: str = Field(..., min_length=MIN_PESSOA_DESCRICAO_CHARS, max_length=MAX_PESSOA_DESCRICAO_CHARS, description="Physical description")
+    papel: Optional[str] = Field(None, max_length=MAX_PAPEL_CHARS, description="Role in video if identifiable")
 
 
 class AudioInfo(BaseModel):
     transcricao: str = Field("", max_length=MAX_TRANSCRICAO_CHARS, description="Transcribed speech or lyrics")
-    musica: Optional[str] = Field(None, max_length=200, description="Song name if identified")
-    artista: Optional[str] = Field(None, max_length=200, description="Artist name if identified")
+    musica: Optional[str] = Field(None, max_length=MAX_MUSICA_CHARS, description="Song name if identified")
+    artista: Optional[str] = Field(None, max_length=MAX_MUSICA_CHARS, description="Artist name if identified")
 
 
 class MetadadosEstruturados(BaseModel):
@@ -120,6 +123,32 @@ class MyVideo(BaseModel):
     id: str
     titulo_video: Optional[str] = None
     descricao_completa: Optional[str] = None
+    url_original: str
+    created_at: str
+
+
+AnalysisStage = Literal["queued", "downloading", "uploading", "watching", "writing", "done", "failed"]
+
+
+class AnalysisError(BaseModel):
+    status: int
+    detail: str
+
+
+class AnalysisJob(BaseModel):
+    id: str
+    url: str
+    stage: AnalysisStage
+    analyze_scenes: bool
+    analyze_audio: bool
+    result: Optional[VideoMetadataDTO] = None
+    error: Optional[AnalysisError] = None
+    created_at: str
+
+
+class ExistingVideo(BaseModel):
+    id: str
+    titulo_video: Optional[str] = None
     url_original: str
     created_at: str
 

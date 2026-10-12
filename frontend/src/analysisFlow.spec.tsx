@@ -1,0 +1,400 @@
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { AnalysisJob, AnalysisStage } from './types';
+
+const mockGetSession = vi.fn();
+const startAnalysis = vi.fn();
+const discardAnalysis = vi.fn();
+const saveVideo = vi.fn();
+
+// What the server would answer when asked for the user's analysis.
+let onServer: AnalysisJob | null = null;
+let serverDown = false;
+
+vi.mock('./lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: () => mockGetSession(),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: vi.fn() } } }),
+      signOut: vi.fn(),
+    },
+  },
+}));
+
+vi.mock('./constants/analysis', () => ({
+  ANALYSIS_POLL_MS: 20,
+  ANALYSIS_LOST_AFTER_MS: 150,
+  ANALYSIS_STEPS: ['downloading', 'uploading', 'watching', 'writing'],
+}));
+
+vi.mock('./services/api', () => ({
+  warmUpBackend: vi.fn(),
+  getIsAdmin: vi.fn().mockResolvedValue(false),
+  getMyVideos: vi.fn().mockResolvedValue([]),
+  getAdminStats: vi.fn(),
+  getMyQuota: vi.fn().mockResolvedValue({
+    used: 0,
+    limit: 20,
+    remaining: 20,
+    resets_at: '2026-09-01',
+    tokens_this_month: 0,
+  }),
+  saveVideo: (...args: unknown[]) => saveVideo(...args),
+  startAnalysis: (...args: unknown[]) => startAnalysis(...args),
+  getAnalysis: () => (serverDown ? Promise.reject(new Error('down')) : Promise.resolve(onServer)),
+  discardAnalysis: (...args: unknown[]) => discardAnalysis(...args),
+  searchVideos: vi.fn().mockResolvedValue([]),
+  getAllUsage: vi.fn(),
+}));
+
+import App from './App';
+
+const LINK = 'https://x.com/a/status/1';
+const TITLE = 'A whale jumps right beside the boat';
+
+const RESULT = {
+  titulo_sugerido: TITLE,
+  descricao_completa:
+    'A whale jumps out of the sea and lands with a huge splash right beside a small boat full of people.',
+  url_original: LINK,
+  metadados_estruturados: {
+    pessoas: [],
+    elementos_cenario: [],
+    audio: { transcricao: '', musica: null, artista: null },
+  },
+};
+
+const job = (stage: AnalysisStage, changes: Partial<AnalysisJob> = {}): AnalysisJob => ({
+  id: 'job-1',
+  url: LINK,
+  stage,
+  analyze_scenes: true,
+  analyze_audio: true,
+  result: stage === 'done' ? RESULT : null,
+  error: null,
+  created_at: '2026-10-11T12:00:00+00:00',
+  ...changes,
+});
+
+const renderApp = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>,
+  );
+};
+
+const user = userEvent.setup();
+
+const press = (name: string | RegExp) => user.click(screen.getByRole('button', { name }));
+
+const runAnalysis = async () => {
+  await user.type(await screen.findByPlaceholderText('https://...'), LINK);
+  await press('Next');
+  await press('Run Analysis');
+};
+
+const currentStep = () => screen.findByText((_, node) => node?.getAttribute('aria-current') === 'step');
+
+const stepNamed = (name: string) => screen.getByText(name).closest('li') as HTMLElement;
+
+// The quota meter is a progress bar too, so this one is asked for by name.
+const progress = () => screen.queryByRole('progressbar', { name: 'Analysis progress' });
+
+// The status bar repeats the headline, so the notice is found by what it is.
+const copyNotice = async () =>
+  within(
+    await waitFor(() => {
+      const notice = document.querySelector<HTMLElement>('[data-help="ingest.duplicate"]');
+      if (!notice) throw new Error('no notice yet');
+      return notice;
+    }),
+  );
+
+describe('following an analysis', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    onServer = null;
+    serverDown = false;
+    mockGetSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'token-abc',
+          user: { id: 'user-1', email: 'ana@example.com', user_metadata: {} },
+        },
+      },
+    });
+    startAnalysis.mockImplementation(() => {
+      onServer = job('queued');
+      return Promise.resolve(onServer);
+    });
+    discardAnalysis.mockImplementation(() => {
+      onServer = null;
+      return Promise.resolve();
+    });
+    saveVideo.mockResolvedValue(undefined);
+  });
+
+  it('should show the step the analysis is at, and the ones behind it', async () => {
+    renderApp();
+    await runAnalysis();
+
+    onServer = job('watching');
+
+    await waitFor(async () =>
+      expect(await currentStep()).toHaveTextContent('The AI is watching the video'),
+    );
+    expect(stepNamed('Downloading the video from X')).toHaveAttribute('data-state', 'done');
+    expect(stepNamed('Sending the video to the AI')).toHaveAttribute('data-state', 'done');
+    expect(stepNamed('The AI is writing the description')).toHaveAttribute('data-state', 'ahead');
+  });
+
+  it('should ask for the analysis with the options that were ticked', async () => {
+    renderApp();
+    await user.type(await screen.findByPlaceholderText('https://...'), LINK);
+    await press('Next');
+    await user.click(screen.getByLabelText('Audio transcription'));
+    await press('Run Analysis');
+
+    expect(startAnalysis).toHaveBeenCalledWith(LINK, { analyzeScenes: true, analyzeAudio: false });
+  });
+
+  it('should open the review by itself when the analysis it was following ends', async () => {
+    renderApp();
+    await runAnalysis();
+
+    onServer = job('done');
+
+    expect(await screen.findByDisplayValue(TITLE)).toBeInTheDocument();
+    expect(progress()).not.toBeInTheDocument();
+  });
+
+  it('should go back to following an analysis that was running when the page loaded', async () => {
+    onServer = job('uploading');
+
+    renderApp();
+
+    expect(await currentStep()).toHaveTextContent('Sending the video to the AI');
+    expect(screen.getByPlaceholderText('https://...')).toHaveValue(LINK);
+    expect(screen.getByPlaceholderText('https://...')).toBeDisabled();
+  });
+
+  it('should offer an analysis that was left unsaved instead of opening it unasked', async () => {
+    onServer = job('done');
+
+    renderApp();
+
+    expect(await screen.findByText('You left an analysis unsaved')).toBeInTheDocument();
+    expect(screen.getByText(TITLE)).toBeInTheDocument();
+    expect(screen.queryByDisplayValue(TITLE)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('https://...')).not.toBeInTheDocument();
+  });
+
+  it('should open the review of an unsaved analysis on request', async () => {
+    onServer = job('done', { analyze_audio: false });
+    renderApp();
+
+    await user.click(await screen.findByRole('button', { name: 'Continue the review' }));
+
+    expect(await screen.findByDisplayValue(TITLE)).toBeInTheDocument();
+    expect(screen.queryByText('Audio Analysis')).not.toBeInTheDocument();
+  });
+
+  it('should throw an unsaved analysis away on request', async () => {
+    onServer = job('done');
+    renderApp();
+
+    await user.click(await screen.findByRole('button', { name: 'Discard' }));
+
+    expect(discardAnalysis).toHaveBeenCalledOnce();
+    expect(await screen.findByPlaceholderText('https://...')).toBeInTheDocument();
+    expect(screen.queryByText('You left an analysis unsaved')).not.toBeInTheDocument();
+  });
+
+  it('should stop a running analysis when it is cancelled', async () => {
+    renderApp();
+    await runAnalysis();
+    await currentStep().catch(() => null);
+
+    await press('Cancel');
+
+    expect(discardAnalysis).toHaveBeenCalledOnce();
+    await waitFor(() => expect(progress()).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Run Analysis' })).toBeEnabled();
+  });
+
+  it('should say why an analysis failed, and tell the server it was read', async () => {
+    renderApp();
+    await runAnalysis();
+
+    onServer = job('failed', {
+      error: { status: 504, detail: 'The AI service took too long to respond.' },
+    });
+
+    expect(await screen.findByText('The AI service took too long to respond.')).toBeInTheDocument();
+    expect(discardAnalysis).toHaveBeenCalled();
+    expect(progress()).not.toBeInTheDocument();
+  });
+
+  it('should stop waiting, and say so, when news of the analysis stops coming', async () => {
+    renderApp();
+    await runAnalysis();
+    await currentStep().catch(() => null);
+
+    serverDown = true;
+
+    expect(await screen.findByText(/I lost contact with the server/)).toBeInTheDocument();
+    expect(progress()).not.toBeInTheDocument();
+  });
+
+  it('should go back to following the analysis when the news comes back', async () => {
+    renderApp();
+    await runAnalysis();
+    serverDown = true;
+    await screen.findByText(/I lost contact with the server/);
+
+    onServer = job('writing');
+    serverDown = false;
+
+    await waitFor(async () =>
+      expect(await currentStep()).toHaveTextContent('The AI is writing the description'),
+    );
+    expect(screen.queryByText(/I lost contact with the server/)).not.toBeInTheDocument();
+  });
+
+  it('should have the robot say each step once as it begins', async () => {
+    renderApp();
+    await runAnalysis();
+    const balloon = () => within(screen.getByRole('status'));
+
+    expect(
+      balloon().getByText(
+        /normally takes a minute|It is quick|keep an eye on it all/,
+      ),
+    ).toBeInTheDocument();
+
+    onServer = job('watching');
+
+    await waitFor(() =>
+      expect(
+        balloon().getByText(/sees the whole video|Movie time|scene by scene/),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it('should show the video already kept when the link is a copy', async () => {
+    startAnalysis.mockRejectedValue({
+      response: {
+        status: 409,
+        data: {
+          detail: 'This video is already in the archive. Nothing was taken from your quota.',
+          existing: {
+            id: 'video-1',
+            titulo_video: 'Whale beside the boat',
+            url_original: ' https://twitter.com/b/status/1/video/1 ',
+            created_at: '2026-08-01T12:00:00+00:00',
+          },
+        },
+      },
+    });
+    renderApp();
+
+    await runAnalysis();
+
+    const notice = await copyNotice();
+    expect(notice.getByText('This video is already in the archive.')).toBeInTheDocument();
+    expect(notice.getByText('Nothing was taken from your quota.')).toBeInTheDocument();
+    expect(notice.getByText('Whale beside the boat')).toBeInTheDocument();
+    expect(notice.getByRole('link', { name: 'Open the post' })).toHaveAttribute(
+      'href',
+      'https://twitter.com/b/status/1/video/1',
+    );
+  });
+
+  it('should put the notice of a copy away with its own button', async () => {
+    startAnalysis.mockRejectedValue({
+      response: {
+        status: 409,
+        data: {
+          detail: 'This video is already in the archive.',
+          existing: { id: 'video-1', url_original: LINK, created_at: '2026-08-01T12:00:00+00:00' },
+        },
+      },
+    });
+    renderApp();
+    await runAnalysis();
+    await copyNotice();
+
+    await press('Dismiss the notice');
+
+    expect(document.querySelector('[data-help="ingest.duplicate"]')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run Analysis' })).toBeEnabled();
+  });
+
+  it('should not treat a copy as a failure', async () => {
+    startAnalysis.mockRejectedValue({
+      response: {
+        status: 409,
+        data: {
+          detail: 'This video is already in the archive.',
+          existing: { id: 'video-1', url_original: LINK, created_at: '2026-08-01T12:00:00+00:00' },
+        },
+      },
+    });
+    renderApp();
+
+    await runAnalysis();
+    await copyNotice();
+
+    expect(screen.queryByRole('button', { name: 'Fill it in myself' })).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/^(I already have that one!|that one is kept already|seen it, kept it!)$/),
+    ).toBeInTheDocument();
+  });
+
+  it('should show a refusal that is not a copy as an error', async () => {
+    startAnalysis.mockRejectedValue({
+      response: { status: 429, data: { detail: 'You have used all 20 analyses for this month.' } },
+    });
+    renderApp();
+
+    await runAnalysis();
+
+    expect(
+      await screen.findByText('You have used all 20 analyses for this month.'),
+    ).toBeInTheDocument();
+  });
+
+  it('should let go of the analysis once its video is saved', async () => {
+    renderApp();
+    await runAnalysis();
+    onServer = job('done');
+    await screen.findByDisplayValue(TITLE);
+
+    saveVideo.mockImplementation(() => {
+      onServer = null;
+      return Promise.resolve();
+    });
+    await press('Save');
+
+    expect(await screen.findByPlaceholderText('https://...')).toHaveValue('');
+    expect(saveVideo).toHaveBeenCalledWith(expect.objectContaining({ titulo_sugerido: TITLE }));
+    expect(discardAnalysis).not.toHaveBeenCalled();
+  });
+
+  it('should discard the analysis when its review is cancelled', async () => {
+    renderApp();
+    await runAnalysis();
+    onServer = job('done');
+    await screen.findByDisplayValue(TITLE);
+
+    await press('Cancel');
+
+    expect(discardAnalysis).toHaveBeenCalledOnce();
+    expect(await screen.findByPlaceholderText('https://...')).toBeInTheDocument();
+  });
+});

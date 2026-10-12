@@ -8,7 +8,7 @@ from core.exceptions import ServiceQuotaExhaustedError
 from main import app
 from services import usage
 from services.usage import ProjectUsage
-from tests.conftest import TEST_USER_ID
+from tests.conftest import TEST_USER_ID, analyze
 
 client = TestClient(app)
 
@@ -72,7 +72,7 @@ class TestServiceExhaustion:
         mock_download.return_value = "does-not-exist.mp4"
         mock_analyze.side_effect = ServiceQuotaExhaustedError("429 quota exceeded")
 
-        response = client.post("/videos/analyze", json=ANALYZE_BODY)
+        response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 503
         assert "out of capacity" in response.json()["detail"]
@@ -87,7 +87,7 @@ class TestServiceExhaustion:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            client.post("/videos/analyze", json=ANALYZE_BODY)
+            analyze(client, ANALYZE_BODY)
 
         recorder.assert_not_awaited()
 
@@ -100,7 +100,7 @@ class TestServiceExhaustion:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            client.post("/videos/analyze", json=ANALYZE_BODY)
+            analyze(client, ANALYZE_BODY)
 
         recorder.assert_awaited_once()
 

@@ -8,7 +8,7 @@ from core.exceptions import ContentBlockedError
 from main import app
 from services import usage
 from services.usage import Quota
-from tests.conftest import TEST_USER_ID
+from tests.conftest import TEST_USER_ID, analyze
 
 client = TestClient(app)
 
@@ -80,7 +80,7 @@ class TestUsageRecording:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            response = client.post("/videos/analyze", json=ANALYZE_BODY)
+            response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 200
         recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", True, None, 0, 0, 0)
@@ -94,7 +94,7 @@ class TestUsageRecording:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            response = client.post("/videos/analyze", json=ANALYZE_BODY)
+            response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 422
         recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "blocked:SAFETY", 0, 0, 0)
@@ -109,7 +109,7 @@ class TestUsageRecording:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            response = client.post("/videos/analyze", json=ANALYZE_BODY)
+            response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 504
         recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "timeout", 0, 0, 0)
@@ -119,7 +119,7 @@ class TestUsageRecording:
     def test_stores_the_tokens_the_analysis_reported(self, mock_download, mock_analyze):
         mock_download.return_value = "does-not-exist.mp4"
 
-        async def fill_usage(_path, _scenes, _audio, usage):
+        async def fill_usage(_path, _scenes, _audio, usage, **_):
             usage.prompt, usage.output, usage.total = 8451, 609, 10890
             return {
                 "titulo_sugerido": "Um titulo valido",
@@ -131,7 +131,7 @@ class TestUsageRecording:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            client.post("/videos/analyze", json=ANALYZE_BODY)
+            analyze(client, ANALYZE_BODY)
 
         recorder.assert_awaited_once_with(
             TEST_USER_ID, "analysis", True, None, 8451, 609, 10890
@@ -144,7 +144,7 @@ class TestUsageRecording:
         burned its input tokens, and a return value never arrives."""
         mock_download.return_value = "does-not-exist.mp4"
 
-        async def burn_then_fail(_path, _scenes, _audio, usage):
+        async def burn_then_fail(_path, _scenes, _audio, usage, **_):
             usage.prompt, usage.output, usage.total = 8000, 0, 8523
             raise ContentBlockedError("SAFETY")
 
@@ -152,7 +152,7 @@ class TestUsageRecording:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            client.post("/videos/analyze", json=ANALYZE_BODY)
+            analyze(client, ANALYZE_BODY)
 
         recorder.assert_awaited_once_with(
             TEST_USER_ID, "analysis", False, "blocked:SAFETY", 8000, 0, 8523
@@ -166,7 +166,7 @@ class TestUsageRecording:
         recorder = AsyncMock()
 
         with patch("routers.videos.record_event", new=recorder):
-            response = client.post("/videos/analyze", json=ANALYZE_BODY)
+            response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 500
         recorder.assert_not_awaited()
