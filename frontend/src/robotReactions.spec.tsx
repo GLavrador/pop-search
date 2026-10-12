@@ -461,7 +461,7 @@ describe('the robot reacting to the app', () => {
 
     expect(
       (await balloon()).getByText(
-        /usually takes about a minute|That is the quick part|keep an eye on it all/,
+        /normally takes a minute|It is quick|keep an eye on it all/,
       ),
     ).toBeInTheDocument();
   });

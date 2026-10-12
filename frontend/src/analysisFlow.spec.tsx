@@ -273,7 +273,7 @@ describe('following an analysis', () => {
 
     expect(
       balloon().getByText(
-        /usually takes about a minute|That is the quick part|keep an eye on it all/,
+        /normally takes a minute|It is quick|keep an eye on it all/,
       ),
     ).toBeInTheDocument();
 

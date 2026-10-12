@@ -674,13 +674,13 @@ export const en = {
     lines: {
       steps: {
         downloading: [
-          'I am fetching the video from X. The whole analysis usually takes about a minute.',
-          'First I download the video from X. That is the quick part.',
+          'I am fetching the video from X. The whole analysis normally takes a minute.',
+          'First I download the video from X. It is quick.',
           'Pulling the video over from X. I will keep an eye on it all.',
         ],
         uploading: [
-          'Got the video! Now I take it to the AI.',
-          'Downloaded. I am handing the video to the AI.',
+          'Video in hand, now I send it to the other robot.',
+          'Downloaded. I am sending the video to the AI.',
           'The video is on its way to the AI now.',
         ],
         watching: [
