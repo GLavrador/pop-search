@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAnalysisJob } from '../../hooks/useAnalysisJob';
 import { useStatus } from '../../context/StatusContext';
 import { lookUpPost, saveVideo } from '../../services/api';
@@ -34,6 +35,7 @@ export const IngestSection = () => {
   const [manualMode, setManualMode] = useState(false);
   const [manualData, setManualData] = useState<VideoMetadata | null>(null);
   const analysis = useAnalysisJob();
+  const queryClient = useQueryClient();
   const { isLoading, stage, data, draft, duplicate, error } = analysis;
   const { setStatus } = useStatus();
   const { t } = useI18n();
@@ -166,6 +168,8 @@ export const IngestSection = () => {
       try {
         setStatus(t.ingest.status.saving);
         await saveVideo(finalData);
+        // The library stays mounted behind its tab, so it would never ask again.
+        queryClient.invalidateQueries({ queryKey: ['myVideos'] });
         setStatus(t.ingest.status.saved, 5000);
         robot.notify({ kind: 'saved' });
         // Nothing to discard: saving already cleared the analysis on the server.

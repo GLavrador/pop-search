@@ -52,6 +52,7 @@ vi.mock('./services/api', () => ({
 }));
 
 import App from './App';
+import { getMyVideos } from './services/api';
 
 const LINK = 'https://x.com/a/status/1';
 const TITLE = 'A whale jumps right beside the boat';
@@ -387,6 +388,23 @@ describe('following an analysis', () => {
     expect(await screen.findByPlaceholderText('https://...')).toHaveValue('');
     expect(saveVideo).toHaveBeenCalledWith(expect.objectContaining({ titulo_sugerido: TITLE }));
     expect(discardAnalysis).not.toHaveBeenCalled();
+  });
+
+  /** The library stays mounted behind its tab, so nothing else makes it ask again. */
+  it('should ask for the library again once a video is saved', async () => {
+    renderApp();
+    await runAnalysis();
+    onServer = job('done');
+    await screen.findByDisplayValue(TITLE);
+    const asked = vi.mocked(getMyVideos).mock.calls.length;
+
+    saveVideo.mockImplementation(() => {
+      onServer = null;
+      return Promise.resolve();
+    });
+    await press('Save');
+
+    await waitFor(() => expect(vi.mocked(getMyVideos).mock.calls.length).toBe(asked + 1));
   });
 
   it('should discard the analysis when its review is cancelled', async () => {
