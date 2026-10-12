@@ -22,3 +22,8 @@ window.matchMedia ??= ((media: string) => ({
 Element.prototype.animate ??= (() => ({
   cancel() {},
 })) as unknown as typeof Element.prototype.animate;
+
+// A tab that has already started up. The boot screen is for the tests that ask for it.
+beforeEach(() => {
+  sessionStorage.setItem('pop-search:booted', '1');
+});

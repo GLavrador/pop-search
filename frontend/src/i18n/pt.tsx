@@ -49,6 +49,27 @@ export const pt: Dictionary = {
     catAlt: 'Um gato',
   },
 
+  boot: {
+    title: 'Pop Search BIOS 1.0',
+    maker: 'Copyright (C) 1998, Pop Search Corp.',
+    program: 'Programa',
+    language: 'Idioma',
+    languageName: 'Português',
+    session: 'Sessão',
+    server: 'Servidor',
+    ok: 'OK',
+    checking: 'verificando...',
+    visitor: 'visitante',
+    calling: 'chamando...',
+    waking: (seconds: number) => `acordando, ${seconds} s`,
+    awake: (time: string) => `OK, em ${time}`,
+    down: 'sem resposta',
+    asleep: 'O servidor dorme quando ninguém usa. Acordar leva até um minuto.',
+    goingIn: 'Entrando sem ele. O robô avisa quando o servidor acordar.',
+    starting: 'Iniciando o Pop Search...',
+    skip: 'Pressione qualquer tecla, ou toque na tela, para entrar agora.',
+  },
+
   gate: {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',

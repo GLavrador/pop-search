@@ -55,6 +55,27 @@ export const en = {
     catAlt: 'A cat',
   },
 
+  boot: {
+    title: 'Pop Search BIOS 1.0',
+    maker: 'Copyright (C) 1998, Pop Search Corp.',
+    program: 'Program',
+    language: 'Language',
+    languageName: 'English',
+    session: 'Session',
+    server: 'Server',
+    ok: 'OK',
+    checking: 'checking...',
+    visitor: 'visitor',
+    calling: 'calling...',
+    waking: (seconds: number) => `waking up, ${seconds} s`,
+    awake: (time: string) => `OK, in ${time}`,
+    down: 'no answer',
+    asleep: 'The server sleeps when nobody is using it. Waking up takes up to a minute.',
+    goingIn: 'Going in without it. The robot will tell you when the server is up.',
+    starting: 'Starting Pop Search...',
+    skip: 'Press any key, or tap the screen, to go in now.',
+  },
+
   gate: {
     title: 'An account is required to add videos.',
     body: 'Indexing a video runs it through the AI, so it is limited to signed-in users. Searching the archive stays open to everyone.',

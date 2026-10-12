@@ -1,0 +1,108 @@
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(16px, 4vw, 40px);
+  overflow: auto;
+  background: #000;
+  font-family: 'Lucida Console', 'Courier New', monospace;
+  font-size: clamp(0.8rem, 2.7vw, 1rem);
+  line-height: 1.6;
+  color: var(--win-gray);
+  cursor: default;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: normal;
+  color: var(--win-light);
+}
+
+.maker {
+  margin: 0;
+}
+
+.logo {
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+/* Black outlines would vanish into the screen. */
+.logo svg {
+  stroke: var(--win-shadow-dark);
+}
+
+.checks {
+  max-width: 36em;
+  margin: 1.6em 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.check {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+}
+
+.dots {
+  flex: 1;
+  min-width: 1.5em;
+  border-bottom: 2px dotted var(--win-shadow-dark);
+  translate: 0 -0.3em;
+}
+
+.value {
+  color: var(--win-light);
+}
+
+.value[data-state='wait'] {
+  color: #ffff55;
+}
+
+.value[data-state='bad'] {
+  color: #ff5555;
+}
+
+.note {
+  max-width: 46em;
+  margin: 1.4em 0 0;
+}
+
+.skip {
+  margin-top: auto;
+  padding: 1.6em 0 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cursor {
+  margin-left: 0.3em;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}

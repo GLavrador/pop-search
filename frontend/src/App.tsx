@@ -12,7 +12,7 @@ import { MyVideos } from './components/MyVideos';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { useIdentityReset } from './hooks/useIdentityReset';
-import { useServerWake, type ServerState } from './hooks/useServerWake';
+import { useServerWake, type ServerState, type ServerStatus } from './hooks/useServerWake';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
@@ -38,7 +38,8 @@ import { useGuide } from './hooks/useGuide';
 import { useRobotDirector } from './hooks/useRobotDirector';
 import { RobotContext, helpAt, type HelpKey } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
-import { SERVER_NOTICE_MS } from './constants/startup';
+import { Boot } from './components/Boot';
+import { BOOTED_KEY, SERVER_NOTICE_MS } from './constants/startup';
 
 const WINDOW_ICON = '💻';
 const APP_NAME = 'Pop Search';
@@ -55,7 +56,7 @@ const readInvite = (): Invite => {
   return saved === 'tucked' ? 'tucked' : saved ? 'seen' : 'fresh';
 };
 
-function AppContent() {
+function AppContent({ server }: { server: ServerStatus }) {
   const [activeTab, setActiveTab] = useState<Tab>('ingest');
   const [windowState, setWindowState] = useState<WindowState>('open');
   const [isMaximized, setIsMaximized] = useState(false);
@@ -75,7 +76,6 @@ function AppContent() {
   const robotSeat = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   useIdentityReset();
-  const server = useServerWake();
   const { t, language } = useI18n();
   const spokenIn = useRef(language);
   const toldServer = useRef<ServerState | null>(null);
@@ -370,12 +370,25 @@ function AppContent() {
   return <RobotContext.Provider value={robot.voice}>{desktop}</RobotContext.Provider>;
 }
 
+function Startup() {
+  const server = useServerWake();
+  const [booting, setBooting] = useState(() => sessionStorage.getItem(BOOTED_KEY) === null);
+
+  const enter = useCallback(() => {
+    sessionStorage.setItem(BOOTED_KEY, '1');
+    delete document.documentElement.dataset.boot;
+    setBooting(false);
+  }, []);
+
+  return booting ? <Boot server={server} onDone={enter} /> : <AppContent server={server} />;
+}
+
 function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
         <StatusProvider>
-          <AppContent />
+          <Startup />
         </StatusProvider>
       </AuthProvider>
     </LanguageProvider>
