@@ -221,6 +221,7 @@ export const IngestSection = () => {
         stage={stage}
         error={error}
         duplicate={duplicate}
+        onDismissDuplicate={analysis.close}
         manualMode={manualMode}
         onManualModeChange={setManualMode}
       />

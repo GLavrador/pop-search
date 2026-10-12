@@ -4,6 +4,7 @@ import { helpAt, useRobot } from '../../context/robotContext';
 import type { AnalysisStage, ExistingVideo } from '../../types';
 import styles from './styles.module.css';
 import { StageProgress } from '../StageProgress';
+import { DuplicateNotice } from './DuplicateNotice';
 
 interface URLInputViewProps {
   url: string;
@@ -17,14 +18,10 @@ interface URLInputViewProps {
   error: string | null;
   /** The archived video the link turned out to be a copy of. */
   duplicate?: ExistingVideo | null;
+  onDismissDuplicate?: () => void;
   manualMode: boolean;
   onManualModeChange: (value: boolean) => void;
 }
-
-const formatDate = (value: string, locale: string): string => {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(locale);
-};
 
 export const URLInputView = ({
   url,
@@ -36,13 +33,14 @@ export const URLInputView = ({
   stage = null,
   error,
   duplicate = null,
+  onDismissDuplicate = () => {},
   manualMode,
   onManualModeChange
 }: URLInputViewProps) => {
   const [step, setStep] = useState<1 | 2>(1);
   const [analyzeScenes, setAnalyzeScenes] = useState(true);
   const [analyzeAudio, setAnalyzeAudio] = useState(true);
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const robot = useRobot();
 
   const handleNext = () => {
@@ -180,21 +178,7 @@ export const URLInputView = ({
         </div>
       )}
 
-      {duplicate && (
-        <div className={`win95-border ${styles.notice}`} aria-live="polite" {...helpAt('ingest.duplicate')}>
-          <strong>{t.ingest.duplicate.title}</strong>
-          <span>{t.ingest.duplicate.body}</span>
-          <span className={styles.noticeSubject}>
-            {duplicate.titulo_video || duplicate.url_original}
-          </span>
-          <span className={styles.noticeFoot}>
-            {t.ingest.duplicate.added(formatDate(duplicate.created_at, locale))}{' '}
-            <a href={duplicate.url_original.trim()} target="_blank" rel="noopener noreferrer">
-              {t.ingest.duplicate.open}
-            </a>
-          </span>
-        </div>
-      )}
+      {duplicate && <DuplicateNotice video={duplicate} onDismiss={onDismissDuplicate} />}
 
       {error && (
         <div className="win95-border win95-error" {...helpAt('ingest.error')}>

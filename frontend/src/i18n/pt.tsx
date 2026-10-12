@@ -237,8 +237,9 @@ export const pt: Dictionary = {
     duplicate: {
       title: 'Esse vídeo já está no acervo.',
       body: 'Nada foi descontado da sua cota.',
-      added: (date: string) => `Adicionado em ${date}.`,
+      added: (date: string) => `Adicionado em ${date}`,
       open: 'Abrir o post',
+      dismiss: 'Fechar o aviso',
     },
     draft: {
       title: 'Você deixou uma análise sem salvar',

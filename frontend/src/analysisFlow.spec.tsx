@@ -315,6 +315,26 @@ describe('following an analysis', () => {
     );
   });
 
+  it('should put the notice of a copy away with its own button', async () => {
+    startAnalysis.mockRejectedValue({
+      response: {
+        status: 409,
+        data: {
+          detail: 'This video is already in the archive.',
+          existing: { id: 'video-1', url_original: LINK, created_at: '2026-08-01T12:00:00+00:00' },
+        },
+      },
+    });
+    renderApp();
+    await runAnalysis();
+    await copyNotice();
+
+    await press('Dismiss the notice');
+
+    expect(document.querySelector('[data-help="ingest.duplicate"]')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run Analysis' })).toBeEnabled();
+  });
+
   it('should not treat a copy as a failure', async () => {
     startAnalysis.mockRejectedValue({
       response: {

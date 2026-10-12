@@ -231,8 +231,9 @@ export const en = {
     duplicate: {
       title: 'This video is already in the archive.',
       body: 'Nothing was taken from your quota.',
-      added: (date: string) => `Added on ${date}.`,
+      added: (date: string) => `Added on ${date}`,
       open: 'Open the post',
+      dismiss: 'Dismiss the notice',
     },
     draft: {
       title: 'You left an analysis unsaved',
