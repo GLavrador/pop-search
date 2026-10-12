@@ -63,6 +63,20 @@ describe('MyVideos', () => {
     expect(screen.getByText('1 indexed')).toBeInTheDocument();
   });
 
+  it('should show the picture of each video, and not what its post said', () => {
+    const post = { texto: 'olha essa capivara', miniatura: 'https://pbs.twimg.com/a.jpg' };
+    mockUseMyVideosQuery.mockReturnValue({
+      videos: [video({ post })],
+      isLoading: false,
+      error: null,
+    });
+
+    const { container } = render(<MyVideos />);
+
+    expect(container.querySelector('img')).toHaveAttribute('src', 'https://pbs.twimg.com/a.jpg');
+    expect(screen.queryByText(/olha essa capivara/)).not.toBeInTheDocument();
+  });
+
   it('should fall back to the url when a video has no title', () => {
     mockUseMyVideosQuery.mockReturnValue({
       videos: [video({ titulo_video: undefined })],

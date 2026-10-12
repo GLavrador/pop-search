@@ -2,6 +2,7 @@ import type { SearchResult } from "../../types";
 import { useStatus } from "../../context/StatusContext";
 import { useI18n } from "../../i18n/languageContext";
 import { helpAt, useRobot } from "../../context/robotContext";
+import { Thumbnail } from "../Post/Thumbnail";
 import styles from "./styles.module.css";
 
 interface VideoCardProps {
@@ -33,9 +34,7 @@ export const VideoCard = ({ data }: VideoCardProps) => {
 
   return (
     <div className={styles.card} {...helpAt('card')}>
-      <div className={styles.iconColumn}>
-        🎬
-      </div>
+      <Thumbnail src={data.post?.miniatura} />
 
       <div className={styles.contentColumn}>
         <div className={styles.header}>

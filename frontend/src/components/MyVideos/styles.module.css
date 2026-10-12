@@ -37,10 +37,6 @@
   border: 1px dotted var(--win-shadow-dark);
 }
 
-.icon {
-  flex-shrink: 0;
-}
-
 .body {
   flex: 1;
   min-width: 0;

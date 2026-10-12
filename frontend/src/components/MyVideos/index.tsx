@@ -1,6 +1,7 @@
 import { useMyVideosQuery } from '../../hooks/useMyVideosQuery';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
+import { Thumbnail } from '../Post/Thumbnail';
 import styles from './styles.module.css';
 
 const formatDate = (value: string, locale: string): string => {
@@ -44,7 +45,7 @@ export const MyVideos = () => {
       <div className={styles.list}>
         {videos.map((video) => (
           <div key={video.id} className={styles.row}>
-            <span className={styles.icon}>🎬</span>
+            <Thumbnail src={video.post?.miniatura} />
             <div className={styles.body}>
               <a
                 href={video.url_original}
