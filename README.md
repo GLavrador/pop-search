@@ -47,6 +47,10 @@ contribuir exige conta.
 - **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
   qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
   falha da IA, vídeo salvo) e pode ser arrastado pela tela
+- **Inicialização e tela azul**: a página abre numa tela de boot em que cada
+  linha é uma verificação de verdade (sessão, servidor), e que cobre o tempo de
+  o backend acordar. Um erro que derrubaria a tela vira uma tela azul, da qual
+  se volta com uma tecla
 
 ## Como a busca funciona
 
