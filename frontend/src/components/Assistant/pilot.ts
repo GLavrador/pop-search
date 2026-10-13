@@ -55,7 +55,16 @@ export type Target = HTMLElement | (() => HTMLElement | null) | null;
 export type Move = 'jolt' | 'spin' | 'hop' | 'nod' | 'shake';
 
 /** The places it can be dropped on. Each one gets its own answer. */
-export type Zone = 'bin' | 'computer' | 'app' | 'clock' | 'start' | 'task' | 'close' | 'roof';
+export type Zone =
+  | 'bin'
+  | 'computer'
+  | 'app'
+  | 'tricks'
+  | 'clock'
+  | 'start'
+  | 'task'
+  | 'close'
+  | 'roof';
 
 export interface Mission {
   /** Changes whenever the robot has something new to say. */

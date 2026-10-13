@@ -35,6 +35,7 @@ const SELECTORS: Record<IconZone | 'taskbar' | 'window', string> = {
   bin: '[data-robot="icon"][data-robot-zone="bin"]',
   computer: '[data-robot="icon"][data-robot-zone="computer"]',
   app: '[data-robot="icon"][data-robot-zone="app"]',
+  tricks: '[data-robot="icon"][data-robot-zone="tricks"]',
   taskbar: '[data-robot="taskbar"]',
   window: '[data-robot="window"]',
 };

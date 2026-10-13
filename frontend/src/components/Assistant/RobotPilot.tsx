@@ -49,8 +49,8 @@ interface RobotPilotProps {
   /** Set while something hanging over it is in use, so it stays put under it. */
   pinned?: boolean;
   handle?: RefObject<RobotHandle | null>;
-  /** Takes the click. Without it a click is just a poke. */
-  onPoke?: () => void;
+  /** Has first say on a click: true when it answered in words, so the poke itself keeps quiet. */
+  onPoke?: () => boolean;
   /** It was picked up: whatever it was saying is cut short. */
   onGrab?: () => void;
   /** It was dragged and let go, on something it knows or nowhere in particular. */
@@ -138,8 +138,7 @@ export const RobotPilot = ({
       justDropped.current = false;
       return;
     }
-    const spent = pilot.current?.poke(onPoke !== undefined) ?? false;
-    if (!spent) onPoke?.();
+    pilot.current?.poke(onPoke?.() ?? false);
   };
 
   const handleDown = (event: PointerEvent<HTMLButtonElement>) => {

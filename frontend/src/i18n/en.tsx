@@ -36,6 +36,7 @@ export const en = {
   desktop: {
     myComputer: 'My Computer',
     recycleBin: 'Recycle Bin',
+    tricks: 'Tricks',
   },
 
   system: {
@@ -232,6 +233,7 @@ export const en = {
       two: 'one computer...',
       polish: 'this one with care',
       three: 'and my house!',
+      tricks: 'and my tricks!',
       bar: 'now, the bar',
       heave: 'hnnngh!',
       slip: 'it slipped!',
@@ -823,8 +825,79 @@ export const en = {
     } satisfies Record<GuideStepId, GuideStepCopy>,
   },
 
+  tricks: {
+    title: "BIP-98's tricks",
+    lead: 'Not everything fits in the guide.',
+    intro:
+      'This is what there is to do with me, with the desktop and with the search. I only say what to try. What happens next is for you to find out.',
+    first: {
+      legend: 'Start with this one',
+      what: 'The ? button of the window.',
+      text: 'It is on the blue bar, beside the minimize button. Click it, then click anything on screen: I go over and explain what it is and what it is for. It works on buttons, fields, tabs, search results, even on me.',
+      action: 'Try it now',
+    },
+    groups: [
+      {
+        legend: 'With me',
+        items: [
+          {
+            what: 'Poke me.',
+            text: 'Once, twice in a row, or many times.',
+          },
+          {
+            what: 'Pick me up and drag me.',
+            text: 'Carry me anywhere, let go of me in mid-air, or throw me.',
+          },
+          { what: 'Shake me.', text: 'From side to side, without letting go.' },
+          {
+            what: 'Drop me on things.',
+            text: 'On the top edge of the window, on an icon, on the clock, on Start, on the X of the window, on the Pop Search button down on the taskbar. I have an opinion about each.',
+          },
+          { what: 'Try to put me in the Recycle Bin.', text: 'I would not.' },
+          {
+            what: 'Leave me alone.',
+            text: 'A few minutes without touching anything. And watch what I get up to when nobody is looking.',
+          },
+          {
+            what: 'Minimize the window.',
+            text: 'See where I wait. From there I can bring it back too.',
+          },
+        ],
+      },
+      {
+        legend: 'With the desktop',
+        items: [
+          {
+            what: 'Drag the icons.',
+            text: 'Any of them, anywhere, though they usually go back to their place. Do not put anything in the bin (please).',
+          },
+          { what: 'Try to close the window.', text: 'With the X. It is stubborn: insist.' },
+          { what: 'Open My Computer.', text: 'Double click the icon, or one tap on a phone.' },
+        ],
+      },
+      {
+        legend: 'While typing',
+        items: [
+          {
+            what: 'Write cat, dog, robot or trash in the search.',
+            text: 'No need to even search. Keep an eye on me as you type.',
+          },
+          {
+            what: 'SHOUT in the search, or hold a key down.',
+            text: 'Now and then I also come over to read along, which is bad manners.',
+          },
+          { what: 'Type a password.', text: 'When signing in. I promise I do not look.' },
+          {
+            what: 'Search for the forbidden command.',
+            text: 'It is C:\\con\\con, exactly like that. It used to bring Windows 98 down for real. It does here too.',
+          },
+        ],
+      },
+    ],
+  },
+
   robot: {
-    dismiss: 'Close',
+    dismiss:'Close',
     ask: (what: string) => `What is ${what}?`,
     says: {
       tabs: {
@@ -945,6 +1018,7 @@ export const en = {
         authSubmit: ['checking...', 'one moment...', 'knocking on the door...'],
         gateSignIn: ['come, it is quick', 'an account is free', 'this way!'],
         inviteClose: ['see you!', 'I will be around!', 'call me if you need me'],
+        tricks: ['my secrets!', 'telling everything, are we?', 'now you know too much'],
         adminRange: ['another period!', 'moving the window', 'recounting...'],
         why: ['let me explain!', 'x-ray!', 'behind the scenes!'],
         computer: ['that is me inside!', 'mind the mess', 'my insides!'],
@@ -1006,6 +1080,14 @@ export const en = {
         text: 'Deal: I will not show the invitation again in this browser. The guide stays up here, under Guide, and the Sign In tab can turn the invitation back on.',
         action: 'Undo',
       },
+      tricksOffer: {
+        text: 'Beep! Feel free to poke around, there are things to discover outside the Pop Search window too! I will not say what is hidden, that would spoil it. But if you want to cheat, (almost) everything is right here, in the Tricks icon.',
+        action: 'Peek at the tricks',
+      },
+      guideDone: {
+        text: 'That was the guide! Now make yourself at home. Well, it is my home, but I am lending it: feel free to poke at everything. There are things to do and to discover around here that I did not show, and the fun is in discovering them yourself. But if you want to cheat, (almost) everything is right here, in the Tricks icon.',
+        action: 'Peek at the tricks',
+      },
     },
     drop: {
       computer: [
@@ -1032,6 +1114,11 @@ export const en = {
         'Careful with that button: they say there is a cat on the other side.',
         'The X? I would not press it. There is a cat waiting back there.',
         'That one closes the window. And lets the cat out.',
+      ],
+      tricks: [
+        'My tricks! Open it and I tell all.',
+        'That icon is my list of what there is to get up to around here.',
+        'Tricks: everything the guide did not dare to show.',
       ],
     },
     whatsThis: {
@@ -1081,9 +1168,13 @@ export const en = {
         title: 'Pop Search System',
         text: 'The button of the window. Click to minimize the program, click again to bring it back.',
       } as HelpCopy,
+      tricks: {
+        title: "BIP-98's tricks",
+        text: 'My list of what there is to try around here. Each line says what to do, not what happens: that part is yours to find out.',
+      } as HelpCopy,
       'desktop.icon': {
         title: 'Desktop',
-        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window, and My Computer shows what all this is made of. Just do not drop Pop Search in the Recycle Bin.',
+        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window, My Computer shows what all this is made of, and Tricks holds my list of what there is to try around here. Just do not drop Pop Search in the Recycle Bin.',
       } as HelpCopy,
       system: {
         title: 'System Properties',
@@ -1091,7 +1182,7 @@ export const en = {
       } as HelpCopy,
       robot: {
         title: 'BIP-98',
-        text: 'That is me! I live here in Pop Search and explain whatever you want. You can also pick me up and drag me around the screen.',
+        text: 'That is me! I live here in Pop Search and explain whatever you want. You can also pick me up and drag me around the screen. Poke me and I tell you what else there is to do.',
       } as HelpCopy,
       'guide.invite': {
         title: 'The guide',

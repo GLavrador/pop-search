@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { Robot } from '../Assistant/Robot';
 import computerIcon from '../../assets/computer_explorer.png';
 import recycleBinIcon from '../../assets/recycle_bin_empty.png';
 import styles from './styles.module.css';
 
-export type IconZone = 'bin' | 'computer' | 'app';
+export type IconZone = 'bin' | 'computer' | 'app' | 'tricks';
 
 export interface IconSpec {
   zone: IconZone;
@@ -28,5 +29,6 @@ export const useDesktopIcons = (appIcon: string, appLabel: string): IconSpec[] =
       label: t.desktop.myComputer,
     },
     { zone: 'app', art: <span className={styles.emoji}>{appIcon}</span>, label: appLabel },
+    { zone: 'tricks', art: <Robot className={styles.mascot} />, label: t.desktop.tricks },
   ];
 };

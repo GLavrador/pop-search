@@ -9,6 +9,7 @@ interface DesktopProps {
   appLabel: string;
   onOpenApp?: () => void;
   onOpenComputer?: () => void;
+  onOpenTricks?: () => void;
   /** How much of each icon is there, while they are being built. All of it when left out. */
   built?: Partial<Record<IconZone, number>>;
   /** The program's icon is on its way down the bin. */
@@ -41,6 +42,7 @@ export const Desktop = ({
   appLabel,
   onOpenApp,
   onOpenComputer,
+  onOpenTricks,
   built,
   swallowed = false,
   pressed = null,
@@ -51,7 +53,11 @@ export const Desktop = ({
   const icons = useDesktopIcons(appIcon, appLabel);
   const robot = useRobot();
   const [threatened, setThreatened] = useState(false);
-  const opens: Partial<Record<IconZone, () => void>> = { app: onOpenApp, computer: onOpenComputer };
+  const opens: Partial<Record<IconZone, () => void>> = {
+    app: onOpenApp,
+    computer: onOpenComputer,
+    tricks: onOpenTricks,
+  };
 
   // Only the program can go in the bin, and the robot sees it coming.
   const carry = (zone: IconZone, at: Spot) => {

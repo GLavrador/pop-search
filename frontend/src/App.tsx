@@ -44,6 +44,7 @@ import { Rebuild } from './components/Rebuild';
 import { BlueTiles } from './components/Rebuild/BlueTiles';
 import { useRebuild } from './components/Rebuild/useRebuild';
 import { SystemProperties } from './components/SystemProperties';
+import { Tricks } from './components/Tricks';
 import { BOOTED_KEY, SERVER_NOTICE_MS } from './constants/startup';
 
 const WINDOW_ICON = '💻';
@@ -74,10 +75,14 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const pendingCat = useRef<string | null>(null);
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
   const [computerOpen, setComputerOpen] = useState(false);
+  const [tricksOpen, setTricksOpen] = useState(false);
   const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
-  const robot = useRobotDirector({ guiding: guide.isVisible });
+  const robot = useRobotDirector({
+    guiding: guide.isVisible,
+    onTricks: () => openTricks(),
+  });
   const { notify } = robot;
   const wasSignedIn = useRef<boolean | null>(null);
   const [inviteOff, setInviteOff] = useState(() => localStorage.getItem(INVITE_OFF_KEY) !== null);
@@ -103,6 +108,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
       pendingCat.current = null;
       setCat(null);
       setComputerOpen(false);
+      setTricksOpen(false);
       setWindowState('closed');
     },
     onOpenWindow: () => setWindowState('open'),
@@ -187,6 +193,17 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
     setComputerOpen(true);
   };
 
+  const openTricks = () => {
+    if (!tricksOpen) notify({ kind: 'pressed', what: 'tricks' });
+    setTricksOpen(true);
+  };
+
+  // The one trick the list can start by itself, with the list out of the way.
+  const tryHelp = () => {
+    setTricksOpen(false);
+    if (!robot.helping) robot.toggleHelp();
+  };
+
   const selectTab = (tab: Tab) => {
     if (tab !== activeTab) notify({ kind: 'tab', tab });
     setActiveTab(tab);
@@ -246,6 +263,13 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
 
   const startGuide = guide.start;
 
+  // Taken to the end, the guide has answered the invitation: what it offers next is the rest.
+  const finishGuide = () => {
+    guide.quit();
+    setInviteShut(true);
+    robot.guideDone();
+  };
+
   const offersGuide = !isAuthLoading && !isAuthenticated && guide.step === null;
   const calling = offersGuide && !inviteOff && !inviteShut;
 
@@ -269,6 +293,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         appLabel={APP_NAME}
         onOpenApp={handleOpen}
         onOpenComputer={openComputer}
+        onOpenTricks={openTricks}
         built={rebuild.view.built}
         swallowed={rebuild.view.phase === 'swallowing'}
         pressed={rebuild.view.pressed}
@@ -314,7 +339,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
               robotSeat={robotSeat}
               robotAway={spotNode !== null}
               onBack={guide.back}
-              onNext={guide.isLast ? guide.quit : guide.next}
+              onNext={guide.isLast ? finishGuide : guide.next}
               onJump={guide.goTo}
               onReturn={() => guide.goTo(guide.index)}
               onClose={guide.hide}
@@ -407,6 +432,10 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         />
       )}
 
+      {tricksOpen && !wrecked && (
+        <Tricks onClose={() => setTricksOpen(false)} onTryHelp={tryHelp} />
+      )}
+
       {/* While the desktop is being rebuilt the robot is in the show, not at home. */}
       {wrecked ? (
         <Rebuild cast={rebuild.cast} kind={rebuild.view.kind} onSkip={rebuild.skip} />
@@ -418,6 +447,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
           stage={stage}
           label={t.guide.poke}
           handle={robot.handle}
+          onPoke={() => !tricksOpen && windowState !== 'minimized' && robot.poked()}
           onGrab={robot.dismiss}
           onDrop={robot.dropped}
         >

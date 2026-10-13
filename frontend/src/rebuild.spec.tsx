@@ -70,7 +70,7 @@ const trashTheProgram = () => {
 
 // Asked of the page as cheaply as it can be: the show changes it hundreds of times.
 const theShowToEnd = () =>
-  waitFor(() => expect(document.querySelector('[data-rebuild]')).toBeNull(), { timeout: 12000 });
+  waitFor(() => expect(document.querySelector('[data-rebuild]')).toBeNull(), { timeout: 20000 });
 
 const expectDesktopWhole = () => {
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -100,14 +100,14 @@ describe('throwing the program in the bin', () => {
       'Pop Search was thrown in the Recycle Bin',
     );
     expect(screen.getAllByText('ERROR 0xB1N: PROGRAM_IS_NOT_RUBBISH').length).toBeGreaterThan(0);
-    expect(unbuilt()).toHaveLength(3);
+    expect(unbuilt()).toHaveLength(4);
     expect(clock()).not.toBeInTheDocument();
     expect(frame()).toHaveAttribute('aria-hidden', 'true');
     expect(theRobot()).not.toBeInTheDocument();
 
     // And it stays that way for a while: nobody has come to fix it yet.
     await new Promise((done) => setTimeout(done, 300));
-    expect(unbuilt()).toHaveLength(3);
+    expect(unbuilt()).toHaveLength(4);
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
@@ -130,7 +130,7 @@ describe('throwing the program in the bin', () => {
     await screen.findByRole('alert');
     await theShowToEnd();
     expectDesktopWhole();
-  }, 15000);
+  }, 25000);
 
   it('should put everything back at once when Escape is pressed, and at no other key', async () => {
     pace.value = 1;
