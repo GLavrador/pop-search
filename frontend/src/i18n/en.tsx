@@ -158,6 +158,8 @@ export const en = {
     back: 'Back',
     save: 'Save',
     saving: 'Saving...',
+    ok: 'OK',
+    closeOf: (what: string) => `Close ${what}`,
   },
 
   searchModes: {

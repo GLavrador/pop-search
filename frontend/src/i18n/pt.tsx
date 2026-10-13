@@ -152,6 +152,8 @@ export const pt: Dictionary = {
     back: 'Voltar',
     save: 'Salvar',
     saving: 'Salvando...',
+    ok: 'OK',
+    closeOf: (what) => `Fechar ${what}`,
   },
 
   searchModes: {

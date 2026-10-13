@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';
 import type { Slide } from '../Rebuild/stage';
+import { OwnerContext } from '../Dialog/owner';
 import styles from './styles.module.css';
 
 export type WindowState = 'open' | 'minimized' | 'closing' | 'closed';
@@ -132,7 +133,7 @@ export const RetroWindow = ({
         </div>
       </div>
       <div className={styles.content}>
-        {children}
+        <OwnerContext.Provider value={state === 'open'}>{children}</OwnerContext.Provider>
       </div>
     </div>
   );
