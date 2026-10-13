@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore, type CSSProperties } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { isAnyKey } from '../../utils/keys';
 import { Robot } from '../Assistant/Robot';
+import { emoteSpot } from './emoteSpot';
 import type { Cast, Kind } from './stage';
 import styles from './styles.module.css';
 
@@ -14,8 +15,6 @@ interface RebuildProps {
 const ROBOT_W = 46;
 const BALLOON_W = 280;
 const EDGE = 12;
-// Closer to the right edge than this, what it mutters goes on its other side.
-const EMOTE_ROOM = 190;
 // Higher than this there is no room over its head: what it says hangs under it.
 const HEADROOM = 150;
 
@@ -40,6 +39,7 @@ export const Rebuild = ({ cast, kind, onSkip }: RebuildProps) => {
   const wanted = (actor?.x ?? 0) + ROBOT_W / 2 - width / 2;
   const shift = Math.min(Math.max(wanted, EDGE), screen - EDGE - width) - wanted;
   const facing = actor?.flip ? -1 : 1;
+  const mutter = emoteSpot(actor?.x ?? 0, actor?.y ?? 0, screen);
 
   return (
     <div className={styles.scene} data-rebuild onClick={anything ? onSkip : undefined}>
@@ -88,7 +88,9 @@ export const Rebuild = ({ cast, kind, onSkip }: RebuildProps) => {
           <span
             className={styles.emote}
             data-on={actor.emote ? '' : undefined}
-            data-flip={actor.x > screen - EMOTE_ROOM ? '' : undefined}
+            data-side={mutter.side}
+            data-low={mutter.low ? '' : undefined}
+            style={{ '--room': `${mutter.room}px`, '--drop': `${mutter.drop}px` } as CSSProperties}
           >
             {actor.emote && t.rebuild.emotes[actor.emote]}
           </span>

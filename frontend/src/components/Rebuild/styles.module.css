@@ -164,10 +164,16 @@
   stroke-linecap: round;
 }
 
+/*
+ * Over the head and to the right. The other three places it can take are a
+ * shift away from this one, so it glides to them if the robot moves meanwhile.
+ */
 .emote {
   position: absolute;
-  top: -22px;
+  bottom: calc(100% - 3px);
   left: 38px;
+  width: max-content;
+  max-width: var(--room);
   padding: 2px 8px;
   background: var(--win-tooltip-bg);
   border: 1px solid var(--win-dark);
@@ -175,10 +181,9 @@
   font-weight: bold;
   line-height: 1.35;
   color: var(--win-dark);
-  white-space: nowrap;
   opacity: 0;
   transform: translateY(5px);
-  transition: opacity 150ms ease-out, transform 150ms ease-out;
+  transition: opacity 150ms ease-out, transform 150ms ease-out, translate 150ms ease-out;
 }
 
 .emote[data-on] {
@@ -186,9 +191,17 @@
   transform: none;
 }
 
-.emote[data-flip] {
-  right: 38px;
-  left: auto;
+.emote[data-side='left'] {
+  translate: calc(-100% - 30px) 0;
+  text-align: right;
+}
+
+.emote[data-low] {
+  translate: 10px calc(100% - 3px + var(--drop));
+}
+
+.emote[data-low][data-side='left'] {
+  translate: calc(-100% - 40px) calc(100% - 3px + var(--drop));
 }
 
 .emote:empty {
