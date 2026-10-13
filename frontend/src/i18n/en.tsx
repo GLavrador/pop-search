@@ -6,6 +6,12 @@ interface HelpCopy {
   text: ReactNode;
 }
 
+const ordinal = (n: number) => {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+};
+
 export const en = {
   language: {
     label: 'Language:',
@@ -30,6 +36,114 @@ export const en = {
   desktop: {
     myComputer: 'My Computer',
     recycleBin: 'Recycle Bin',
+  },
+
+  system: {
+    title: 'System Properties',
+    tabs: {
+      general: 'General',
+      devices: 'Device Manager',
+      performance: 'Performance',
+    },
+    asking: 'asking the server...',
+    silent: 'the server did not answer',
+    general: {
+      system: 'System:',
+      name: 'Pop Search 98',
+      version: (version: string) => `version ${version}`,
+      registered: 'Registered to:',
+      visitor: 'Visitor',
+      computer: 'Computer:',
+      memory: (numbers: number) => `${numbers} numbers of memory per video`,
+      videos: (count: number, shown: string) =>
+        count === 1 ? '1 video in the archive' : `${shown} videos in the archive`,
+    },
+    devices: {
+      root: 'Pop Search',
+      list: 'Devices',
+      status: 'Device status',
+      working: 'This device is working properly.',
+      ready: 'This device is installed and waiting for work. It is not tested from here.',
+      waking: 'This device is still waking up.',
+      failing: 'This device is not answering.',
+      asking: 'Asking the server how this device is doing...',
+      unsaid: 'The server did not say how this device is doing.',
+      undriven: 'No driver is installed for this device. It works anyway.',
+      refresh: 'Refresh',
+      remove: 'Remove',
+      screen: {
+        kind: 'Monitor',
+        name: (react: string) => `Your browser, running React ${react}`,
+        about: 'Draws everything you see. The whole desktop is a single page.',
+        size: (width: number, height: number) => `${width} × ${height} pixels right now.`,
+        refusal: 'You are looking through it. Removing it now would be rude.',
+      },
+      server: {
+        kind: 'Ports',
+        name: 'FastAPI server, on Render',
+        about: 'Takes what the page asks for and talks to everything else.',
+        woke: (time: string) =>
+          `Took ${time} to answer on this visit. It sleeps when nobody is using it.`,
+        up: (time: string) => `On for ${time}.`,
+        runtime: (python: string, framework: string) => `Python ${python}, ${framework}.`,
+        refusal: 'Without it nobody searches for anything. Request denied.',
+      },
+      database: {
+        kind: 'Disk drives',
+        name: 'Postgres with pgvector, on Supabase',
+        about:
+          'Keeps every video twice: as words, for the exact search, and as numbers, for the search by meaning.',
+        videos: (count: number, shown: string) =>
+          count === 1 ? '1 video kept.' : `${shown} videos kept.`,
+        answered: (time: string) => `Answered in ${time}.`,
+        refusal: 'Every video lives in there. Not a chance.',
+      },
+      analysis: {
+        kind: 'Processor',
+        name: (model: string) => `Gemini (${model})`,
+        about: 'Watches each video from start to finish and writes its title and description.',
+        idle: 'Only called when somebody keeps a video. Asking it how it is doing would spend the quota.',
+        refusal: 'And who would watch the videos? You?',
+      },
+      embedding: {
+        kind: 'Coprocessor',
+        name: (model: string) => `Gemini (${model})`,
+        about: (numbers: number) =>
+          `Turns a text into ${numbers} numbers. Texts about the same thing get numbers that are close, and that is how the search finds by meaning.`,
+        kept: (kept: number, room: number) =>
+          `${kept} of the last ${room} questions are in memory: asking them again costs nothing.`,
+        refusal: 'Without it the search would only find the exact word.',
+      },
+      downloader: {
+        kind: 'Modem',
+        name: (version: string) => version,
+        about:
+          'Fetches the video from X for the AI to watch, along with the text and the picture of the post.',
+        refusal: 'Without it no video ever gets here from X.',
+      },
+      robot: {
+        kind: 'Other devices',
+        name: 'BIP-98',
+        about: 'Unknown device. Nobody remembers installing it.',
+        refusal: 'The device refused to be removed. It also looks offended.',
+      },
+    },
+    performance: {
+      none: 'No search yet on this visit. Run one in Search.exe and come back: this tab shows how long each step of it took.',
+      last: (query: string, mode: string) => `Last search: "${query}" (${mode})`,
+      found: (count: number) => (count === 1 ? '1 result' : `${count} results`),
+      steps: {
+        embed: 'Understanding the question (AI)',
+        db: 'Looking through the archive (database)',
+        rest: 'Rest of the server',
+        network: 'The way there and back',
+      },
+      skipped: 'skipped: this mode does not use the AI',
+      total: 'From the click to the answer',
+      unreported: 'This server does not say how long each step took.',
+      cached:
+        'A question already asked is not sent to the AI again, which is why that step can take no time at all.',
+    },
   },
 
   closed: {
@@ -158,6 +272,8 @@ export const en = {
     back: 'Back',
     save: 'Save',
     saving: 'Saving...',
+    ok: 'OK',
+    closeOf: (what: string) => `Close ${what}`,
   },
 
   searchModes: {
@@ -265,9 +381,48 @@ export const en = {
     meaning: { label: 'meaning', title: 'Matched by meaning. Your exact words may not appear in this video.' },
     match: (percent: number) => `MATCH: ${percent}%`,
     noDescription: 'No description available',
+    more: 'read more ▾',
+    less: 'read less ▴',
     copy: 'Copy',
     copyTitle: 'Copy URL',
     copied: 'URL copied to clipboard!',
+  },
+
+  why: {
+    open: 'Why?',
+    title: 'See why this video came up, and in this place',
+    heading: 'Why this result?',
+    final: (n: number) => `${ordinal(n)} on the list.`,
+    lead: {
+      both: 'It came up for its meaning and for its words.',
+      words: 'It came up for the words you typed.',
+      meaning: 'It came up for its meaning: it is about something like what you wrote.',
+    },
+    meaning: 'Meaning',
+    words: 'Words',
+    meaningPlace: (n: number, percent: number) =>
+      `${ordinal(n)} among the videos most alike: ${percent}% like what you wrote.`,
+    wordsPlace: (n: number) => `${ordinal(n)} among the videos that have your words.`,
+    belowCut: (percent: number) =>
+      `That is under the ${percent}% precision asked. On its own it would not be here: it got in through the words.`,
+    meaningUnlisted: 'Not among the videos most alike.',
+    wordsUnlisted: 'Not among the first by words.',
+    meaningOff: 'This mode does not look for meaning.',
+    wordsOff: 'This mode does not look for words.',
+    showSum: 'Show the sum >>',
+    hideSum: '<< Hide the sum',
+    sum: {
+      caption: 'How the place on the list was worked out',
+      list: 'List',
+      place: 'Place',
+      points: 'Points',
+      total: 'Together',
+      nth: (n: number) => ordinal(n),
+      out: 'not in it',
+      formula: (k: number, place: number, points: string) => `1 ÷ (${k} + ${place}) = ${points}`,
+    },
+    how: 'Two lists are made, one by meaning and one by words. Each gives points for the place a video holds in it, and whoever adds up the most comes first.',
+    howSingle: 'In this mode only one of the two lists is made, so its order is the final one.',
   },
 
   quota: {
@@ -648,7 +803,7 @@ export const en = {
             Three videos. Look at the label next to each one: it tells you why that video came up.{' '}
             <strong>words</strong> means its text has the word you typed. <strong>meaning</strong>{' '}
             means it is about something similar, even without the word. That is how a giraffe got
-            here.
+            here. The <strong>Why?</strong> button of each one opens the whole explanation.
           </>
         ),
       },
@@ -792,6 +947,11 @@ export const en = {
         authSubmit: ['checking...', 'one moment...', 'knocking on the door...'],
         gateSignIn: ['come, it is quick', 'an account is free', 'this way!'],
         adminRange: ['another period!', 'moving the window', 'recounting...'],
+        why: ['let me explain!', 'x-ray!', 'behind the scenes!'],
+        computer: ['that is me inside!', 'mind the mess', 'my insides!'],
+        deviceRobot: ['that is me!', 'no driver, and proud', 'unknown, me?'],
+        removeDevice: ['that one stays!', 'not a chance!', 'we need that'],
+        removeRobot: ['ME?!', 'remove ME?!', 'go on, try'],
       },
     },
     lines: {
@@ -920,7 +1080,11 @@ export const en = {
       } as HelpCopy,
       'desktop.icon': {
         title: 'Desktop',
-        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window. Just do not drop it in the Recycle Bin.',
+        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window, and My Computer shows what all this is made of. Just do not drop Pop Search in the Recycle Bin.',
+      } as HelpCopy,
+      system: {
+        title: 'System Properties',
+        text: 'What Pop Search is made of, for real: each part, whether it is answering right now, how many videos are kept and how long your last search took at each step.',
       } as HelpCopy,
       robot: {
         title: 'BIP-98',
@@ -1035,6 +1199,10 @@ export const en = {
       'card.origin': {
         title: 'Why it came up',
         text: 'The tag tells the reason: "words" means the text of the video has what you typed, "meaning" means it is about something similar.',
+      } as HelpCopy,
+      'card.why': {
+        title: 'Why?',
+        text: 'Opens a window that tells, in plain words, why this video came up and in this place: how alike it is, where your words were found in it, and the sum behind it for whoever wants to see it.',
       } as HelpCopy,
       'card.match': {
         title: 'Match',

@@ -158,6 +158,89 @@ def test_non_text_modes_still_embed(mock_embed, mock_supabase):
         mock_embed.assert_called_once_with("capivara")
 
 
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
+def test_search_says_why_each_result_is_there(mock_embed, mock_supabase):
+    mock_embed.return_value = [0.1, 0.2, 0.3]
+    _mock_rpc(mock_supabase, [
+        {
+            "id": "abc",
+            "titulo_video": "Show da banda",
+            "descricao_completa": "A banda toca enquanto a plateia canta junto",
+            "url_original": "http://twitter.com/show",
+            "similarity": 0.71,
+            "text_rank": 0.83,
+            "score": 0.0388,
+            "vector_position": 2,
+            "text_position": 1,
+            "fusion_k": 50,
+            "matched": "Show da <<banda>> | A <<banda>> toca",
+        }
+    ])
+
+    response = client.post("/search", json={"query": "banda"})
+
+    assert response.status_code == 200
+    result = response.json()[0]
+    assert result["vector_position"] == 2
+    assert result["text_position"] == 1
+    assert result["fusion_k"] == 50
+    assert result["matched"] == "Show da <<banda>> | A <<banda>> toca"
+
+
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
+def test_search_answers_without_the_reasons_from_an_older_database(mock_embed, mock_supabase):
+    """The function in the database is replaced by hand, so for a while the
+    server may be ahead of it."""
+    mock_embed.return_value = [0.1, 0.2, 0.3]
+    _mock_rpc(mock_supabase, [
+        {
+            "id": "abc",
+            "titulo_video": "Show da banda",
+            "url_original": "http://twitter.com/show",
+            "similarity": 0.71,
+            "text_rank": 0.83,
+            "score": 0.0388,
+        }
+    ])
+
+    response = client.post("/search", json={"query": "banda"})
+
+    assert response.status_code == 200
+    result = response.json()[0]
+    assert result["vector_position"] is None
+    assert result["text_position"] is None
+    assert result["matched"] is None
+
+
+def _timed_steps(response):
+    return [step.split(";")[0] for step in response.headers["server-timing"].split(", ")]
+
+
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
+def test_search_reports_how_long_each_step_took(mock_embed, mock_supabase):
+    mock_embed.return_value = [0.1, 0.2, 0.3]
+    _mock_rpc(mock_supabase, [])
+
+    response = client.post("/search", json={"query": "capivara"})
+
+    assert _timed_steps(response) == ["embed", "db", "total"]
+    for step in response.headers["server-timing"].split(", "):
+        assert float(step.split(";dur=")[1]) >= 0
+
+
+@patch("routers.search.supabase")
+@patch("routers.search.embed_query")
+def test_text_mode_reports_no_time_for_a_step_it_skipped(mock_embed, mock_supabase):
+    _mock_rpc(mock_supabase, [])
+
+    response = client.post("/search", json={"query": "capivara", "mode": "text"})
+
+    assert _timed_steps(response) == ["db", "total"]
+
+
 def test_search_rejects_unknown_mode():
     response = client.post("/search", json={"query": "teste", "mode": "magica"})
     assert response.status_code == 422

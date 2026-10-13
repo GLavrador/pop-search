@@ -88,6 +88,17 @@ describe('the icons of the desktop', () => {
     expect(onOpenApp).toHaveBeenCalledTimes(1);
   });
 
+  it('should open My Computer on a double click, and nothing for the bin', () => {
+    const onOpenComputer = vi.fn();
+    const { onOpenApp } = renderDesktop({ onOpenComputer });
+
+    fireEvent.doubleClick(icon('My Computer'));
+    fireEvent.doubleClick(icon('Recycle Bin'));
+
+    expect(onOpenComputer).toHaveBeenCalledTimes(1);
+    expect(onOpenApp).not.toHaveBeenCalled();
+  });
+
   it('should warn the robot once when the program is held over the bin', () => {
     renderDesktop();
     putBinAt(8, 8);

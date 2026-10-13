@@ -26,6 +26,111 @@ export const pt: Dictionary = {
     recycleBin: 'Lixeira',
   },
 
+  system: {
+    title: 'Propriedades do Sistema',
+    tabs: {
+      general: 'Geral',
+      devices: 'Gerenciador de dispositivos',
+      performance: 'Desempenho',
+    },
+    asking: 'perguntando ao servidor...',
+    silent: 'o servidor não respondeu',
+    general: {
+      system: 'Sistema:',
+      name: 'Pop Search 98',
+      version: (version) => `versão ${version}`,
+      registered: 'Registrado para:',
+      visitor: 'Visitante',
+      computer: 'Computador:',
+      memory: (numbers) => `${numbers} números de memória por vídeo`,
+      videos: (count, shown) => (count === 1 ? '1 vídeo no acervo' : `${shown} vídeos no acervo`),
+    },
+    devices: {
+      root: 'Pop Search',
+      list: 'Dispositivos',
+      status: 'Estado do dispositivo',
+      working: 'Este dispositivo está funcionando corretamente.',
+      ready: 'Este dispositivo está instalado e esperando trabalho. Ele não é testado daqui.',
+      waking: 'Este dispositivo ainda está acordando.',
+      failing: 'Este dispositivo não está respondendo.',
+      asking: 'Perguntando ao servidor como está este dispositivo...',
+      unsaid: 'O servidor não disse como está este dispositivo.',
+      undriven: 'Nenhum driver instalado para este dispositivo. Funciona mesmo assim.',
+      refresh: 'Atualizar',
+      remove: 'Remover',
+      screen: {
+        kind: 'Monitor',
+        name: (react) => `Seu navegador, rodando React ${react}`,
+        about: 'Desenha tudo o que você vê. A área de trabalho inteira é uma página só.',
+        size: (width, height) => `${width} × ${height} pixels agora.`,
+        refusal: 'Você está olhando por ele. Remover agora seria falta de educação.',
+      },
+      server: {
+        kind: 'Portas',
+        name: 'Servidor FastAPI, no Render',
+        about: 'Recebe o que a página pede e conversa com todo o resto.',
+        woke: (time) =>
+          `Levou ${time} para responder nesta visita. Ele dorme quando ninguém está usando.`,
+        up: (time) => `Ligado há ${time}.`,
+        runtime: (python, framework) => `Python ${python}, ${framework}.`,
+        refusal: 'Sem ele ninguém busca nada. Pedido negado.',
+      },
+      database: {
+        kind: 'Unidades de disco',
+        name: 'Postgres com pgvector, no Supabase',
+        about:
+          'Guarda cada vídeo duas vezes: em palavras, para a busca exata, e em números, para a busca por significado.',
+        videos: (count, shown) => (count === 1 ? '1 vídeo guardado.' : `${shown} vídeos guardados.`),
+        answered: (time) => `Respondeu em ${time}.`,
+        refusal: 'Todos os vídeos moram aí. Nem pensar.',
+      },
+      analysis: {
+        kind: 'Processador',
+        name: (model) => `Gemini (${model})`,
+        about: 'Assiste a cada vídeo do começo ao fim e escreve o título e a descrição.',
+        idle: 'Só é chamado quando alguém guarda um vídeo. Perguntar como ele está gastaria a cota.',
+        refusal: 'E quem ia assistir aos vídeos? Você?',
+      },
+      embedding: {
+        kind: 'Coprocessador',
+        name: (model) => `Gemini (${model})`,
+        about: (numbers) =>
+          `Transforma um texto em ${numbers} números. Textos sobre a mesma coisa ficam com números próximos, e é assim que a busca acha por significado.`,
+        kept: (kept, room) =>
+          `${kept} das últimas ${room} perguntas estão na memória: repetir uma delas não custa nada.`,
+        refusal: 'Sem ele a busca só acharia a palavra exata.',
+      },
+      downloader: {
+        kind: 'Modem',
+        name: (version) => version,
+        about: 'Busca o vídeo no X para a IA assistir, junto com o texto e a imagem do post.',
+        refusal: 'Sem ele nenhum vídeo chega do X.',
+      },
+      robot: {
+        kind: 'Outros dispositivos',
+        name: 'BIP-98',
+        about: 'Dispositivo desconhecido. Ninguém lembra de ter instalado.',
+        refusal: 'O dispositivo se recusou a ser removido. E ainda ficou ofendido.',
+      },
+    },
+    performance: {
+      none: 'Nenhuma busca nesta visita ainda. Faça uma no Search.exe e volte: esta aba mostra quanto tempo cada etapa dela levou.',
+      last: (query, mode) => `Última busca: "${query}" (${mode})`,
+      found: (count) => (count === 1 ? '1 resultado' : `${count} resultados`),
+      steps: {
+        embed: 'Entender a pergunta (IA)',
+        db: 'Procurar no acervo (banco de dados)',
+        rest: 'Resto do servidor',
+        network: 'O caminho de ida e volta',
+      },
+      skipped: 'pulada: este modo não usa a IA',
+      total: 'Do clique até a resposta',
+      unreported: 'Este servidor não informa quanto tempo cada etapa levou.',
+      cached:
+        'Uma pergunta já feita não é mandada de novo para a IA, e por isso essa etapa pode não levar tempo nenhum.',
+    },
+  },
+
   closed: {
     phrases: [
       'Programa encerrado. Quem manda agora é o gato.',
@@ -152,6 +257,8 @@ export const pt: Dictionary = {
     back: 'Voltar',
     save: 'Salvar',
     saving: 'Salvando...',
+    ok: 'OK',
+    closeOf: (what) => `Fechar ${what}`,
   },
 
   searchModes: {
@@ -271,9 +378,48 @@ export const pt: Dictionary = {
     },
     match: (percent: number) => `MATCH: ${percent}%`,
     noDescription: 'Sem descrição disponível',
+    more: 'ler mais ▾',
+    less: 'ler menos ▴',
     copy: 'Copiar',
     copyTitle: 'Copiar URL',
     copied: 'URL copiada para a área de transferência!',
+  },
+
+  why: {
+    open: 'Por quê?',
+    title: 'Ver por que este vídeo apareceu, e nesta posição',
+    heading: 'Por que este resultado?',
+    final: (n) => `${n}º da lista.`,
+    lead: {
+      both: 'Apareceu pelo significado e pelas palavras.',
+      words: 'Apareceu pelas palavras que você digitou.',
+      meaning: 'Apareceu pelo significado: fala de algo parecido com o que você escreveu.',
+    },
+    meaning: 'Significado',
+    words: 'Palavras',
+    meaningPlace: (n, percent) =>
+      `${n}º entre os vídeos mais parecidos: ${percent}% parecido com o que você escreveu.`,
+    wordsPlace: (n) => `${n}º entre os vídeos que têm as suas palavras.`,
+    belowCut: (percent) =>
+      `Isso fica abaixo da precisão de ${percent}% pedida. Sozinho ele não estaria aqui: entrou pelas palavras.`,
+    meaningUnlisted: 'Não ficou entre os vídeos mais parecidos.',
+    wordsUnlisted: 'Não ficou entre os primeiros pelas palavras.',
+    meaningOff: 'Este modo não procura por significado.',
+    wordsOff: 'Este modo não procura por palavras.',
+    showSum: 'Ver a conta >>',
+    hideSum: '<< Esconder a conta',
+    sum: {
+      caption: 'Como a posição na lista foi calculada',
+      list: 'Lista',
+      place: 'Posição',
+      points: 'Pontos',
+      total: 'Soma',
+      nth: (n) => `${n}º`,
+      out: 'fora dela',
+      formula: (k, place, points) => `1 ÷ (${k} + ${place}) = ${points}`,
+    },
+    how: 'São feitas duas listas, uma por significado e outra por palavras. Cada uma dá pontos pela posição do vídeo nela, e quem soma mais pontos vem primeiro.',
+    howSingle: 'Neste modo só uma das duas listas é feita, então a ordem dela é a final.',
   },
 
   quota: {
@@ -655,7 +801,8 @@ export const pt: Dictionary = {
             Três vídeos. Olhe a etiqueta ao lado de cada um: ela conta por que aquele vídeo
             apareceu. <strong>palavras</strong> quer dizer que o texto dele tem a palavra que você
             digitou. <strong>significado</strong> quer dizer que ele fala de algo parecido, mesmo
-            sem a palavra. Foi assim que uma girafa veio parar aqui.
+            sem a palavra. Foi assim que uma girafa veio parar aqui. O botão{' '}
+            <strong>Por quê?</strong> de cada um abre a explicação inteira.
           </>
         ),
       },
@@ -799,6 +946,11 @@ export const pt: Dictionary = {
         authSubmit: ['conferindo...', 'um instante...', 'batendo na porta...'],
         gateSignIn: ['vem, é rapidinho', 'a conta é de graça', 'por aqui!'],
         adminRange: ['outro período!', 'mudando a janela', 'recontando...'],
+        why: ['deixa que eu explico!', 'raio-x!', 'os bastidores!'],
+        computer: ['olha eu por dentro!', 'não repara a bagunça', 'meus bastidores!'],
+        deviceRobot: ['esse sou eu!', 'sem driver, com orgulho', 'desconhecido, eu?'],
+        removeDevice: ['isso fica!', 'nem pensar!', 'a gente precisa disso'],
+        removeRobot: ['EU?!', 'ME remover?!', 'tenta, vai'],
       },
     },
     lines: {
@@ -927,7 +1079,11 @@ export const pt: Dictionary = {
       },
       'desktop.icon': {
         title: 'Área de trabalho',
-        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela. Só não solte ele na Lixeira.',
+        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela, e o Meu Computador mostra do que isto tudo é feito. Só não solte o Pop Search na Lixeira.',
+      },
+      system: {
+        title: 'Propriedades do Sistema',
+        text: 'Do que o Pop Search é feito, de verdade: cada peça, se ela está respondendo agora, quantos vídeos estão guardados e quanto tempo a sua última busca levou em cada etapa.',
       },
       robot: {
         title: 'BIP-98',
@@ -1043,6 +1199,10 @@ export const pt: Dictionary = {
       'card.origin': {
         title: 'Por que apareceu',
         text: 'A etiqueta conta o motivo: "palavras" quer dizer que o texto do vídeo tem o que você digitou, "significado" quer dizer que ele fala de algo parecido.',
+      },
+      'card.why': {
+        title: 'Por quê?',
+        text: 'Abre uma janela que conta, em palavras simples, por que este vídeo apareceu e nesta posição: o quanto ele se parece, onde as suas palavras foram achadas nele, e a conta por trás para quem quiser ver.',
       },
       'card.match': {
         title: 'Match',

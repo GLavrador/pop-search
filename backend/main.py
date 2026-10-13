@@ -31,6 +31,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Without this a page on another origin cannot read how long a search took.
+    expose_headers=["Server-Timing"],
 )
 
 app.state.limiter = limiter

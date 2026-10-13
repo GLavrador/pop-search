@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { vi, describe, it, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi, describe, it, expect, afterEach } from 'vitest';
 import { VideoCard } from './index';
 import type { SearchResult } from '../../types';
 
@@ -66,6 +66,89 @@ describe('VideoCard Component', () => {
       render(<VideoCard data={{ ...mockData, similarity: 0.8 }} />);
 
       expect(screen.getByText('meaning')).toBeInTheDocument();
+    });
+
+    it('should show no likeness for a video found by its words alone', () => {
+      render(<VideoCard data={{ ...mockData, similarity: 0, text_rank: 0.6 }} />);
+
+      expect(screen.getByText('words')).toBeInTheDocument();
+      expect(screen.queryByText(/MATCH/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('asking why it came up', () => {
+    it('should not be offered while there is no reason to give', () => {
+      render(<VideoCard data={mockData} />);
+
+      expect(screen.queryByRole('button', { name: 'Why?' })).not.toBeInTheDocument();
+    });
+
+    it('should be a button that says what it is for', () => {
+      const onWhy = vi.fn();
+      render(<VideoCard data={mockData} onWhy={onWhy} />);
+      const why = screen.getByRole('button', { name: 'Why?' });
+
+      expect(why).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(why);
+
+      expect(onWhy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should stay pressed while the reason is on screen', () => {
+      render(<VideoCard data={mockData} onWhy={vi.fn()} explaining />);
+
+      expect(screen.getByRole('button', { name: 'Why?' })).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
+  describe('a long description', () => {
+    // jsdom lays nothing out: the box is told its heights, and when it is looked at.
+    const layOut = (full: number, shown: number) => {
+      vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(full);
+      vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(shown);
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          private readonly seen: () => void;
+          constructor(seen: () => void) {
+            this.seen = seen;
+          }
+          observe() {
+            this.seen();
+          }
+          disconnect() {}
+        },
+      );
+    };
+    const summary = () => screen.getByText('This is a summary of the test video.');
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('should be cut short, and unfolded and folded back on request', () => {
+      layOut(120, 50);
+      render(<VideoCard data={mockData} />);
+
+      expect(summary()).toHaveAttribute('data-folded');
+
+      fireEvent.click(screen.getByRole('button', { name: 'read more ▾' }));
+
+      expect(summary()).not.toHaveAttribute('data-folded');
+
+      fireEvent.click(screen.getByRole('button', { name: 'read less ▴' }));
+
+      expect(summary()).toHaveAttribute('data-folded');
+      expect(screen.getByRole('button', { name: 'read more ▾' })).toBeInTheDocument();
+    });
+
+    it('should offer nothing to unfold when all of it fits', () => {
+      layOut(50, 50);
+      render(<VideoCard data={mockData} />);
+
+      expect(screen.queryByRole('button', { name: /read more/ })).not.toBeInTheDocument();
     });
   });
 });

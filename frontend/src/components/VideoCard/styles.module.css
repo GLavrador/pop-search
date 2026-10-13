@@ -1,3 +1,4 @@
+/* Three parts side by side: the picture, what the video is, and how it matched. */
 .card {
   display: flex;
   background: var(--win-light);
@@ -17,7 +18,8 @@
 
 .card:hover .title,
 .card:hover .summary,
-.card:hover .score {
+.card:hover .more,
+.card:hover .match {
   color: white;
 }
 
@@ -25,16 +27,9 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
   min-width: 0;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  flex-wrap: wrap;
 }
 
 .title {
@@ -42,45 +37,40 @@
   color: var(--win-link);
   text-decoration: underline;
   font-weight: bold;
-  white-space: normal;
-  word-wrap: break-word;
-  flex: 1;
-  min-width: 0;
-}
-
-.score {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.8rem;
-  color: var(--win-success);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.origin {
-  padding: 0 4px;
-  background: var(--win-tag-bg);
-  border: 1px solid var(--win-tag-border);
-  color: var(--win-text-secondary);
-  font-size: 0.7rem;
-  cursor: help;
-}
-
-.card:hover .origin {
-  background: var(--win-blue-title);
-  border-color: var(--win-light);
-  color: var(--win-light);
+  overflow-wrap: anywhere;
 }
 
 .summary {
   font-size: 0.85rem;
   color: var(--win-text-dark);
   margin: 0;
-  line-height: 1.2;
-  white-space: normal;
-  word-wrap: break-word;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* Three lines of it, and the rest on request. */
+.summary[data-folded] {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.more {
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: var(--win-link);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.more:focus-visible,
+.whyButton:focus-visible {
+  outline: 1px dotted currentColor;
+  outline-offset: 2px;
 }
 
 .urlRow {
@@ -88,7 +78,7 @@
   gap: 5px;
   margin-top: 5px;
   align-items: center;
-  flex-wrap: wrap;
+  align-self: stretch;
 }
 
 .urlInput {
@@ -117,6 +107,98 @@
   border: 1px solid var(--win-dark);
   border-bottom-color: var(--win-light);
   border-right-color: var(--win-light);
+}
+
+/* How it matched, in a column of its own: the numbers of every card line up. */
+.side {
+  flex: 0 0 178px;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding-left: 12px;
+  border-left: 1px solid var(--win-shadow-light);
+}
+
+.how {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.match {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--win-success);
+  white-space: nowrap;
+}
+
+.origin {
+  padding: 0 4px;
+  background: var(--win-tag-bg);
+  border: 1px solid var(--win-tag-border);
+  color: var(--win-text-secondary);
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.card:hover .origin {
+  background: var(--win-blue-title);
+  border-color: var(--win-light);
+  color: var(--win-light);
+}
+
+.whyButton {
+  margin-top: 2px;
+  padding: 3px 12px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--win-dark);
+  white-space: nowrap;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+  cursor: pointer;
+}
+
+.whyButton:active,
+.whyButton[aria-expanded='true'] {
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+}
+
+/* On a narrow screen that column becomes a line under the rest, the button at its end. */
+@media (max-width: 768px) {
+  .side {
+    flex: 1 1 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 0;
+    border-left: none;
+    border-top: 1px solid var(--win-shadow-light);
+  }
+
+  .how {
+    gap: 4px;
+  }
+
+  .whyButton {
+    margin: 0;
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: 768px) {

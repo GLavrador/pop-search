@@ -9,7 +9,9 @@ import type {
   QuotaStatus,
   ProjectUsageReport,
   AdminStatsReport,
+  SystemReport,
 } from '../types';
+import { lastSearch, timed } from './searchTrace';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
 import { DEFAULT_SEARCH_MODE } from '../constants/searchModes';
 import { SERVER_ATTEMPT_TIMEOUT_MS } from '../constants/startup';
@@ -127,11 +129,32 @@ export const searchVideos = async (
   { query, limit = DEFAULT_LIMIT, threshold = DEFAULT_THRESHOLD, mode = DEFAULT_SEARCH_MODE }: SearchParams,
   signal?: AbortSignal
 ): Promise<SearchResult[]> => {
+  const asked = performance.now();
   const response = await api.post<SearchResult[]>('/search', {
     query,
     limit,
     threshold,
     mode
   }, { signal });
+
+  const timing = response.headers?.['server-timing'];
+  lastSearch.set({
+    query,
+    mode,
+    found: response.data.length,
+    roundTripMs: performance.now() - asked,
+    embedMs: timed(timing, 'embed'),
+    dbMs: timed(timing, 'db'),
+    serverMs: timed(timing, 'total'),
+  });
+
+  return response.data;
+};
+
+export const getSystem = async (signal?: AbortSignal): Promise<SystemReport> => {
+  const response = await api.get<SystemReport>('/system', {
+    signal,
+    timeout: SERVER_ATTEMPT_TIMEOUT_MS,
+  });
   return response.data;
 };

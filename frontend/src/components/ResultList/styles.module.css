@@ -1,0 +1,114 @@
+.why {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 4px 2px;
+}
+
+.video {
+  display: -webkit-box;
+  overflow: hidden;
+  font-weight: bold;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.absent {
+  color: var(--win-text-muted);
+}
+
+.meter {
+  display: block;
+  width: 100%;
+  height: 10px;
+  padding: 1px;
+  background: var(--win-light);
+  border-top: 1px solid var(--win-shadow-dark);
+  border-left: 1px solid var(--win-shadow-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: var(--win-blue-title);
+}
+
+.excerpt {
+  display: block;
+  padding: 4px 6px;
+  quotes: none;
+  background: var(--win-light);
+  border-top: 1px solid var(--win-shadow-dark);
+  border-left: 1px solid var(--win-shadow-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  overflow-wrap: anywhere;
+}
+
+.excerpt mark {
+  padding: 0 2px;
+  background: var(--win-blue-title);
+  color: var(--win-light);
+}
+
+.sum {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--win-shadow-dark);
+  box-shadow: inset 0 1px 0 0 var(--win-light);
+}
+
+.sum table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sum caption {
+  padding-bottom: 4px;
+  font-weight: bold;
+  text-align: left;
+}
+
+.sum th,
+.sum td {
+  padding: 2px 8px 2px 0;
+  font-weight: normal;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.sum thead th {
+  color: var(--win-text-secondary);
+  border-bottom: 1px solid var(--win-shadow-dark);
+}
+
+.sum tfoot th,
+.sum tfoot td {
+  font-weight: bold;
+  border-top: 1px solid var(--win-shadow-dark);
+}
+
+.sum .points {
+  padding-right: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sum td.points {
+  font-family: 'Courier New', monospace;
+}
+
+.how {
+  color: var(--win-text-secondary);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 420px) {
+  .sum .points {
+    white-space: normal;
+  }
+}

@@ -1,0 +1,128 @@
+/* Over the window and the icons, under the taskbar and the robot. */
+.dialog {
+  position: fixed;
+  top: clamp(12px, 12vh, 110px);
+  left: 50%;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: min(480px, calc(100vw - 16px));
+  max-height: calc(100vh - 60px);
+  padding: 2px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.dialog:focus {
+  outline: none;
+}
+
+.titleBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 24px;
+  padding: 4px 4px 4px 8px;
+  background: linear-gradient(90deg, var(--win-blue-title), var(--win-blue-grad));
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.title {
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 14px;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  background: var(--win-gray);
+  border-top: 1px solid white;
+  border-left: 1px solid white;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  cursor: default;
+}
+
+.close:active {
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8px 8px 0;
+  overflow-y: auto;
+}
+
+.body p {
+  margin: 0;
+}
+
+.footer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+}
+
+.ok {
+  margin-left: auto;
+}
+
+/* The etched frame of a group box. The name covers the line it sits on. */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+  padding: 4px 10px 10px;
+  border: 1px solid var(--win-shadow-dark);
+  box-shadow: 1px 1px 0 0 var(--win-light), inset 1px 1px 0 0 var(--win-light);
+}
+
+.legend {
+  margin-left: -2px;
+  padding: 0 5px;
+  color: var(--win-dark);
+  background-color: var(--win-gray);
+}
+
+@media (max-width: 768px) {
+  /* Above a window that fills the screen, still under the robot. */
+  .dialog {
+    z-index: 205;
+  }
+
+  .titleBar {
+    min-height: 30px;
+  }
+
+  .close {
+    width: 24px;
+    height: 20px;
+    font-size: 11px;
+  }
+}

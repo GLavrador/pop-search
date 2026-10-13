@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { VideoCard } from '../VideoCard';
+import { ResultList } from '../ResultList';
 import { AdvancedSearchOptions } from '../AdvancedSearchOptions';
 import { PrecisionPresets } from '../PrecisionPresets';
 import { DEMO_QUERY, DEMO_SEARCH_RESULTS } from '../../constants/demoVideo';
@@ -104,7 +104,7 @@ export const DemoSearch = ({ step, onGo, onSpot }: DemoSearchProps) => {
                   : t.search.emptyLiteral}
               </div>
             ) : (
-              results.map((result) => <VideoCard key={result.id} data={result} />)
+              <ResultList results={results} asked={{ mode, threshold }} />
             )}
           </div>
         </>

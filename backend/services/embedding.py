@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from core.logger import get_logger
-from core.gemini import get_genai, EMBEDDING_MODEL
+from core.gemini import get_genai, EMBEDDING_DIMENSIONS, EMBEDDING_MODEL
 from dtos import VideoMetadataDTO
 
 logger = get_logger("services.embedding")
@@ -80,7 +80,7 @@ def create_embedding(data: VideoMetadataDTO) -> list[float]:
             model=EMBEDDING_MODEL,
             content=text_payload,
             task_type="retrieval_document",
-            output_dimensionality=768
+            output_dimensionality=EMBEDDING_DIMENSIONS
         )
 
         embedding = result['embedding']
@@ -104,9 +104,14 @@ def _embed_query(text: str) -> tuple[float, ...]:
         model=EMBEDDING_MODEL,
         content=text,
         task_type="retrieval_query",
-        output_dimensionality=768
+        output_dimensionality=EMBEDDING_DIMENSIONS
     )
     return tuple(result['embedding'])
+
+
+def questions_kept() -> int:
+    """How many questions are answered from memory, without asking the model again."""
+    return _embed_query.cache_info().currsize
 
 
 # No truncation needed here: SearchRequest.query is already capped at 500
