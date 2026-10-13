@@ -38,6 +38,114 @@ export const en = {
     recycleBin: 'Recycle Bin',
   },
 
+  system: {
+    title: 'System Properties',
+    tabs: {
+      general: 'General',
+      devices: 'Device Manager',
+      performance: 'Performance',
+    },
+    asking: 'asking the server...',
+    silent: 'the server did not answer',
+    general: {
+      system: 'System:',
+      name: 'Pop Search 98',
+      version: (version: string) => `version ${version}`,
+      registered: 'Registered to:',
+      visitor: 'Visitor',
+      computer: 'Computer:',
+      memory: (numbers: number) => `${numbers} numbers of memory per video`,
+      videos: (count: number, shown: string) =>
+        count === 1 ? '1 video in the archive' : `${shown} videos in the archive`,
+    },
+    devices: {
+      root: 'Pop Search',
+      list: 'Devices',
+      status: 'Device status',
+      working: 'This device is working properly.',
+      ready: 'This device is installed and waiting for work. It is not tested from here.',
+      waking: 'This device is still waking up.',
+      failing: 'This device is not answering.',
+      asking: 'Asking the server how this device is doing...',
+      unsaid: 'The server did not say how this device is doing.',
+      undriven: 'No driver is installed for this device. It works anyway.',
+      refresh: 'Refresh',
+      remove: 'Remove',
+      screen: {
+        kind: 'Monitor',
+        name: (react: string) => `Your browser, running React ${react}`,
+        about: 'Draws everything you see. The whole desktop is a single page.',
+        size: (width: number, height: number) => `${width} × ${height} pixels right now.`,
+        refusal: 'You are looking through it. Removing it now would be rude.',
+      },
+      server: {
+        kind: 'Ports',
+        name: 'FastAPI server, on Render',
+        about: 'Takes what the page asks for and talks to everything else.',
+        woke: (time: string) =>
+          `Took ${time} to answer on this visit. It sleeps when nobody is using it.`,
+        up: (time: string) => `On for ${time}.`,
+        runtime: (python: string, framework: string) => `Python ${python}, ${framework}.`,
+        refusal: 'Without it nobody searches for anything. Request denied.',
+      },
+      database: {
+        kind: 'Disk drives',
+        name: 'Postgres with pgvector, on Supabase',
+        about:
+          'Keeps every video twice: as words, for the exact search, and as numbers, for the search by meaning.',
+        videos: (count: number, shown: string) =>
+          count === 1 ? '1 video kept.' : `${shown} videos kept.`,
+        answered: (time: string) => `Answered in ${time}.`,
+        refusal: 'Every video lives in there. Not a chance.',
+      },
+      analysis: {
+        kind: 'Processor',
+        name: (model: string) => `Gemini (${model})`,
+        about: 'Watches each video from start to finish and writes its title and description.',
+        idle: 'Only called when somebody keeps a video. Asking it how it is doing would spend the quota.',
+        refusal: 'And who would watch the videos? You?',
+      },
+      embedding: {
+        kind: 'Coprocessor',
+        name: (model: string) => `Gemini (${model})`,
+        about: (numbers: number) =>
+          `Turns a text into ${numbers} numbers. Texts about the same thing get numbers that are close, and that is how the search finds by meaning.`,
+        kept: (kept: number, room: number) =>
+          `${kept} of the last ${room} questions are in memory: asking them again costs nothing.`,
+        refusal: 'Without it the search would only find the exact word.',
+      },
+      downloader: {
+        kind: 'Modem',
+        name: (version: string) => version,
+        about:
+          'Fetches the video from X for the AI to watch, along with the text and the picture of the post.',
+        refusal: 'Without it no video ever gets here from X.',
+      },
+      robot: {
+        kind: 'Other devices',
+        name: 'BIP-98',
+        about: 'Unknown device. Nobody remembers installing it.',
+        refusal: 'The device refused to be removed. It also looks offended.',
+      },
+    },
+    performance: {
+      none: 'No search yet on this visit. Run one in Search.exe and come back: this tab shows how long each step of it took.',
+      last: (query: string, mode: string) => `Last search: "${query}" (${mode})`,
+      found: (count: number) => (count === 1 ? '1 result' : `${count} results`),
+      steps: {
+        embed: 'Understanding the question (AI)',
+        db: 'Looking through the archive (database)',
+        rest: 'Rest of the server',
+        network: 'The way there and back',
+      },
+      skipped: 'skipped: this mode does not use the AI',
+      total: 'From the click to the answer',
+      unreported: 'This server does not say how long each step took.',
+      cached:
+        'A question already asked is not sent to the AI again, which is why that step can take no time at all.',
+    },
+  },
+
   closed: {
     phrases: [
       'Program terminated. The cat is in charge now.',
@@ -840,6 +948,10 @@ export const en = {
         gateSignIn: ['come, it is quick', 'an account is free', 'this way!'],
         adminRange: ['another period!', 'moving the window', 'recounting...'],
         why: ['let me explain!', 'x-ray!', 'behind the scenes!'],
+        computer: ['that is me inside!', 'mind the mess', 'my insides!'],
+        deviceRobot: ['that is me!', 'no driver, and proud', 'unknown, me?'],
+        removeDevice: ['that one stays!', 'not a chance!', 'we need that'],
+        removeRobot: ['ME?!', 'remove ME?!', 'go on, try'],
       },
     },
     lines: {
@@ -968,7 +1080,11 @@ export const en = {
       } as HelpCopy,
       'desktop.icon': {
         title: 'Desktop',
-        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window. Just do not drop it in the Recycle Bin.',
+        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window, and My Computer shows what all this is made of. Just do not drop Pop Search in the Recycle Bin.',
+      } as HelpCopy,
+      system: {
+        title: 'System Properties',
+        text: 'What Pop Search is made of, for real: each part, whether it is answering right now, how many videos are kept and how long your last search took at each step.',
       } as HelpCopy,
       robot: {
         title: 'BIP-98',

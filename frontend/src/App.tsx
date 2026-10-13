@@ -43,6 +43,7 @@ import { BlueScreen } from './components/BlueScreen';
 import { Rebuild } from './components/Rebuild';
 import { BlueTiles } from './components/Rebuild/BlueTiles';
 import { useRebuild } from './components/Rebuild/useRebuild';
+import { SystemProperties } from './components/SystemProperties';
 import { BOOTED_KEY, SERVER_NOTICE_MS } from './constants/startup';
 
 const WINDOW_ICON = '💻';
@@ -75,6 +76,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const closeClicks = useRef(0);
   const pendingCat = useRef<string | null>(null);
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
+  const [computerOpen, setComputerOpen] = useState(false);
   const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
@@ -102,6 +104,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
       closeClicks.current = 0;
       pendingCat.current = null;
       setCat(null);
+      setComputerOpen(false);
       setWindowState('closed');
     },
     onOpenWindow: () => setWindowState('open'),
@@ -181,6 +184,11 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
     notify({ kind: 'reopened' });
   };
 
+  const openComputer = () => {
+    if (!computerOpen) notify({ kind: 'pressed', what: 'computer' });
+    setComputerOpen(true);
+  };
+
   const selectTab = (tab: Tab) => {
     if (tab !== activeTab) notify({ kind: 'tab', tab });
     setActiveTab(tab);
@@ -247,6 +255,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         appIcon={WINDOW_ICON}
         appLabel={APP_NAME}
         onOpenApp={handleOpen}
+        onOpenComputer={openComputer}
         built={rebuild.view.built}
         swallowed={rebuild.view.phase === 'swallowing'}
         pressed={rebuild.view.pressed}
@@ -377,6 +386,14 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
           />
         </div>
       </RetroWindow>
+
+      {computerOpen && !wrecked && (
+        <SystemProperties
+          server={server}
+          owner={isAuthenticated ? displayName : null}
+          onClose={() => setComputerOpen(false)}
+        />
+      )}
 
       {/* While the desktop is being rebuilt the robot is in the show, not at home. */}
       {wrecked ? (
