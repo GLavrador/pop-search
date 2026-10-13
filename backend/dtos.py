@@ -192,4 +192,10 @@ class SearchResult(BaseModel):
     text_rank: float = Field(0.0, description="ts_rank_cd score, 0.0 if no text match")
     score: float = Field(0.0, description="Fused RRF score used for ordering")
     post: Optional[PostInfo] = None
+    # Why the row is there. All of it is missing while the database still runs
+    # the match_videos from before these columns.
+    vector_position: Optional[int] = Field(None, description="Place in the list by meaning, 1 on top")
+    text_position: Optional[int] = Field(None, description="Place in the list by words, 1 on top")
+    fusion_k: Optional[int] = Field(None, description="The k of the fusion: score = sum of 1 / (k + place)")
+    matched: Optional[str] = Field(None, description="Excerpt with the words that matched between << and >>")
 

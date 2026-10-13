@@ -186,6 +186,10 @@ create policy "videos: public read"
 --
 -- match_threshold applies to the vector branch ONLY. Applying it to full-text
 -- matches as well would collapse the hybrid search back into a vector-only one.
+--
+-- Each row also says why it is there: its place in each of the two lists
+-- (null when that list did not have it), the k the fusion ran with, and an
+-- excerpt of its text with the words that matched between << and >>.
 
 drop function if exists match_videos;
 
@@ -205,7 +209,11 @@ returns table (
   similarity float,
   text_rank float,
   score float,
-  post jsonb
+  post jsonb,
+  vector_position int,
+  text_position int,
+  fusion_k int,
+  matched text
 )
 language sql
 stable
@@ -251,6 +259,8 @@ as $$
       coalesce(vh.id, th.id) as video_id,
       coalesce(vh.similarity, 0)::float as sim,
       coalesce(th.text_rank, 0)::float as trank,
+      vh.rank::int as vector_place,
+      th.rank::int as text_place,
       (
         coalesce(1.0 / (rrf_k + vh.rank), 0) +
         coalesce(1.0 / (rrf_k + th.rank), 0)
@@ -268,7 +278,34 @@ as $$
     f.sim,
     f.trank,
     f.fused_score,
-    v.post
+    v.post,
+    f.vector_place,
+    f.text_place,
+    rrf_k,
+    -- The same text the fts column indexes, in reading order. ts_headline runs
+    -- it through the same configuration, so what it marks is what matched,
+    -- accents and word endings included.
+    case when f.text_place is not null then
+      ts_headline(
+        'portuguese_unaccent',
+        concat_ws(' | ',
+          nullif(v.titulo_video, ''),
+          nullif(v.descricao_completa, ''),
+          nullif(v.post ->> 'texto', ''),
+          nullif(v.metadados_estruturados -> 'audio' ->> 'transcricao', ''),
+          nullif(v.metadados_estruturados -> 'audio' ->> 'musica', ''),
+          nullif(v.metadados_estruturados -> 'audio' ->> 'artista', ''),
+          nullif(array_to_string(array(
+            select jsonb_array_elements_text(jsonb_path_query_array(
+              v.metadados_estruturados, '$.pessoas[*].descricao'))), ', '), ''),
+          nullif(array_to_string(array(
+            select jsonb_array_elements_text(jsonb_path_query_array(
+              v.metadados_estruturados, '$.elementos_cenario[*]'))), ', '), '')
+        ),
+        websearch_to_tsquery('portuguese_unaccent', query_text),
+        'StartSel=<<, StopSel=>>, MaxFragments=2, MaxWords=14, MinWords=5'
+      )
+    end
   from fused f
   join videos v on v.id = f.video_id
   where f.passes_vector or f.passes_text
