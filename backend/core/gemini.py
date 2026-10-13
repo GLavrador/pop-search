@@ -10,6 +10,7 @@ load_dotenv()
 _configured = False
 
 EMBEDDING_MODEL = "models/gemini-embedding-001"
+EMBEDDING_DIMENSIONS = 768
 GENERATION_MODEL = "gemini-2.5-flash"
 
 GENERATION_CONFIG = {
