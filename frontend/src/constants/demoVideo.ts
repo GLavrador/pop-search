@@ -18,8 +18,13 @@ export const DEMO_SEARCH_RESULTS: SearchResult[] = [
     url_original: 'https://x.com/VorosTwins/status/2085904884084478151/video/1',
     similarity: 0.78,
     text_rank: 0.91,
-    score: 0.039,
+    score: 0.0392,
     post: DEMO_POST,
+    vector_position: 1,
+    text_position: 1,
+    fusion_k: 50,
+    matched:
+      'planeta Terra e fazendo ela girar | <<Gato>> cinza e branco deitado, de olhos fechados',
   },
   {
     id: 'demo-2',
@@ -29,7 +34,11 @@ export const DEMO_SEARCH_RESULTS: SearchResult[] = [
     url_original: 'https://x.com/exemplo/status/2',
     similarity: 0.62,
     text_rank: 0,
-    score: 0.019,
+    score: 0.0192,
+    vector_position: 2,
+    text_position: null,
+    fusion_k: 50,
+    matched: null,
   },
   {
     id: 'demo-3',
@@ -38,7 +47,12 @@ export const DEMO_SEARCH_RESULTS: SearchResult[] = [
     url_original: 'https://x.com/exemplo/status/3',
     similarity: 0,
     text_rank: 0.44,
-    score: 0.018,
+    score: 0.0192,
+    vector_position: null,
+    text_position: 2,
+    fusion_k: 50,
+    matched:
+      'Cachorro assustado com <<gato>> de pelúcia gigante | Um cão recua devagar diante de um <<gato>> de pelúcia',
   },
 ];
 
