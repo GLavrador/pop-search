@@ -73,6 +73,14 @@ export interface SearchResult {
   /** Fused RRF score used for ordering. */
   score?: number;
   post?: PostInfo | null;
+  /** Place in the list by meaning, 1 on top. Null when that list did not have it. */
+  vector_position?: number | null;
+  /** Place in the list by words, 1 on top. Null when that list did not have it. */
+  text_position?: number | null;
+  /** The k of the fusion: each list gives 1 / (k + place) points. */
+  fusion_k?: number | null;
+  /** An excerpt of the video's text, the words that matched between << and >>. */
+  matched?: string | null;
 }
 
 export interface QuotaStatus {

@@ -9,6 +9,10 @@ import styles from "./styles.module.css";
 
 interface VideoCardProps {
   data: SearchResult;
+  /** Asks for the whole reason it came up. Without it there is no asking. */
+  onWhy?: () => void;
+  /** That reason is on screen right now. */
+  explaining?: boolean;
 }
 
 const matchOriginKey = (similarity: number, textRank: number) => {
@@ -20,7 +24,7 @@ const matchOriginKey = (similarity: number, textRank: number) => {
   return 'meaning' as const;
 };
 
-export const VideoCard = ({ data }: VideoCardProps) => {
+export const VideoCard = ({ data, onWhy, explaining = false }: VideoCardProps) => {
   const { setStatus } = useStatus();
   const { t } = useI18n();
   const robot = useRobot();
@@ -95,6 +99,20 @@ export const VideoCard = ({ data }: VideoCardProps) => {
             {origin.label}
           </span>
         </div>
+
+        {onWhy && (
+          <button
+            type="button"
+            className={styles.whyButton}
+            title={t.why.title}
+            aria-haspopup="dialog"
+            aria-expanded={explaining}
+            onClick={onWhy}
+            {...helpAt('card.why')}
+          >
+            {t.why.open}
+          </button>
+        )}
       </div>
     </div>
   );

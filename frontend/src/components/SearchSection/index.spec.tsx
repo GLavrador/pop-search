@@ -8,6 +8,7 @@ vi.mock('../../hooks/useVideoSearchQuery', () => ({
   useVideoSearchQuery: vi.fn(() => ({
     search: vi.fn(),
     results: [],
+    asked: null,
     isLoading: false,
     hasSearched: false,
     settledAt: 0,
@@ -48,6 +49,7 @@ describe('SearchSection Component', () => {
     vi.mocked(useVideoSearchQuery).mockReturnValue({
       search: mockSearch,
       results: [],
+      asked: null,
       isLoading: false,
       hasSearched: false,
       settledAt: 0,
@@ -70,6 +72,7 @@ describe('SearchSection Component', () => {
     vi.mocked(useVideoSearchQuery).mockReturnValue({
       search: mockSearch,
       results: [],
+      asked: null,
       isLoading: false,
       hasSearched: false,
       settledAt: 0,
@@ -92,6 +95,7 @@ describe('SearchSection Component', () => {
     vi.mocked(useVideoSearchQuery).mockReturnValue({
       search: mockSearch,
       results: [],
+      asked: null,
       isLoading: false,
       hasSearched: false,
       settledAt: 0,
@@ -159,6 +163,7 @@ describe('SearchSection Component', () => {
     vi.mocked(useVideoSearchQuery).mockReturnValue({
       search: mockSearch,
       results: [],
+      asked: null,
       isLoading: false,
       hasSearched: false,
       settledAt: 0,
@@ -177,6 +182,7 @@ describe('SearchSection Component', () => {
     vi.mocked(useVideoSearchQuery).mockReturnValue({
       search: vi.fn(),
       results: [],
+      asked: null,
       isLoading: false,
       hasSearched: true,
       settledAt: 0,
@@ -188,10 +194,42 @@ describe('SearchSection Component', () => {
     expect(screen.getByText('0 found.')).toBeInTheDocument();
   });
 
+  it('should let a result say why it is there, in the place it holds and under the search it answers', () => {
+    const result = (id: string, vector_position: number) => ({
+      id,
+      titulo_video: `Video ${id}`,
+      url_original: `https://x.com/a/status/${id}`,
+      similarity: 0.8,
+      vector_position,
+      text_position: null,
+      fusion_k: 50,
+    });
+    vi.mocked(useVideoSearchQuery).mockReturnValue({
+      search: vi.fn(),
+      results: [result('1', 1), result('2', 2)],
+      asked: { query: 'whale', threshold: 0.6, limit: 5, mode: 'semantic' },
+      isLoading: false,
+      hasSearched: true,
+      settledAt: 1,
+      error: null,
+    });
+
+    renderWithProviders(<SearchSection />);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Why?' })[1]);
+
+    const reason = screen.getByRole('dialog', { name: 'Why this result?' });
+    expect(reason).toHaveTextContent('Video 2');
+    expect(reason).toHaveTextContent('2nd on the list.');
+    expect(reason).toHaveTextContent('This mode does not look for words.');
+  });
+
   it('should show error message when error occurs', () => {
     vi.mocked(useVideoSearchQuery).mockReturnValue({
       search: vi.fn(),
       results: [],
+      asked: null,
       isLoading: false,
       hasSearched: true,
       settledAt: 0,
@@ -207,6 +245,7 @@ describe('SearchSection Component', () => {
     vi.mocked(useVideoSearchQuery).mockReturnValue({
       search: vi.fn(),
       results: [],
+      asked: null,
       isLoading: true,
       hasSearched: true,
       settledAt: 0,

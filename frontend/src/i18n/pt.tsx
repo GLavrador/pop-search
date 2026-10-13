@@ -280,6 +280,43 @@ export const pt: Dictionary = {
     copied: 'URL copiada para a área de transferência!',
   },
 
+  why: {
+    open: 'Por quê?',
+    title: 'Ver por que este vídeo apareceu, e nesta posição',
+    heading: 'Por que este resultado?',
+    final: (n) => `${n}º da lista.`,
+    lead: {
+      both: 'Apareceu pelo significado e pelas palavras.',
+      words: 'Apareceu pelas palavras que você digitou.',
+      meaning: 'Apareceu pelo significado: fala de algo parecido com o que você escreveu.',
+    },
+    meaning: 'Significado',
+    words: 'Palavras',
+    meaningPlace: (n, percent) =>
+      `${n}º entre os vídeos mais parecidos: ${percent}% parecido com o que você escreveu.`,
+    wordsPlace: (n) => `${n}º entre os vídeos que têm as suas palavras.`,
+    belowCut: (percent) =>
+      `Isso fica abaixo da precisão de ${percent}% pedida. Sozinho ele não estaria aqui: entrou pelas palavras.`,
+    meaningUnlisted: 'Não ficou entre os vídeos mais parecidos.',
+    wordsUnlisted: 'Não ficou entre os primeiros pelas palavras.',
+    meaningOff: 'Este modo não procura por significado.',
+    wordsOff: 'Este modo não procura por palavras.',
+    showSum: 'Ver a conta >>',
+    hideSum: '<< Esconder a conta',
+    sum: {
+      caption: 'Como a posição na lista foi calculada',
+      list: 'Lista',
+      place: 'Posição',
+      points: 'Pontos',
+      total: 'Soma',
+      nth: (n) => `${n}º`,
+      out: 'fora dela',
+      formula: (k, place, points) => `1 ÷ (${k} + ${place}) = ${points}`,
+    },
+    how: 'São feitas duas listas, uma por significado e outra por palavras. Cada uma dá pontos pela posição do vídeo nela, e quem soma mais pontos vem primeiro.',
+    howSingle: 'Neste modo só uma das duas listas é feita, então a ordem dela é a final.',
+  },
+
   quota: {
     loading: 'Carregando uso...',
     label: 'Análises este mês',
@@ -659,7 +696,8 @@ export const pt: Dictionary = {
             Três vídeos. Olhe a etiqueta ao lado de cada um: ela conta por que aquele vídeo
             apareceu. <strong>palavras</strong> quer dizer que o texto dele tem a palavra que você
             digitou. <strong>significado</strong> quer dizer que ele fala de algo parecido, mesmo
-            sem a palavra. Foi assim que uma girafa veio parar aqui.
+            sem a palavra. Foi assim que uma girafa veio parar aqui. O botão{' '}
+            <strong>Por quê?</strong> de cada um abre a explicação inteira.
           </>
         ),
       },
@@ -803,6 +841,7 @@ export const pt: Dictionary = {
         authSubmit: ['conferindo...', 'um instante...', 'batendo na porta...'],
         gateSignIn: ['vem, é rapidinho', 'a conta é de graça', 'por aqui!'],
         adminRange: ['outro período!', 'mudando a janela', 'recontando...'],
+        why: ['deixa que eu explico!', 'raio-x!', 'os bastidores!'],
       },
     },
     lines: {
@@ -1047,6 +1086,10 @@ export const pt: Dictionary = {
       'card.origin': {
         title: 'Por que apareceu',
         text: 'A etiqueta conta o motivo: "palavras" quer dizer que o texto do vídeo tem o que você digitou, "significado" quer dizer que ele fala de algo parecido.',
+      },
+      'card.why': {
+        title: 'Por quê?',
+        text: 'Abre uma janela que conta, em palavras simples, por que este vídeo apareceu e nesta posição: o quanto ele se parece, onde as suas palavras foram achadas nele, e a conta por trás para quem quiser ver.',
       },
       'card.match': {
         title: 'Match',

@@ -15,6 +15,8 @@ interface SearchArgs {
 interface UseVideoSearchQueryReturn {
     search: (query: string, threshold: number, limit: number, mode: SearchMode) => boolean;
     results: SearchResult[];
+    /** The search the results answer. */
+    asked: SearchArgs | null;
     isLoading: boolean;
     hasSearched: boolean;
     error: string | null;
@@ -61,6 +63,7 @@ export const useVideoSearchQuery = (): UseVideoSearchQueryReturn => {
     return {
         search,
         results: query.data ?? [],
+        asked: searchQuery,
         isLoading: query.isFetching,
         hasSearched,
         error: query.error ? getErrorMessage(query.error) : null,

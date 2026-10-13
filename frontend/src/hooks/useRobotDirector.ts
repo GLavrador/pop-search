@@ -69,6 +69,7 @@ const PRESS_FACES: Partial<Record<PressKey, Face>> = {
   editCancel: 'neutral',
   removeAsk: 'worried',
   back: 'neutral',
+  why: 'curious',
 };
 
 const mark = (zone: Zone) => () =>

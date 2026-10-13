@@ -76,6 +76,32 @@ describe('VideoCard Component', () => {
     });
   });
 
+  describe('asking why it came up', () => {
+    it('should not be offered while there is no reason to give', () => {
+      render(<VideoCard data={mockData} />);
+
+      expect(screen.queryByRole('button', { name: 'Why?' })).not.toBeInTheDocument();
+    });
+
+    it('should be a button that says what it is for', () => {
+      const onWhy = vi.fn();
+      render(<VideoCard data={mockData} onWhy={onWhy} />);
+      const why = screen.getByRole('button', { name: 'Why?' });
+
+      expect(why).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(why);
+
+      expect(onWhy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should stay pressed while the reason is on screen', () => {
+      render(<VideoCard data={mockData} onWhy={vi.fn()} explaining />);
+
+      expect(screen.getByRole('button', { name: 'Why?' })).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
   describe('a long description', () => {
     // jsdom lays nothing out: the box is told its heights, and when it is looked at.
     const layOut = (full: number, shown: number) => {

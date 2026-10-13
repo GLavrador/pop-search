@@ -67,7 +67,8 @@
   cursor: pointer;
 }
 
-.more:focus-visible {
+.more:focus-visible,
+.whyButton:focus-visible {
   outline: 1px dotted currentColor;
   outline-offset: 2px;
 }
@@ -153,7 +154,31 @@
   color: var(--win-light);
 }
 
-/* On a narrow screen that column becomes a line under the rest. */
+.whyButton {
+  margin-top: 2px;
+  padding: 3px 12px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--win-dark);
+  white-space: nowrap;
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+  cursor: pointer;
+}
+
+.whyButton:active,
+.whyButton[aria-expanded='true'] {
+  border-top: 2px solid var(--win-dark);
+  border-left: 2px solid var(--win-dark);
+  border-right: 2px solid var(--win-light);
+  border-bottom: 2px solid var(--win-light);
+}
+
+/* On a narrow screen that column becomes a line under the rest, the button at its end. */
 @media (max-width: 768px) {
   .side {
     flex: 1 1 100%;
@@ -168,6 +193,11 @@
 
   .how {
     gap: 4px;
+  }
+
+  .whyButton {
+    margin: 0;
+    flex-shrink: 0;
   }
 }
 

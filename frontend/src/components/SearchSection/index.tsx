@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useVideoSearchQuery } from "../../hooks/useVideoSearchQuery";
 import { useStatus } from "../../context/StatusContext";
-import { VideoCard } from "../VideoCard";
+import { ResultList } from "../ResultList";
 import { TaskProgress } from "../TaskProgress";
 import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
 import { PrecisionPresets } from "../PrecisionPresets";
@@ -23,7 +23,7 @@ export const SearchSection = () => {
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [mode, setMode] = useState<SearchMode>(DEFAULT_SEARCH_MODE);
   const thresholdApplies = findSearchMode(mode).usesThreshold;
-  const { search, results, isLoading, hasSearched, error, settledAt } = useVideoSearchQuery();
+  const { search, results, asked, isLoading, hasSearched, error, settledAt } = useVideoSearchQuery();
   const { setStatus } = useStatus();
   const { t } = useI18n();
   const robot = useRobot();
@@ -199,9 +199,7 @@ export const SearchSection = () => {
           </div>
         )}
 
-        {results.map((video) => (
-          <VideoCard key={video.id} data={video} />
-        ))}
+        <ResultList results={results} asked={asked ?? undefined} />
       </div>
     </div>
   );
