@@ -35,6 +35,10 @@ contribuir exige conta.
   fica guardada até ser salva, mesmo que a pessoa feche a página
 - **Busca híbrida**: encontra por significado e por palavra exata, fundindo os
   dois rankings
+- **Por que este resultado?**: o botão "Por quê?" de cada resultado abre uma
+  janela que explica em palavras simples por que ele apareceu: a posição em cada
+  ranking e o trecho onde as palavras bateram. A conta da fusão fica a um botão
+  de distância
 - **Entrada manual**: dá para catalogar um vídeo sem usar IA
 - **O post junto do vídeo**: a miniatura e o texto do post no X são lidos de
   graça durante o download. A miniatura aparece nos resultados; o texto vira um
@@ -58,6 +62,10 @@ contribuir exige conta.
   lugar. Soltar o do Pop Search na Lixeira derruba tudo numa tela azul: o robô
   não acredita, procura o que sumiu, reclama e reconstrói tudo peça por peça,
   com direito a barra de tarefas que escorrega e janela aberta à força
+- **Meu Computador mostra os bastidores**: o ícone abre as Propriedades do
+  Sistema, com as peças de verdade num Gerenciador de dispositivos (servidor,
+  banco, Gemini, yt-dlp e como cada uma está agora), o tamanho do acervo e quanto
+  tempo a última busca levou em cada etapa
 
 ## Como a busca funciona
 
@@ -83,6 +91,12 @@ combinadas com **E**: cada palavra a mais restringe.
 
 Acentos são normalizados dos dois lados da comparação por uma configuração de
 busca própria (`portuguese_unaccent`), então `musica` encontra `música`.
+
+Cada resultado volta com a explicação da própria posição: o lugar que ocupou em
+cada ranking, o `k` da fusão (`score` é a soma de `1 / (k + lugar)`) e um trecho
+do texto com as palavras que casaram, marcado pelo `ts_headline` do Postgres com
+a mesma configuração da busca. É o que a janela aberta pelo botão "Por quê?" de
+cada resultado mostra.
 
 ## Contas e limites
 
@@ -226,6 +240,20 @@ Cada resultado traz `similarity`, `text_rank` e `score`, o que permite saber se
 casou por significado, por palavra ou pelos dois, e o `post` de onde o vídeo veio
 (`texto` e `miniatura`), quando ele foi guardado. Quem postou não é guardado.
 **20 req/min.**
+
+Também traz o porquê: `vector_position` e `text_position` (o lugar em cada
+ranking, `null` quando o vídeo não estava nele), `fusion_k` e `matched`, um
+trecho com as palavras que casaram entre `<<` e `>>`.
+
+A resposta leva o cabeçalho `Server-Timing` com o tempo de cada etapa em
+milissegundos: `embed` (transformar a pergunta em vetor, ausente no modo `text`),
+`db` (a consulta no Postgres) e `total`.
+
+### Sistema - público
+
+`GET /system` devolve do que o servidor é feito e como está: versão, tempo
+ligado, modelos do Gemini, versão do yt-dlp, quantos vídeos há no acervo e quanto
+tempo o banco levou para responder. Não chama a IA. **30 req/min.**
 
 ### Analisar vídeo - requer conta
 
@@ -403,7 +431,7 @@ backend/
 │   ├── limiter.py           # Rate limiting por IP
 │   └── logger.py            # Logs
 ├── routers/
-│   ├── health.py            # Healthcheck
+│   ├── health.py            # Healthcheck e relatório do sistema
 │   ├── videos.py            # Análise e indexação
 │   ├── search.py            # Busca híbrida
 │   └── me.py                # Conta, cota e estatísticas
