@@ -267,6 +267,8 @@ export const en = {
     meaning: { label: 'meaning', title: 'Matched by meaning. Your exact words may not appear in this video.' },
     match: (percent: number) => `MATCH: ${percent}%`,
     noDescription: 'No description available',
+    more: 'read more ▾',
+    less: 'read less ▴',
     copy: 'Copy',
     copyTitle: 'Copy URL',
     copied: 'URL copied to clipboard!',

@@ -273,6 +273,8 @@ export const pt: Dictionary = {
     },
     match: (percent: number) => `MATCH: ${percent}%`,
     noDescription: 'Sem descrição disponível',
+    more: 'ler mais ▾',
+    less: 'ler menos ▴',
     copy: 'Copiar',
     copyTitle: 'Copiar URL',
     copied: 'URL copiada para a área de transferência!',
