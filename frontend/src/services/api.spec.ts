@@ -1,10 +1,15 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-const { post, put, del } = vi.hoisted(() => ({ post: vi.fn(), put: vi.fn(), del: vi.fn() }));
+const { post, put, del, get } = vi.hoisted(() => ({
+  post: vi.fn(),
+  put: vi.fn(),
+  del: vi.fn(),
+  get: vi.fn(),
+}));
 
 vi.mock('axios', () => ({
   default: {
-    create: () => ({ post, put, get: vi.fn(), delete: del, interceptors: { request: { use: vi.fn() } } }),
+    create: () => ({ post, put, get, delete: del, interceptors: { request: { use: vi.fn() } } }),
   },
 }));
 
@@ -12,7 +17,15 @@ vi.mock('../lib/supabase', () => ({
   supabase: { auth: { getSession: vi.fn().mockResolvedValue({ data: { session: null } }) } },
 }));
 
-import { deleteVideo, lookUpPost, startAnalysis, updateVideo } from './api';
+import {
+  deleteVideo,
+  getSystem,
+  lookUpPost,
+  searchVideos,
+  startAnalysis,
+  updateVideo,
+} from './api';
+import { lastSearch, timed } from './searchTrace';
 
 const LINK = 'https://x.com/a/status/1';
 const OPTIONS = { analyzeScenes: true, analyzeAudio: false };
@@ -102,5 +115,72 @@ describe('changing a video of mine', () => {
     await deleteVideo('video-1');
 
     expect(del).toHaveBeenCalledWith('/me/videos/video-1');
+  });
+});
+
+describe('searching', () => {
+  const FOUND = [{ id: 'a' }, { id: 'b' }];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    lastSearch.set(null);
+  });
+
+  it('should keep how long each step took, as the server told it', async () => {
+    post.mockResolvedValue({
+      data: FOUND,
+      headers: { 'server-timing': 'embed;dur=412.6, db;dur=95.2, total;dur=521.9' },
+    });
+
+    expect(await searchVideos({ query: 'whale', mode: 'hybrid' })).toBe(FOUND);
+
+    expect(lastSearch.get()).toMatchObject({
+      query: 'whale',
+      mode: 'hybrid',
+      found: 2,
+      embedMs: 412.6,
+      dbMs: 95.2,
+      serverMs: 521.9,
+    });
+    expect(lastSearch.get()?.roundTripMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should keep no time for a step the server skipped', async () => {
+    post.mockResolvedValue({
+      data: FOUND,
+      headers: { 'server-timing': 'db;dur=95.2, total;dur=101' },
+    });
+
+    await searchVideos({ query: 'whale', mode: 'text' });
+
+    expect(lastSearch.get()).toMatchObject({ embedMs: null, dbMs: 95.2, serverMs: 101 });
+  });
+
+  it('should still time the whole trip when the server reports nothing', async () => {
+    post.mockResolvedValue({ data: FOUND });
+
+    await searchVideos({ query: 'whale' });
+
+    expect(lastSearch.get()).toMatchObject({ found: 2, embedMs: null, dbMs: null, serverMs: null });
+    expect(lastSearch.get()?.roundTripMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should find its own steps among the ones added on the way', () => {
+    const header = 'cfExtPri, embed;dur=12.5;desc="ai", cache;desc="total;dur=9", total;dur=40';
+
+    expect(timed(header, 'embed')).toBe(12.5);
+    expect(timed(header, 'total')).toBe(40);
+    expect(timed(header, 'db')).toBeNull();
+    expect(timed(undefined, 'total')).toBeNull();
+  });
+});
+
+describe('asking the server about itself', () => {
+  it('should hand back what it says', async () => {
+    const report = { version: '1.0.0', uptime_seconds: 12 };
+    get.mockResolvedValue({ data: report });
+
+    expect(await getSystem()).toBe(report);
+    expect(get).toHaveBeenCalledWith('/system', expect.objectContaining({ timeout: 30000 }));
   });
 });

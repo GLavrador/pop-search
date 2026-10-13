@@ -83,6 +83,23 @@ export interface SearchResult {
   matched?: string | null;
 }
 
+/** What the server is made of and how it is doing. */
+export interface SystemReport {
+  version: string;
+  uptime_seconds: number;
+  python: string;
+  framework: string;
+  downloader: string;
+  database: { ok: boolean; ms: number | null; videos: number | null };
+  ai: {
+    analysis_model: string;
+    embedding_model: string;
+    dimensions: number;
+    questions_kept: number;
+    questions_room: number;
+  };
+}
+
 export interface QuotaStatus {
   used: number;
   limit: number;
