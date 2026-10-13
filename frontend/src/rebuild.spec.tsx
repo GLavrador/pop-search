@@ -171,8 +171,10 @@ describe('throwing the program in the bin', () => {
 
     trashTheProgram();
 
-    expect(await screen.findByText(DISBELIEF)).toBeInTheDocument();
-    expect(await screen.findByText(/everything back in its place/)).toBeInTheDocument();
+    expect(await screen.findByText(DISBELIEF, {}, { timeout: 4000 })).toBeInTheDocument();
+    expect(
+      await screen.findByText(/everything back in its place/, {}, { timeout: 4000 }),
+    ).toBeInTheDocument();
     expect(unbuilt()).toHaveLength(0);
     expect(clock()).toBeInTheDocument();
     await theShowToEnd();

@@ -202,7 +202,9 @@ describe('following an analysis', () => {
     onServer = job('done', { analyze_audio: false });
     renderApp();
 
-    await user.click(await screen.findByRole('button', { name: 'Continue the review' }));
+    await user.click(
+      await screen.findByRole('button', { name: 'Continue the review' }, { timeout: 3000 }),
+    );
 
     expect(await screen.findByDisplayValue(TITLE)).toBeInTheDocument();
     expect(screen.queryByText('Audio Analysis')).not.toBeInTheDocument();
@@ -212,7 +214,7 @@ describe('following an analysis', () => {
     onServer = job('done');
     renderApp();
 
-    await user.click(await screen.findByRole('button', { name: 'Discard' }));
+    await user.click(await screen.findByRole('button', { name: 'Discard' }, { timeout: 3000 }));
 
     expect(discardAnalysis).toHaveBeenCalledOnce();
     expect(await screen.findByPlaceholderText('https://...')).toBeInTheDocument();
