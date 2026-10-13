@@ -1,6 +1,7 @@
 import {
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   type PointerEvent,
   type ReactNode,
@@ -86,7 +87,7 @@ export const RobotPilot = ({
   const press = useRef<{ x: number; y: number; carrying: boolean } | null>(null);
   const justDropped = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!sky.current || !craft.current || !emote.current || !balloon.current) return;
 
     const flying = createPilot({
@@ -105,7 +106,8 @@ export const RobotPilot = ({
     };
   }, [home, stage]);
 
-  useEffect(() => {
+  // Before the screen is drawn again: a new line must not show where the last one was said.
+  useLayoutEffect(() => {
     pilot.current?.brief({
       utterance,
       cue,

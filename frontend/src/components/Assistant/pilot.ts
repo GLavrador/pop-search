@@ -943,7 +943,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       snoreAt = now + SNORE_EVERY;
     }
 
-    const open = !flying && (pinned || leg.mission === true);
+    const open = !flying && !briefed && (pinned || leg.mission === true);
     if (open !== balloonOn) {
       balloonOn = open;
       balloon.toggleAttribute('data-on', open);
@@ -1012,6 +1012,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       if (!unchanged && !itsOwnDoing) {
         briefed = true;
         dozing = false;
+        // What it says next is said where it lands, not here before it has left.
+        balloonOn = false;
+        balloon.removeAttribute('data-on');
       }
     },
 
