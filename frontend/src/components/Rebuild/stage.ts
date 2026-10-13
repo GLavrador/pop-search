@@ -1,6 +1,7 @@
 import type { Dictionary } from '../../i18n/en';
 import type { Face, Pose } from '../Assistant/trips';
 import type { IconZone } from '../Desktop/icons';
+import type { Store } from '../../utils/store';
 
 export type LineKey = keyof Dictionary['rebuild']['says'];
 export type EmoteKey = keyof Dictionary['rebuild']['emotes'];
@@ -81,33 +82,9 @@ export interface RebuildView {
 }
 
 /**
- * Something kept apart from the rest of the screen because it changes many
- * times a second: only what draws it is drawn again.
+ * The robot of the show, and the blue that covers the desktop in the pieces it is
+ * cleaned up in. Kept in stores because they change many times a second.
  */
-export interface Store<T> {
-  get: () => T;
-  set: (next: T) => void;
-  subscribe: (notify: () => void) => () => void;
-}
-
-export const createStore = <T>(first: T): Store<T> => {
-  let held = first;
-  const watching = new Set<() => void>();
-
-  return {
-    get: () => held,
-    set: (next) => {
-      held = next;
-      watching.forEach((notify) => notify());
-    },
-    subscribe: (notify) => {
-      watching.add(notify);
-      return () => watching.delete(notify);
-    },
-  };
-};
-
-/** The robot of the show, and the blue that covers the desktop in the pieces it is cleaned up in. */
 export type Cast = Store<Actor | null>;
 export type Blue = Store<Tiles | null>;
 

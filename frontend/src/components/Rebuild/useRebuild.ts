@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { REBUILD_PACE, SWALLOW_MS } from '../../constants/rebuild';
 import type { IconZone } from '../Desktop/icons';
+import { createStore } from '../../utils/store';
 import { setupShow, wreckCalmly, wreckShow } from './show';
 import {
   IDLE,
   blueOver,
-  createStore,
   gridFor,
   wrecked,
   type Actor,
