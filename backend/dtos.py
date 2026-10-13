@@ -199,3 +199,28 @@ class SearchResult(BaseModel):
     fusion_k: Optional[int] = Field(None, description="The k of the fusion: score = sum of 1 / (k + place)")
     matched: Optional[str] = Field(None, description="Excerpt with the words that matched between << and >>")
 
+
+class DatabaseStatus(BaseModel):
+    ok: bool
+    ms: Optional[float] = None
+    videos: Optional[int] = None
+
+
+class AiStatus(BaseModel):
+    analysis_model: str
+    embedding_model: str
+    dimensions: int
+    questions_kept: int
+    questions_room: int
+
+
+class SystemReport(BaseModel):
+    """What the server is made of and how it is doing, for anyone to read."""
+    version: str
+    uptime_seconds: int
+    python: str
+    framework: str
+    downloader: str
+    database: DatabaseStatus
+    ai: AiStatus
+

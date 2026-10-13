@@ -176,5 +176,6 @@ def no_real_database():
          patch("services.jobs.supabase", guard), \
          patch("routers.me.supabase", guard), \
          patch("routers.videos.supabase", guard), \
-         patch("routers.search.supabase", guard):
+         patch("routers.search.supabase", guard), \
+         patch("routers.health.supabase", guard):
         yield
