@@ -1,3 +1,4 @@
+import { availableParallelism } from 'node:os'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react-swc'
 
@@ -20,5 +21,7 @@ export default defineConfig({
     environment: 'jsdom', 
     setupFiles: './src/test/setup.ts', 
     css: false, 
+    // Left to itself Vitest starts a worker per logical processor, and they starve each other.
+    maxWorkers: Math.min(6, Math.max(1, availableParallelism() - 1)),
   },
 })
