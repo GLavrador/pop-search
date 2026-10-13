@@ -23,5 +23,7 @@ export default defineConfig({
     css: false, 
     // Left to itself Vitest starts a worker per logical processor, and they starve each other.
     maxWorkers: Math.min(6, Math.max(1, availableParallelism() - 1)),
+    // A test of the whole app takes seconds in jsdom, and longer on a busy machine.
+    testTimeout: 15000,
   },
 })
