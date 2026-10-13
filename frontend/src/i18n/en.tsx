@@ -702,7 +702,7 @@ export const en = {
           <>
             I am the robot that lives in here and helps whoever is just arriving. Before I show
             you where everything is, let me tell you <strong>what Pop Search is</strong> and what
-            it is for. It will not take long.
+            it is for.
           </>
         ),
         next: 'Tell me ▶',
@@ -712,22 +712,23 @@ export const en = {
         say: (
           <>
             Know that video you saw on X and then could never find again? Pop Search is an archive
-            of videos built so that does not happen. It works in three beats:
+            of videos built so that does not happen. This is basically how it works:
             <ol>
               <li>
-                <strong>You keep it</strong> Paste the link to the post that has the video.
+                <strong>You keep it</strong> A video you would not want to lose or forget. Just
+                paste the link to the post it is in.
               </li>
               <li>
-                <strong>The AI watches</strong> An artificial intelligence sees the video and
-                writes down what happens in it.
+                <strong>The AI describes it</strong> An artificial intelligence watches the video
+                and writes down what happens in it. Or you write it yourself, if you would rather.
               </li>
               <li>
-                <strong>You find it</strong> Later you just write what you remember, like{' '}
-                <em>cat knocking over a glass</em>.
+                <strong>You find it</strong> The search goes by meaning (semantic) and by the words
+                (exact). It finds your videos and other people's, even when you are not sure what
+                to type.
               </li>
             </ol>
-            Now I will show you each part working, on a practice screen: nothing we do here
-            reaches the real app.
+            Now I will show you each part working, in a tutorial. It will not take long :)
           </>
         ),
         next: 'Off we go ▶',

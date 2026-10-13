@@ -700,7 +700,7 @@ export const pt: Dictionary = {
           <>
             Sou o robô que mora aqui dentro e ajuda quem está chegando. Antes de te mostrar onde
             fica cada coisa, deixa eu te contar <strong>o que é o Pop Search</strong> e para que
-            ele serve. É rapidinho.
+            ele serve.
           </>
         ),
         next: 'Me conta ▶',
@@ -710,22 +710,23 @@ export const pt: Dictionary = {
         say: (
           <>
             Sabe aquele vídeo que você viu no X e depois nunca mais achou? O Pop Search é um
-            arquivo de vídeos feito para isso não acontecer. Ele funciona em três tempos:
+            arquivo de vídeos feito para isso não acontecer. Ele basicamente funciona assim:
             <ol>
               <li>
-                <strong>Você guarda</strong> Cola o link do post que tem o vídeo.
+                <strong>Você guarda</strong> Um vídeo que você não gostaria de perder ou
+                esquecer. É só colar o link do post em que ele está.
               </li>
               <li>
-                <strong>A IA assiste</strong> Uma inteligência artificial vê o vídeo e escreve o
-                que acontece nele.
+                <strong>A IA descreve</strong> Uma inteligência artificial assiste ao vídeo e
+                escreve o que acontece nele. Se preferir, você mesmo escreve.
               </li>
               <li>
-                <strong>Você acha</strong> Depois é só escrever o que lembra, tipo{' '}
-                <em>gato derrubando um copo</em>.
+                <strong>Você acha</strong> A busca vai pelo significado (semântica) e pelas
+                palavras (exata). Dá para achar vídeos seus e de outras pessoas, mesmo sem saber
+                bem o que digitar.
               </li>
             </ol>
-            Agora eu te mostro cada parte funcionando, numa tela de treino: nada do que a gente
-            fizer aqui vai para o app de verdade.
+            Agora eu te mostro cada parte funcionando, num tutorial. É rapidinho :)
           </>
         ),
         next: 'Vamos lá ▶',

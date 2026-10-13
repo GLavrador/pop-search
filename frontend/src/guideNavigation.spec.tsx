@@ -76,8 +76,10 @@ describe('guided demo navigation', () => {
 
     expect(screen.getByText('What Pop Search is')).toBeInTheDocument();
     expect(screen.getByText('You keep it')).toBeInTheDocument();
-    expect(screen.getByText('The AI watches')).toBeInTheDocument();
+    expect(screen.getByText('The AI describes it')).toBeInTheDocument();
+    expect(screen.getByText(/Or you write it yourself/)).toBeInTheDocument();
     expect(screen.getByText('You find it')).toBeInTheDocument();
+    expect(screen.getByText(/by meaning \(semantic\) and by the words \(exact\)/)).toBeInTheDocument();
     expect(screen.getByText('2/13')).toBeInTheDocument();
 
     await press('Off we go ▶');
