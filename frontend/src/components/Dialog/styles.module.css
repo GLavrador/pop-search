@@ -82,6 +82,23 @@
   margin: 0;
 }
 
+.body::-webkit-scrollbar {
+  width: 16px;
+}
+
+.body::-webkit-scrollbar-track {
+  background: var(--win-shadow-light);
+  border-left: 1px solid white;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background-color: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+}
+
 .footer {
   display: flex;
   flex-shrink: 0;
