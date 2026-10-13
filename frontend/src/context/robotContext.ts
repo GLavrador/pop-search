@@ -59,7 +59,9 @@ export type RobotEvent =
   | { kind: 'iconDropped' }
   /** The program's icon is being held over the bin. */
   | { kind: 'binThreat' }
-  | { kind: 'appTrashed' };
+  | { kind: 'appTrashed' }
+  /** The visitor asked not to be invited to the guide again. */
+  | { kind: 'inviteHidden'; undo: () => void };
 
 export interface RobotVoice {
   /** Has it explain a control, standing next to `node`. */

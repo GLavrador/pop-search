@@ -71,10 +71,46 @@ describe('AuthPanel', () => {
     expect(onStartGuide).toHaveBeenCalledOnce();
   });
 
-  it('should not offer the guide before the account exists', () => {
+  it('should keep the nudge towards the guide for once the account is created', () => {
     render(<AuthPanel onStartGuide={vi.fn()} />);
 
     expect(screen.queryByRole('button', { name: /Show me how it works/i })).not.toBeInTheDocument();
+  });
+
+  it('should offer the guide to a visitor from the sign in form', async () => {
+    const user = userEvent.setup();
+    const onStartGuide = vi.fn();
+    render(<AuthPanel onStartGuide={onStartGuide} />);
+
+    await user.click(screen.getByRole('button', { name: '▶ Open the guide' }));
+
+    expect(onStartGuide).toHaveBeenCalledOnce();
+  });
+
+  it('should let a visitor switch the invitation to the guide off and back on', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const view = render(<AuthPanel onStartGuide={vi.fn()} invite={{ on: true, onChange }} />);
+    const invited = () =>
+      screen.getByRole('checkbox', { name: 'Invite me to the guide every time Pop Search opens' });
+
+    expect(invited()).toBeChecked();
+    await user.click(invited());
+    expect(onChange).toHaveBeenLastCalledWith(false);
+
+    view.rerender(<AuthPanel onStartGuide={vi.fn()} invite={{ on: false, onChange }} />);
+
+    expect(invited()).not.toBeChecked();
+    await user.click(invited());
+    expect(onChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('should give a signed in account no switch for an invitation it never gets', () => {
+    mockAuth.isAuthenticated = true;
+    render(<AuthPanel onStartGuide={vi.fn()} invite={{ on: true, onChange: vi.fn() }} />);
+
+    expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
   it('should not offer the guide when sign up fails', async () => {

@@ -662,17 +662,13 @@ export const pt: Dictionary = {
     ),
     offScriptAction: 'Me leve de volta',
     invite: {
-      fresh: {
-        lead: 'Primeira vez aqui?',
-        text: 'Eu te mostro o app inteiro em dois minutos.',
-        start: '▶ Começar o guia',
-      },
-      again: {
-        lead: 'Quer rever?',
-        text: 'Eu te mostro o app de novo em dois minutos.',
-        start: '▶ Rever o guia',
-      },
-      dismissTitle: 'Recolher. O guia continua lá em cima, na barra de título.',
+      lead: 'Quer ver como o Pop Search funciona?',
+      text: 'Eu te mostro tudo em dois minutos, numa tela de treino. Não precisa de conta.',
+      start: '▶ Começar o guia',
+      close: 'Fechar por agora. O convite volta quando a página abrir de novo.',
+      hide: 'não mostrar mais',
+      hideTitle: 'Não mostrar mais este convite neste navegador. Dá para ligar de novo na aba Sign In.',
+      keep: 'Me convidar para o guia toda vez que o Pop Search abrir',
     },
     chip: {
       label: 'Guia',
@@ -700,7 +696,7 @@ export const pt: Dictionary = {
           <>
             Sou o robô que mora aqui dentro e ajuda quem está chegando. Antes de te mostrar onde
             fica cada coisa, deixa eu te contar <strong>o que é o Pop Search</strong> e para que
-            ele serve. É rapidinho.
+            ele serve.
           </>
         ),
         next: 'Me conta ▶',
@@ -710,22 +706,23 @@ export const pt: Dictionary = {
         say: (
           <>
             Sabe aquele vídeo que você viu no X e depois nunca mais achou? O Pop Search é um
-            arquivo de vídeos feito para isso não acontecer. Ele funciona em três tempos:
+            arquivo de vídeos feito para isso não acontecer. Ele basicamente funciona assim:
             <ol>
               <li>
-                <strong>Você guarda</strong> Cola o link do post que tem o vídeo.
+                <strong>Você guarda</strong> Um vídeo que você não gostaria de perder ou
+                esquecer. É só colar o link do post em que ele está.
               </li>
               <li>
-                <strong>A IA assiste</strong> Uma inteligência artificial vê o vídeo e escreve o
-                que acontece nele.
+                <strong>A IA descreve</strong> Uma inteligência artificial assiste ao vídeo e
+                escreve o que acontece nele. Se preferir, você mesmo escreve.
               </li>
               <li>
-                <strong>Você acha</strong> Depois é só escrever o que lembra, tipo{' '}
-                <em>gato derrubando um copo</em>.
+                <strong>Você acha</strong> A busca vai pelo significado (semântica) e pelas
+                palavras (exata). Dá para achar vídeos seus e de outras pessoas, mesmo sem saber
+                bem o que digitar.
               </li>
             </ol>
-            Agora eu te mostro cada parte funcionando, numa tela de treino: nada do que a gente
-            fizer aqui vai para o app de verdade.
+            Agora eu te mostro cada parte funcionando, num tutorial. É rapidinho :)
           </>
         ),
         next: 'Vamos lá ▶',
@@ -946,6 +943,7 @@ export const pt: Dictionary = {
         authSwitch: ['conta nova ou antiga?', 'tanto faz, eu espero', 'escolha à vontade'],
         authSubmit: ['conferindo...', 'um instante...', 'batendo na porta...'],
         gateSignIn: ['vem, é rapidinho', 'a conta é de graça', 'por aqui!'],
+        inviteClose: ['até já!', 'tô por aqui!', 'qualquer coisa, me chama'],
         adminRange: ['outro período!', 'mudando a janela', 'recontando...'],
         why: ['deixa que eu explico!', 'raio-x!', 'os bastidores!'],
         computer: ['olha eu por dentro!', 'não repara a bagunça', 'meus bastidores!'],
@@ -1002,6 +1000,10 @@ export const pt: Dictionary = {
       },
       serverDown: {
         text: 'O servidor não respondeu. Buscar e guardar vídeos pode não funcionar por enquanto. Tente recarregar a página daqui a pouco.',
+      },
+      inviteHidden: {
+        text: 'Combinado: não mostro mais o convite neste navegador. O guia continua aqui em cima, em Guia, e na aba Sign In dá para ligar o convite de novo.',
+        action: 'Desfazer',
       },
     },
     drop: {

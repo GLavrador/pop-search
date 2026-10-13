@@ -665,17 +665,13 @@ export const en = {
     ),
     offScriptAction: 'Take me back',
     invite: {
-      fresh: {
-        lead: 'First time here?',
-        text: 'I can show you the whole app in two minutes.',
-        start: '▶ Start the guide',
-      },
-      again: {
-        lead: 'Want another look?',
-        text: 'I can show you the app again in two minutes.',
-        start: '▶ See the guide again',
-      },
-      dismissTitle: 'Tuck this away. The guide stays up in the title bar.',
+      lead: 'Want to see how Pop Search works?',
+      text: 'I will show you all of it in two minutes, on a practice screen. No account needed.',
+      start: '▶ Start the guide',
+      close: 'Close for now. The invitation is back the next time the page opens.',
+      hide: 'do not show again',
+      hideTitle: 'Do not show this invitation again in this browser. The Sign In tab can turn it back on.',
+      keep: 'Invite me to the guide every time Pop Search opens',
     },
     chip: {
       label: 'Guide',
@@ -702,7 +698,7 @@ export const en = {
           <>
             I am the robot that lives in here and helps whoever is just arriving. Before I show
             you where everything is, let me tell you <strong>what Pop Search is</strong> and what
-            it is for. It will not take long.
+            it is for.
           </>
         ),
         next: 'Tell me ▶',
@@ -712,22 +708,23 @@ export const en = {
         say: (
           <>
             Know that video you saw on X and then could never find again? Pop Search is an archive
-            of videos built so that does not happen. It works in three beats:
+            of videos built so that does not happen. This is basically how it works:
             <ol>
               <li>
-                <strong>You keep it</strong> Paste the link to the post that has the video.
+                <strong>You keep it</strong> A video you would not want to lose or forget. Just
+                paste the link to the post it is in.
               </li>
               <li>
-                <strong>The AI watches</strong> An artificial intelligence sees the video and
-                writes down what happens in it.
+                <strong>The AI describes it</strong> An artificial intelligence watches the video
+                and writes down what happens in it. Or you write it yourself, if you would rather.
               </li>
               <li>
-                <strong>You find it</strong> Later you just write what you remember, like{' '}
-                <em>cat knocking over a glass</em>.
+                <strong>You find it</strong> The search goes by meaning (semantic) and by the words
+                (exact). It finds your videos and other people's, even when you are not sure what
+                to type.
               </li>
             </ol>
-            Now I will show you each part working, on a practice screen: nothing we do here
-            reaches the real app.
+            Now I will show you each part working, in a tutorial. It will not take long :)
           </>
         ),
         next: 'Off we go ▶',
@@ -947,6 +944,7 @@ export const en = {
         authSwitch: ['new account or old?', 'either way, I wait', 'take your pick'],
         authSubmit: ['checking...', 'one moment...', 'knocking on the door...'],
         gateSignIn: ['come, it is quick', 'an account is free', 'this way!'],
+        inviteClose: ['see you!', 'I will be around!', 'call me if you need me'],
         adminRange: ['another period!', 'moving the window', 'recounting...'],
         why: ['let me explain!', 'x-ray!', 'behind the scenes!'],
         computer: ['that is me inside!', 'mind the mess', 'my insides!'],
@@ -1003,6 +1001,10 @@ export const en = {
       },
       serverDown: {
         text: 'The server did not answer. Searching and keeping videos may not work for now. Try reloading the page in a little while.',
+      },
+      inviteHidden: {
+        text: 'Deal: I will not show the invitation again in this browser. The guide stays up here, under Guide, and the Sign In tab can turn the invitation back on.',
+        action: 'Undo',
       },
     },
     drop: {

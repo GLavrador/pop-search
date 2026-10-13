@@ -1359,13 +1359,12 @@
 }
 
 /* The navy button is always the way forward, and there is only ever one. */
-:is(.assistant, .invite, .paused, .speech) .go {
+:is(.assistant, .paused, .speech) .go {
   min-width: 124px;
   background: var(--win-blue-title);
   color: var(--win-light);
 }
 
-.invite,
 .paused {
   flex: 0 0 auto;
   display: flex;
@@ -1378,14 +1377,13 @@
   box-shadow: 2px 2px 0 0 var(--win-shadow-dark);
 }
 
-.inviteText,
 .pausedText {
   flex: 1;
   min-width: 0;
   font-size: 0.8rem;
 }
 
-:is(.invite, .paused) .go {
+.paused .go {
   min-width: 0;
   padding: 3px 12px;
   font-size: 0.8rem;
@@ -1417,46 +1415,68 @@
     justify-content: space-between;
   }
 
-  .invite,
   .paused {
     flex-wrap: wrap;
   }
 
-  .inviteText,
   .pausedText {
     flex: 1 1 60%;
   }
 }
 
-/* The invitation is the one thing a visitor should not miss, so it is the loud one. */
-.invite {
-  gap: 11px;
-  padding: 8px 8px 8px 11px;
+/* The invitation: the robot does the asking, with what to do about it to the right of what it says. */
+.calling .bubble {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 7px 32px 8px 12px;
 }
 
-.robotMedium {
+.callText {
+  flex: 1;
+  min-width: 0;
+}
+
+.calling .title {
+  margin: 0 0 1px;
+}
+
+.calling .say {
+  line-height: 1.4;
+}
+
+.callMoves {
   flex: 0 0 auto;
-  width: 32px;
-  height: 37px;
-  margin: -13px 0 -3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
 }
 
-.invite .inviteText {
-  font-size: 0.87rem;
-  line-height: 1.35;
-}
-
-.inviteLead {
-  color: var(--win-blue-title);
-}
-
-.invite .go {
-  padding: 5px 14px;
-  font-size: 0.86rem;
-}
-
-.inviteFresh .go {
+.calling .go {
+  padding: 5px 16px;
+  font-size: 0.88rem;
+  font-weight: bold;
+  white-space: nowrap;
   animation: callout 1.4s ease-out infinite;
+}
+
+@media (max-width: 768px) {
+  .calling .bubble {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding-right: 12px;
+  }
+
+  .calling .title {
+    margin-right: 22px;
+  }
+
+  .callMoves {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+  }
 }
 
 @keyframes callout {
@@ -1508,7 +1528,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inviteFresh .go {
+  .calling .go {
     animation: none;
   }
 }

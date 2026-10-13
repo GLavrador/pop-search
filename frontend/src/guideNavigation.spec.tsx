@@ -27,7 +27,7 @@ import App from './App';
 
 const renderApp = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  render(
+  return render(
     <QueryClientProvider client={queryClient}>
       <App />
     </QueryClientProvider>,
@@ -76,8 +76,10 @@ describe('guided demo navigation', () => {
 
     expect(screen.getByText('What Pop Search is')).toBeInTheDocument();
     expect(screen.getByText('You keep it')).toBeInTheDocument();
-    expect(screen.getByText('The AI watches')).toBeInTheDocument();
+    expect(screen.getByText('The AI describes it')).toBeInTheDocument();
+    expect(screen.getByText(/Or you write it yourself/)).toBeInTheDocument();
     expect(screen.getByText('You find it')).toBeInTheDocument();
+    expect(screen.getByText(/by meaning \(semantic\) and by the words \(exact\)/)).toBeInTheDocument();
     expect(screen.getByText('2/13')).toBeInTheDocument();
 
     await press('Off we go ▶');
@@ -203,7 +205,7 @@ describe('guided demo navigation', () => {
     expect(screen.getByText('6/13')).toBeInTheDocument();
   });
 
-  it('should end on the last step and keep offering the guide, on every tab', async () => {
+  it('should end on the last step and go on inviting, on every tab', async () => {
     renderApp();
     await startGuide();
     await jumpTo(13);
@@ -211,18 +213,53 @@ describe('guided demo navigation', () => {
     await press('Finish ✓');
 
     expect(screen.queryByText('13/13')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '▶ See the guide again' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
 
     await user.click(tab('🔍 Search.exe'));
 
-    expect(screen.getByRole('button', { name: '▶ See the guide again' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
   });
 
-  it('should move into the title bar when tucked away, and still open the guide', async () => {
+  it('should have the robot invite a visitor from above the tabs, so it is there on all of them', async () => {
     renderApp();
-    await user.click(await screen.findByRole('button', { name: /Tuck this away/ }));
+
+    expect(await screen.findByText('Want to see how Pop Search works?')).toBeInTheDocument();
+    expect(screen.getByText(/in two minutes, on a practice screen/)).toBeInTheDocument();
+
+    await user.click(tab('🔍 Search.exe'));
+
+    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+  });
+
+  it('should invite again every time the page opens, whatever was done with the guide before', async () => {
+    // What earlier versions kept about the invitation no longer counts.
+    localStorage.setItem('pop-search:guide-invite', 'tucked');
+    renderApp();
+
+    expect(await screen.findByText('Want to see how Pop Search works?')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Guide: let BIP-98 show you around' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('should keep the way to the guide in one place: the sign in wall offers only to sign in', async () => {
+    renderApp();
+    await screen.findByText('Want to see how Pop Search works?');
+
+    expect(screen.getByText('An account is required to add videos.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Show me how it works/ })).not.toBeInTheDocument();
+  });
+
+  it('should stop inviting only when asked to in so many words, and say where the guide went', async () => {
+    renderApp();
+
+    await user.click(await screen.findByRole('button', { name: 'do not show again' }));
 
     expect(screen.queryByRole('button', { name: /Start the guide/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'I will not show the invitation again in this browser',
+    );
+    expect(localStorage.getItem('pop-search:guide-invite-off')).not.toBeNull();
 
     await user.click(tab('🔍 Search.exe'));
     await press('Guide: let BIP-98 show you around');
@@ -230,8 +267,72 @@ describe('guided demo navigation', () => {
     expect(screen.getByText('Hi! I am BIP-98')).toBeInTheDocument();
   });
 
-  it('should stay tucked away on the next visit', async () => {
-    localStorage.setItem('pop-search:guide-invite', 'tucked');
+  it('should take that back on the spot when asked', async () => {
+    renderApp();
+    await user.click(await screen.findByRole('button', { name: 'do not show again' }));
+
+    await press('Undo');
+
+    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:guide-invite-off')).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Guide: let BIP-98 show you around' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('should close at the X for now only, and be back the next time the page opens', async () => {
+    const page = renderApp();
+
+    await user.click(await screen.findByRole('button', { name: /Close for now/ }));
+
+    expect(screen.queryByRole('button', { name: /Start the guide/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Guide: let BIP-98 show you around' })).toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:guide-invite-off')).toBeNull();
+
+    page.unmount();
+    renderApp();
+
+    expect(await screen.findByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+  });
+
+  it('should keep a way to the guide, and the switch of the invitation, on the sign in tab', async () => {
+    renderApp();
+    await user.click(await screen.findByRole('button', { name: 'do not show again' }));
+    await user.click(tab('🔑 Sign In'));
+    const invited = () =>
+      screen.getByRole('checkbox', { name: 'Invite me to the guide every time Pop Search opens' });
+
+    expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
+    expect(invited()).not.toBeChecked();
+
+    await user.click(invited());
+
+    expect(invited()).toBeChecked();
+    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:guide-invite-off')).toBeNull();
+
+    await user.click(invited());
+
+    expect(screen.queryByRole('button', { name: '▶ Start the guide' })).not.toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:guide-invite-off')).not.toBeNull();
+  });
+
+  it('should bring back at once an invitation closed at the X, when it is switched on again', async () => {
+    renderApp();
+    await user.click(await screen.findByRole('button', { name: /Close for now/ }));
+    await user.click(tab('🔑 Sign In'));
+    const invited = screen.getByRole('checkbox', {
+      name: 'Invite me to the guide every time Pop Search opens',
+    });
+
+    await user.click(invited);
+    await user.click(invited);
+
+    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+  });
+
+  it('should stay put away on the next visit, with the guide in the title bar', async () => {
+    localStorage.setItem('pop-search:guide-invite-off', '1');
     renderApp();
 
     expect(
