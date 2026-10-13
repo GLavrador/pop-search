@@ -41,6 +41,8 @@ export interface Stop {
   side?: Side;
   /** How it settles there, when the place itself decides it: a ledge is for sitting. */
   pose?: Pose;
+  /** The side of it the balloon hangs on, when the place leaves only that one free. */
+  hang?: 'left' | 'right';
 }
 
 /** One stop: where to go, how to look once there, and how long to stay. */

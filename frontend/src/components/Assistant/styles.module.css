@@ -72,7 +72,6 @@
   line-height: 1.45;
   visibility: hidden;
   opacity: 0;
-  transition: opacity 140ms ease-out, visibility 0s linear 140ms;
 }
 
 .balloon:empty {

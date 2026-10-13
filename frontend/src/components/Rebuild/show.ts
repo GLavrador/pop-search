@@ -36,6 +36,7 @@ const buildIcons = async (s: Stage, quick: boolean) => {
     ['bin', 'one'],
     ['computer', 'two'],
     ['app', 'three'],
+    ['tricks', 'tricks'],
   ];
   const blow = quick ? 200 : 360;
 

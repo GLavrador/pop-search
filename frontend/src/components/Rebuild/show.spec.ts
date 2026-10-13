@@ -292,7 +292,15 @@ describe('building the desktop as the page opens', () => {
     await setupShow(stage);
 
     const muttered = told.filter(({ kind }) => kind === 'emote');
-    expect(muttered.map(({ what }) => what)).toEqual(['one', 'two', 'polish', 'three', 'start', 'ready']);
+    expect(muttered.map(({ what }) => what)).toEqual([
+      'one',
+      'two',
+      'polish',
+      'three',
+      'tricks',
+      'start',
+      'ready',
+    ]);
     muttered.forEach((mutter) => {
       const off = told.slice(told.indexOf(mutter)).find(({ kind }) => kind === 'fly');
       expect((off?.at ?? Infinity) - mutter.at).toBeGreaterThanOrEqual(STILL_TO_READ_MS);

@@ -24,6 +24,7 @@ export const pt: Dictionary = {
   desktop: {
     myComputer: 'Meu Computador',
     recycleBin: 'Lixeira',
+    tricks: 'Truques',
   },
 
   system: {
@@ -217,6 +218,7 @@ export const pt: Dictionary = {
       two: 'um computador...',
       polish: 'essa aqui com carinho',
       three: 'e a minha casa!',
+      tricks: 'e os meus truques!',
       bar: 'agora, a barra',
       heave: 'hnnngh!',
       slip: 'escorregou!',
@@ -822,8 +824,79 @@ export const pt: Dictionary = {
     },
   },
 
+  tricks: {
+    title: 'Truques do BIP-98',
+    lead: 'Nem tudo cabe no guia.',
+    intro:
+      'Isto é o que dá para fazer comigo, com a área de trabalho e com a busca. Eu só digo o que tentar. O que acontece depois, você descobre.',
+    first: {
+      legend: 'Comece por este',
+      what: 'O botão ? da janela.',
+      text: 'Fica na barra azul, ao lado do minimizar. Clique nele e depois em qualquer coisa da tela: eu vou até lá e explico o que é e para que serve. Vale para botão, campo, aba, resultado da busca, até para mim.',
+      action: 'Testar agora',
+    },
+    groups: [
+      {
+        legend: 'Comigo',
+        items: [
+          {
+            what: 'Me cutuque.',
+            text: 'Uma vez, duas seguidas, ou muitas.',
+          },
+          {
+            what: 'Me pegue e me arraste.',
+            text: 'Me leve para qualquer canto, me solte no ar ou me jogue longe.',
+          },
+          { what: 'Me sacuda.', text: 'De um lado para o outro, sem soltar.' },
+          {
+            what: 'Me solte em cima das coisas.',
+            text: 'Na borda de cima da janela, num ícone, no relógio, no Iniciar, no X da janela, no botão do Pop Search lá na barra de tarefas. Sobre cada uma eu tenho uma opinião.',
+          },
+          { what: 'Tente me jogar na Lixeira.', text: 'Eu não faria isso.' },
+          {
+            what: 'Me deixe sozinho.',
+            text: 'Uns minutos sem mexer em nada. E repare no que eu apronto quando ninguém está olhando.',
+          },
+          {
+            what: 'Minimize a janela.',
+            text: 'Veja onde eu fico esperando. Dali eu também sei trazer ela de volta.',
+          },
+        ],
+      },
+      {
+        legend: 'Com a área de trabalho',
+        items: [
+          {
+            what: 'Arraste os ícones.',
+            text: 'Qualquer um, para qualquer lugar, mas eles normalmente voltam pro lugar. Não jogue nada no lixo (por favor).',
+          },
+          { what: 'Tente fechar a janela.', text: 'No X. Ela é teimosa: insista.' },
+          { what: 'Abra o Meu Computador.', text: 'Dois cliques no ícone, ou um toque no celular.' },
+        ],
+      },
+      {
+        legend: 'Digitando',
+        items: [
+          {
+            what: 'Escreva gato, cachorro, robô ou lixo na busca.',
+            text: 'Nem precisa buscar. Fique de olho em mim enquanto digita.',
+          },
+          {
+            what: 'GRITE na busca, ou segure uma tecla.',
+            text: 'De vez em quando eu também venho ler junto, o que é falta de educação.',
+          },
+          { what: 'Digite uma senha.', text: 'Na hora de entrar na conta. Eu juro que não olho.' },
+          {
+            what: 'Busque o comando proibido.',
+            text: 'É C:\\con\\con, exatamente assim. Ele derrubava o Windows 98 de verdade. Aqui também derruba.',
+          },
+        ],
+      },
+    ],
+  },
+
   robot: {
-    dismiss: 'Fechar',
+    dismiss:'Fechar',
     ask: (what: string) => `O que é ${what}?`,
     says: {
       tabs: {
@@ -944,6 +1017,7 @@ export const pt: Dictionary = {
         authSubmit: ['conferindo...', 'um instante...', 'batendo na porta...'],
         gateSignIn: ['vem, é rapidinho', 'a conta é de graça', 'por aqui!'],
         inviteClose: ['até já!', 'tô por aqui!', 'qualquer coisa, me chama'],
+        tricks: ['meus segredos!', 'vai contar tudo, é?', 'agora você sabe demais'],
         adminRange: ['outro período!', 'mudando a janela', 'recontando...'],
         why: ['deixa que eu explico!', 'raio-x!', 'os bastidores!'],
         computer: ['olha eu por dentro!', 'não repara a bagunça', 'meus bastidores!'],
@@ -1005,6 +1079,14 @@ export const pt: Dictionary = {
         text: 'Combinado: não mostro mais o convite neste navegador. O guia continua aqui em cima, em Guia, e na aba Sign In dá para ligar o convite de novo.',
         action: 'Desfazer',
       },
+      tricksOffer: {
+        text: 'Bip! Pode mexer por aqui à vontade, tem coisas para descobrir fora da aba do Pop Search também! Eu não vou dizer o que tem escondido, senão perde a graça. Mas se quiser colar, (quase) tudo está aqui, no ícone Truques.',
+        action: 'Espiar os truques',
+      },
+      guideDone: {
+        text: 'Esse foi o guia! Agora a casa é sua. Quer dizer, é minha, mas eu empresto: pode mexer em tudo à vontade. Tem coisas para fazer e descobrir por aqui que eu não mostrei, e a graça é descobrir sozinho. Mas se quiser colar, (quase) tudo está aqui, no ícone Truques.',
+        action: 'Espiar os truques',
+      },
     },
     drop: {
       computer: [
@@ -1031,6 +1113,11 @@ export const pt: Dictionary = {
         'Cuidado com esse botão: dizem que tem um gato do outro lado.',
         'O X? Eu não apertaria. Tem um gato esperando ali atrás.',
         'Esse fecha a janela. E solta o gato.',
+      ],
+      tricks: [
+        'Os meus truques! Abre aí que eu conto tudo.',
+        'Esse ícone é a minha lista do que dá para aprontar por aqui.',
+        'Truques: tudo o que o guia não teve coragem de mostrar.',
       ],
     },
     whatsThis: {
@@ -1080,9 +1167,13 @@ export const pt: Dictionary = {
         title: 'Pop Search System',
         text: 'O botão da janela. Clique para minimizar o programa, clique de novo para trazer de volta.',
       },
+      tricks: {
+        title: 'Truques do BIP-98',
+        text: 'A minha lista do que dá para tentar por aqui. Cada linha diz o que fazer, não o que acontece: essa parte é você que descobre.',
+      },
       'desktop.icon': {
         title: 'Área de trabalho',
-        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela, e o Meu Computador mostra do que isto tudo é feito. Só não solte o Pop Search na Lixeira.',
+        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela, o Meu Computador mostra do que isto tudo é feito, e o Truques guarda a minha lista do que dá para tentar por aqui. Só não solte o Pop Search na Lixeira.',
       },
       system: {
         title: 'Propriedades do Sistema',
@@ -1090,7 +1181,7 @@ export const pt: Dictionary = {
       },
       robot: {
         title: 'BIP-98',
-        text: 'Esse sou eu! Moro aqui no Pop Search e explico o que você quiser. Também dá para me pegar e me arrastar pela tela.',
+        text: 'Esse sou eu! Moro aqui no Pop Search e explico o que você quiser. Também dá para me pegar e me arrastar pela tela. Me cutuque que eu conto o que mais dá para fazer.',
       },
       'guide.invite': {
         title: 'O guia',

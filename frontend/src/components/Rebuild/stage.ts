@@ -131,9 +131,14 @@ export interface Stage {
   mend: () => void;
 }
 
-export const ALL_ICONS: readonly IconZone[] = ['bin', 'computer', 'app'];
+export const ALL_ICONS: readonly IconZone[] = ['bin', 'computer', 'app', 'tricks'];
 
-const ALL_BUILT: Record<IconZone, Built> = { bin: WHOLE, computer: WHOLE, app: WHOLE };
+const ALL_BUILT: Record<IconZone, Built> = {
+  bin: WHOLE,
+  computer: WHOLE,
+  app: WHOLE,
+  tricks: WHOLE,
+};
 
 export const IDLE: RebuildView = {
   phase: 'idle',
@@ -160,7 +165,7 @@ export const wrecked = (kind: Kind): RebuildView => ({
   ...IDLE,
   phase: 'show',
   kind,
-  built: { bin: 0, computer: 0, app: 0 },
+  built: { bin: 0, computer: 0, app: 0, tricks: 0 },
   taskbar: { by: 1, ms: 0 },
   start: false,
   clock: 'none',

@@ -1,0 +1,58 @@
+/* The room at the foot keeps the frame of the last group whole when scrolled to the end. */
+.tricks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 6px;
+}
+
+.intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.portrait {
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+/* What it says comes out of a balloon, as it does everywhere else. */
+.says {
+  position: relative;
+  flex: 1;
+  padding: 6px 9px 7px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+}
+
+.says::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: -6px;
+  width: 9px;
+  height: 9px;
+  background: var(--win-tooltip-bg);
+  border-left: 1px solid var(--win-dark);
+  border-bottom: 1px solid var(--win-dark);
+  transform: rotate(45deg);
+}
+
+.lead {
+  font-weight: bold;
+}
+
+.first {
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0 0 0 16px;
+  list-style: square;
+}

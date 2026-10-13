@@ -53,6 +53,10 @@ contribuir exige conta.
 - **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
   qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
   falha da IA, vídeo salvo) e pode ser arrastado pela tela
+- **Truques à vista**: o que dá para fazer fora do guia (com o robô, com a área
+  de trabalho, com a busca) está numa lista do próprio BIP-98, que diz o que
+  tentar e não o que acontece. Ela abre pelo ícone Truques da área de trabalho,
+  e o robô a oferece quando é cutucado e quando o guia termina
 - **Abertura com o robô montando tudo**: na primeira vez em cada aba, o BIP-98
   constrói a área de trabalho à vista (ícones a martelo, barra de tarefas,
   relógio, o azul espanado) e abre o programa. Qualquer tecla pula

@@ -205,7 +205,7 @@ describe('guided demo navigation', () => {
     expect(screen.getByText('6/13')).toBeInTheDocument();
   });
 
-  it('should end on the last step and go on inviting, on every tab', async () => {
+  it('should end on the last step and offer what the guide left out, in place of inviting again', async () => {
     renderApp();
     await startGuide();
     await jumpTo(13);
@@ -213,11 +213,24 @@ describe('guided demo navigation', () => {
     await press('Finish ✓');
 
     expect(screen.queryByText('13/13')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '▶ Start the guide' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Guide: let BIP-98 show you around' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Now make yourself at home');
 
-    await user.click(tab('🔍 Search.exe'));
+    await press('Peek at the tricks');
+
+    expect(screen.getByRole('dialog', { name: "BIP-98's tricks" })).toBeInTheDocument();
+  });
+
+  it('should go on inviting when the guide is left before its end', async () => {
+    renderApp();
+    await startGuide();
+    await press('Close the guide');
+
+    await press('end guide');
 
     expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
   it('should have the robot invite a visitor from above the tabs, so it is there on all of them', async () => {

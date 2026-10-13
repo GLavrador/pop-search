@@ -88,7 +88,9 @@ describe('signing in without a reload', () => {
 
   it('should drop what was cached under the previous identity', async () => {
     const { resetQueries } = renderApp();
-    await waitFor(() => expect(screen.getByText('🔑 Sign In')).toBeInTheDocument());
+    // Only a visitor whose session has been read is invited to the guide. Signing in
+    // before that would be the first identity seen, not a change of one.
+    await screen.findByRole('button', { name: /Start the guide/ });
     expect(resetQueries).not.toHaveBeenCalled();
 
     signIn();

@@ -55,7 +55,16 @@ export type Target = HTMLElement | (() => HTMLElement | null) | null;
 export type Move = 'jolt' | 'spin' | 'hop' | 'nod' | 'shake';
 
 /** The places it can be dropped on. Each one gets its own answer. */
-export type Zone = 'bin' | 'computer' | 'app' | 'clock' | 'start' | 'task' | 'close' | 'roof';
+export type Zone =
+  | 'bin'
+  | 'computer'
+  | 'app'
+  | 'tricks'
+  | 'clock'
+  | 'start'
+  | 'task'
+  | 'close'
+  | 'roof';
 
 export interface Mission {
   /** Changes whenever the robot has something new to say. */
@@ -151,6 +160,7 @@ const SEATED = 9;
 const ROOST_INSET = 118;
 const BALLOON_GAP = 10;
 const BALLOON_LIFT = 23;
+const ASIDE = 10;
 const DROP_REACH = 14;
 // Wherever it is caught, it ends up held by the antenna.
 const HANDLE: Point = { x: 23, y: 4 };
@@ -392,7 +402,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     const fitsAbove = pos.y - height - BALLOON_GAP >= 4;
     const fitsBelow = pos.y + size.h + BALLOON_GAP + height <= window.innerHeight - 34;
     let hang = 'up';
-    if (perch?.side === 'below') {
+    if (perch?.hang) {
+      hang = perch.hang;
+    } else if (perch?.side === 'below') {
       hang = fitsBelow || !fitsAbove ? 'drop' : 'up';
     } else if (!fitsAbove) {
       // Standing beside a control, a balloon at its side would land on that control.
@@ -472,6 +484,22 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     };
   };
 
+  /** True when what it has to say fits neither over its head nor beside it there. */
+  const cramped = (at: Point) =>
+    balloon.firstElementChild !== null &&
+    at.y - balloon.offsetHeight - BALLOON_GAP < 4 &&
+    !roomBeside(at);
+
+  /** In the air off the top corner of the window, what it says hung beside it and clear of the window. */
+  const aside = (frame: Box): Stop | null => {
+    const x = frame.right + ASIDE;
+    const reach = balloon.offsetWidth + BALLOON_GAP + 8;
+    if (x + size.w + reach > window.innerWidth) return null;
+
+    const y = Math.max(frame.top - 10, balloon.offsetHeight - size.h + BALLOON_LIFT + 6);
+    return { at: { x, y }, pose: 'hover', hang: 'right' };
+  };
+
   /** Where it lives between errands: up on the window, or down by the clock. */
   const roost = (): Stop | null => {
     const frame = openWindow();
@@ -480,7 +508,10 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
 
     if (box.top >= size.h - 8) {
       const x = clamp(box.right - size.w - ROOST_INSET, box.left + 8, box.right - size.w - 8);
-      return { at: { x, y: box.top - size.h + SEATED }, pose: 'sit' };
+      const up: Stop = { at: { x, y: box.top - size.h + SEATED }, pose: 'sit' };
+      // Said from up there, it would drop over the title bar and the tabs: it says it
+      // from beside the window, and from down by the clock where the screen has no room.
+      return (cramped(up.at) ? (aside(box) ?? byClock()) : null) ?? up;
     }
 
     // A window filling a small screen has the taskbar under it: the status bar is the ledge.
@@ -912,7 +943,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       snoreAt = now + SNORE_EVERY;
     }
 
-    const open = !flying && (pinned || leg.mission === true);
+    const open = !flying && !briefed && (pinned || leg.mission === true);
     if (open !== balloonOn) {
       balloonOn = open;
       balloon.toggleAttribute('data-on', open);
@@ -981,6 +1012,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
       if (!unchanged && !itsOwnDoing) {
         briefed = true;
         dozing = false;
+        // What it says next is said where it lands, not here before it has left.
+        balloonOn = false;
+        balloon.removeAttribute('data-on');
       }
     },
 

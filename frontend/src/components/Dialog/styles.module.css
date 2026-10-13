@@ -1,13 +1,16 @@
 /* Over the window and the icons, under the taskbar and the robot. */
 .dialog {
+  --top: clamp(12px, 12vh, 110px);
+
   position: fixed;
-  top: clamp(12px, 12vh, 110px);
+  top: var(--top);
   left: 50%;
   z-index: 60;
   display: flex;
   flex-direction: column;
   width: min(480px, calc(100vw - 16px));
-  max-height: calc(100vh - 60px);
+  /* A long one ends above the taskbar, with its OK still in reach. */
+  max-height: calc(100vh - var(--top) - 38px);
   padding: 2px;
   font-size: 0.85rem;
   line-height: 1.35;
@@ -77,6 +80,23 @@
 
 .body p {
   margin: 0;
+}
+
+.body::-webkit-scrollbar {
+  width: 16px;
+}
+
+.body::-webkit-scrollbar-track {
+  background: var(--win-shadow-light);
+  border-left: 1px solid white;
+}
+
+.body::-webkit-scrollbar-thumb {
+  background-color: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
 }
 
 .footer {

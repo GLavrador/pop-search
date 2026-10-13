@@ -110,7 +110,7 @@ describe('starting up', () => {
       expect(blue).toHaveTextContent(/^Pop Search$/);
       expect(screen.getByRole('status')).toHaveTextContent(BUILDING);
       expect(screen.queryByText(BIOS)).not.toBeInTheDocument();
-      expect(unbuilt()).toHaveLength(3);
+      expect(unbuilt()).toHaveLength(4);
       expect(document.querySelector('[data-robot="taskbar"]')).toHaveAttribute('data-start', 'none');
       expect(document.querySelector('[data-robot="clock"]')).toBeNull();
       expect(frame()).toHaveAttribute('aria-hidden', 'true');

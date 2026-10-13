@@ -51,6 +51,8 @@ export type Brief = Pick<Mission, 'utterance' | 'cue' | 'target' | 'aim' | 'roam
 interface DirectorOptions {
   /** True while the guide has the robot: it then keeps quiet about everything else. */
   guiding: boolean;
+  /** Opens the list of what there is to try, which it offers when poked and after the guide. */
+  onTricks: () => void;
 }
 
 const RANK = { tip: 0, react: 1, ask: 2 };
@@ -58,6 +60,8 @@ const LINE_SPEECH = 2200;
 const WAIT_BETWEEN_LINES = 18000;
 const REVISIT_CHATTER = 0.4;
 const SAME_PRESS_GAP = 1500;
+const OFFER_FOR = 16000;
+const OFFER_REST = 90000;
 
 // Most buttons get a smile. These few get a different look.
 const PRESS_FACES: Partial<Record<PressKey, Face>> = {
@@ -81,6 +85,7 @@ const mark = (zone: Zone) => () =>
 const DROPS = {
   computer: mark('computer'),
   app: mark('app'),
+  tricks: mark('tricks'),
   clock: mark('clock'),
   start: mark('start'),
   close: mark('close'),
@@ -118,6 +123,11 @@ const EMPTY_BOX = () => findHelp('search.empty');
 const SEARCH_FIELD = () => findHelp('search.query')?.querySelector<HTMLElement>('input') ?? null;
 const TITLE_FIELD = () => findHelp('review.general')?.querySelector<HTMLElement>('input') ?? null;
 const GUIDE_CHIP = () => document.querySelector<HTMLElement>('[data-robot="guide"]');
+// The icon the list opens from. Under a window that fills the screen there is nothing to point at.
+const TRICKS_ICON = () =>
+  document.querySelector('[data-robot="window"][data-maximized]:not([aria-hidden="true"])')
+    ? null
+    : DROPS.tricks();
 const BROADEST = Math.min(...PRECISION_PRESETS.map((preset) => preset.threshold));
 
 const AT_REST: Brief = { utterance: 'rest', cue: 'rest', target: null, aim: null, roam: 'calm' };
@@ -138,7 +148,7 @@ const READING: Record<'search' | 'title', Brief> = {
 const isHelpKey = (key: string | undefined): key is HelpKey =>
   key !== undefined && key in en.robot.help;
 
-export const useRobotDirector = ({ guiding }: DirectorOptions) => {
+export const useRobotDirector = ({ guiding, onTricks }: DirectorOptions) => {
   const { t } = useI18n();
   const [line, setLine] = useState<Line | null>(null);
   const [helping, setHelping] = useState(false);
@@ -151,10 +161,11 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
   const noticed = useRef(new Set<TypedWord>());
   const vary = useMemo(() => createVariety(), []);
   const toldStep = useRef<AnalysisStep | null>(null);
-  const live = useRef({ guiding, t });
+  const offered = useRef({ id: 0, at: -OFFER_REST });
+  const live = useRef({ guiding, t, onTricks });
 
   useEffect(() => {
-    live.current = { guiding, t };
+    live.current = { guiding, t, onTricks };
   });
 
   const put = useCallback((next: Line | null) => {
@@ -207,7 +218,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
 
       const turn = vary(`drop.${zone}`, [0, 1, 2]);
       const time = DROPS.clock()?.textContent?.trim() ?? '';
-      const onIcon = zone === 'computer' || zone === 'app';
+      const onIcon = zone === 'computer' || zone === 'app' || zone === 'tricks';
       say({
         rank: 'react',
         copy: ({ robot }) => ({
@@ -229,6 +240,44 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
     },
     [say, vary],
   );
+
+  /** Standing by the icon that opens it, it says there is a list of what to try. */
+  const offerTricks = useCallback(
+    (when: 'tricksOffer' | 'guideDone', ttl: number) => {
+      const before = spoken.current;
+      say({
+        rank: 'react',
+        copy: ({ robot }) => robot.lines[when],
+        run: () => live.current.onTricks(),
+        cue: 'teach',
+        target: TRICKS_ICON,
+        aim: BESIDE_ICON,
+        ttl,
+      });
+      const made = spoken.current;
+      if (made && made !== before) offered.current = { id: made.id, at: Date.now() };
+    },
+    [say],
+  );
+
+  /**
+   * A poke with nothing else going on gets the offer in place of a beep, and says
+   * so by returning true. Poked again it drops the subject and goes back to play.
+   */
+  const poked = useCallback(() => {
+    const current = spoken.current;
+    if (current && current.id === offered.current.id) {
+      put(null);
+      return false;
+    }
+    if (live.current.guiding || current) return false;
+    if (Date.now() - offered.current.at < OFFER_REST) return false;
+
+    offerTricks('tricksOffer', OFFER_FOR);
+    return true;
+  }, [offerTricks, put]);
+
+  const guideDone = useCallback(() => offerTricks('guideDone', 22000), [offerTricks]);
 
   // Each step of an analysis gets a word, once, in one of its wordings.
   const sayStep = useCallback(
@@ -586,5 +635,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
     stopHelp,
     pick,
     dropped,
+    poked,
+    guideDone,
   };
 };

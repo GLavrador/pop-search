@@ -264,6 +264,16 @@ describe('the robot outside the guide', () => {
     ).toBeInTheDocument();
   });
 
+  it('should say what its own icon holds when it is dropped on it', async () => {
+    renderApp();
+
+    await dropOn('Tricks');
+
+    expect(
+      within(screen.getByRole('status')).getByText(/I tell all|my list of what there is|did not dare/),
+    ).toBeInTheDocument();
+  });
+
   it('should read out the time when it is dropped on the clock', async () => {
     renderApp();
     const clock = document.querySelector('[data-robot-zone="clock"]') as HTMLElement;
