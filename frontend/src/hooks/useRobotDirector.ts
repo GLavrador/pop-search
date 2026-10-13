@@ -117,6 +117,7 @@ const ERROR_BOX = () => findHelp('ingest.error');
 const EMPTY_BOX = () => findHelp('search.empty');
 const SEARCH_FIELD = () => findHelp('search.query')?.querySelector<HTMLElement>('input') ?? null;
 const TITLE_FIELD = () => findHelp('review.general')?.querySelector<HTMLElement>('input') ?? null;
+const GUIDE_CHIP = () => document.querySelector<HTMLElement>('[data-robot="guide"]');
 const BROADEST = Math.min(...PRECISION_PRESETS.map((preset) => preset.threshold));
 
 const AT_REST: Brief = { utterance: 'rest', cue: 'rest', target: null, aim: null, roam: 'calm' };
@@ -443,6 +444,16 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
             ttl: 14000,
           });
           break;
+        case 'inviteHidden':
+          say({
+            rank: 'react',
+            copy: ({ robot }) => robot.lines.inviteHidden,
+            run: event.undo,
+            cue: 'teach',
+            target: GUIDE_CHIP,
+            ttl: 16000,
+          });
+          break;
       }
     },
     [hush, put, react, review, say, sayStep, stopReading, typed, vary],
@@ -543,8 +554,11 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
 
   const voice = useMemo<RobotVoice>(() => ({ explain, notify }), [explain, notify]);
 
-  /** What it should be doing now: its own line first, then the guide, then the app. */
-  const briefOver = (guide: Brief | null): Brief => {
+  /**
+   * What it should be doing now: its own line first, then the guide, then the app,
+   * and with none of them asking, whatever it was left to do.
+   */
+  const briefOver = (guide: Brief | null, idle: Brief = AT_REST): Brief => {
     if (line) {
       return {
         utterance: `line:${line.id}`,
@@ -557,7 +571,7 @@ export const useRobotDirector = ({ guiding }: DirectorOptions) => {
     }
     if (guide) return guide;
     if (watching) return WATCHING;
-    return reader.reading ? READING[reader.reading] : AT_REST;
+    return reader.reading ? READING[reader.reading] : idle;
   };
 
   return {

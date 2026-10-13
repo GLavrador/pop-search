@@ -35,7 +35,7 @@ import { DemoIngest } from './components/Demo/DemoIngest';
 import { DemoSearch } from './components/Demo/DemoSearch';
 import { AIMS } from './components/Demo/spotlight';
 import { useGuide } from './hooks/useGuide';
-import { useRobotDirector } from './hooks/useRobotDirector';
+import { useRobotDirector, type Brief } from './hooks/useRobotDirector';
 import { RobotContext, helpAt, type HelpKey } from './context/robotContext';
 import type { WindowState } from './components/RetroWindow';
 import { Boot } from './components/Boot';
@@ -50,16 +50,13 @@ const WINDOW_ICON = '💻';
 const APP_NAME = 'Pop Search';
 const CLICKS_TO_CLOSE = 5;
 const CLOSING_MS = 320;
-const INVITE_KEY = 'pop-search:guide-invite';
+// A visitor is invited to the guide every time the page opens. Asking for that to
+// stop is the one thing kept about it. Put away either way, it leaves a chip in
+// the title bar.
+const INVITE_OFF_KEY = 'pop-search:guide-invite-off';
 
-// A visitor is always offered the guide: loudly at first, as a chip in the title
-// bar once they tuck the invitation away.
-type Invite = 'fresh' | 'seen' | 'tucked';
-
-const readInvite = (): Invite => {
-  const saved = localStorage.getItem(INVITE_KEY);
-  return saved === 'tucked' ? 'tucked' : saved ? 'seen' : 'fresh';
-};
+// While the invitation is up the robot makes it in person, from the seat beside it.
+const CALLING: Brief = { utterance: 'invite', cue: 'greet', target: null, aim: null, roam: 'calm' };
 
 interface AppContentProps {
   server: ServerStatus;
@@ -83,7 +80,8 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const robot = useRobotDirector({ guiding: guide.isVisible });
   const { notify } = robot;
   const wasSignedIn = useRef<boolean | null>(null);
-  const [invite, setInvite] = useState(readInvite);
+  const [inviteOff, setInviteOff] = useState(() => localStorage.getItem(INVITE_OFF_KEY) !== null);
+  const [inviteShut, setInviteShut] = useState(false);
   const [spotNode, setSpotNode] = useState<HTMLElement | null>(null);
   const reportSpot = useCallback((node: HTMLElement | null) => setSpotNode(node), []);
   const robotSeat = useRef<HTMLDivElement>(null);
@@ -225,17 +223,31 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const searchStep = onStepTab && step?.tab === 'search' ? step : null;
   const cue: Cue = step?.id === 'welcome' ? 'greet' : step?.id === 'saved' ? 'cheer' : 'teach';
 
-  const keepInvite = (next: Invite) => {
-    setInvite(next);
-    localStorage.setItem(INVITE_KEY, next);
+  const keepInviting = (on: boolean) => {
+    setInviteOff(!on);
+    if (on) {
+      setInviteShut(false);
+      localStorage.removeItem(INVITE_OFF_KEY);
+    } else {
+      localStorage.setItem(INVITE_OFF_KEY, '1');
+    }
   };
 
-  const startGuide = () => {
-    if (invite === 'fresh') keepInvite('seen');
-    guide.start();
+  const shutInvite = () => {
+    setInviteShut(true);
+    notify({ kind: 'pressed', what: 'inviteClose' });
   };
+
+  // It says where the guide went, and offers to take the choice back.
+  const stopInviting = () => {
+    keepInviting(false);
+    notify({ kind: 'inviteHidden', undo: () => keepInviting(true) });
+  };
+
+  const startGuide = guide.start;
 
   const offersGuide = !isAuthLoading && !isAuthenticated && guide.step === null;
+  const calling = offersGuide && !inviteOff && !inviteShut;
 
   const brief = robot.briefOver(
     step && {
@@ -245,6 +257,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
       aim: step.spot ? AIMS[step.spot] : null,
       roam: 'eager',
     },
+    calling ? CALLING : undefined,
   );
 
   const desktop = (
@@ -275,17 +288,18 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         onMinimize={() => setWindowState('minimized')}
         onMaximize={toggleMaximized}
         onClose={handleClose}
-        aside={offersGuide && invite === 'tucked' ? <GuideChip onOpen={startGuide} /> : undefined}
+        aside={offersGuide && !calling ? <GuideChip onOpen={startGuide} /> : undefined}
         onHelp={robot.toggleHelp}
         helping={robot.helping}
         shut={rebuild.view.shut}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
-          {offersGuide && invite !== 'tucked' && (
+          {calling && (
             <GuideInvite
-              returning={invite === 'seen'}
+              robotSeat={robotSeat}
               onStart={startGuide}
-              onDismiss={() => keepInvite('tucked')}
+              onClose={shutInvite}
+              onHide={stopInviting}
             />
           )}
 
@@ -340,21 +354,16 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
                   <div className={styles.gate} {...helpAt('ingest.gate')}>
                     <p><strong>{t.gate.title}</strong></p>
                     <p>{t.gate.body}</p>
-                    <div className={styles.gateActions}>
-                      <button
-                        type="button"
-                        className="win95-btn"
-                        onClick={() => {
-                          notify({ kind: 'pressed', what: 'gateSignIn' });
-                          setActiveTab('account');
-                        }}
-                      >
-                        {t.gate.signIn}
-                      </button>
-                      <button type="button" className="win95-btn" onClick={startGuide}>
-                        {t.gate.openGuide}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className="win95-btn"
+                      onClick={() => {
+                        notify({ kind: 'pressed', what: 'gateSignIn' });
+                        setActiveTab('account');
+                      }}
+                    >
+                      {t.gate.signIn}
+                    </button>
                   </div>
                 )}
               </div>
@@ -378,7 +387,10 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
               </div>
             )}
             <div style={{ display: activeTab === 'account' ? 'block' : 'none' }}>
-              <AuthPanel onStartGuide={startGuide} />
+              <AuthPanel
+                onStartGuide={startGuide}
+                invite={{ on: !inviteOff, onChange: keepInviting }}
+              />
             </div>
           </div>
           <StatusBar

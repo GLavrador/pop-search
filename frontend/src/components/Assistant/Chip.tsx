@@ -6,7 +6,7 @@ interface GuideChipProps {
   onOpen: () => void;
 }
 
-/** What is left of the invitation once a visitor tucks it away: it sits in the title bar. */
+/** What is left of the invitation once a visitor asks not to see it: it sits in the title bar. */
 export const GuideChip = ({ onOpen }: GuideChipProps) => {
   const { t } = useI18n();
 
@@ -14,6 +14,7 @@ export const GuideChip = ({ onOpen }: GuideChipProps) => {
     <button
       type="button"
       className={styles.chip}
+      data-robot="guide"
       title={t.guide.chip.title}
       aria-label={t.guide.chip.title}
       onClick={onOpen}

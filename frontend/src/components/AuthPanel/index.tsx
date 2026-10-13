@@ -5,15 +5,18 @@ import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
 import { QuotaMeter } from '../QuotaMeter';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import ingest from '../IngestSection/styles.module.css';
 import styles from './styles.module.css';
 
 type Mode = 'signIn' | 'signUp';
 
 interface AuthPanelProps {
   onStartGuide?: () => void;
+  /** Whether a visitor is invited to the guide each time the page opens, and the switch for it. */
+  invite?: { on: boolean; onChange: (on: boolean) => void };
 }
 
-export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
+export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
   const { isAuthenticated, displayName, signIn, signUp, signOut } = useAuth();
   const { setStatus } = useStatus();
   const { t } = useI18n();
@@ -26,6 +29,31 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
+
+  // The invitation is only ever made to a visitor, so only a visitor gets its switch.
+  const guide = onStartGuide && (
+    <>
+      <hr className={styles.divider} />
+      <div className={styles.guide} {...helpAt('account.guide')}>
+        <p className={styles.guideLegend}>{t.guide.profile.legend}</p>
+        <p className={styles.guideNote}>{t.guide.profile.note}</p>
+        <button type="button" className="win95-btn" onClick={onStartGuide}>
+          {t.guide.profile.start}
+        </button>
+        {invite && !isAuthenticated && (
+          <label className={styles.inviteSwitch}>
+            <input
+              type="checkbox"
+              className={ingest.manualCheckbox}
+              checked={invite.on}
+              onChange={(event) => invite.onChange(event.target.checked)}
+            />
+            {t.guide.invite.keep}
+          </label>
+        )}
+      </div>
+    </>
+  );
 
   if (isAuthenticated) {
     return (
@@ -46,20 +74,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
           </button>
         </div>
         <QuotaMeter />
-
-        {onStartGuide && (
-          <>
-            <hr className={styles.divider} />
-            <div className={styles.guide} {...helpAt('account.guide')}>
-              <p className={styles.guideLegend}>{t.guide.profile.legend}</p>
-              <p className={styles.guideNote}>{t.guide.profile.note}</p>
-              <button type="button" className="win95-btn" onClick={onStartGuide}>
-                {t.guide.profile.start}
-              </button>
-            </div>
-          </>
-        )}
-
+        {guide}
         <hr className={styles.divider} />
         <LanguageSwitcher />
       </div>
@@ -190,7 +205,7 @@ export const AuthPanel = ({ onStartGuide }: AuthPanelProps) => {
       >
         {isSignUp ? t.auth.toSignIn : t.auth.toSignUp}
       </button>
-
+      {guide}
       <hr className={styles.divider} />
       <LanguageSwitcher />
     </form>

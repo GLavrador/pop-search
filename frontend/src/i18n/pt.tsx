@@ -662,17 +662,13 @@ export const pt: Dictionary = {
     ),
     offScriptAction: 'Me leve de volta',
     invite: {
-      fresh: {
-        lead: 'Primeira vez aqui?',
-        text: 'Eu te mostro o app inteiro em dois minutos.',
-        start: '▶ Começar o guia',
-      },
-      again: {
-        lead: 'Quer rever?',
-        text: 'Eu te mostro o app de novo em dois minutos.',
-        start: '▶ Rever o guia',
-      },
-      dismissTitle: 'Recolher. O guia continua lá em cima, na barra de título.',
+      lead: 'Quer ver como o Pop Search funciona?',
+      text: 'Eu te mostro tudo em dois minutos, numa tela de treino. Não precisa de conta.',
+      start: '▶ Começar o guia',
+      close: 'Fechar por agora. O convite volta quando a página abrir de novo.',
+      hide: 'não mostrar mais',
+      hideTitle: 'Não mostrar mais este convite neste navegador. Dá para ligar de novo na aba Sign In.',
+      keep: 'Me convidar para o guia toda vez que o Pop Search abrir',
     },
     chip: {
       label: 'Guia',
@@ -947,6 +943,7 @@ export const pt: Dictionary = {
         authSwitch: ['conta nova ou antiga?', 'tanto faz, eu espero', 'escolha à vontade'],
         authSubmit: ['conferindo...', 'um instante...', 'batendo na porta...'],
         gateSignIn: ['vem, é rapidinho', 'a conta é de graça', 'por aqui!'],
+        inviteClose: ['até já!', 'tô por aqui!', 'qualquer coisa, me chama'],
         adminRange: ['outro período!', 'mudando a janela', 'recontando...'],
         why: ['deixa que eu explico!', 'raio-x!', 'os bastidores!'],
         computer: ['olha eu por dentro!', 'não repara a bagunça', 'meus bastidores!'],
@@ -1003,6 +1000,10 @@ export const pt: Dictionary = {
       },
       serverDown: {
         text: 'O servidor não respondeu. Buscar e guardar vídeos pode não funcionar por enquanto. Tente recarregar a página daqui a pouco.',
+      },
+      inviteHidden: {
+        text: 'Combinado: não mostro mais o convite neste navegador. O guia continua aqui em cima, em Guia, e na aba Sign In dá para ligar o convite de novo.',
+        action: 'Desfazer',
       },
     },
     drop: {

@@ -113,6 +113,21 @@
   color: var(--win-text-secondary);
 }
 
+.inviteSwitch {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  cursor: pointer;
+  user-select: none;
+}
+
+.inviteSwitch input {
+  margin-top: 1px;
+}
+
 .session {
   display: flex;
   align-items: center;

@@ -47,7 +47,9 @@ contribuir exige conta.
   ele ou tirá-lo do acervo
 - **Contas com limite mensal**: contribuir exige cadastro; buscar não
 - **Assistente guiado**: um assistente conduz o visitante pelas telas de verdade,
-  com uma adição de vídeo e uma busca de mentira, sem conta e sem chamada de IA
+  com uma adição de vídeo e uma busca de mentira, sem conta e sem chamada de IA.
+  Quem não está logado é convidado pelo próprio robô, num balão acima das abas,
+  toda vez que abre a página, até pedir para não ver mais
 - **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
   qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
   falha da IA, vídeo salvo) e pode ser arrastado pela tela

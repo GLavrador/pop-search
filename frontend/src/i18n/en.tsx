@@ -665,17 +665,13 @@ export const en = {
     ),
     offScriptAction: 'Take me back',
     invite: {
-      fresh: {
-        lead: 'First time here?',
-        text: 'I can show you the whole app in two minutes.',
-        start: '▶ Start the guide',
-      },
-      again: {
-        lead: 'Want another look?',
-        text: 'I can show you the app again in two minutes.',
-        start: '▶ See the guide again',
-      },
-      dismissTitle: 'Tuck this away. The guide stays up in the title bar.',
+      lead: 'Want to see how Pop Search works?',
+      text: 'I will show you all of it in two minutes, on a practice screen. No account needed.',
+      start: '▶ Start the guide',
+      close: 'Close for now. The invitation is back the next time the page opens.',
+      hide: 'do not show again',
+      hideTitle: 'Do not show this invitation again in this browser. The Sign In tab can turn it back on.',
+      keep: 'Invite me to the guide every time Pop Search opens',
     },
     chip: {
       label: 'Guide',
@@ -948,6 +944,7 @@ export const en = {
         authSwitch: ['new account or old?', 'either way, I wait', 'take your pick'],
         authSubmit: ['checking...', 'one moment...', 'knocking on the door...'],
         gateSignIn: ['come, it is quick', 'an account is free', 'this way!'],
+        inviteClose: ['see you!', 'I will be around!', 'call me if you need me'],
         adminRange: ['another period!', 'moving the window', 'recounting...'],
         why: ['let me explain!', 'x-ray!', 'behind the scenes!'],
         computer: ['that is me inside!', 'mind the mess', 'my insides!'],
@@ -1004,6 +1001,10 @@ export const en = {
       },
       serverDown: {
         text: 'The server did not answer. Searching and keeping videos may not work for now. Try reloading the page in a little while.',
+      },
+      inviteHidden: {
+        text: 'Deal: I will not show the invitation again in this browser. The guide stays up here, under Guide, and the Sign In tab can turn the invitation back on.',
+        action: 'Undo',
       },
     },
     drop: {

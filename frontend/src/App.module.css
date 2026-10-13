@@ -47,12 +47,6 @@
   margin: 0;
 }
 
-.gateActions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 
 .footer {
   margin-top: 20px;
