@@ -64,16 +64,17 @@ const buildIcons = async (s: Stage, quick: boolean) => {
         await s.fly(beside, quick ? 130 : 220, { pose: 'hover', then: 'dust', flip: true });
         s.look({ tool: 'duster' });
         s.shine('app');
-        s.emote('polish', quick ? 700 : 1200);
-        await s.wait(quick ? 520 : 1000);
+        s.emote('polish', 1200);
+        await s.wait(1000);
         s.shine(null);
       }
 
       s.look({ tool: null, pose: 'hover', face: 'happy' });
     }
     s.build(zone, NAMED);
-    s.emote(said, quick ? 800 : 1300);
-    await s.wait(quick ? 180 : 420);
+    // It stays until what it muttered has been read: said on the wing, it is gone unread.
+    s.emote(said, 1000);
+    await s.wait(1000);
   }
 
   s.look({ flip: false, face: 'stern' });
@@ -134,8 +135,8 @@ const installStart = async (s: Stage, { h }: Scene, quick: boolean) => {
   await s.wait(quick ? 230 : 400);
   s.start();
   s.look({ tool: null, pose: 'hover', face: 'happy' });
-  s.emote('start', quick ? 800 : 1400);
-  await s.wait(quick ? 200 : 700);
+  s.emote('start', 1250);
+  await s.wait(1250);
   s.look({ flip: false });
 };
 
@@ -386,19 +387,21 @@ export const setupShow = async (s: Stage) => {
   await s.wait(400);
   s.appear({ x: centre, y: -ROBOT.h - 20 }, { face: 'happy' });
   await s.fly(talkAt, 700);
-  // Nothing to either side: it has the whole place to make.
-  s.look({ face: 'curious', gaze: -1 });
-  await s.wait(230);
+  // Somebody is here already, and to either side there is nothing to receive them in.
+  s.look({ face: 'wow' });
+  await s.say('visit', 2200);
+  s.look({ face: 'worried', gaze: -1 });
+  await s.wait(260);
   s.look({ gaze: 1 });
-  await s.wait(230);
+  await s.wait(260);
   s.look({ gaze: 0, face: 'happy', pose: 'wave' });
-  await s.say('hello', 1400);
+  await s.say('tidy', 3000);
 
   await rebuild(s, scene, true);
 
   s.look({ face: 'happy' });
   await s.fly(talkAt, 500, { then: 'wave' });
-  s.emote('ready', 1200);
-  await s.wait(650);
+  s.emote('ready', 1150);
+  await s.wait(1150);
   await s.fly({ x: w + 40, y: talkAt.y - 20 }, 600);
 };

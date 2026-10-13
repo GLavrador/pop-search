@@ -128,12 +128,15 @@ describe('starting up', () => {
       expect(document.documentElement).not.toHaveAttribute('data-boot');
     });
 
-    it('should have the robot say there is nothing yet, and that it will make it all', async () => {
-      pace.value = 0.3;
+    it('should have the robot caught unready by the visit, and ask for a moment to tidy up', async () => {
+      pace.value = 0.2;
       renderApp();
 
       expect(
-        await screen.findByText('Nothing here yet. Leave it to me: I will make it all!', {}, { timeout: 3000 }),
+        await screen.findByText('Goodness, I was not expecting visitors just now!', {}, { timeout: 3000 }),
+      ).toBeInTheDocument();
+      expect(
+        await screen.findByText(/make yourself at home, let me just tidy up/, {}, { timeout: 3000 }),
       ).toBeInTheDocument();
     });
 

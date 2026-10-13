@@ -205,7 +205,8 @@ export const pt: Dictionary = {
       who: 'Quem foi que jogou o Pop Search na LIXEIRA?! Eu MORO aí dentro!',
       fine: 'Tá bom, tá bom. Eu monto tudo de novo. Mas você fica olhando.',
       done: 'Pronto, tudo de volta no lugar. E programa NÃO é lixo. Combinado?',
-      hello: 'Não tem nada aqui ainda. Deixa comigo: eu faço tudo!',
+      visit: 'Caramba, não estava esperando visita agora!',
+      tidy: 'Mas fica à vontade, deixa eu só ajeitar aqui rapidinho, hihi.',
     },
     emotes: {
       no: 'não...',
