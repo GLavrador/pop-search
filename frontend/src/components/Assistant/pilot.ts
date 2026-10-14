@@ -132,10 +132,14 @@ const HEAD_TURN = 1.6;
 const FIRST_DWELL = 16000;
 const DWELL = 12000;
 const SEAT_DWELL = 8000;
-const CALM_FIRST = 24000;
-const CALM_DWELL = 34000;
-const CALM_SPREAD = 30000;
+const CALM_FIRST = 9000;
+const CALM_DWELL = 13000;
+const CALM_SPREAD = 12000;
 const SETTLED_FOR = 6000;
+const POINTER_SETTLED_FOR = 2000;
+const NOT_NOW = 1500;
+// Something open over the window, or an icon in the hand: someone is in the middle of something.
+const IN_USE = '[role="dialog"], [data-carried]';
 const SPEECH: Record<Cue, number> = {
   greet: 3200,
   teach: 1900,
@@ -769,6 +773,12 @@ export const createPilot = ({
     if (speed < 24 && Math.abs(tilt) < 0.03 && Math.abs(tiltRate) < 0.4) touchDown(now);
   };
 
+  /** Someone is at it: typing, clicking, moving the pointer about, or with something open over the window. */
+  const busy = (now: number) =>
+    now - lastInput < SETTLED_FOR ||
+    (pointer !== null && now - pointer.at < POINTER_SETTLED_FOR) ||
+    document.querySelector(IN_USE) !== null;
+
   const advance = (now: number) => {
     const roam = mission?.roam ?? 'never';
     const restless =
@@ -781,8 +791,8 @@ export const createPilot = ({
 
     if (!queue.length && (wantTrick || restless)) {
       // In the app it waits for a pause: nobody wants it crossing the screen as they type.
-      if (!wantTrick && roam === 'calm' && now - lastInput < SETTLED_FOR) {
-        holdUntil = now + 2500;
+      if (!wantTrick && roam === 'calm' && busy(now)) {
+        holdUntil = now + NOT_NOW;
         return;
       }
       const trip = planTrip(scene, lastTrip);
@@ -1002,6 +1012,7 @@ export const createPilot = ({
   window.addEventListener('pointermove', onPointer, { passive: true });
   window.addEventListener('pointerdown', onInput, { passive: true });
   window.addEventListener('keydown', onInput);
+  window.addEventListener('wheel', onInput, { passive: true });
   window.addEventListener('input', onType, true);
   raf = window.requestAnimationFrame(tick);
 
@@ -1172,6 +1183,7 @@ export const createPilot = ({
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('pointerdown', onInput);
       window.removeEventListener('keydown', onInput);
+      window.removeEventListener('wheel', onInput);
       window.removeEventListener('input', onType, true);
       sky.style.zIndex = '';
     },
