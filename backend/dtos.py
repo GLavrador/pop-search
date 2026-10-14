@@ -144,6 +144,15 @@ class ProjectUsageReport(BaseModel):
     daily_limit: int
 
 
+MAX_BIN_SCORE = 1_000_000
+
+
+class BinRecords(BaseModel):
+    """The best score of a user at each of the two games in the Recycle Bin."""
+    flappy: int = Field(0, ge=0, le=MAX_BIN_SCORE)
+    dino: int = Field(0, ge=0, le=MAX_BIN_SCORE)
+
+
 class MyVideo(BaseModel):
     id: str
     titulo_video: Optional[str] = None

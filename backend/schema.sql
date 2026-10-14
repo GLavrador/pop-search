@@ -92,6 +92,17 @@ create table analysis_jobs (
 
 create unique index analysis_jobs_id_idx on analysis_jobs (id);
 
+-- 4c. the best score of each user at the two games in the Recycle Bin
+--
+-- One row per user. The backend only ever raises a record, never lowers it,
+-- so the best of every browser the user played in ends up here.
+create table bin_records (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  flappy int not null default 0 check (flappy >= 0),
+  dino int not null default 0 check (dino >= 0),
+  updated_at timestamptz not null default now()
+);
+
 -- 5. main table
 create table videos (
   id uuid primary key default gen_random_uuid(),
@@ -161,6 +172,9 @@ create policy "usage_events: owner can read"
 
 -- No policy at all: only the backend, through service_role, reads or writes it.
 alter table analysis_jobs enable row level security;
+
+-- The same: records are read and raised through the backend only.
+alter table bin_records enable row level security;
 
 alter table videos enable row level security;
 
