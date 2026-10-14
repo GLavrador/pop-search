@@ -108,6 +108,12 @@ export interface QuotaStatus {
   tokens_this_month: number;
 }
 
+/** The best score at each of the games in the Recycle Bin. */
+export interface BinRecords {
+  flappy: number;
+  dino: number;
+}
+
 export interface UserUsageRow {
   user_id: string;
   display_name: string;

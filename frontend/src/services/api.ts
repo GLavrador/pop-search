@@ -10,6 +10,7 @@ import type {
   ProjectUsageReport,
   AdminStatsReport,
   SystemReport,
+  BinRecords,
 } from '../types';
 import { lastSearch, timed } from './searchTrace';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
@@ -108,6 +109,17 @@ export const getAdminStats = async (
   signal?: AbortSignal,
 ): Promise<AdminStatsReport> => {
   const response = await api.get<AdminStatsReport>('/me/admin/stats', { params: { days }, signal });
+  return response.data;
+};
+
+export const getBinRecords = async (signal?: AbortSignal): Promise<BinRecords> => {
+  const response = await api.get<BinRecords>('/me/bin-records', { signal });
+  return response.data;
+};
+
+/** Offers these records to the account, which keeps the best of each game and answers with them. */
+export const keepBinRecords = async (records: BinRecords): Promise<BinRecords> => {
+  const response = await api.put<BinRecords>('/me/bin-records', records);
   return response.data;
 };
 
