@@ -32,7 +32,8 @@
 }
 
 /* Over the window while one of them is in the air, still under the taskbar. */
-.desktop:has([data-carried]) {
+.desktop:has([data-carried]),
+.desktop[data-lifted] {
   z-index: 50;
 }
 
@@ -47,6 +48,11 @@
   opacity: 0;
   pointer-events: none;
   transition: transform 260ms ease-in, opacity 260ms ease-in;
+}
+
+/* In the bin: its place on the desktop is kept, with nothing in it. */
+.icon[data-trashed]:not([data-swallowed]) {
+  visibility: hidden;
 }
 
 /*
