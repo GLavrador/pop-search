@@ -1,4 +1,4 @@
-import type { Box, Point, Side, Size } from './flight';
+import { planFlight, type Box, type Point, type Side, type Size } from './flight';
 import type { Variety } from './variety';
 
 export type Face =
@@ -138,18 +138,16 @@ export interface Scene {
 }
 
 interface Trip {
-  /** How likely it is next to the others. Below 1 for the ones that should stay a surprise. */
-  odds: number;
-  /** Empty when the trip is not possible on this screen. */
+  /** Empty when the trip is not possible on this screen, or not right now. */
   plan: (scene: Scene) => Leg[];
 }
 
 const AHEAD: Point = { x: 0, y: 0 };
 const DOWN: Point = { x: 0, y: 1 };
 const BUSY_FOR = 12000;
-// A screen saver only comes on once nobody has touched anything for a while.
-const SAVER_AFTER = 45000;
-const SAVER_BOUNCES = 5;
+// As a screen saver it keeps bouncing about for this long, and then stops.
+const SAVER_FOR = 15000;
+const MOST_BOUNCES = 40;
 const TINTS = 4;
 
 export const HOP = [
@@ -416,7 +414,6 @@ export const lurk = ({ size }: Scene, avoid?: Side): Leg[] => {
 
 export const TRIPS: Record<string, Trip> = {
   icon: {
-    odds: 1,
     plan: (scene) => {
       const icon = pick(icons());
       if (!icon) return [];
@@ -435,7 +432,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // It leans on a shortcut and pushes. The shortcut gives a little and comes back.
   shove: {
-    odds: 0.9,
     plan: (scene) => {
       const icon = pick(icons());
       if (!icon) return [];
@@ -478,7 +474,6 @@ export const TRIPS: Record<string, Trip> = {
   },
 
   clock: {
-    odds: 1,
     plan: (scene) => {
       const dial = landmark('clock');
       const bar = landmark('taskbar');
@@ -505,7 +500,6 @@ export const TRIPS: Record<string, Trip> = {
   },
 
   sit: {
-    odds: 0.9,
     plan: ({ size }) => {
       const bar = landmark('taskbar');
       if (!bar) return [];
@@ -527,14 +521,12 @@ export const TRIPS: Record<string, Trip> = {
   },
 
   stomp: {
-    odds: 0.35,
     // Never on its own while the user is in the middle of something: it takes the window away.
     plan: (scene) => (scene.idleFor() < BUSY_FOR ? [] : stomp(scene)),
   },
 
   // It tries the Start button too. Nothing opens, which puzzles it.
   start: {
-    odds: 0.5,
     plan: (scene) => {
       const button = landmark('start');
       const bar = landmark('taskbar');
@@ -565,7 +557,6 @@ export const TRIPS: Record<string, Trip> = {
   },
 
   peek: {
-    odds: 1,
     plan: ({ size }) => {
       const frame = boxOf(openWindow());
       if (!frame) return [];
@@ -604,7 +595,6 @@ export const TRIPS: Record<string, Trip> = {
   },
 
   zigzag: {
-    odds: 0.7,
     plan: ({ size, position }) => {
       const floor = (boxOf(landmark('taskbar'))?.top ?? window.innerHeight) - size.h - 6;
       const frame = boxOf(openWindow());
@@ -628,7 +618,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // Out through one edge of the screen at full tilt, back in through the other.
   dash: {
-    odds: 0.9,
     plan: ({ size, position }) => {
       const from = position();
       if (!from) return [];
@@ -664,7 +653,6 @@ export const TRIPS: Record<string, Trip> = {
   },
 
   rooftop: {
-    odds: 0.7,
     plan: ({ size }) => {
       const frame = openWindow();
       if (!frame || frame.getBoundingClientRect().top < size.h) return [];
@@ -686,7 +674,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // A nap on top of the window, until the next step wakes it.
   nap: {
-    odds: 0.5,
     plan: ({ size }) => {
       const frame = openWindow();
       if (!frame || frame.getBoundingClientRect().top < size.h) return [];
@@ -709,7 +696,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // It comes right up to the glass from the other side, big as life, presses on it and knocks.
   glass: {
-    odds: 0.6,
     plan: (scene) => {
       const at = scene.onScreen({
         x: (window.innerWidth - scene.size.w) / 2,
@@ -745,7 +731,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // It counts the icons on the desktop one by one. One missing puzzles it, and it says it will fetch it later.
   count: {
-    odds: 0.9,
     plan: (scene) => {
       const places = slots();
       if (places.length < 2) return [];
@@ -806,7 +791,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // Hide and seek behind the window: it flies about back there, and now and then its eyes show over the top.
   hide: {
-    odds: 0.8,
     plan: (scene) => {
       const frame = openWindow();
       if (!frame || frame.getBoundingClientRect().top - PEEKING < 2) return [];
@@ -867,7 +851,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // Beside its own portrait on the Tricks icon: that is me, it says, and strikes the very same pose.
   itsMe: {
-    odds: 0.8,
     plan: (scene) => {
       const icon = iconOf('tricks');
       if (!icon) return [];
@@ -895,12 +878,11 @@ export const TRIPS: Record<string, Trip> = {
     },
   },
 
-  // Left alone a while, it turns into the screen saver: wall to wall, a new colour at each bounce.
+  // It turns into the screen saver for a while: wall to wall, a new colour at each bounce.
   saver: {
-    odds: 0.8,
     plan: (scene) => {
       const from = scene.position();
-      if (!from || scene.idleFor() < SAVER_AFTER) return [];
+      if (!from) return [];
       const { size } = scene;
       const floor = (boxOf(landmark('taskbar'))?.top ?? window.innerHeight) - size.h - 4;
       const room = { left: 4, top: 4, right: window.innerWidth - size.w - 4, bottom: floor };
@@ -910,23 +892,32 @@ export const TRIPS: Record<string, Trip> = {
         x: start.x < (room.left + room.right) / 2 ? 1 : -1,
         y: start.y < (room.top + room.bottom) / 2 ? 0.7 : -0.7,
       };
-      return bounces(start, room, heading, SAVER_BOUNCES).map((at, index) => ({
-        where: () => ({ at }),
-        pose: 'fly',
-        face: 'happy',
-        gaze: AHEAD,
-        emote: index === 0 ? () => scene.vary('saver', scene.emotes().saver) : undefined,
-        hold: index === 0 ? 900 : 60,
-        direct: true,
-        tint: (index % TINTS) + 1,
-        skittish: true,
-      }));
+      const legs: Leg[] = [];
+      let lasted = 0;
+      let was = from;
+      for (const [index, at] of bounces(start, room, heading, MOST_BOUNCES).entries()) {
+        if (lasted >= SAVER_FOR) break;
+        const hold = index === 0 ? 900 : 60;
+        lasted += planFlight(was, at, 0, 0).duration + hold;
+        was = at;
+        legs.push({
+          where: () => ({ at }),
+          pose: 'fly',
+          face: 'happy',
+          gaze: AHEAD,
+          emote: index === 0 ? () => scene.vary('saver', scene.emotes().saver) : undefined,
+          hold,
+          direct: true,
+          tint: (index % TINTS) + 1,
+          skittish: true,
+        });
+      }
+      return legs;
     },
   },
 
   // It turns its antenna like a modem dialling in, lights flashing and body buzzing, until it gets a line.
   dialUp: {
-    odds: 0.6,
     plan: (scene) => {
       const at = scene.position();
       if (!at) return [];
@@ -963,7 +954,6 @@ export const TRIPS: Record<string, Trip> = {
 
   // It leans over the bin for a look inside: full, it pulls a face; empty, it is pleased with it.
   binPeek: {
-    odds: 0.6,
     plan: (scene) => {
       const bin = iconOf('bin');
       if (!bin) return [];
@@ -1014,7 +1004,6 @@ export const TRIPS: Record<string, Trip> = {
   },
 
   dance: {
-    odds: 0.7,
     plan: (scene) => {
       const bar = landmark('taskbar');
       if (!bar) return [];
@@ -1036,23 +1025,55 @@ export const TRIPS: Record<string, Trip> = {
   },
 };
 
-/** Picks a trip by its odds, never the same one twice running. */
-export const planTrip = (scene: Scene, last: string): { name: string; legs: Leg[] } | null => {
-  const pool = Object.keys(TRIPS).filter((name) => name !== last);
+/**
+ * Goes through every trip, in an order shuffled afresh each round, before any of
+ * them comes round again, and never the same one twice running. One that cannot
+ * be made right now keeps its turn in the round, and another is made meanwhile.
+ */
+export const createRotation = (random: () => number = Math.random) => {
+  const names = Object.keys(TRIPS);
+  let round: string[] = [];
+  let last = '';
 
-  while (pool.length) {
-    const total = pool.reduce((sum, name) => sum + TRIPS[name].odds, 0);
-    let roll = Math.random() * total;
-    const index = Math.max(
-      0,
-      pool.findIndex((name) => {
-        roll -= TRIPS[name].odds;
-        return roll <= 0;
-      }),
-    );
-    const [name] = pool.splice(index, 1);
-    const legs = TRIPS[name].plan(scene);
-    if (legs.length) return { name, legs };
-  }
-  return null;
+  const shuffled = () => {
+    const deck = [...names];
+    for (let i = deck.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    return deck;
+  };
+
+  const first = (scene: Scene, from: readonly string[]) => {
+    for (const name of from) {
+      if (name === last) continue;
+      const legs = TRIPS[name].plan(scene);
+      if (legs.length) return { name, legs };
+    }
+    return null;
+  };
+
+  return (scene: Scene): { name: string; legs: Leg[] } | null => {
+    if (!round.length) round = shuffled();
+    const trip = first(scene, round) ?? first(scene, shuffled());
+    if (trip) {
+      round = round.filter((name) => name !== trip.name);
+      last = trip.name;
+    }
+    return trip;
+  };
+};
+
+// How long it stays put between trips, and how often each. Weights, not shares of a hundred.
+const PAUSES: readonly { ms: number; weight: number }[] = [
+  { ms: 15000, weight: 50 },
+  { ms: 10000, weight: 20 },
+  { ms: 20000, weight: 10 },
+  { ms: 13000, weight: 30 },
+];
+
+/** How long to stay put before the next trip. */
+export const pauseBetween = (roll = Math.random()) => {
+  let left = roll * PAUSES.reduce((sum, { weight }) => sum + weight, 0);
+  return PAUSES.find(({ weight }) => (left -= weight) < 0)?.ms ?? PAUSES[PAUSES.length - 1].ms;
 };

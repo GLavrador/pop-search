@@ -20,7 +20,8 @@ import {
   landmark,
   lurk,
   openWindow,
-  planTrip,
+  createRotation,
+  pauseBetween,
   stomp,
   type Emotes,
   type Face,
@@ -135,9 +136,6 @@ const HEAD_TURN = 1.6;
 const FIRST_DWELL = 16000;
 const DWELL = 12000;
 const SEAT_DWELL = 8000;
-const CALM_FIRST = 9000;
-const CALM_DWELL = 13000;
-const CALM_SPREAD = 12000;
 const SETTLED_FOR = 6000;
 const POINTER_SETTLED_FOR = 2000;
 const NOT_NOW = 1500;
@@ -262,7 +260,7 @@ export const createPilot = ({
   let mission: Mission | null = null;
   let briefed = false;
   let visits = 0;
-  let lastTrip = '';
+  const nextTrip = createRotation();
   let wantTrick = false;
 
   let pos: Point | null = null;
@@ -549,7 +547,7 @@ export const createPilot = ({
     const speech = mission?.speech ?? SPEECH[cue];
 
     let hold = DWELL;
-    if (roam === 'calm') hold = returning ? CALM_DWELL + Math.random() * CALM_SPREAD : CALM_FIRST;
+    if (roam === 'calm') hold = pauseBetween();
     else if (roam === 'eager' && mission?.target) hold = returning ? DWELL : FIRST_DWELL;
     else if (roam === 'eager') hold = SEAT_DWELL + speech;
 
@@ -797,12 +795,9 @@ export const createPilot = ({
         holdUntil = now + NOT_NOW;
         return;
       }
-      const trip = planTrip(scene, lastTrip);
+      const trip = nextTrip(scene);
       wantTrick = false;
-      if (trip) {
-        lastTrip = trip.name;
-        queue = trip.legs;
-      }
+      if (trip) queue = trip.legs;
     }
 
     const next = queue.shift();

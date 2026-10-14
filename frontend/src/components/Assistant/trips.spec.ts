@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { en } from '../../i18n/en';
 import { createVariety } from './variety';
-import { TRIPS, bounces, planTrip, type Leg, type Scene } from './trips';
+import { planFlight } from './flight';
+import { TRIPS, bounces, createRotation, pauseBetween, type Leg, type Scene } from './trips';
 
 const ICONS = [
   ['bin', 'Recycle Bin'],
@@ -31,11 +32,23 @@ const desktop = (trashed: string[] = []) => {
   });
 };
 
-const windowOver = (frame: DOMRect) => {
+const landmarkAt = (name: string, at: DOMRect) => {
   const node = document.createElement('div');
-  node.dataset.robot = 'window';
-  vi.spyOn(node, 'getBoundingClientRect').mockReturnValue(frame);
+  node.dataset.robot = name;
+  vi.spyOn(node, 'getBoundingClientRect').mockReturnValue(at);
   document.body.append(node);
+  return node;
+};
+const windowOver = (frame: DOMRect) => landmarkAt('window', frame);
+
+/** Everything a trip may go to: the window, and the taskbar with its buttons and clock. */
+const screenful = () => {
+  desktop();
+  windowOver(box(150, 100, 700, 500));
+  landmarkAt('taskbar', box(0, 738, 1024, 30));
+  landmarkAt('start', box(2, 740, 60, 26));
+  landmarkAt('task', box(70, 740, 160, 26)).setAttribute('aria-pressed', 'true');
+  landmarkAt('clock', box(950, 740, 70, 26)).textContent = '11:15';
 };
 
 const scene = (over: Partial<Scene> = {}): Scene => ({
@@ -141,17 +154,26 @@ describe('hide and seek behind the window', () => {
 });
 
 describe('the screen saver', () => {
-  it('should only come on once nobody has touched anything for a while', () => {
+  it('should come on whenever its turn comes, and keep bouncing for about fifteen seconds', () => {
     desktop();
 
-    expect(TRIPS.saver.plan(scene({ idleFor: () => 5000 }))).toEqual([]);
-    expect(TRIPS.saver.plan(scene({ idleFor: () => 60000 })).length).toBeGreaterThan(2);
+    const legs = TRIPS.saver.plan(scene());
+
+    let from = { x: 600, y: 300 };
+    const lasts = legs.reduce((sum, leg) => {
+      const to = (leg.where() as { at: { x: number; y: number } }).at;
+      const flight = planFlight(from, to, 0, 0).duration;
+      from = to;
+      return sum + flight + leg.hold;
+    }, 0);
+    expect(lasts).toBeGreaterThanOrEqual(15000);
+    expect(lasts).toBeLessThan(17000);
   });
 
   it('should take a new colour at each bounce and give way at the first sign of the user', () => {
     desktop();
 
-    const legs = TRIPS.saver.plan(scene({ idleFor: () => 60000 }));
+    const legs = TRIPS.saver.plan(scene());
 
     legs.slice(1).forEach((leg, index) => expect(leg.tint).not.toBe(legs[index].tint));
     legs.forEach((leg) => expect(leg.skittish).toBe(true));
@@ -186,14 +208,46 @@ describe('knocking on the glass', () => {
 });
 
 describe('picking what to do next', () => {
-  it('should never do the same thing twice running', () => {
-    desktop();
-    let last = '';
+  const idle = () => scene({ idleFor: () => 60000 });
 
-    for (let turn = 0; turn < 80; turn += 1) {
-      const trip = planTrip(scene({ idleFor: () => 60000 }), last);
-      expect(trip?.name).not.toBe(last);
-      last = trip?.name ?? '';
-    }
+  it('should do every trip there is room for once before any of them comes round again', () => {
+    screenful();
+    const possible = Object.keys(TRIPS).filter((name) => TRIPS[name].plan(idle()).length > 0);
+    const next = createRotation();
+
+    const done = possible.map(() => next(idle())?.name);
+
+    expect(possible.length).toBeGreaterThan(15);
+    expect(new Set(done)).toEqual(new Set(possible));
+  });
+
+  it('should never do the same thing twice running, round after round', () => {
+    screenful();
+    const next = createRotation();
+
+    const done = Array.from({ length: 100 }, () => next(idle())?.name);
+
+    done.slice(1).forEach((name, index) => expect(name).not.toBe(done[index]));
+  });
+
+  it('should keep the turn of a trip that cannot be made yet, and make it once it can', () => {
+    screenful();
+    const next = createRotation(() => 0);
+    const busy = scene({ idleFor: () => 0 });
+
+    const before = Array.from({ length: 6 }, () => next(busy)?.name);
+    const later = Array.from({ length: 30 }, () => next(idle())?.name);
+
+    expect(before).not.toContain('stomp');
+    expect(later).toContain('stomp');
+  });
+});
+
+describe('the pause between trips', () => {
+  it('should be 15, 10, 20 or 13 seconds, by weights of 50, 20, 10 and 30', () => {
+    const rolls = Array.from({ length: 1100 }, (_, index) => pauseBetween((index + 0.5) / 1100));
+
+    const count = (ms: number) => rolls.filter((pause) => pause === ms).length;
+    expect([count(15000), count(10000), count(20000), count(13000)]).toEqual([500, 200, 100, 300]);
   });
 });
