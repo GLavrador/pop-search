@@ -221,8 +221,8 @@ export const en = {
       who: 'Who threw Pop Search in the BIN?! I LIVE in there!',
       fine: 'Fine, fine. I will put it all back together. But you are going to watch.',
       done: 'There, everything back in its place. And a program is NOT rubbish. Deal?',
-      visit: 'Goodness, I was not expecting visitors just now!',
-      tidy: 'But make yourself at home, let me just tidy up real quick, hehe.',
+      visit: 'Goodness, a visitor! Nothing is ready!',
+      tidy: 'Come on in, I will just tidy up quickly, hehe!',
     },
     emotes: {
       no: 'no...',
