@@ -53,6 +53,8 @@ interface DirectorOptions {
   guiding: boolean;
   /** Opens the list of what there is to try, which it offers when poked and after the guide. */
   onTricks: () => void;
+  /** Sends it into the bin after what was thrown there, which it offers as soon as something is. */
+  onFetch: () => void;
 }
 
 const RANK = { tip: 0, react: 1, ask: 2 };
@@ -81,7 +83,8 @@ const PRESS_FACES: Partial<Record<PressKey, Face>> = {
 
 const mark = (zone: Zone) => () =>
   document.querySelector<HTMLElement>(`[data-robot-zone="${zone}"]`);
-// The bin and the top of the window it handles with its body alone; these get a balloon.
+const BIN = mark('bin');
+// The top of the window it handles with its body alone, and the bin it goes into; these get a balloon.
 const DROPS = {
   computer: mark('computer'),
   app: mark('app'),
@@ -104,7 +107,7 @@ const TYPED_LOOKS: Record<TypedWord, Reaction> = {
   cat: { face: 'wow', move: 'jolt' },
   robot: { face: 'happy', move: 'hop' },
   dog: { face: 'happy', move: 'nod' },
-  bin: { face: 'worried', move: 'shake' },
+  bin: { face: 'disgust', move: 'shake' },
   home: { face: 'happy', move: 'nod' },
 };
 
@@ -148,7 +151,7 @@ const READING: Record<'search' | 'title', Brief> = {
 const isHelpKey = (key: string | undefined): key is HelpKey =>
   key !== undefined && key in en.robot.help;
 
-export const useRobotDirector = ({ guiding, onTricks }: DirectorOptions) => {
+export const useRobotDirector = ({ guiding, onTricks, onFetch }: DirectorOptions) => {
   const { t } = useI18n();
   const [line, setLine] = useState<Line | null>(null);
   const [helping, setHelping] = useState(false);
@@ -162,10 +165,10 @@ export const useRobotDirector = ({ guiding, onTricks }: DirectorOptions) => {
   const vary = useMemo(() => createVariety(), []);
   const toldStep = useRef<AnalysisStep | null>(null);
   const offered = useRef({ id: 0, at: -OFFER_REST });
-  const live = useRef({ guiding, t, onTricks });
+  const live = useRef({ guiding, t, onTricks, onFetch });
 
   useEffect(() => {
-    live.current = { guiding, t, onTricks };
+    live.current = { guiding, t, onTricks, onFetch };
   });
 
   const put = useCallback((next: Line | null) => {
@@ -272,12 +275,16 @@ export const useRobotDirector = ({ guiding, onTricks }: DirectorOptions) => {
     }
     if (live.current.guiding || current) return false;
     if (Date.now() - offered.current.at < OFFER_REST) return false;
+    // With the list in the bin there is no icon to stand by, and nothing to offer.
+    if (!DROPS.tricks()) return false;
 
     offerTricks('tricksOffer', OFFER_FOR);
     return true;
   }, [offerTricks, put]);
 
-  const guideDone = useCallback(() => offerTricks('guideDone', 22000), [offerTricks]);
+  const guideDone = useCallback(() => {
+    if (DROPS.tricks()) offerTricks('guideDone', 22000);
+  }, [offerTricks]);
 
   // Each step of an analysis gets a word, once, in one of its wordings.
   const sayStep = useCallback(
@@ -482,6 +489,26 @@ export const useRobotDirector = ({ guiding, onTricks }: DirectorOptions) => {
         case 'appTrashed':
           put(null);
           react({ face: 'wow', emote: vary('appTrashed', says.appTrashed), move: 'jolt', ms: 900 });
+          break;
+        case 'iconTrashed': {
+          const { what } = event;
+          const turn = vary(`trashed.${what}`, [0, 1]);
+          say({
+            rank: 'react',
+            copy: ({ robot }) => ({
+              text: robot.lines.trashed[what][turn % robot.lines.trashed[what].length],
+              action: robot.lines.trashed.action,
+            }),
+            run: () => live.current.onFetch(),
+            cue: 'teach',
+            target: BIN,
+            aim: BESIDE_ICON,
+            ttl: 12000,
+          });
+          break;
+        }
+        case 'binEmpty':
+          react({ face: 'curious', emote: vary('binEmpty', says.binEmpty), move: 'nod' });
           break;
         case 'serverDown':
           say({

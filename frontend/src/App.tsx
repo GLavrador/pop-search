@@ -45,6 +45,8 @@ import { BlueTiles } from './components/Rebuild/BlueTiles';
 import { useRebuild } from './components/Rebuild/useRebuild';
 import { SystemProperties } from './components/SystemProperties';
 import { Tricks } from './components/Tricks';
+import { Bin } from './components/Bin';
+import { useBin } from './components/Bin/useBin';
 import { BOOTED_KEY, SERVER_NOTICE_MS } from './constants/startup';
 
 const WINDOW_ICON = '💻';
@@ -82,6 +84,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const robot = useRobotDirector({
     guiding: guide.isVisible,
     onTricks: () => openTricks(),
+    onFetch: () => openBin(),
   });
   const { notify } = robot;
   const wasSignedIn = useRef<boolean | null>(null);
@@ -98,12 +101,25 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
 
   const { hide: hideGuide } = guide;
   const { stopHelp, dismiss } = robot;
+  // The robot goes into the bin alone: the guide, what it was saying and what was open all wait.
+  const bin = useBin({
+    onEnter: () => {
+      hideGuide();
+      stopHelp();
+      dismiss();
+      setComputerOpen(false);
+      setTricksOpen(false);
+    },
+  });
+  const { empty: emptyBin } = bin;
   const rebuild = useRebuild({
     intro,
     onWreck: () => {
       hideGuide();
       stopHelp();
       dismiss();
+      // Built again from nothing, the desktop has every icon on it and the bin has none.
+      emptyBin();
       closeClicks.current = 0;
       pendingCat.current = null;
       setCat(null);
@@ -198,6 +214,11 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
     setTricksOpen(true);
   };
 
+  // With something in it the robot goes in after it. Empty, it only says so.
+  const openBin = () => {
+    if (!bin.visit()) notify({ kind: 'binEmpty' });
+  };
+
   // The one trick the list can start by itself, with the list out of the way.
   const tryHelp = () => {
     setTricksOpen(false);
@@ -285,7 +306,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   );
 
   const desktop = (
-    <div className={styles.appContainer}>
+    <div className={styles.appContainer} inert={bin.away}>
       <BlueTiles blue={rebuild.blue} kind={rebuild.view.kind} />
 
       <Desktop
@@ -294,12 +315,17 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         onOpenApp={handleOpen}
         onOpenComputer={openComputer}
         onOpenTricks={openTricks}
+        onOpenBin={openBin}
         built={rebuild.view.built}
         swallowed={rebuild.view.phase === 'swallowing'}
+        trashed={bin.trashed}
         pressed={rebuild.view.pressed}
         shining={rebuild.view.shining}
         frozen={wrecked}
+        binBorne={bin.view.borne}
+        lifted={bin.away}
         onTrashApp={rebuild.trash}
+        onTrash={bin.trash}
       />
 
       {isClosed && cat && <CatReveal image={cat.image} phrase={cat.phrase} />}
@@ -436,20 +462,23 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         <Tricks onClose={() => setTricksOpen(false)} onTryHelp={tryHelp} />
       )}
 
-      {/* While the desktop is being rebuilt the robot is in the show, not at home. */}
+      {/* While the desktop is being rebuilt the robot is in the show, not at home. Nor is it while it is off to the bin. */}
       {wrecked ? (
         <Rebuild cast={rebuild.cast} kind={rebuild.view.kind} onSkip={rebuild.skip} />
+      ) : bin.away ? (
+        <Bin bin={bin} />
       ) : (
         <RobotPilot
           {...brief}
           home={robotSeat}
+          entry={bin.exit}
           parked={windowState === 'minimized'}
           stage={stage}
           label={t.guide.poke}
           handle={robot.handle}
           onPoke={() => !tricksOpen && windowState !== 'minimized' && robot.poked()}
           onGrab={robot.dismiss}
-          onDrop={robot.dropped}
+          onDrop={(zone) => (zone === 'bin' ? openBin() : robot.dropped(zone))}
         >
           {robot.line && <Speech line={robot.line} onDismiss={robot.dismiss} />}
         </RobotPilot>
