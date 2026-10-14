@@ -15,11 +15,14 @@ export type Face =
   | 'aghast'
   | 'stern'
   | 'strain'
-  | 'phew';
+  | 'phew'
+  | 'disgust'
+  | 'brave';
 
 export type Pose =
   | 'stand'
   | 'fly'
+  | 'blast'
   | 'heave'
   | 'tug'
   | 'hammer'
@@ -31,6 +34,8 @@ export type Pose =
   | 'dangle'
   | 'brake'
   | 'hover'
+  | 'run'
+  | 'duck'
   | 'point-down'
   | 'point-up'
   | 'point-left'
@@ -74,8 +79,6 @@ export interface Emotes {
   knock: string;
   puzzled: string;
   grabbed: readonly string[];
-  bin: readonly string[];
-  hiding: readonly string[];
   dizzy: readonly string[];
   enough: readonly string[];
   lurk: readonly string[];
@@ -631,27 +634,6 @@ export const TRIPS: Record<string, Trip> = {
       ];
     },
   },
-};
-
-/** Somewhere to cower: behind the far edge of the window, or half out of the screen. */
-export const hide = ({ size, emotes, vary }: Scene): Leg[] => {
-  const frame = boxOf(openWindow());
-  const behind = frame !== null && window.innerWidth - frame.right > size.w * 0.6;
-  const at = behind
-    ? { x: frame.right - size.w * 0.42, y: frame.top + (frame.bottom - frame.top) * 0.3 }
-    : { x: window.innerWidth - size.w * 0.5, y: window.innerHeight * 0.35 };
-  return [
-    {
-      where: () => ({ at, side: 'right' }),
-      pose: 'peek',
-      face: 'worried',
-      gaze: { x: -1, y: -0.4 },
-      emote: () => vary('hiding', emotes().hiding),
-      hold: 5200,
-      layer: behind ? 'behind' : undefined,
-      swift: true,
-    },
-  ];
 };
 
 /** Picks a trip by its odds, never the same one twice running. */
