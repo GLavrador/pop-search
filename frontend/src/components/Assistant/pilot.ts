@@ -14,6 +14,9 @@ import {
 } from './flight';
 import {
   HOP,
+  JOLT,
+  NOD,
+  SHAKE,
   landmark,
   lurk,
   openWindow,
@@ -188,36 +191,48 @@ const SNORE_EVERY = 9000;
 
 const LAYERS = { behind: '0', front: '' };
 
+const SPEECHLESS: Emotes = {
+  heavy: '',
+  sorry: '',
+  knock: '',
+  puzzled: '',
+  grabbed: [],
+  dizzy: [],
+  enough: [],
+  lurk: [],
+  found: [],
+  flip: [],
+  roof: [],
+  yawn: [],
+  woke: [],
+  counting: [],
+  allThere: [],
+  missing: [],
+  later: [],
+  hiding: [],
+  unseen: [],
+  itsMe: '',
+  likeMe: [],
+  glass: [],
+  saver: [],
+  caught: [],
+  dialing: '',
+  modem: '',
+  online: [],
+  binFull: [],
+  binEmpty: [],
+};
+
 const SQUASH = [
   { transform: 'scale(1.1, 0.86)' },
   { transform: 'scale(0.97, 1.04)' },
   { transform: 'scale(1)' },
-];
-const JOLT = [
-  { transform: 'translateY(0) scale(1)' },
-  { transform: 'translateY(-10px) scale(0.94, 1.08)' },
-  { transform: 'translateY(0) scale(1)' },
 ];
 const SPIN = [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }];
 const FLIP = [
   { transformOrigin: '50% 55%', transform: 'translateY(0) rotate(0deg)' },
   { transformOrigin: '50% 55%', transform: 'translateY(-24px) rotate(-180deg)', offset: 0.5 },
   { transformOrigin: '50% 55%', transform: 'translateY(0) rotate(-360deg)' },
-];
-const NOD = [
-  { transform: 'translateY(0)' },
-  { transform: 'translateY(3px)' },
-  { transform: 'translateY(0)' },
-  { transform: 'translateY(3px)' },
-  { transform: 'translateY(0)' },
-];
-const SHAKE = [
-  { transform: 'translateX(0)' },
-  { transform: 'translateX(-4px)' },
-  { transform: 'translateX(4px)' },
-  { transform: 'translateX(-4px)' },
-  { transform: 'translateX(4px)' },
-  { transform: 'translateX(0)' },
 ];
 const MOVES: Record<Move, { frames: Keyframe[]; ms: number }> = {
   jolt: { frames: JOLT, ms: 420 },
@@ -322,36 +337,22 @@ export const createPilot = ({
     y: clamp(at.y, 2, Math.max(2, window.innerHeight - size.h - 2)),
   });
 
-  const move = (frames: Keyframe[], duration: number) => {
-    if (!still) svg?.animate?.(frames, { duration, easing: 'ease-out' });
+  const move = (frames: Keyframe[], duration: number, easing = 'ease-out') => {
+    if (!still) svg?.animate?.(frames, { duration, easing });
   };
 
   const scene: Scene = {
     size,
     position: () => pos,
     onScreen,
-    emotes: () =>
-      mission?.emotes ?? {
-        heavy: '',
-        sorry: '',
-        knock: '',
-        puzzled: '',
-        grabbed: [],
-        dizzy: [],
-        enough: [],
-        lurk: [],
-        found: [],
-        flip: [],
-        roof: [],
-        yawn: [],
-        woke: [],
-      },
+    emotes: () => mission?.emotes ?? SPEECHLESS,
     after: (ms, run) => later.push({ at: clock + ms, run }),
     move,
+    say: (text, ms) => say(text, clock + ms),
     prank: (ms) => {
       prankUntil = clock + ms;
     },
-    idleFor: () => clock - lastInput,
+    idleFor: () => clock - Math.max(lastInput, pointer?.at ?? 0),
     vary,
   };
 
@@ -674,6 +675,7 @@ export const createPilot = ({
     setFlag('data-pose', pose);
     setFlag('data-face', now < flashUntil ? flash : look);
     setFlag('data-talking', null);
+    setFlag('data-tint', null);
     if (sky.style.zIndex !== LAYERS.front) sky.style.zIndex = LAYERS.front;
     if (balloonOn) {
       balloonOn = false;
@@ -899,10 +901,14 @@ export const createPilot = ({
       say(vary('yawn', scene.emotes().yawn), now + 2600);
     }
 
+    const pose = perch?.pose ?? (typeof leg.pose === 'function' ? leg.pose(side) : leg.pose);
     let want: Point = AHEAD;
     const rest = typeof leg.gaze === 'function' ? leg.gaze(side) : leg.gaze;
     if (flying) {
       want = heading ?? want;
+    } else if (pose === 'statue') {
+      // Holding still as a picture: its eyes go nowhere.
+      want = rest && rest !== 'wander' ? rest : AHEAD;
     } else if (now < avertUntil) {
       // Caught reading over a shoulder: up and away from the field, as if nothing happened.
       const field = reading?.node.isConnected ? reading.node.getBoundingClientRect() : null;
@@ -946,8 +952,8 @@ export const createPilot = ({
       body.style.transform = spin;
     }
 
-    const pose = perch?.pose ?? (typeof leg.pose === 'function' ? leg.pose(side) : leg.pose);
     setFlag('data-pose', flying ? 'fly' : pose);
+    setFlag('data-tint', leg.tint ? String(leg.tint) : null);
     const resting = dozing ? 'sleepy' : face;
     setFlag('data-face', now < flashUntil ? flash : flying ? 'neutral' : resting);
     setFlag('data-talking', now < talkUntil ? '' : null);
@@ -983,13 +989,31 @@ export const createPilot = ({
     say(vary('woke', scene.emotes().woke), now + 1700);
     move(JOLT, 420);
   };
+  /** Caught at something it was only doing to pass the time: it drops it and goes back. */
+  const cutShort = () => {
+    if (!leg?.skittish || held || slide) return;
+    const now = present();
+    queue = [];
+    later = [];
+    // Its own moves only: the ones in the stylesheet are its pose, and stay.
+    svg
+      ?.getAnimations?.()
+      .filter((running) => !('animationName' in running))
+      .forEach((running) => running.cancel());
+    flash = 'wow';
+    flashUntil = now + 700;
+    depart(station(), now);
+    say(vary('caught', scene.emotes().caught), now + 1400);
+  };
   const onPointer = (event: PointerEvent) => {
     pointer = { x: event.clientX, y: event.clientY, at: clock };
     stir();
+    cutShort();
   };
   const onInput = () => {
     lastInput = present();
     stir();
+    cutShort();
   };
   const onType = (event: Event) => {
     const node = event.target;
@@ -1054,6 +1078,16 @@ export const createPilot = ({
           queue = elsewhere;
           holdUntil = now + 350;
         }
+        return false;
+      }
+
+      // Found where it hides, the game is up: it comes out.
+      if (leg?.seeking) {
+        say(vary('found', scene.emotes().found), now + 1400);
+        flash = 'happy';
+        flashUntil = now + 1400;
+        queue = [];
+        holdUntil = now + 350;
         return false;
       }
 

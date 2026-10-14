@@ -36,6 +36,9 @@ export type Pose =
   | 'hover'
   | 'run'
   | 'duck'
+  | 'statue'
+  | 'knock'
+  | 'tune'
   | 'point-down'
   | 'point-up'
   | 'point-left'
@@ -71,6 +74,12 @@ export interface Leg {
   mission?: boolean;
   /** Degrees its body is turned once there. Only a robot in hiding has one. */
   turn?: number;
+  /** Playing hide and seek: found, the game is up. */
+  seeking?: boolean;
+  /** The colour its lights glow in on the way there and once there. */
+  tint?: number;
+  /** Gets out of the way at the first sign of the user: it was only passing the time. */
+  skittish?: boolean;
 }
 
 export interface Emotes {
@@ -87,6 +96,25 @@ export interface Emotes {
   roof: readonly string[];
   yawn: readonly string[];
   woke: readonly string[];
+  /** One, two, three: said over each icon as it is counted. */
+  counting: readonly string[];
+  allThere: readonly string[];
+  /** An icon is not where it should be. Takes the name under the empty place. */
+  missing: readonly ((name: string) => string)[];
+  later: readonly string[];
+  hiding: readonly string[];
+  unseen: readonly string[];
+  itsMe: string;
+  likeMe: readonly string[];
+  glass: readonly string[];
+  saver: readonly string[];
+  /** Caught at something it was only doing to pass the time. */
+  caught: readonly string[];
+  dialing: string;
+  modem: string;
+  online: readonly string[];
+  binFull: readonly string[];
+  binEmpty: readonly string[];
 }
 
 /** What a trip may use of the robot and of the screen it lives on. */
@@ -98,10 +126,12 @@ export interface Scene {
   /** Runs something later, on the same clock the flight uses. */
   after: (ms: number, run: () => void) => void;
   /** A one-off movement of the body that leaves the pose alone. */
-  move: (frames: Keyframe[], duration: number) => void;
+  move: (frames: Keyframe[], duration: number, easing?: string) => void;
+  /** A word over its head, there and then, for this long. */
+  say: (text: string, ms: number) => void;
   /** Says the next change to the window is the robot's own doing, not a new errand. */
   prank: (ms: number) => void;
-  /** How long since the user last typed or clicked. */
+  /** How long since the user last typed, clicked or moved the pointer. */
   idleFor: () => number;
   /** Chooses among ways of saying one thing, never the same twice running. */
   vary: Variety;
@@ -117,6 +147,10 @@ interface Trip {
 const AHEAD: Point = { x: 0, y: 0 };
 const DOWN: Point = { x: 0, y: 1 };
 const BUSY_FOR = 12000;
+// A screen saver only comes on once nobody has touched anything for a while.
+const SAVER_AFTER = 45000;
+const SAVER_BOUNCES = 5;
+const TINTS = 4;
 
 export const HOP = [
   { transform: 'translateY(0)' },
@@ -132,12 +166,48 @@ const WIGGLE = [
   { transform: 'rotate(-13deg)' },
   { transform: 'rotate(0deg)' },
 ];
-const LOOM = [
-  { transform: 'scale(1)' },
-  { transform: 'scale(1.55)', offset: 0.12 },
-  { transform: 'scale(1.55)', offset: 0.88 },
-  { transform: 'scale(1)' },
+export const NOD = [
+  { transform: 'translateY(0)' },
+  { transform: 'translateY(3px)' },
+  { transform: 'translateY(0)' },
+  { transform: 'translateY(3px)' },
+  { transform: 'translateY(0)' },
 ];
+export const SHAKE = [
+  { transform: 'translateX(0)' },
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(4px)' },
+  { transform: 'translateX(-4px)' },
+  { transform: 'translateX(4px)' },
+  { transform: 'translateX(0)' },
+];
+export const JOLT = [
+  { transform: 'translateY(0) scale(1)' },
+  { transform: 'translateY(-10px) scale(0.94, 1.08)' },
+  { transform: 'translateY(0) scale(1)' },
+];
+
+// Right up against the glass, from the far side of it: squashed flat on arriving, a bump at each knock.
+const NEAR = 3.4;
+const close = (x: number, offset: number, y = x): Keyframe => ({
+  transform: `scale(${x}, ${y})`,
+  transformOrigin: '50% 50%',
+  offset,
+});
+const GLASS: Keyframe[] = [
+  { ...close(1, 0), easing: 'ease-in' },
+  close(NEAR, 0.15),
+  close(NEAR * 1.07, 0.19, NEAR * 0.94),
+  close(NEAR, 0.24),
+  ...[0.36, 0.5, 0.64].flatMap((knock) => [
+    close(NEAR, knock),
+    close(NEAR * 1.04, knock + 0.03),
+    close(NEAR, knock + 0.06),
+  ]),
+  { ...close(NEAR, 0.82), easing: 'ease-in-out' },
+  close(1, 1),
+];
+const GLASS_MS = 4000;
 const FLASH = [
   { backgroundColor: '#000080', backgroundImage: 'none', color: '#ffffff' },
   { backgroundColor: '#000080', backgroundImage: 'none', color: '#ffffff' },
@@ -154,21 +224,67 @@ export const openWindow = () => {
   return frame?.getAttribute('aria-hidden') === 'true' ? null : frame;
 };
 const boxOf = (node: Element | null): Box | null => (node ? node.getBoundingClientRect() : null);
-const icons = () => [...document.querySelectorAll<HTMLElement>('[data-robot="icon"]')];
+/** Where an icon stands when nothing moves it: one that went down the bin is still drawn over the bin. */
+const placeOf = (icon: HTMLElement): Box => {
+  const within = icon.offsetParent?.getBoundingClientRect();
+  if (!within) return icon.getBoundingClientRect();
+  const left = within.left + icon.offsetLeft;
+  const top = within.top + icon.offsetTop;
+  return { left, top, right: left + icon.offsetWidth, bottom: top + icon.offsetHeight };
+};
+/** Under the window an icon can neither be seen nor got at. */
+const underWindow = (node: HTMLElement) => {
+  const frame = boxOf(openWindow());
+  const box = placeOf(node);
+  const x = (box.left + box.right) / 2;
+  const y = (box.top + box.bottom) / 2;
+  return frame !== null && x > frame.left && x < frame.right && y > frame.top && y < frame.bottom;
+};
+const icons = () =>
+  [...document.querySelectorAll<HTMLElement>('[data-robot="icon"]')].filter((icon) => !underWindow(icon));
+const iconOf = (zone: string) => {
+  const icon = document.querySelector<HTMLElement>(`[data-robot="icon"][data-robot-zone="${zone}"]`);
+  return icon && !underWindow(icon) ? icon : null;
+};
+/** Every place on the desktop an icon stands in, in order: with its icon, or empty while the icon is in the bin. */
+const slots = () =>
+  [...document.querySelectorAll<HTMLElement>('[data-slot]')].filter((slot) => !underWindow(slot));
+const isEmpty = (slot: HTMLElement) => slot.hasAttribute('data-trashed');
+const nameOf = (slot: HTMLElement) => slot.lastElementChild?.textContent?.trim() ?? '';
 const animate = (node: Element, frames: Keyframe[], duration: number) =>
   node.animate?.(frames, { duration, easing: 'ease-out' });
 
 /** Next to a desktop shortcut, on whichever side has room. */
 const beside = (icon: HTMLElement, { size, onScreen }: Scene, overlap = 0) => (): Stop => {
-  const box = icon.getBoundingClientRect();
+  const box = placeOf(icon);
   const fitsRight = box.right + 4 + size.w <= window.innerWidth;
   return {
     at: onScreen({
       x: fitsRight ? box.right + 4 - overlap : box.left - size.w - 4 + overlap,
-      y: box.top + (box.height - size.h) / 2,
+      y: (box.top + box.bottom - size.h) / 2,
     }),
     side: fitsRight ? 'right' : 'left',
   };
+};
+
+// Turned towards what it stands beside, and pointing at it.
+const toward = (side?: Side): Point => ({ x: side === 'right' ? -1 : 1, y: 0.3 });
+const pointAt = (side?: Side): Pose => (side === 'right' ? 'point-left' : 'point-right');
+
+/** Where something going straight from `from` meets the walls of `room`, bounce after bounce. */
+export const bounces = (from: Point, room: Box, heading: Point, count: number): Point[] => {
+  const hits: Point[] = [];
+  let at = from;
+  let way = heading;
+  for (let bounce = 0; bounce < count; bounce += 1) {
+    const across = ((way.x > 0 ? room.right : room.left) - at.x) / way.x;
+    const down = ((way.y > 0 ? room.bottom : room.top) - at.y) / way.y;
+    const go = Math.max(0, Math.min(across, down));
+    at = { x: at.x + way.x * go, y: at.y + way.y * go };
+    hits.push(at);
+    way = { x: across <= down ? -way.x : way.x, y: down <= across ? -way.y : way.y };
+  }
+  return hits;
 };
 
 /** Standing on the taskbar, centred over one of its buttons. */
@@ -591,24 +707,308 @@ export const TRIPS: Record<string, Trip> = {
     },
   },
 
-  // It comes right up to the glass and knocks, looking straight out.
-  knock: {
+  // It comes right up to the glass from the other side, big as life, presses on it and knocks.
+  glass: {
     odds: 0.6,
     plan: (scene) => {
-      const frame = boxOf(openWindow());
-      const at = frame
-        ? { x: (frame.left + frame.right - scene.size.w) / 2, y: frame.top - 12 }
-        : { x: (window.innerWidth - scene.size.w) / 2, y: window.innerHeight * 0.3 };
+      const at = scene.onScreen({
+        x: (window.innerWidth - scene.size.w) / 2,
+        y: window.innerHeight * 0.4 - scene.size.h / 2,
+      });
+      const where = () => ({ at });
       return [
+        { where, pose: 'hover', face: 'happy', gaze: AHEAD, hold: 300, skittish: true },
         {
-          where: () => ({ at: scene.onScreen(at) }),
-          pose: 'wave',
+          where,
+          pose: 'knock',
+          face: 'curious',
+          gaze: AHEAD,
+          hold: GLASS_MS,
+          skittish: true,
+          onLand: () => {
+            scene.move(GLASS, GLASS_MS, 'linear');
+            scene.after(GLASS_MS * 0.17, () => scene.say(scene.emotes().knock, GLASS_MS * 0.62));
+          },
+        },
+        {
+          where,
+          pose: 'hover',
+          face: 'curious',
+          gaze: 'wander',
+          emote: () => scene.vary('glass', scene.emotes().glass),
+          hold: 1800,
+          skittish: true,
+        },
+      ];
+    },
+  },
+
+  // It counts the icons on the desktop one by one. One missing puzzles it, and it says it will fetch it later.
+  count: {
+    odds: 0.9,
+    plan: (scene) => {
+      const places = slots();
+      if (places.length < 2) return [];
+      const { emotes, vary } = scene;
+      let counted = 0;
+      const legs = places.flatMap((slot): Leg[] => {
+        const where = beside(slot, scene);
+        if (isEmpty(slot)) {
+          const name = nameOf(slot);
+          return [
+            {
+              where,
+              pose: pointAt,
+              face: 'wow',
+              gaze: toward,
+              emote: () => vary('missing', emotes().missing)(name),
+              hold: 2000,
+              onLand: () => scene.move(SHAKE, 520),
+            },
+            {
+              where,
+              pose: 'stand',
+              face: 'neutral',
+              gaze: AHEAD,
+              emote: () => vary('later', emotes().later),
+              hold: 2200,
+              onLand: () => scene.move(NOD, 520),
+            },
+          ];
+        }
+        counted += 1;
+        const number = counted;
+        return [
+          {
+            where,
+            pose: pointAt,
+            face: 'curious',
+            gaze: toward,
+            emote: () => emotes().counting[number - 1] ?? String(number),
+            hold: 800,
+            onLand: () => scene.move(NOD, 420),
+          },
+        ];
+      });
+      if (counted === places.length) {
+        legs.push({
+          where: beside(places[places.length - 1], scene),
+          pose: 'cheer',
           face: 'happy',
           gaze: AHEAD,
-          emote: () => scene.emotes().knock,
-          hold: 2500,
-          onLand: () => scene.move(LOOM, 2400),
+          emote: () => vary('allThere', emotes().allThere),
+          hold: 1700,
+        });
+      }
+      return legs;
+    },
+  },
+
+  // Hide and seek behind the window: it flies about back there, and now and then its eyes show over the top.
+  hide: {
+    odds: 0.8,
+    plan: (scene) => {
+      const frame = openWindow();
+      if (!frame || frame.getBoundingClientRect().top - PEEKING < 2) return [];
+      const { size } = scene;
+      // From the left of the window (0) to its right (1).
+      const across = (along: number) => {
+        const { left, width } = frame.getBoundingClientRect();
+        return left + 30 + along * Math.max(0, width - 60 - size.w);
+      };
+      // Out of sight behind the window, or with its eyes over the top of it.
+      const spot = (along: number, up: boolean) => () => {
+        const { top, height } = frame.getBoundingClientRect();
+        return { at: { x: across(along), y: up ? top - PEEKING : top + Math.min(height / 3, 140) } };
+      };
+      const lurking = (along: number, hold: number): Leg => ({
+        where: spot(along, false),
+        pose: 'hover',
+        face: 'curious',
+        gaze: 'wander',
+        hold,
+        layer: 'behind',
+        seeking: true,
+      });
+      const peeking = (along: number, face: Face, emote?: () => string): Leg => ({
+        where: spot(along, true),
+        pose: 'peek',
+        face,
+        gaze: { x: along < 0.5 ? 0.8 : -0.8, y: 0.5 },
+        emote,
+        hold: 1500,
+        layer: 'behind',
+        seeking: true,
+        direct: true,
+        swift: true,
+      });
+      const [first, second, third] = [0.15, 0.5, 0.85].sort(() => Math.random() - 0.5);
+      return [
+        { ...lurking(first, 1300), emote: () => scene.vary('hiding', scene.emotes().hiding) },
+        lurking(second, 600),
+        peeking(second, 'curious'),
+        lurking(third, 600),
+        peeking(third, 'wow'),
+        lurking(first, 600),
+        peeking(first, 'curious', () => scene.vary('hiding', scene.emotes().hiding)),
+        {
+          where: () => ({ at: { x: across(first), y: frame.getBoundingClientRect().top - size.h + 1 } }),
+          pose: 'cheer',
+          face: 'happy',
+          gaze: AHEAD,
+          emote: () => scene.vary('unseen', scene.emotes().unseen),
+          hold: 1700,
+          direct: true,
+          swift: true,
         },
+      ];
+    },
+  },
+
+  // Beside its own portrait on the Tricks icon: that is me, it says, and strikes the very same pose.
+  itsMe: {
+    odds: 0.8,
+    plan: (scene) => {
+      const icon = iconOf('tricks');
+      if (!icon) return [];
+      const where = beside(icon, scene);
+      return [
+        {
+          where,
+          pose: pointAt,
+          face: 'happy',
+          gaze: toward,
+          emote: () => scene.emotes().itsMe,
+          hold: 1700,
+          onLand: () => scene.move(HOP, 400),
+        },
+        { where, pose: 'statue', face: 'neutral', gaze: AHEAD, hold: 2400 },
+        {
+          where,
+          pose: 'stand',
+          face: 'happy',
+          gaze: toward,
+          emote: () => scene.vary('likeMe', scene.emotes().likeMe),
+          hold: 1800,
+        },
+      ];
+    },
+  },
+
+  // Left alone a while, it turns into the screen saver: wall to wall, a new colour at each bounce.
+  saver: {
+    odds: 0.8,
+    plan: (scene) => {
+      const from = scene.position();
+      if (!from || scene.idleFor() < SAVER_AFTER) return [];
+      const { size } = scene;
+      const floor = (boxOf(landmark('taskbar'))?.top ?? window.innerHeight) - size.h - 4;
+      const room = { left: 4, top: 4, right: window.innerWidth - size.w - 4, bottom: floor };
+      if (room.right - room.left < 200 || room.bottom - room.top < 150) return [];
+      const start = { x: clamp(from.x, room.left, room.right), y: clamp(from.y, room.top, room.bottom) };
+      const heading = {
+        x: start.x < (room.left + room.right) / 2 ? 1 : -1,
+        y: start.y < (room.top + room.bottom) / 2 ? 0.7 : -0.7,
+      };
+      return bounces(start, room, heading, SAVER_BOUNCES).map((at, index) => ({
+        where: () => ({ at }),
+        pose: 'fly',
+        face: 'happy',
+        gaze: AHEAD,
+        emote: index === 0 ? () => scene.vary('saver', scene.emotes().saver) : undefined,
+        hold: index === 0 ? 900 : 60,
+        direct: true,
+        tint: (index % TINTS) + 1,
+        skittish: true,
+      }));
+    },
+  },
+
+  // It turns its antenna like a modem dialling in, lights flashing and body buzzing, until it gets a line.
+  dialUp: {
+    odds: 0.6,
+    plan: (scene) => {
+      const at = scene.position();
+      if (!at) return [];
+      const where = () => ({ at });
+      return [
+        {
+          where,
+          pose: 'tune',
+          face: 'curious',
+          gaze: { x: 0.3, y: -1 },
+          emote: () => scene.emotes().dialing,
+          hold: 1800,
+        },
+        {
+          where,
+          pose: 'tune',
+          face: 'strain',
+          gaze: { x: -0.3, y: -1 },
+          emote: () => scene.emotes().modem,
+          hold: 2000,
+          onLand: () => scene.move(SHAKE, 600),
+        },
+        {
+          where,
+          pose: 'cheer',
+          face: 'happy',
+          gaze: AHEAD,
+          emote: () => scene.vary('online', scene.emotes().online),
+          hold: 1600,
+        },
+      ];
+    },
+  },
+
+  // It leans over the bin for a look inside: full, it pulls a face; empty, it is pleased with it.
+  binPeek: {
+    odds: 0.6,
+    plan: (scene) => {
+      const bin = iconOf('bin');
+      if (!bin) return [];
+      const where = beside(bin, scene);
+      const full = bin.querySelector('[data-full]') !== null;
+      const lean = () => {
+        const by = where().side === 'right' ? -1 : 1;
+        scene.move(
+          [
+            { transform: 'translate(0, 0) rotate(0deg)' },
+            { transform: `translate(${by * 6}px, 3px) rotate(${by * 14}deg)`, offset: 0.3 },
+            { transform: `translate(${by * 6}px, 3px) rotate(${by * 14}deg)`, offset: 0.75 },
+            { transform: 'translate(0, 0) rotate(0deg)' },
+          ],
+          1100,
+        );
+      };
+      return [
+        {
+          where,
+          pose: 'hover',
+          face: 'curious',
+          gaze: (side) => ({ ...toward(side), y: 0.8 }),
+          hold: 1200,
+          onLand: lean,
+        },
+        full
+          ? {
+              where,
+              pose: 'stand',
+              face: 'disgust',
+              gaze: AHEAD,
+              emote: () => scene.vary('binFull', scene.emotes().binFull),
+              hold: 2000,
+              onLand: () => scene.move(JOLT, 420),
+            }
+          : {
+              where,
+              pose: 'stand',
+              face: 'happy',
+              gaze: AHEAD,
+              emote: () => scene.vary('binEmpty', scene.emotes().binEmpty),
+              hold: 1800,
+              onLand: () => scene.move(NOD, 520),
+            },
       ];
     },
   },

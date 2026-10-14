@@ -485,6 +485,23 @@
   animation-duration: 2.4s;
 }
 
+/* Gone screen saver: its lights take a new colour at every bounce. */
+[data-tint='1'] .robot {
+  --robot-glow: #ff5ad8;
+}
+
+[data-tint='2'] .robot {
+  --robot-glow: #ffe04a;
+}
+
+[data-tint='3'] .robot {
+  --robot-glow: #5ab4ff;
+}
+
+[data-tint='4'] .robot {
+  --robot-glow: #8cff5a;
+}
+
 /* Up for it: brows set, eyes bright, a grin from one side to the other. */
 [data-face='brave'] .mouthFlat {
   display: none;
@@ -942,6 +959,82 @@
 
 [data-pose='duck'] .armR {
   transform: rotate(-38deg);
+}
+
+/* Still as its own picture on the Tricks icon. */
+[data-pose='statue'] .robot {
+  animation: none;
+}
+
+/* Up against the glass from the other side: one palm flat on it, the other hand knocking. */
+[data-pose='knock'] .robot {
+  animation: none;
+}
+
+[data-pose='knock'] .armL {
+  transform: rotate(64deg);
+}
+
+[data-pose='knock'] .armR {
+  animation: knuckle 0.56s ease-in infinite;
+}
+
+/* That close its head is much bigger: what it says goes over the top of it. */
+[data-pose='knock'] .emote {
+  top: -104px;
+  translate: -40% 0;
+}
+
+/* Turning its antenna for a line: lights flashing like a modem's, its whole body buzzing. */
+[data-pose='tune'] .robot {
+  animation: shudder 0.11s linear infinite;
+}
+
+[data-pose='tune'] .armR {
+  animation: dial 0.5s ease-in-out infinite;
+}
+
+[data-pose='tune'] .armL {
+  transform: rotate(-30deg);
+}
+
+[data-pose='tune'] .led {
+  animation: modem 0.36s steps(1) infinite;
+}
+
+@keyframes knuckle {
+  0%,
+  100% {
+    transform: rotate(-58deg);
+  }
+  40% {
+    transform: rotate(-84deg);
+  }
+  55% {
+    transform: rotate(-40deg);
+  }
+}
+
+@keyframes dial {
+  0%,
+  100% {
+    transform: rotate(-86deg);
+  }
+  50% {
+    transform: rotate(-64deg);
+  }
+}
+
+@keyframes modem {
+  0% {
+    fill: #4fe36a;
+  }
+  33% {
+    fill: #ffd84a;
+  }
+  66% {
+    fill: #ff5a4a;
+  }
 }
 
 @keyframes jog {
