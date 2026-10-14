@@ -88,6 +88,20 @@ export const Robot = ({ className = '' }: RobotProps) => (
             <rect className={styles.pupil} x="19.1" y="19.4" width="1.8" height="1.8" />
             <rect className={styles.pupil} x="31.1" y="19.4" width="1.8" height="1.8" />
           </g>
+          {/* Half shut under lids that do not agree: one pulled down, one cocked. */}
+          <g className={styles.eyesSour}>
+            <rect x="17" y="20.8" width="6" height="2" />
+            <rect x="29" y="20.2" width="6" height="2.6" />
+            <path d="M16.6 17.6 L23.2 19.4" />
+            <path d="M28.8 17.2 L35.4 16.4" />
+          </g>
+          {/* Set brows and a glint in each eye: it has made up its mind. */}
+          <g className={styles.eyesKeen}>
+            <path d="M16.4 16 L23 17.6" />
+            <path d="M29 17.6 L35.6 16" />
+            <rect className={styles.pupil} x="20.8" y="18.9" width="1.5" height="1.5" />
+            <rect className={styles.pupil} x="32.8" y="18.9" width="1.5" height="1.5" />
+          </g>
 
           <rect className={styles.mouthFlat} x="20" y="25.5" width="12" height="2.6" />
           <path className={styles.mouthSmile} d="M20.5 25 V28 H31.5 V25" />
@@ -99,6 +113,9 @@ export const Robot = ({ className = '' }: RobotProps) => (
             className={styles.mouthGrit}
             d="M20.5 24.7 H31.5 V28.3 H20.5 Z M24.2 24.7 V28.3 M27.8 24.7 V28.3"
           />
+          <path className={styles.mouthSour} d="M20 26.6 l2.4 -1.6 l2.4 1.6 l2.4 -1.6 l2.4 1.6 h2.4" />
+          <rect className={styles.tongue} x="27.4" y="26.6" width="3.4" height="2.9" />
+          <path className={styles.mouthGrin} d="M20 24.6 H32 V26.4 L29.6 28.6 H22.4 L20 26.4 Z" />
         </g>
         <path
           className={styles.sweat}
