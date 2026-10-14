@@ -52,6 +52,10 @@ export type Cue = 'greet' | 'teach' | 'cheer' | 'rest' | 'watch' | 'worry' | 'sl
 /** How restless it is between errands: the guide keeps it busy, the app lets it be. */
 export type Roam = 'eager' | 'calm' | 'never';
 
+/** Where it rests between errands of its own: up on the window, down on the taskbar, or inside the window. */
+type Rest = 'roof' | 'taskbar' | 'inside';
+const RESTS: readonly Rest[] = ['roof', 'taskbar', 'inside'];
+
 /** A control, or a way to find it once it is on screen. */
 export type Target = HTMLElement | (() => HTMLElement | null) | null;
 
@@ -164,6 +168,8 @@ const REMEASURE_EVERY = 110;
 const SWIFT = 0.3;
 const SEATED = 9;
 const ROOST_INSET = 118;
+// Inside the window it sits in the far corner of the status bar, clear of the scrollbar over it.
+const INSIDE_INSET = 28;
 const BALLOON_GAP = 10;
 const BALLOON_LIFT = 23;
 const ASIDE = 10;
@@ -511,8 +517,32 @@ export const createPilot = ({
     return { at: { x, y }, pose: 'hover', hang: 'right' };
   };
 
-  /** Where it lives between errands: up on the window, or down by the clock. */
-  const roost = (): Stop | null => {
+  /** Inside the window, sat on the status bar in its far corner. */
+  const inside = (): Stop | null => {
+    const ledge = openWindow() ? boxOf(landmark('status')) : null;
+    if (!ledge) return null;
+    return {
+      at: { x: ledge.right - size.w - INSIDE_INSET, y: ledge.top - size.h + SEATED },
+      pose: 'sit',
+    };
+  };
+
+  /** The places it can rest in on this screen: up on the window only with room over it. */
+  const restsHere = (): Rest[] => {
+    const box = boxOf(openWindow());
+    return RESTS.filter(
+      (rest) =>
+        rest === 'taskbar' ||
+        (rest === 'roof' && box !== null && box.top >= size.h - 8) ||
+        (rest === 'inside' && inside() !== null),
+    );
+  };
+
+  /** Where it lives between errands: up on the window, down by the clock, or inside the window. */
+  const roost = (rest: Rest = 'roof'): Stop | null => {
+    if (rest === 'taskbar') return byClock();
+    if (rest === 'inside') return inside() ?? byClock();
+
     const frame = openWindow();
     const box = boxOf(frame);
     if (!frame || !box) return byClock();
@@ -527,14 +557,7 @@ export const createPilot = ({
 
     // A window filling a small screen has the taskbar under it: the status bar is the ledge.
     const fills = box.top <= 1 && box.bottom >= window.innerHeight - 1;
-    const ledge = fills ? boxOf(landmark('status')) : null;
-    if (ledge) {
-      return {
-        at: { x: ledge.right - size.w - 12, y: ledge.top - size.h + SEATED },
-        pose: 'sit',
-      };
-    }
-    return byClock();
+    return (fills ? inside() : null) ?? byClock();
   };
 
   /** Next to the control it is talking about, in its seat, or wherever it lives. */
@@ -545,6 +568,10 @@ export const createPilot = ({
     const points = cue === 'teach' || cue === 'greet' || cue === 'cheer';
     const festive = cue === 'greet' || cue === 'cheer';
     const speech = mission?.speech ?? SPEECH[cue];
+
+    // Between errands of its own it rests in one of its places, another one each time.
+    const places = restsHere();
+    const rest = roam === 'calm' && cue === 'rest' ? vary(`rest:${places.join()}`, places) : 'roof';
 
     let hold = DWELL;
     if (roam === 'calm') hold = pauseBetween();
@@ -567,7 +594,7 @@ export const createPilot = ({
           const box = seat.getBoundingClientRect();
           return { at: { x: box.left, y: box.top } };
         }
-        return roost();
+        return roost(rest);
       },
       pose: (where) => {
         if (cue === 'cheer' && !returning) return 'cheer';
