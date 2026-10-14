@@ -1,0 +1,100 @@
+/* Over everything, the taskbar and the robot's own sky included. It also takes every click. */
+.scene {
+  composes: scene from '../Rebuild/styles.module.css';
+}
+
+/*
+ * The front of the bin, from the edge of its mouth down, drawn again over the
+ * robot: all of the robot is seen going in, and what is down the bin is behind this.
+ */
+.front {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  clip-path: polygon(0 4px, 18px 10px, 32px 6px, 32px 32px, 0 32px);
+  pointer-events: none;
+}
+
+.actor {
+  composes: actor from '../Rebuild/styles.module.css';
+}
+
+/* Where the robot is seen: everywhere, or only from the top of the screen down to the mouth of the bin. */
+.hole {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+.hole[data-cut] {
+  overflow: hidden;
+}
+
+/* Turned on its head and squeezed thin, about its own middle. */
+.body {
+  display: block;
+  width: 46px;
+  height: 53px;
+  transform-origin: 50% 50%;
+  transition: transform 200ms ease-out;
+}
+
+.emote {
+  composes: emote from '../Rebuild/styles.module.css';
+}
+
+.says {
+  composes: says from '../Rebuild/styles.module.css';
+}
+
+.skip {
+  composes: skip from '../Rebuild/styles.module.css';
+}
+
+/*
+ * The inside of the bin, over the whole screen. It opens from the mouth of the
+ * bin outwards, and closes back down to it.
+ */
+.way {
+  position: fixed;
+  inset: 0;
+  z-index: 131;
+}
+
+.way[data-iris='opening'] {
+  animation: irisOpen var(--iris-ms, 600ms) ease-in both;
+}
+
+.way[data-iris='closing'] {
+  animation: irisShut var(--iris-ms, 500ms) ease-out both;
+}
+
+@keyframes irisOpen {
+  from {
+    clip-path: circle(0 at var(--iris-x) var(--iris-y));
+  }
+  to {
+    clip-path: circle(150vmax at var(--iris-x) var(--iris-y));
+  }
+}
+
+@keyframes irisShut {
+  from {
+    clip-path: circle(150vmax at var(--iris-x) var(--iris-y));
+  }
+  to {
+    clip-path: circle(0 at var(--iris-x) var(--iris-y));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .body {
+    transition: none;
+  }
+
+  .way[data-iris] {
+    animation: none;
+  }
+}

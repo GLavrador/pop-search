@@ -88,14 +88,17 @@ describe('the icons of the desktop', () => {
     expect(onOpenApp).toHaveBeenCalledTimes(1);
   });
 
-  it('should open My Computer on a double click, and nothing for the bin', () => {
+  it('should open My Computer and the bin on a double click, each its own way', () => {
     const onOpenComputer = vi.fn();
-    const { onOpenApp } = renderDesktop({ onOpenComputer });
+    const onOpenBin = vi.fn();
+    const { onOpenApp } = renderDesktop({ onOpenComputer, onOpenBin });
 
     fireEvent.doubleClick(icon('My Computer'));
-    fireEvent.doubleClick(icon('Recycle Bin'));
-
     expect(onOpenComputer).toHaveBeenCalledTimes(1);
+    expect(onOpenBin).not.toHaveBeenCalled();
+
+    fireEvent.doubleClick(icon('Recycle Bin'));
+    expect(onOpenBin).toHaveBeenCalledTimes(1);
     expect(onOpenApp).not.toHaveBeenCalled();
   });
 
@@ -129,16 +132,72 @@ describe('the icons of the desktop', () => {
     expect(notify).not.toHaveBeenCalledWith({ kind: 'iconDropped' });
   });
 
-  it('should let nothing but the program into the bin', () => {
-    const { onTrashApp } = renderDesktop();
+  it.each([
+    ['My Computer', 'computer'],
+    ['Tricks', 'tricks'],
+  ] as const)('should take %s into the bin, and tell the robot which one went', (name, zone) => {
+    const onTrash = vi.fn();
+    const { onTrashApp } = renderDesktop({ onTrash });
     putBinAt(8, 8);
 
-    pick('My Computer');
-    carry('My Computer', 40, 30);
-    letGo('My Computer', 40, 30);
+    pick(name);
+    carry(name, 40, 30);
+    expect(icon('Recycle Bin')).toHaveAttribute('data-aimed');
+    expect(notify).not.toHaveBeenCalled();
 
+    letGo(name, 40, 30);
+
+    expect(onTrash).toHaveBeenCalledWith(zone);
     expect(onTrashApp).not.toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith({ kind: 'iconTrashed', what: zone });
+    expect(notify).not.toHaveBeenCalledWith({ kind: 'iconDropped' });
     expect(icon('Recycle Bin')).not.toHaveAttribute('data-aimed');
+  });
+
+  it('should not take the bin into itself', () => {
+    const onTrash = vi.fn();
+    const { onTrashApp } = renderDesktop({ onTrash });
+    putBinAt(8, 8);
+
+    pick('Recycle Bin');
+    carry('Recycle Bin', 46, 36);
+    letGo('Recycle Bin', 46, 36);
+
+    expect(onTrash).not.toHaveBeenCalled();
+    expect(onTrashApp).not.toHaveBeenCalled();
+    expect(notify).toHaveBeenCalledWith({ kind: 'iconDropped' });
+  });
+
+  it('should keep the place of an icon that is in the bin, with nothing there to find', () => {
+    renderDesktop({ trashed: ['computer'] });
+
+    const gone = screen.getByText('My Computer').closest('button');
+    expect(screen.queryByRole('button', { name: 'My Computer' })).not.toBeInTheDocument();
+    expect(gone).toHaveAttribute('data-trashed');
+    expect(gone).not.toHaveAttribute('data-robot-zone');
+    expect(gone).not.toHaveAttribute('data-robot');
+    expect(icon('Tricks')).toHaveAttribute('data-robot-zone', 'tricks');
+  });
+
+  it('should show the bin full for as long as something is in it', () => {
+    const view = render(<Desktop appIcon="💻" appLabel="Pop Search" />);
+    const picture = () => view.getByRole('button', { name: 'Recycle Bin' }).querySelector('img');
+    const empty = picture()?.getAttribute('src');
+
+    view.rerender(<Desktop appIcon="💻" appLabel="Pop Search" trashed={['tricks']} />);
+    expect(picture()).toHaveAttribute('data-full');
+    expect(picture()?.getAttribute('src')).not.toBe(empty);
+
+    view.rerender(<Desktop appIcon="💻" appLabel="Pop Search" trashed={[]} />);
+    expect(picture()).not.toHaveAttribute('data-full');
+    expect(picture()?.getAttribute('src')).toBe(empty);
+  });
+
+  it('should put the bin wherever the robot has carried it', () => {
+    renderDesktop({ binBorne: { x: 64, y: 104, ms: 640 } });
+
+    expect(icon('Recycle Bin')).toHaveStyle({ transform: 'translate(64px, 104px)' });
+    expect(icon('My Computer').style.transform).toBe('');
   });
 
   it('should say how much of an icon is there while it is being built', () => {

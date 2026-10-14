@@ -637,8 +637,6 @@ export const en = {
       knock: 'knock knock',
       puzzled: 'huh?',
       grabbed: ['whoa!', 'hey!', 'put me down!', 'wheee!'],
-      bin: ['NOT THE BIN!!', 'I AM NOT RUBBISH!', 'HELP!!'],
-      hiding: ['is it over?', 'is it gone?', 'can I come out?'],
       dizzy: ['so dizzy...', 'stop the world!', 'everything is spinning...'],
       enough: ['enough!', 'stop, that tickles!', 'hey, that will do!'],
       lurk: ['that is it, I am hiding!', 'bye, I am off!', 'leave me be!'],
@@ -853,7 +851,10 @@ export const en = {
             what: 'Drop me on things.',
             text: 'On the top edge of the window, on an icon, on the clock, on Start, on the X of the window, on the Pop Search button down on the taskbar. I have an opinion about each.',
           },
-          { what: 'Try to put me in the Recycle Bin.', text: 'I would not.' },
+          {
+            what: 'Send me after what went in the Recycle Bin.',
+            text: 'Throw My Computer or Tricks in there, then open the bin. I go, though I do not promise to go smiling.',
+          },
           {
             what: 'Leave me alone.',
             text: 'A few minutes without touching anything. And watch what I get up to when nobody is looking.',
@@ -869,7 +870,7 @@ export const en = {
         items: [
           {
             what: 'Drag the icons.',
-            text: 'Any of them, anywhere, though they usually go back to their place. Do not put anything in the bin (please).',
+            text: 'Any of them, anywhere, though they usually go back to their place. Just do not put Pop Search in the bin (please).',
           },
           { what: 'Try to close the window.', text: 'With the X. It is stubborn: insist.' },
           { what: 'Open My Computer.', text: 'Double click the icon, or one tap on a phone.' },
@@ -894,6 +895,193 @@ export const en = {
         ],
       },
     ],
+  },
+
+  bin: {
+    going: {
+      reluctant: [
+        'Oh, I do not much like going in there...',
+        'That smell of old files again...',
+        'All right, all right, I am going.',
+      ],
+      willing: [
+        'And off we go!',
+        'At least it is quiet in there.',
+        'Rescue mission: leave it to me!',
+      ],
+    },
+    emotes: {
+      grab: 'come here, you',
+      stuck: 'nngh!',
+      tight: 'it does... not... fit',
+      again: 'once more!',
+      in: 'plop!',
+      out: 'pop!',
+      back: 'it always goes back',
+    },
+    back: {
+      rescued: [
+        'Rescued! And hardly any dust on them.',
+        'Mission accomplished: everybody is back!',
+        'There, each one in its place.',
+      ],
+      left: [
+        'They stayed in there. I will fetch them another day.',
+        'Back empty handed. For today.',
+        'Some other time, then.',
+      ],
+    },
+    skip: 'skip ▸▸',
+    skipTitle: 'Skip the scene (Esc)',
+    inside: {
+      title: 'Recycle Bin',
+      spoken: 'Inside the Recycle Bin',
+      says: [
+        'Found them! But the bin gives nothing back for free. How do we get them out of here?',
+        'There they are, on the heap. Look what else was thrown away: two whole games! Win one and I take the icons back up.',
+        'Dusty as ever. The icons are right there, and so is a way out for them: an old game or two that nobody wanted.',
+      ],
+      pile: 'Thrown away',
+      choose: 'How do we get them out?',
+      flappy: { name: 'Rescue by playing Flappy BIP', about: 'Fly between the menus.' },
+      dino: { name: 'Rescue by playing Dino BIP', about: 'Run, jump and duck.' },
+      direct: { name: 'Rescue right away', about: 'No challenge at all.' },
+      leave: { name: 'Leave', about: 'Without rescuing anything.' },
+      won: 'We did it! The Rescue button down there, beside the bar, takes them back up. Or play a little more, I will not tell anyone.',
+      untouchable: [
+        'Everything in here is too damaged, you cannot even touch me.',
+        'Better not pick me up: there are bad sectors all over the place in here.',
+        'Careful! With the disk like this, I would end up in fragments.',
+      ],
+      untouchedClean: [
+        'It is clean, but it is still the Recycle Bin. No picking me up in here.',
+        'Not yet: I only leave this place with them.',
+        'A disk as good as new, and still no dragging me about.',
+      ],
+      cleaning: [
+        'Hold on, I can uncorrupt all of this!',
+        'Now this mess can be cleaned up!',
+        'Leave the rest to me, I will uncorrupt it!',
+      ],
+      explorer: {
+        menus: ['File', 'Edit', 'View', 'Go', 'Favorites', 'Help'],
+        address: 'Address',
+        name: 'Name',
+        goal: 'Goal',
+        best: 'Best',
+        hint: 'Win one of the games and everything goes back to the desktop.',
+        ready: 'Rescue ready: the Rescue button is beside the progress bar.',
+        objects: (count: number) => `${count} object(s)`,
+      },
+      goal: (points: number) => `Goal: ${points}`,
+      best: (points: number) => `Your best: ${points}`,
+      confirm: {
+        title: 'Recycle Bin',
+        text: 'Are you sure?',
+        detail: 'Everything is rescued without going through the challenge.',
+        yes: 'Yes',
+        no: 'No',
+      },
+      junk: {
+        errors: [
+          {
+            title: 'SOL.EXE - Error',
+            text: 'A game of Solitaire was left halfway through in 1999. Nobody came back to finish it.',
+          },
+          {
+            title: 'DEFRAG.EXE - Error',
+            text: 'Defragmentation has been stopped for 9,131 days. Windows recommends patience.',
+          },
+          {
+            title: 'WINWORD.EXE - Error',
+            text: 'essay_FINAL_v7_this_time.doc cannot be saved because it no longer exists.',
+          },
+          {
+            title: 'Explorer - Error',
+            text: 'Not enough memory to remember why this file was kept.',
+          },
+        ],
+        ok: 'OK',
+        close: 'Close',
+        files: {
+          temp: '~WRL0003.tmp',
+          text: 'New Text Document (4).txt',
+          picture: 'untitled.bmp',
+          shortcut: 'Shortcut to Shortcut',
+          setup: 'SETUP.EXE',
+          folder: 'old stuff',
+          batch: 'AUTOEXEC.BAT',
+          disks: 'Disk 1 of 31',
+          music: 'Greatest Hits.cda',
+          waiting: 'Please wait',
+          solitaire: 'Solitaire',
+          scandisk: 'ScanDisk',
+          essay: 'essay_FINAL_v7.doc',
+        },
+      },
+      defrag: {
+        title: 'Defragmenting Drive C',
+        working: 'Defragmenting file system...',
+        ready: 'Rescue ready.',
+        done: (percent: number) => `${percent}% complete`,
+        stop: 'Stop',
+        pause: 'Pause',
+        legend: 'Legend',
+        details: 'Hide Details',
+        rescue: 'Rescue',
+        key: {
+          title: 'Defrag Legend',
+          done: 'Defragmented data',
+          data: 'Data still to be defragmented',
+          moving: 'Data that was being moved',
+          lost: 'Forgotten data',
+          bad: 'Bad (damaged) area of the disk',
+          free: 'Free space',
+          close: 'Close',
+        },
+      },
+    },
+    games: {
+      points: 'Points',
+      goal: 'Goal',
+      best: 'Best',
+      quit: 'Quit the game',
+      unlocked: {
+        title: 'Rescue unlocked!',
+        text: 'The Rescue button beside the progress bar takes them up now. Or keep going for your best.',
+      },
+      newBest: 'New best!',
+      met: 'reached',
+      over: {
+        again: 'Try again',
+        tally: (points: number, best: number) => `Points: ${points}. Best: ${best}.`,
+        unlocked: 'The rescue is ready, beside the progress bar.',
+        short: (missing: number) =>
+          missing === 1 ? 'One point short of the rescue.' : `${missing} points short of the rescue.`,
+      },
+      flappy: {
+        title: 'Flappy BIP',
+        how: 'Space, click or tap to fly',
+        lost: [
+          'BIP-98 flew into a menu.',
+          'That menu was not supposed to open there.',
+          'Somebody left the Start menu open.',
+        ],
+        menus: ['File', 'Edit', 'View', 'Help'],
+        file: ['New', 'Open...', 'Save', 'Save As...', '-', 'Print...', 'Send To', 'Properties', '-', 'Close'],
+      },
+      dino: {
+        title: 'Dino BIP',
+        how: 'Space or ↑ to jump, ↓ to duck',
+        lost: [
+          'BIP-98 tripped over old hardware.',
+          'A window that flies does not look where it is going.',
+          'That floppy disk was not there a second ago.',
+        ],
+        jump: 'Jump',
+        duck: 'Duck',
+      },
+    },
   },
 
   robot: {
@@ -938,6 +1126,7 @@ export const en = {
       iconDropped: ['it always goes back', 'stubborn icons', 'it likes it there'],
       binThreat: ['do NOT!', 'not in there!!', 'do not even think about it!'],
       appTrashed: ['WHAT DID YOU DO?!', 'NOOOO!', 'MY HOUSE!!'],
+      binEmpty: ['it is empty', 'nothing to fetch in there', 'spotless, for now'],
       bigger: ['wow, so big!', 'full screen!', 'room to spare!'],
       smaller: ['that fits better', 'regular size', 'back to my corner'],
       echo: [
@@ -987,7 +1176,7 @@ export const en = {
         cat: ['meow?', 'a cat?! where?', 'the one behind the window?'],
         robot: ['that is me!!', 'did you call?', 'robot? present!'],
         dog: ['woof woof!', 'dogs I like', 'where is the puppy?'],
-        bin: ['do not say that word!', 'a bin?! where?!', 'yikes...'],
+        bin: ['it is all dust in there...', 'the bin? I can fetch, if need be', 'ugh, that smell'],
         home: ['you are already in it!', 'the best program there is!', 'that is my house!'],
       },
       press: {
@@ -1088,6 +1277,17 @@ export const en = {
         text: 'That was the guide! Now make yourself at home. Well, it is my home, but I am lending it: feel free to poke at everything. There are things to do and to discover around here that I did not show, and the fun is in discovering them yourself. But if you want to cheat, (almost) everything is right here, in the Tricks icon.',
         action: 'Peek at the tricks',
       },
+      trashed: {
+        computer: [
+          'There goes My Computer. If you miss it, just open the Recycle Bin and I will go in and fetch it.',
+          'My Computer in the bin? Fine, you are the boss. Change your mind, open the Recycle Bin and I go down to get it.',
+        ],
+        tricks: [
+          'Hey, those were my tricks! Fine, fine. If you want them back, just open the Recycle Bin and I will go in and fetch them.',
+          'My tricks, in the bin! I was going to use those. Open the Recycle Bin and I bring them back.',
+        ],
+        action: 'Fetch it now',
+      },
     },
     drop: {
       computer: [
@@ -1174,7 +1374,7 @@ export const en = {
       } as HelpCopy,
       'desktop.icon': {
         title: 'Desktop',
-        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window, My Computer shows what all this is made of, and Tricks holds my list of what there is to try around here. Just do not drop Pop Search in the Recycle Bin.',
+        text: 'You can drag the icons around, but they always go back to their place. The Pop Search one opens the program again if you close the window, My Computer shows what all this is made of, and Tricks holds my list of what there is to try around here. Those two can go in the Recycle Bin: open it afterwards and I go in to fetch them. Just do not drop Pop Search in it.',
       } as HelpCopy,
       system: {
         title: 'System Properties',

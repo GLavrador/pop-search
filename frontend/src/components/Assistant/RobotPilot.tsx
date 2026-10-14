@@ -36,6 +36,8 @@ interface RobotPilotProps {
   cue: Cue;
   /** The empty seat kept for it inside the assistant panel. */
   home: RefObject<HTMLElement | null>;
+  /** Where on the screen it comes on, when it is back from somewhere and not flying in. */
+  entry?: { x: number; y: number } | null;
   /** The control it is talking about, when there is one. */
   target: Target;
   aim: Aim | null;
@@ -64,6 +66,7 @@ export const RobotPilot = ({
   utterance,
   cue,
   home,
+  entry = null,
   target,
   aim,
   parked,
@@ -86,6 +89,7 @@ export const RobotPilot = ({
   const pilot = useRef<Pilot | null>(null);
   const press = useRef<{ x: number; y: number; carrying: boolean } | null>(null);
   const justDropped = useRef(false);
+  const cameOnAt = useRef(entry);
 
   useLayoutEffect(() => {
     if (!sky.current || !craft.current || !emote.current || !balloon.current) return;
@@ -97,6 +101,7 @@ export const RobotPilot = ({
       balloon: balloon.current,
       home,
       stage,
+      entry: cameOnAt.current,
     });
     pilot.current = flying;
 

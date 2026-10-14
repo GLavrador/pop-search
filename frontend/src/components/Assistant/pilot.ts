@@ -14,7 +14,6 @@ import {
 } from './flight';
 import {
   HOP,
-  hide,
   landmark,
   lurk,
   openWindow,
@@ -102,6 +101,8 @@ interface Parts {
   home: RefObject<HTMLElement | null>;
   /** The scrolling panel it must stay inside while pointing. */
   stage: RefObject<HTMLElement | null>;
+  /** Where it already is as it comes on, when that is not somewhere off the screen. */
+  entry?: Point | null;
 }
 
 export interface Pilot {
@@ -224,7 +225,15 @@ const MOVES: Record<Move, { frames: Keyframe[]; ms: number }> = {
 
 const clamp = (value: number, low: number, high: number) => Math.min(Math.max(value, low), high);
 
-export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts): Pilot => {
+export const createPilot = ({
+  sky,
+  craft,
+  emote,
+  balloon,
+  home,
+  stage,
+  entry,
+}: Parts): Pilot => {
   const svg = craft.querySelector('svg');
   const vary = createVariety();
   const body = craft.querySelector<HTMLElement>('button');
@@ -278,7 +287,8 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   let pokes = 0;
   let pokedAt: number[] = [];
   let prankUntil = 0;
-  let lastInput = 0;
+  // Wherever it comes back from, it comes back awake: time spent elsewhere is not time left alone.
+  let lastInput = performance.now();
   let yawned = false;
   let dozing = false;
   let reading: { node: HTMLInputElement | HTMLTextAreaElement; until: number } | null = null;
@@ -323,8 +333,6 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
         knock: '',
         puzzled: '',
         grabbed: [],
-        bin: [],
-        hiding: [],
         dizzy: [],
         enough: [],
         lurk: [],
@@ -599,7 +607,9 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     hush();
 
     // First time on stage, or back from beyond the edge: it flies in from outside.
-    pos = next.from?.() ?? pos ?? { x: window.innerWidth + 12, y: Math.max(16, spot.at.y - 110) };
+    pos = next.from?.() ??
+      pos ??
+      entry ?? { x: window.innerWidth + 12, y: Math.max(16, spot.at.y - 110) };
 
     const bow = next.direct ? 0 : (0.45 + Math.random() * 0.55) * (Math.random() < 0.8 ? 1 : -1);
     const plan = planFlight(pos, spot.at, now, bow * climbing(pos, spot.at));
@@ -697,7 +707,6 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
   const touchDown = (now: number) => {
     if (!pos) return;
     const { zone, hold } = landing;
-    const scared = zone === 'bin';
     const ledge = zone === 'roof' ? boxOf(openWindow()) : null;
     const spot: Stop = ledge
       ? {
@@ -720,7 +729,7 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     leg = {
       where: () => spot,
       pose: zone ? 'stand' : 'hover',
-      face: scared ? 'worried' : ledge ? 'happy' : 'neutral',
+      face: ledge ? 'happy' : 'neutral',
       hold,
     };
     perch = spot;
@@ -734,7 +743,6 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
     face = leg.face;
     holdUntil = now + hold;
     move(SQUASH, 300);
-    if (scared) queue = hide(scene);
     // Put on the app's own button it does its number there: it jumps until the window obeys.
     if (zone === 'task') queue = stomp(scene);
   };
@@ -1135,23 +1143,15 @@ export const createPilot = ({ sky, craft, emote, balloon, home, stage }: Parts):
 
       const now = present();
       const zone = zoneAt(pos);
-      const scared = zone === 'bin';
 
       // Put on something it stays on it; thrown anywhere else it carries on for a bit.
       slide = zone || still ? { x: 0, y: 0 } : throwOf(trail, performance.now());
       // Wherever it ends up it stays a while, then goes back to what it was doing.
       const brief = zone === 'task' ? 350 : 700;
-      const stay = scared ? 450 : zone === 'roof' ? ROOF_FOR : zone ? brief : HOVER_FOR;
+      const stay = zone === 'roof' ? ROOF_FOR : zone ? brief : HOVER_FOR;
       landing = { zone, hold: Math.max(stay, dizzyUntil - now) };
       shaking = NOT_SHAKING;
       if (now >= dizzyUntil) hush();
-
-      if (scared) {
-        flash = 'worried';
-        flashUntil = now + 1500;
-        say(vary('bin', scene.emotes().bin), now + 1500);
-        move(SHAKE, 520);
-      }
       return zone;
     },
 

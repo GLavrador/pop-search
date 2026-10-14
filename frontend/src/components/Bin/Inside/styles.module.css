@@ -1,0 +1,1173 @@
+/*
+ * The inside of the bin is one window filling the screen: the Disk
+ * Defragmenter, stuck where it was left. Everything else lies on its disk, in
+ * layers from the bottom: the Defragmenter and what was thrown away, then the
+ * wear of the screen over them, then everything that answers or has something
+ * to say, which the wear never covers. The game is under the wear until the
+ * goal is reached.
+ */
+.inside {
+  --title: 22px;
+  --panel: 98px;
+
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  outline: none;
+  background: var(--win-gray);
+  color: var(--win-dark);
+}
+
+.defrag {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+  background: var(--win-gray);
+}
+
+/* Faded, the way a screen left on for years fades, until the robot puts it in order. */
+.defragBar,
+.disk,
+.junk {
+  filter: saturate(0.58) contrast(0.93) brightness(0.97);
+  transition: filter 1100ms linear;
+}
+
+.inside[data-wiping] .defragBar,
+.inside[data-wiping] .disk,
+.inside[data-wiping] .junk,
+.inside[data-clean] .defragBar,
+.inside[data-clean] .disk,
+.inside[data-clean] .junk {
+  filter: none;
+}
+
+.defragBar,
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 3px 3px 5px;
+  background: linear-gradient(90deg, var(--win-blue-title), var(--win-blue-grad));
+  color: var(--win-light);
+  font-size: 0.9rem;
+  font-weight: bold;
+  user-select: none;
+}
+
+.defragBar {
+  flex: 0 0 auto;
+  height: var(--title);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.defragName,
+.barName {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.defragName img,
+.barName img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Its own buttons are there, and none of them does anything any more. */
+.stuck {
+  display: flex;
+  gap: 2px;
+}
+
+.stuck i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 14px;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  color: var(--win-shadow-dark);
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.stuck i:last-child {
+  margin-left: 2px;
+}
+
+.disk {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 2px 0;
+  overflow: hidden;
+  background: var(--win-light);
+  border: 2px solid;
+  border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+}
+
+.grid {
+  position: absolute;
+  inset: 0 16px 0 0;
+  filter: contrast(0.8) brightness(1.05);
+}
+
+.map {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.scroller {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: 16px;
+  background-color: var(--win-shadow-light);
+  background-image:
+    linear-gradient(45deg, var(--win-light) 25%, transparent 25%, transparent 75%, var(--win-light) 75%),
+    linear-gradient(45deg, var(--win-light) 25%, transparent 25%, transparent 75%, var(--win-light) 75%);
+  background-size: 2px 2px;
+  background-position: 0 0, 1px 1px;
+}
+
+.scroller i,
+.scroller b {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  font-size: 0.5rem;
+  font-style: normal;
+  line-height: 1;
+}
+
+.scroller b {
+  height: 38px;
+}
+
+.scroller i:last-child {
+  margin-top: auto;
+}
+
+/* What it says and its buttons are over the wear: they have to be read. */
+.panel {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 auto;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: var(--panel);
+  padding: 8px 6px 6px;
+  font-size: 0.84rem;
+}
+
+.progress {
+  flex: 1;
+  max-width: 420px;
+}
+
+.progress p {
+  margin: 0 0 6px;
+}
+
+/* The bar it stopped at, and fills up again from there as the game is played. */
+.meter {
+  height: 20px;
+  margin-bottom: 6px;
+  padding: 2px;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--win-blue-title) 0 9px,
+    transparent 9px 11px
+  );
+  transition: width 400ms steps(8, end);
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(108px, auto));
+  gap: 6px 8px;
+}
+
+.controls :global(.win95-btn) {
+  min-width: 0;
+  padding: 3px 12px;
+  font-size: 0.82rem;
+  font-weight: normal;
+}
+
+/* The default button of the window, once there is something to do with it. */
+.controls .rescue {
+  outline: 1px solid var(--win-dark);
+  font-weight: bold;
+}
+
+/*
+ * What lies on the disk: old files, and the errors nobody ever closed. Each is
+ * put where there is room for it, clear of the bin's window and of the robot.
+ */
+.junk {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.lying {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.lying[data-out] {
+  display: none;
+}
+
+.file {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  width: 82px;
+}
+
+.fileArt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.fileArt img,
+.fileArt svg {
+  width: 32px;
+  height: 32px;
+}
+
+.fileArt .arrow {
+  position: absolute;
+  inset: 0;
+}
+
+.fileName {
+  max-width: 100%;
+  padding: 0 2px;
+  background: var(--win-light);
+  font-size: 0.7rem;
+  line-height: 1.25;
+  color: var(--win-dark);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* What the robot came for, picked out from the rest the way selected files are. */
+.file[data-chosen] .fileArt > :first-child {
+  filter: brightness(0.75) sepia(1) hue-rotate(190deg) saturate(3);
+}
+
+.file[data-chosen] .fileName {
+  background: var(--win-blue-title);
+  color: var(--win-light);
+  outline: 1px dotted var(--win-light);
+  outline-offset: -1px;
+}
+
+/* An error box exactly as Windows 98 drew it. */
+.error {
+  width: min(284px, 72vw);
+  padding: 2px;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-shadow-light) var(--win-dark) var(--win-dark) var(--win-shadow-light);
+  box-shadow:
+    inset 1px 1px 0 var(--win-light),
+    inset -1px -1px 0 var(--win-shadow-dark);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.errorBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 2px 2px 4px;
+  background: linear-gradient(90deg, var(--win-blue-title), var(--win-blue-grad));
+  color: var(--win-light);
+  font-weight: bold;
+}
+
+.errorBar i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 12px;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  color: var(--win-dark);
+  font-size: 0.66rem;
+  font-style: normal;
+  line-height: 1;
+}
+
+.errorBody {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 12px 10px 6px 12px;
+}
+
+.errorBody img {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.errorBody p {
+  margin: 0;
+  padding-top: 2px;
+}
+
+.errorFoot {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 9px;
+}
+
+/* OK, with the dotted line of the button that has the focus, waiting for a press that never came. */
+.errorFoot span {
+  position: relative;
+  min-width: 74px;
+  padding: 3px 0;
+  border: 1px solid var(--win-dark);
+  box-shadow:
+    inset 1px 1px 0 var(--win-light),
+    inset -1px -1px 0 var(--win-shadow-dark),
+    inset -2px -2px 0 var(--win-dark);
+  text-align: center;
+}
+
+.errorFoot span::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px dotted var(--win-dark);
+}
+
+/* Closed by the robot at last: the button it presses goes in, and only then the window goes. */
+.error[data-state='pressed'][data-close-with='x'] .errorBar i {
+  border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+  padding: 1px 0 0 1px;
+}
+
+.error[data-state='pressed'][data-close-with='button'] .errorFoot span {
+  box-shadow:
+    inset 1px 1px 0 var(--win-dark),
+    inset 2px 2px 0 var(--win-shadow-dark);
+  padding: 4px 0 2px;
+  text-indent: 2px;
+}
+
+.error[data-state='closed'] {
+  opacity: 0;
+  scale: 0.9;
+  transition:
+    opacity 130ms ease-out,
+    scale 130ms ease-out;
+}
+
+/*
+ * What answers: what the robot came for, the robot, and the bin's own window,
+ * over the disk and under its bar. It makes no layer of its own: each of them
+ * takes its place over the wear or under it.
+ */
+.room {
+  position: absolute;
+  top: calc(var(--title) + 6px);
+  right: 18px;
+  bottom: calc(var(--panel) + 6px);
+  left: 0;
+  display: grid;
+  grid-template-areas: 'aside menu den';
+  grid-template-columns: minmax(190px, 0.8fr) minmax(0, 700px) minmax(300px, 1.2fr);
+  gap: 18px;
+  padding: 14px 14px 14px 18px;
+}
+
+.find {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  z-index: 3;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.den {
+  position: relative;
+  z-index: 3;
+  grid-area: den;
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+  align-self: center;
+  justify-self: center;
+}
+
+.lost {
+  display: flex;
+  gap: 4px;
+}
+
+.keeper {
+  position: relative;
+}
+
+/* The robot where it stands. It can be grabbed at, never picked up, and it flies off from here to press a game. */
+.puppet {
+  display: inline-block;
+  line-height: 0;
+  cursor: grab;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+}
+
+.puppet[data-away] {
+  visibility: hidden;
+}
+
+.balloon {
+  position: absolute;
+  bottom: calc(100% + 13px);
+  left: -40px;
+  width: 248px;
+  margin: 0;
+  padding: 9px 12px 10px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.45);
+  font-size: 0.9rem;
+  line-height: 1.42;
+}
+
+.balloon::before,
+.balloon::after {
+  content: '';
+  position: absolute;
+  left: 63px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 8px 7px 0;
+  translate: -7px 0;
+}
+
+.balloon::before {
+  top: 100%;
+  border-top-color: var(--win-dark);
+}
+
+.balloon::after {
+  top: calc(100% - 2px);
+  border-top-color: var(--win-tooltip-bg);
+}
+
+/* The robot putting the disk in order, over the wear it is sweeping off and under the game. */
+.sweeper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 46px;
+  height: 53px;
+  line-height: 0;
+  transition-property: transform;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.broom {
+  position: absolute;
+  bottom: -14px;
+  left: -22px;
+  width: 32px;
+  height: 32px;
+}
+
+.menu,
+.confirm,
+.legend {
+  padding: 2px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* The bin's window, as the Explorer opens it, big in the middle of the disk. */
+.menu {
+  position: relative;
+  z-index: 3;
+  grid-area: menu;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  max-height: 100%;
+  overflow: hidden auto;
+}
+
+.menu .bar {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 1.05rem;
+}
+
+.barClose {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 16px;
+  padding: 0;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  color: var(--win-dark);
+  font-size: 0.68rem;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.menuStrip,
+.address {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 2px 2px 4px;
+  border-bottom: 1px solid var(--win-shadow-dark);
+  box-shadow: 0 1px 0 var(--win-light);
+  font-size: 0.95rem;
+  user-select: none;
+}
+
+.menuStrip {
+  justify-content: space-between;
+}
+
+.menuWords {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.menuWords span {
+  padding: 1px 6px;
+}
+
+.menuWords span::first-letter {
+  text-decoration: underline;
+}
+
+/* The flag that waves while a page loads, still. */
+.flag {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 24px;
+  background: #000;
+  border: 1px solid;
+  border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+}
+
+.flag img,
+.addressField img {
+  width: 16px;
+  height: 16px;
+}
+
+.address {
+  padding: 3px 4px;
+}
+
+.addressField {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+  align-items: center;
+  min-width: 0;
+  height: 26px;
+  padding-left: 3px;
+  background: var(--win-light);
+  border: 2px solid;
+  border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+}
+
+.addressField i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 100%;
+  margin-left: auto;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  font-size: 0.5rem;
+  font-style: normal;
+}
+
+/* The inside of the window: the panel with the name of the folder, and the list. */
+.folder {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  min-height: 0;
+  margin: 3px 0 2px;
+  background: var(--win-light);
+  border: 2px solid;
+  border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+}
+
+.webView {
+  padding: 16px 16px 12px;
+  background:
+    radial-gradient(ellipse 120% 70% at 0 0, #bcd2ee 0%, rgba(188, 210, 238, 0) 70%),
+    var(--win-light);
+  border-right: 1px solid var(--win-shadow-light);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.webView img {
+  display: block;
+  width: 48px;
+  height: 48px;
+}
+
+.webView h2 {
+  margin: 10px 0 8px;
+  font-size: 2.1rem;
+  line-height: 1.05;
+}
+
+/* The line of colour under the name, as in every folder seen as a web page. */
+.webView hr {
+  height: 3px;
+  margin: 0 0 12px;
+  background: linear-gradient(90deg, #d40000, #f0a000 30%, #3aa000 55%, #0050d0 80%, transparent);
+  border: 0;
+}
+
+.webView p {
+  margin: 0 0 6px;
+}
+
+.listing {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.columns,
+.way {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px 96px;
+  align-items: center;
+}
+
+.columns span {
+  padding: 1px 6px;
+  background: var(--win-gray);
+  border: 1px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.ways {
+  margin: 0;
+  padding: 3px 0;
+  list-style: none;
+}
+
+.way {
+  width: 100%;
+  min-height: 86px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 1.1rem;
+  color: var(--win-dark);
+  text-align: left;
+  cursor: pointer;
+}
+
+.wayName {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.wayName img {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.wayText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wayText small {
+  font-size: 0.9rem;
+  color: var(--win-text-dark);
+}
+
+.wayGoal,
+.wayBest {
+  padding: 0 10px;
+  text-align: right;
+}
+
+.wayGoal {
+  font-weight: bold;
+  color: var(--win-blue-title);
+}
+
+/* Picked out the way a selected file is: in the colour of the title bar. */
+.way:hover,
+.way:focus-visible,
+.way[data-pressed] {
+  outline: none;
+  background: var(--win-blue-title);
+  color: var(--win-light);
+}
+
+.way:hover small,
+.way:focus-visible small,
+.way[data-pressed] small,
+.way:hover .wayGoal,
+.way:focus-visible .wayGoal,
+.way[data-pressed] .wayGoal {
+  color: var(--win-light);
+}
+
+.way:focus-visible {
+  outline: 1px dotted var(--win-light);
+  outline-offset: -2px;
+}
+
+/* Pressed by the robot's own hand. */
+.way[data-pressed] .wayName {
+  translate: 1px 1px;
+}
+
+.statusStrip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  font-size: 0.88rem;
+  user-select: none;
+}
+
+.statusStrip span {
+  padding: 1px 4px;
+  border: 1px solid;
+  border-color: var(--win-shadow-dark) var(--win-light) var(--win-light) var(--win-shadow-dark);
+}
+
+/* Where a game is played, and over it what is being played for. Under the wear until the goal is reached. */
+.hall {
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.inside[data-earned] .hall {
+  z-index: 4;
+}
+
+.prize {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 2px 10px;
+  background: var(--win-tooltip-bg);
+  border: 1px solid var(--win-dark);
+  font-size: 0.76rem;
+}
+
+.prize b {
+  padding: 0 3px;
+  background: var(--win-blue-title);
+  color: var(--win-light);
+  font-weight: normal;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.confirm {
+  width: min(100%, 330px);
+}
+
+.confirmBody {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 14px 8px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.confirmBody img {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.confirmBody p {
+  margin: 0 0 4px;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 6px 10px 12px;
+}
+
+.legend {
+  width: min(100%, 300px);
+}
+
+.keys {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding: 14px 16px 6px;
+  font-size: 0.82rem;
+  list-style: none;
+}
+
+.keys li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* The same blocks the disk is drawn with. */
+.swatch {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--win-dark);
+}
+
+.swatch[data-block='done'] {
+  background: #0000c0;
+  border-color: #000080;
+}
+
+.swatch[data-block='data'] {
+  background: #00ffff;
+}
+
+.swatch[data-block='moving'] {
+  background: linear-gradient(225deg, #ff0000 0 3px, #ffffff 3px);
+}
+
+.swatch[data-block='lost'] {
+  background: #c0c0c0;
+  border-color: #808080;
+}
+
+.swatch[data-block='bad'] {
+  background:
+    linear-gradient(45deg, transparent 42%, #c00000 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, #c00000 42% 58%, transparent 58%),
+    #2a2a2a;
+}
+
+.swatch[data-block='free'] {
+  background: #ffffff;
+  border-color: #c0c0c0;
+}
+
+/*
+ * The monitor it is all seen on, worn: lines across it, the grain of its cells,
+ * and a few cells gone black for good. Over the disk, under whatever answers,
+ * and swept off by the robot from left to right once the disk is in order.
+ */
+.screen,
+.screen::before,
+.screen::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.screen {
+  z-index: 2;
+  background:
+    url('../../../assets/crt/dead-pixels.png'),
+    radial-gradient(ellipse 85% 80% at 50% 48%, transparent 58%, rgba(0, 0, 0, 0.26) 100%);
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1100ms linear;
+}
+
+.inside[data-wiping] .screen {
+  clip-path: inset(0 0 0 100%);
+}
+
+.screen::before {
+  content: '';
+  background: url('../../../assets/crt/scanlines.png');
+  opacity: 0.5;
+}
+
+.screen::after {
+  content: '';
+  background: url('../../../assets/crt/subpixels.png');
+  opacity: 0.32;
+}
+
+/* Narrower, or taller than wide: the window is the size it was before, and does without its side panel. */
+@media (max-width: 1099px), (max-aspect-ratio: 1 / 1) {
+  .room {
+    grid-template-areas: 'menu den';
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  }
+
+  .menu .bar {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    font-size: 0.9rem;
+  }
+
+  .menuStrip,
+  .address {
+    font-size: 0.8rem;
+  }
+
+  .flag {
+    width: 34px;
+    height: 20px;
+  }
+
+  .addressField {
+    height: 22px;
+  }
+
+  .folder {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .webView {
+    display: none;
+  }
+
+  .columns,
+  .way {
+    grid-template-columns: minmax(0, 1fr) 52px 64px;
+  }
+
+  .columns span {
+    font-size: 0.74rem;
+  }
+
+  .way {
+    min-height: 44px;
+    padding: 4px 0;
+    font-size: 0.82rem;
+  }
+
+  .wayName {
+    gap: 8px;
+    padding: 0 6px;
+  }
+
+  .wayText small {
+    font-size: 0.72rem;
+  }
+
+  .wayGoal,
+  .wayBest {
+    padding: 0 6px;
+  }
+
+  .statusStrip {
+    font-size: 0.74rem;
+  }
+}
+
+/* Short: the window goes up to the top of its column and its rows close up, to leave room under it. */
+@media (min-width: 1100px) and (min-aspect-ratio: 1 / 1) and (max-height: 760px) {
+  .menu {
+    align-self: start;
+  }
+
+  .way {
+    min-height: 58px;
+    padding: 4px 0;
+  }
+
+  .webView {
+    padding: 12px 14px 8px;
+  }
+
+  .webView h2 {
+    margin: 6px 0 6px;
+    font-size: 1.7rem;
+  }
+}
+
+/* Tall and narrow: the bin's window goes under what the robot came for, and less of the rest fits. */
+@media (max-aspect-ratio: 1 / 1), (max-width: 620px) {
+  .inside {
+    --panel: 132px;
+  }
+
+  .panel {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .progress {
+    width: 100%;
+    max-width: none;
+  }
+
+  .progress p {
+    margin-bottom: 4px;
+  }
+
+  .controls {
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .controls :global(.win95-btn) {
+    padding: 3px 2px;
+    font-size: 0.72rem;
+  }
+
+  .room {
+    grid-template-areas:
+      'den'
+      'menu';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .den {
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .balloon {
+    left: 50%;
+    width: 232px;
+    font-size: 0.84rem;
+    translate: -50% 0;
+  }
+
+  .balloon::before,
+  .balloon::after {
+    left: 50%;
+  }
+
+  .menu {
+    align-self: end;
+    justify-self: center;
+    width: min(100%, 430px);
+  }
+
+  .address,
+  .statusStrip {
+    display: none;
+  }
+
+  .way {
+    min-height: 40px;
+    padding: 2px 0;
+  }
+}
+
+@media (max-height: 560px) {
+  .address,
+  .statusStrip {
+    display: none;
+  }
+
+  .way {
+    min-height: 36px;
+    padding: 1px 0;
+  }
+
+  .prize {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meter span,
+  .defragBar,
+  .disk,
+  .junk,
+  .screen,
+  .puppet,
+  .error[data-state='closed'] {
+    transition: none;
+  }
+}

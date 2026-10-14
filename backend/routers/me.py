@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -10,6 +11,7 @@ from core.logger import get_logger
 from db import supabase
 from dtos import (
     AdminStatsReport,
+    BinRecords,
     MyVideo,
     PostInfo,
     ProjectUsageReport,
@@ -133,6 +135,64 @@ async def read_admin_stats(request: Request, days: int = 30, user_id: str = Curr
         raise HTTPException(
             status_code=500,
             detail="An internal error occurred while loading statistics. Please try again.",
+        )
+
+
+def _read_records(user_id: str) -> BinRecords:
+    rows = (
+        supabase.table("bin_records")
+        .select("flappy, dino")
+        .eq("user_id", user_id)
+        .limit(1)
+        .execute()
+        .data
+    ) or []
+    return BinRecords(**rows[0]) if rows else BinRecords()
+
+
+def _keep_records(user_id: str, records: BinRecords) -> None:
+    supabase.table("bin_records").upsert({
+        "user_id": user_id,
+        "flappy": records.flappy,
+        "dino": records.dino,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }).execute()
+
+
+@router.get("/bin-records", response_model=BinRecords)
+@limiter.limit("30/minute")
+async def read_my_bin_records(request: Request, user_id: str = CurrentUser):
+    try:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _read_records, user_id)
+    except Exception as e:
+        logger.exception(f"Failed to read the bin records of {user_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while loading your records. Please try again.",
+        )
+
+
+@router.put("/bin-records", response_model=BinRecords)
+@limiter.limit("30/minute")
+async def keep_my_bin_records(request: Request, offered: BinRecords, user_id: str = CurrentUser):
+    """Keeps the best of what is offered and what was kept, game by game: a
+    record only ever goes up, whichever browser it comes from."""
+    try:
+        loop = asyncio.get_event_loop()
+        kept = await loop.run_in_executor(None, _read_records, user_id)
+        best = BinRecords(
+            flappy=max(kept.flappy, offered.flappy),
+            dino=max(kept.dino, offered.dino),
+        )
+        if best != kept:
+            await loop.run_in_executor(None, _keep_records, user_id, best)
+        return best
+    except Exception as e:
+        logger.exception(f"Failed to keep the bin records of {user_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while saving your records. Please try again.",
         )
 
 

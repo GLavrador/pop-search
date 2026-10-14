@@ -634,8 +634,6 @@ export const pt: Dictionary = {
       knock: 'toc toc',
       puzzled: 'ué?',
       grabbed: ['eeei!', 'opa!', 'me solta!', 'uooou!'],
-      bin: ['LIXO NÃO!!', 'EU NÃO SOU LIXO!', 'SOCORRO!!'],
-      hiding: ['já passou?', 'ela já foi embora?', 'posso sair?'],
       dizzy: ['tô tonto...', 'para o mundo!', 'tá tudo girando...'],
       enough: ['chega!', 'para, faz cócegas!', 'ei, já deu!'],
       lurk: ['chega, vou me esconder!', 'tchau, fui!', 'me deixa em paz!'],
@@ -852,7 +850,10 @@ export const pt: Dictionary = {
             what: 'Me solte em cima das coisas.',
             text: 'Na borda de cima da janela, num ícone, no relógio, no Iniciar, no X da janela, no botão do Pop Search lá na barra de tarefas. Sobre cada uma eu tenho uma opinião.',
           },
-          { what: 'Tente me jogar na Lixeira.', text: 'Eu não faria isso.' },
+          {
+            what: 'Me mande buscar o que foi para a Lixeira.',
+            text: 'Jogue lá o Meu Computador ou os Truques e depois abra a Lixeira. Eu vou, mas não prometo ir sorrindo.',
+          },
           {
             what: 'Me deixe sozinho.',
             text: 'Uns minutos sem mexer em nada. E repare no que eu apronto quando ninguém está olhando.',
@@ -868,7 +869,7 @@ export const pt: Dictionary = {
         items: [
           {
             what: 'Arraste os ícones.',
-            text: 'Qualquer um, para qualquer lugar, mas eles normalmente voltam pro lugar. Não jogue nada no lixo (por favor).',
+            text: 'Qualquer um, para qualquer lugar, mas eles normalmente voltam pro lugar. Só não jogue o Pop Search no lixo (por favor).',
           },
           { what: 'Tente fechar a janela.', text: 'No X. Ela é teimosa: insista.' },
           { what: 'Abra o Meu Computador.', text: 'Dois cliques no ícone, ou um toque no celular.' },
@@ -893,6 +894,193 @@ export const pt: Dictionary = {
         ],
       },
     ],
+  },
+
+  bin: {
+    going: {
+      reluctant: [
+        'Ai, não gosto muito de ir lá...',
+        'De novo esse cheiro de arquivo velho...',
+        'Tá bom, tá bom, já vou.',
+      ],
+      willing: [
+        'E lá vamos nós!',
+        'Pelo menos lá dentro é sossegado.',
+        'Missão resgate: deixa comigo!',
+      ],
+    },
+    emotes: {
+      grab: 'vem cá, você',
+      stuck: 'nngh!',
+      tight: 'não... cabe...',
+      again: 'de novo!',
+      in: 'ploc!',
+      out: 'pop!',
+      back: 'ela sempre volta',
+    },
+    back: {
+      rescued: [
+        'Resgatados! E quase sem poeira.',
+        'Missão cumprida: todo mundo de volta!',
+        'Prontinho, cada um no seu lugar.',
+      ],
+      left: [
+        'Ficaram lá dentro. Outro dia eu busco.',
+        'Voltei de mãos vazias. Por hoje.',
+        'Fica para a próxima, então.',
+      ],
+    },
+    skip: 'pular ▸▸',
+    skipTitle: 'Pular a cena (Esc)',
+    inside: {
+      title: 'Lixeira',
+      spoken: 'Dentro da Lixeira',
+      says: [
+        'Achei! Mas a Lixeira não devolve nada de graça. Como a gente tira eles daqui?',
+        'Estão ali, no monte. E olha o que jogaram fora junto: dois jogos inteiros! Vencendo um, eu levo os ícones lá para cima.',
+        'Empoeirado como sempre. Os ícones estão bem ali, e a saída deles também: um ou dois jogos velhos que ninguém quis.',
+      ],
+      pile: 'Jogados fora',
+      choose: 'Como tirar eles daqui?',
+      flappy: { name: 'Resgatar jogando Flappy BIP', about: 'Voe entre os menus.' },
+      dino: { name: 'Resgatar jogando Dino BIP', about: 'Corra, pule e agache.' },
+      direct: { name: 'Resgatar direto', about: 'Sem desafio nenhum.' },
+      leave: { name: 'Sair', about: 'Sem resgatar nada.' },
+      won: 'Conseguimos! O botão Resgatar ali embaixo, do lado da barra, leva eles lá para cima. Ou jogue mais um pouco, eu não conto para ninguém.',
+      untouchable: [
+        'Aqui é tudo muito danificado, não dá nem para me tocar.',
+        'Melhor não me pegar: tem setor defeituoso para todo lado aqui dentro.',
+        'Cuidado! Com o disco desse jeito, eu acabo todo fragmentado.',
+      ],
+      untouchedClean: [
+        'Está limpo, mas continua sendo a Lixeira. Aqui dentro, sem me pegar.',
+        'Ainda não: eu só saio daqui com eles.',
+        'Disco novo em folha, e mesmo assim nada de me arrastar.',
+      ],
+      cleaning: [
+        'Espera, isso aqui eu consigo descorromper!',
+        'Agora dá para limpar essa bagunça!',
+        'Deixa que eu descorrompo o resto!',
+      ],
+      explorer: {
+        menus: ['Arquivo', 'Editar', 'Exibir', 'Ir', 'Favoritos', 'Ajuda'],
+        address: 'Endereço',
+        name: 'Nome',
+        goal: 'Meta',
+        best: 'Recorde',
+        hint: 'Vença um dos jogos e tudo volta para a área de trabalho.',
+        ready: 'Resgate pronto: o botão Resgatar fica ao lado da barra de progresso.',
+        objects: (count: number) => `${count} objeto(s)`,
+      },
+      goal: (points: number) => `Meta: ${points}`,
+      best: (points: number) => `Seu recorde: ${points}`,
+      confirm: {
+        title: 'Lixeira',
+        text: 'Tem certeza?',
+        detail: 'Tudo é resgatado sem passar pelo desafio.',
+        yes: 'Sim',
+        no: 'Não',
+      },
+      junk: {
+        errors: [
+          {
+            title: 'SOL.EXE - Erro',
+            text: 'Uma partida de Paciência foi deixada pela metade em 1999. Ninguém voltou para terminar.',
+          },
+          {
+            title: 'DEFRAG.EXE - Erro',
+            text: 'A desfragmentação está parada há 9.131 dias. O Windows recomenda paciência.',
+          },
+          {
+            title: 'WINWORD.EXE - Erro',
+            text: 'TCC_FINAL_v7_agora_vai.doc não pode ser salvo porque não existe mais.',
+          },
+          {
+            title: 'Explorer - Erro',
+            text: 'Memória insuficiente para lembrar por que este arquivo foi guardado.',
+          },
+        ],
+        ok: 'OK',
+        close: 'Fechar',
+        files: {
+          temp: '~WRL0003.tmp',
+          text: 'Novo Documento de Texto (4).txt',
+          picture: 'sem título.bmp',
+          shortcut: 'Atalho para Atalho',
+          setup: 'SETUP.EXE',
+          folder: 'coisas velhas',
+          batch: 'AUTOEXEC.BAT',
+          disks: 'Disco 1 de 31',
+          music: 'Grandes Sucessos.cda',
+          waiting: 'Aguarde',
+          solitaire: 'Paciência',
+          scandisk: 'ScanDisk',
+          essay: 'TCC_FINAL_v7.doc',
+        },
+      },
+      defrag: {
+        title: 'Desfragmentando a unidade C',
+        working: 'Desfragmentando o sistema de arquivos...',
+        ready: 'Resgate pronto.',
+        done: (percent: number) => `${percent}% concluído`,
+        stop: 'Parar',
+        pause: 'Pausar',
+        legend: 'Legenda',
+        details: 'Ocultar detalhes',
+        rescue: 'Resgatar',
+        key: {
+          title: 'Legenda do Desfragmentador',
+          done: 'Dados desfragmentados',
+          data: 'Dados a desfragmentar',
+          moving: 'Dados que estavam sendo movidos',
+          lost: 'Dados esquecidos',
+          bad: 'Área danificada do disco',
+          free: 'Espaço livre',
+          close: 'Fechar',
+        },
+      },
+    },
+    games: {
+      points: 'Pontos',
+      goal: 'Meta',
+      best: 'Recorde',
+      quit: 'Sair do jogo',
+      unlocked: {
+        title: 'Resgate liberado!',
+        text: 'O botão Resgatar, do lado da barra de progresso, já leva eles. Ou continue pelo seu recorde.',
+      },
+      newBest: 'Novo recorde!',
+      met: 'atingida',
+      over: {
+        again: 'Tentar de novo',
+        tally: (points: number, best: number) => `Pontos: ${points}. Recorde: ${best}.`,
+        unlocked: 'O resgate está pronto, do lado da barra de progresso.',
+        short: (missing: number) =>
+          missing === 1 ? 'Faltou um ponto para o resgate.' : `Faltaram ${missing} pontos para o resgate.`,
+      },
+      flappy: {
+        title: 'Flappy BIP',
+        how: 'Espaço, clique ou toque para voar',
+        lost: [
+          'O BIP-98 bateu num menu.',
+          'Aquele menu não era para abrir ali.',
+          'Alguém deixou o menu Iniciar aberto.',
+        ],
+        menus: ['Arquivo', 'Editar', 'Exibir', 'Ajuda'],
+        file: ['Novo', 'Abrir...', 'Salvar', 'Imprimir...', '-', 'Enviar para', 'Propriedades', '-', 'Fechar'],
+      },
+      dino: {
+        title: 'Dino BIP',
+        how: 'Espaço ou ↑ para pular, ↓ para agachar',
+        lost: [
+          'O BIP-98 tropeçou em hardware velho.',
+          'Janela que voa não olha por onde anda.',
+          'Aquele disquete não estava ali um segundo atrás.',
+        ],
+        jump: 'Pular',
+        duck: 'Agachar',
+      },
+    },
   },
 
   robot: {
@@ -937,6 +1125,7 @@ export const pt: Dictionary = {
       iconDropped: ['ele sempre volta', 'ícone teimoso', 'ele gosta dali'],
       binThreat: ['NÃO!', 'aí não!!', 'nem pense nisso!'],
       appTrashed: ['O QUE VOCÊ FEZ?!', 'NÃÃÃO!', 'MINHA CASA!!'],
+      binEmpty: ['tá vazia', 'nada para buscar aí', 'limpinha, por enquanto'],
       bigger: ['uau, que grande!', 'tela cheia!', 'espaço de sobra!'],
       smaller: ['assim cabe melhor', 'tamanho normal', 'de volta ao cantinho'],
       echo: [
@@ -986,7 +1175,7 @@ export const pt: Dictionary = {
         cat: ['miau?', 'gato?! cadê?', 'é o de trás da janela?'],
         robot: ['sou eu!!', 'me chamou?', 'robô? presente!'],
         dog: ['au au!', 'de cachorro eu gosto', 'cadê o doguinho?'],
-        bin: ['não fala essa palavra!', 'lixo?! onde?!', 'credo...'],
+        bin: ['lá dentro é só poeira...', 'lixo? se precisar, eu busco', 'eca, que cheiro'],
         home: ['você já está nele!', 'o melhor programa que tem!', 'essa é a minha casa!'],
       },
       press: {
@@ -1087,6 +1276,17 @@ export const pt: Dictionary = {
         text: 'Esse foi o guia! Agora a casa é sua. Quer dizer, é minha, mas eu empresto: pode mexer em tudo à vontade. Tem coisas para fazer e descobrir por aqui que eu não mostrei, e a graça é descobrir sozinho. Mas se quiser colar, (quase) tudo está aqui, no ícone Truques.',
         action: 'Espiar os truques',
       },
+      trashed: {
+        computer: [
+          'Lá se foi o Meu Computador. Se bater saudade, é só abrir a Lixeira que eu vou lá dentro buscar.',
+          'Meu Computador na Lixeira? Tudo bem, quem manda é você. Se mudar de ideia, abra a Lixeira e eu desço para pegar.',
+        ],
+        tricks: [
+          'Ei, eram os meus truques! Tá, tá. Se quiser de volta, é só abrir a Lixeira que eu vou lá dentro buscar.',
+          'Meus truques, na Lixeira! Eu ia usar aquilo. Abra a Lixeira e eu trago de volta.',
+        ],
+        action: 'Buscar agora',
+      },
     },
     drop: {
       computer: [
@@ -1173,7 +1373,7 @@ export const pt: Dictionary = {
       },
       'desktop.icon': {
         title: 'Área de trabalho',
-        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela, o Meu Computador mostra do que isto tudo é feito, e o Truques guarda a minha lista do que dá para tentar por aqui. Só não solte o Pop Search na Lixeira.',
+        text: 'Dá para arrastar os ícones, mas eles sempre voltam para o lugar. O do Pop Search abre o programa de novo se você fechar a janela, o Meu Computador mostra do que isto tudo é feito, e o Truques guarda a minha lista do que dá para tentar por aqui. Esses dois podem ir para a Lixeira: abra ela depois e eu vou lá dentro buscar. Só não solte o Pop Search nela.',
       },
       system: {
         title: 'Propriedades do Sistema',

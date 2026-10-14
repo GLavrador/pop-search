@@ -60,6 +60,10 @@ export type RobotEvent =
   /** The program's icon is being held over the bin. */
   | { kind: 'binThreat' }
   | { kind: 'appTrashed' }
+  /** One of the other icons went in the bin, where it stays until it is fetched. */
+  | { kind: 'iconTrashed'; what: 'computer' | 'tricks' }
+  /** The bin was opened with nothing in it. */
+  | { kind: 'binEmpty' }
   /** The visitor asked not to be invited to the guide again. */
   | { kind: 'inviteHidden'; undo: () => void };
 

@@ -64,7 +64,7 @@ const dropAt = async (target: Element) => {
 
 const dropOn = (name: string | RegExp) => dropAt(screen.getByRole('button', { name }));
 
-const BIN = /^(NOT THE BIN!!|I AM NOT RUBBISH!|HELP!!)$/;
+const EMPTY_BIN = /^(it is empty|nothing to fetch in there|spotless, for now)$/;
 
 const openAdvanced = async () => {
   await user.click(tab('🔍 Search.exe'));
@@ -224,22 +224,24 @@ describe('the robot outside the guide', () => {
     expect(document.querySelector('[data-help-layer]')).not.toBeInTheDocument();
   });
 
-  it('should panic when it is dropped on the recycle bin', async () => {
+  it('should only say the bin is empty when it is dropped on it with nothing in there', async () => {
     renderApp();
 
     await dropOn('Recycle Bin');
 
-    expect(screen.getByText(BIN)).toBeInTheDocument();
+    expect(screen.getByText(EMPTY_BIN)).toBeInTheDocument();
+    expect(said()).not.toBeInTheDocument();
+    expect(document.querySelector('[data-bin-trip]')).not.toBeInTheDocument();
   });
 
-  it('should panic in other words when it is dropped there again', async () => {
+  it('should say so in other words when it is dropped there again', async () => {
     renderApp();
     await dropOn('Recycle Bin');
-    const first = screen.getByText(BIN).textContent;
+    const first = screen.getByText(EMPTY_BIN).textContent;
 
     await dropOn('Recycle Bin');
 
-    expect(screen.getByText(BIN)).not.toHaveTextContent(first ?? '');
+    expect(screen.getByText(EMPTY_BIN)).not.toHaveTextContent(first ?? '');
   });
 
   it('should point out that everything already runs inside My Computer', async () => {

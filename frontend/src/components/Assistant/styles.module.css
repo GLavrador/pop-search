@@ -239,6 +239,13 @@
   line-height: 0;
 }
 
+.puppet {
+  display: block;
+  width: 46px;
+  height: 53px;
+  line-height: 0;
+}
+
 /* Banks with the flight; the pilot feeds --lean from the horizontal speed. */
 .rig {
   transform-origin: 26px 40px;
@@ -331,6 +338,7 @@
   stroke: #c2410c;
   stroke-width: 0.8;
   opacity: 0;
+  scale: var(--jets, 1);
   transform-box: fill-box;
   transform-origin: center top;
   transition: opacity 120ms ease-out;
@@ -409,12 +417,34 @@
   stroke: none;
 }
 
+.eyesSour rect,
+.mouthGrin {
+  fill: var(--robot-glow);
+  stroke: none;
+}
+
+.eyesSour path,
+.eyesKeen path,
+.mouthSour {
+  fill: none;
+  stroke: var(--robot-glow);
+  stroke-width: 1.6;
+  stroke-linecap: square;
+}
+
+.tongue {
+  fill: #ff9a8a;
+  stroke: none;
+}
+
 /* Faces: one set of eyes and one mouth shows at a time. */
 .eyesHappy,
 .eyesWide,
 .eyesShut,
 .eyesDizzy,
 .eyesTight,
+.eyesSour,
+.eyesKeen,
 .brows,
 .browsAngry,
 .browsStern,
@@ -424,8 +454,57 @@
 .mouthWavy,
 .mouthYawn,
 .mouthGrit,
+.mouthSour,
+.mouthGrin,
+.tongue,
 .sweat {
   display: none;
+}
+
+/* It would rather not: a sour look, the tongue out and a sickly light. */
+[data-face='disgust'] .robot {
+  --robot-glow: #c3de52;
+}
+
+[data-face='disgust'] .eyesRound,
+[data-face='disgust'] .mouthFlat {
+  display: none;
+}
+
+[data-face='disgust'] .eyesSour,
+[data-face='disgust'] .mouthSour,
+[data-face='disgust'] .tongue {
+  display: inline;
+}
+
+[data-face='disgust'] .head {
+  --tilt: 7deg;
+}
+
+[data-face='disgust'] .led {
+  animation-duration: 2.4s;
+}
+
+/* Up for it: brows set, eyes bright, a grin from one side to the other. */
+[data-face='brave'] .mouthFlat {
+  display: none;
+}
+
+[data-face='brave'] .eyesKeen,
+[data-face='brave'] .mouthGrin {
+  display: inline;
+}
+
+[data-face='brave'] .eyesRound {
+  translate: 0 0.6px;
+}
+
+[data-face='brave'] .eye {
+  animation: none;
+}
+
+[data-face='brave'] .led {
+  animation-duration: 0.45s;
 }
 
 /* Cross enough to change colour. */
@@ -584,7 +663,10 @@
 [data-talking] .mouthSmile,
 [data-talking] .mouthOh,
 [data-talking] .mouthFrown,
-[data-talking] .mouthWavy {
+[data-talking] .mouthWavy,
+[data-talking] .mouthSour,
+[data-talking] .mouthGrin,
+[data-talking] .tongue {
   display: none;
 }
 
@@ -604,19 +686,35 @@
   animation: thrust 0.11s steps(2, jump-none) infinite;
 }
 
-[data-pose='fly'] .armL {
+/* A kick of the jets for an instant: a little longer and brighter than they burn the rest of the time. */
+[data-pose='blast'] .flame {
+  opacity: 1;
+  scale: calc(var(--jets, 1) * 1.1) calc(var(--jets, 1) * 1.25);
+  fill: #ff9c1f;
+  animation: thrust 0.07s steps(2, jump-none) infinite;
+}
+
+[data-pose='blast'] .flameCore {
+  fill: #fff0a8;
+}
+
+[data-pose='fly'] .armL,
+[data-pose='blast'] .armL {
   transform: rotate(22deg);
 }
 
-[data-pose='fly'] .armR {
+[data-pose='fly'] .armR,
+[data-pose='blast'] .armR {
   transform: rotate(-22deg);
 }
 
-[data-pose='fly'] .legL {
+[data-pose='fly'] .legL,
+[data-pose='blast'] .legL {
   transform: translateY(-1.5px) rotate(9deg);
 }
 
-[data-pose='fly'] .legR {
+[data-pose='fly'] .legR,
+[data-pose='blast'] .legR {
   transform: translateY(-1.5px) rotate(-9deg);
 }
 
@@ -807,6 +905,83 @@
 [data-pose='dust'] .flame {
   opacity: 1;
   animation: glow 0.3s ease-in-out infinite alternate;
+}
+
+/* Running on the spot: it is the ground that goes by. */
+[data-pose='run'] .robot {
+  animation: jog 0.24s ease-in-out infinite;
+}
+
+[data-pose='run'] .legL,
+[data-pose='duck'] .legL {
+  animation: stride 0.24s linear infinite;
+}
+
+[data-pose='run'] .legR,
+[data-pose='duck'] .legR {
+  animation: stride 0.24s linear -0.12s infinite;
+}
+
+[data-pose='run'] .armL {
+  animation: pump 0.24s linear -0.12s infinite;
+}
+
+[data-pose='run'] .armR {
+  animation: pumpBack 0.24s linear infinite;
+}
+
+/* Head down and flat out, arms swept back, to pass under what flies at it. */
+[data-pose='duck'] .robot {
+  transform: scale(1.14, 0.56);
+  animation: none;
+}
+
+[data-pose='duck'] .armL {
+  transform: rotate(38deg);
+}
+
+[data-pose='duck'] .armR {
+  transform: rotate(-38deg);
+}
+
+@keyframes jog {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.6px);
+  }
+}
+
+@keyframes stride {
+  0%,
+  100% {
+    transform: rotate(30deg);
+  }
+  50% {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes pump {
+  0%,
+  100% {
+    transform: rotate(40deg);
+  }
+  50% {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes pumpBack {
+  0%,
+  100% {
+    transform: rotate(16deg);
+  }
+  50% {
+    transform: rotate(-40deg);
+  }
 }
 
 @keyframes shudder {
