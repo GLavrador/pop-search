@@ -12,11 +12,12 @@ import { MyVideos } from './components/MyVideos';
 import { AdminDashboard } from './components/AdminDashboard';
 import { useAdminStatsQuery } from './hooks/useAdminStatsQuery';
 import { useIdentityReset } from './hooks/useIdentityReset';
+import { useHeightVar } from './hooks/useHeightVar';
 import { useServerWake, type ServerState, type ServerStatus } from './hooks/useServerWake';
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
-import { TAB_LABELS, type Tab } from './constants/tabs';
+import { TAB_ICONS, TAB_LABELS, type Tab } from './constants/tabs';
 import { Taskbar } from './components/Taskbar';
 import { TaskButton } from './components/Taskbar/TaskButton';
 import { Desktop } from './components/Desktop';
@@ -94,6 +95,9 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const reportSpot = useCallback((node: HTMLElement | null) => setSpotNode(node), []);
   const robotSeat = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  // What hangs over the tabs takes its height from the room the content has in the window.
+  const over = useRef<HTMLDivElement>(null);
+  useHeightVar(over, '--over');
   useIdentityReset();
   const { t, language } = useI18n();
   const spokenIn = useRef(language);
@@ -237,18 +241,26 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
 
   const isClosed = windowState === 'closed';
 
-  const tabs: { id: Tab; label: string; help: HelpKey }[] = [
-    { id: 'ingest', label: TAB_LABELS.ingest, help: 'tab.ingest' },
-    { id: 'search', label: TAB_LABELS.search, help: 'tab.search' },
+  const tabs: { id: Tab; label: string; icon: string; help: HelpKey }[] = [
+    { id: 'ingest', label: TAB_LABELS.ingest, icon: TAB_ICONS.ingest, help: 'tab.ingest' },
+    { id: 'search', label: TAB_LABELS.search, icon: TAB_ICONS.search, help: 'tab.search' },
     ...(isAuthenticated
-      ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos, help: 'tab.library' as HelpKey }]
+      ? [
+          {
+            id: 'library' as Tab,
+            label: TAB_LABELS.myVideos,
+            icon: TAB_ICONS.myVideos,
+            help: 'tab.library' as HelpKey,
+          },
+        ]
       : []),
     ...(isAdmin
-      ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats, help: 'tab.admin' as HelpKey }]
+      ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats, icon: TAB_ICONS.stats, help: 'tab.admin' as HelpKey }]
       : []),
     {
       id: 'account',
-      label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn,
+      label: isAuthenticated ? (displayName ?? '') : TAB_LABELS.signIn,
+      icon: isAuthenticated ? TAB_ICONS.account : TAB_ICONS.signIn,
       help: 'tab.account',
     },
   ];
@@ -345,41 +357,43 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         shut={rebuild.view.shut}
       >
         <div className={`${styles.mainPanel} ${isMaximized ? styles.mainPanelMax : ''}`}>
-          {calling && (
-            <GuideInvite
-              robotSeat={robotSeat}
-              onStart={startGuide}
-              onClose={shutInvite}
-              onHide={stopInviting}
-            />
-          )}
+          <div ref={over} className={styles.over}>
+            {calling && (
+              <GuideInvite
+                robotSeat={robotSeat}
+                onStart={startGuide}
+                onClose={shutInvite}
+                onHide={stopInviting}
+              />
+            )}
 
-          {step && (
-            <Assistant
-              index={guide.index}
-              total={guide.total}
-              copy={t.guide.steps[step.id]}
-              act={step.act}
-              isFirst={guide.isFirst}
-              strayedFrom={strayedFrom}
-              robotSeat={robotSeat}
-              robotAway={spotNode !== null}
-              onBack={guide.back}
-              onNext={guide.isLast ? finishGuide : guide.next}
-              onJump={guide.goTo}
-              onReturn={() => guide.goTo(guide.index)}
-              onClose={guide.hide}
-            />
-          )}
+            {step && (
+              <Assistant
+                index={guide.index}
+                total={guide.total}
+                copy={t.guide.steps[step.id]}
+                act={step.act}
+                isFirst={guide.isFirst}
+                strayedFrom={strayedFrom}
+                robotSeat={robotSeat}
+                robotAway={spotNode !== null}
+                onBack={guide.back}
+                onNext={guide.isLast ? finishGuide : guide.next}
+                onJump={guide.goTo}
+                onReturn={() => guide.goTo(guide.index)}
+                onClose={guide.hide}
+              />
+            )}
 
-          {guide.isPaused && (
-            <GuidePaused
-              index={guide.index}
-              total={guide.total}
-              onResume={() => guide.goTo(guide.index)}
-              onQuit={guide.quit}
-            />
-          )}
+            {guide.isPaused && (
+              <GuidePaused
+                index={guide.index}
+                total={guide.total}
+                onResume={() => guide.goTo(guide.index)}
+                onQuit={guide.quit}
+              />
+            )}
+          </div>
 
           <TabStrip
             tabs={tabs}

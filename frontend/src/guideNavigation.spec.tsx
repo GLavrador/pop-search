@@ -166,11 +166,11 @@ describe('guided demo navigation', () => {
 
     await jumpTo(11);
     expect(screen.getByText('What came up')).toBeInTheDocument();
-    expect(tab('🔍 Search.exe')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Search.exe')).toHaveAttribute('aria-selected', 'true');
 
     await jumpTo(4);
     expect(screen.getByText('Analysis Options')).toBeInTheDocument();
-    expect(tab('💿 Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
   });
 
   it('should stand aside when the user opens another tab, keeping its place', async () => {
@@ -178,7 +178,7 @@ describe('guided demo navigation', () => {
     await startGuide();
     await jumpTo(4);
 
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     expect(screen.queryByText('DEMO')).not.toBeInTheDocument();
     expect(screen.getByText('4/13')).toBeInTheDocument();
@@ -186,7 +186,7 @@ describe('guided demo navigation', () => {
     await press('Take me back');
 
     expect(screen.getByText('Analysis Options')).toBeInTheDocument();
-    expect(tab('💿 Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
   });
 
   it('should keep its place while closed and restore the same step', async () => {
@@ -239,7 +239,7 @@ describe('guided demo navigation', () => {
     expect(await screen.findByText('Want to see how Pop Search works?')).toBeInTheDocument();
     expect(screen.getByText(/in two minutes, on a practice screen/)).toBeInTheDocument();
 
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
   });
@@ -274,7 +274,7 @@ describe('guided demo navigation', () => {
     );
     expect(localStorage.getItem('pop-search:guide-invite-off')).not.toBeNull();
 
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     await press('Guide: let BIP-98 show you around');
 
     expect(screen.getByText('Hi! I am BIP-98')).toBeInTheDocument();
@@ -311,7 +311,7 @@ describe('guided demo navigation', () => {
   it('should keep a way to the guide, and the switch of the invitation, on the sign in tab', async () => {
     renderApp();
     await user.click(await screen.findByRole('button', { name: 'do not show again' }));
-    await user.click(tab('🔑 Sign In'));
+    await user.click(tab('Sign In'));
     const invited = () =>
       screen.getByRole('checkbox', { name: 'Invite me to the guide every time Pop Search opens' });
 
@@ -333,7 +333,7 @@ describe('guided demo navigation', () => {
   it('should bring back at once an invitation closed at the X, when it is switched on again', async () => {
     renderApp();
     await user.click(await screen.findByRole('button', { name: /Close for now/ }));
-    await user.click(tab('🔑 Sign In'));
+    await user.click(tab('Sign In'));
     const invited = screen.getByRole('checkbox', {
       name: 'Invite me to the guide every time Pop Search opens',
     });
@@ -365,14 +365,14 @@ describe('guided demo navigation', () => {
     });
     renderApp();
 
-    await screen.findByText('📁 My-Videos.exe');
+    await screen.findByText('My-Videos.exe');
 
     expect(screen.queryByRole('button', { name: /Start the guide/i })).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Guide: let BIP-98 show you around' }),
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('tab', { name: /👤/ }));
+    await user.click(screen.getByRole('tab', { name: 'ana' }));
 
     expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
   });
@@ -403,7 +403,7 @@ describe('guided demo navigation', () => {
   it('should leave the real search untouched while it runs', async () => {
     renderApp();
 
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     await user.type(screen.getByPlaceholderText('Type to search...'), 'whales');
 
     await startGuide();

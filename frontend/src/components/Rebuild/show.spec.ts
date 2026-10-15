@@ -7,12 +7,15 @@ import type { Box, LineKey, Stage } from './stage';
 const SCREEN = { w: 1100, h: 700 };
 // Slower than this and a line is gone before most people are through it.
 const MS_A_LETTER = 40;
-const STILL_TO_READ_MS = 900;
+const UP_TO_READ_MS = 900;
+// Long enough to start reading it where it was said, before it goes along with the robot.
+const STILL_TO_READ_MS = 300;
 const GRID = { cols: 4, rows: 5 };
 const BOXES: Record<string, Box> = {
   bin: { left: 8, top: 8, width: 76, height: 58 },
   computer: { left: 8, top: 72, width: 76, height: 70 },
   app: { left: 8, top: 148, width: 76, height: 58 },
+  tricks: { left: 8, top: 212, width: 76, height: 58 },
   taskbar: { left: 0, top: 670, width: 1100, height: 30 },
   window: { left: 150, top: 20, width: 800, height: 560 },
 };
@@ -36,6 +39,7 @@ const record = () => {
   const pass = async (ms: number) => {
     now += ms;
   };
+  const elapsed = () => now;
   const stage: Stage = {
     screen: () => SCREEN,
     box: (what) => BOXES[what],
@@ -78,7 +82,7 @@ const record = () => {
     },
     mend: () => note('mend'),
   };
-  return { stage, log, told };
+  return { stage, log, told, elapsed };
 };
 
 const only = (log: string[], start: string) => log.filter((entry) => entry.startsWith(start));
@@ -286,7 +290,7 @@ describe('building the desktop as the page opens', () => {
     });
   });
 
-  it('should stay where it is until what it mutters has been read', async () => {
+  it('should leave up what it mutters until it has been read, staying a moment before it moves on', async () => {
     const { stage, told } = record();
 
     await setupShow(stage);
@@ -301,10 +305,34 @@ describe('building the desktop as the page opens', () => {
       'start',
       'ready',
     ]);
-    muttered.forEach((mutter) => {
+    muttered.forEach((mutter, index) => {
+      const next = muttered[index + 1];
+      const up = Math.min(mutter.ms, next ? next.at - mutter.at : Infinity);
+      expect(up).toBeGreaterThanOrEqual(UP_TO_READ_MS);
       const off = told.slice(told.indexOf(mutter)).find(({ kind }) => kind === 'fly');
       expect((off?.at ?? Infinity) - mutter.at).toBeGreaterThanOrEqual(STILL_TO_READ_MS);
     });
+  });
+
+  it('should be over in about twenty seconds', async () => {
+    const { stage, elapsed } = record();
+
+    await setupShow(stage);
+
+    expect(elapsed()).toBeGreaterThan(18000);
+    expect(elapsed()).toBeLessThan(21000);
+  });
+
+  it('should shoo the blue three rows at a time, every piece of it once', async () => {
+    const { stage, log } = record();
+
+    await setupShow(stage);
+
+    // Four columns, five rows: rows 0 to 2 left to right, then 3 and 4 right to left.
+    const shooed = only(log, 'shoo').map((entry) => Number(entry.split(' ')[1]));
+    expect(shooed.slice(0, 3)).toEqual([0, 4, 8]);
+    expect(shooed.slice(12, 14)).toEqual([15, 19]);
+    expect([...shooed].sort((a, b) => a - b)).toEqual([...Array(20).keys()]);
   });
 
   it('should skip the mishaps: no slipping, no hour nobody set, no knocking', async () => {

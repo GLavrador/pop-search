@@ -1,10 +1,12 @@
 .appContainer {
+  --top: clamp(20px, calc(35vh - 260px), 150px);
+
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  padding-top: clamp(20px, calc(35vh - 260px), 150px);
+  padding-top: var(--top);
   padding-bottom: 50px;
   overflow: hidden;
   overflow: clip;
@@ -85,6 +87,35 @@
   max-height: none;
   display: flex;
   flex-direction: column;
+}
+
+/* The guide, the invitation or the paused guide, over the tabs. */
+.over {
+  flex: 0 0 auto;
+}
+
+/*
+ * On a computer the desktop is the screen and never scrolls. The window ends
+ * above the taskbar, and what does not fit in it scrolls inside it: its content
+ * gets what is left of the screen once the window's own parts, what hangs over
+ * the tabs and the taskbar are counted.
+ */
+@media (min-width: 769px) {
+  .appContainer {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .contentArea:not(.contentAreaMax) {
+    --fit: max(120px, calc(100dvh - var(--top) - 182px - var(--over, 0px)));
+    min-height: min(var(--steady), var(--fit));
+    max-height: min(65vh, var(--fit));
+  }
+
+  .contentAreaGuided:not(.contentAreaMax) {
+    min-height: min(var(--steady), var(--room), var(--fit));
+    max-height: min(var(--room), var(--fit));
+  }
 }
 
 .contentAreaMax > div {

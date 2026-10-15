@@ -165,6 +165,7 @@ export const DesktopIcon = ({
       // In the bin it is nowhere to be found: not by the robot, not by the keyboard.
       data-robot={trashed ? undefined : 'icon'}
       data-robot-zone={trashed ? undefined : zone}
+      data-slot={zone}
       data-carried={carried ? '' : undefined}
       data-swallowed={sinking ? '' : undefined}
       data-trashed={trashed ? '' : undefined}

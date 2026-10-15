@@ -51,7 +51,7 @@ import App from './App';
 const BOOTED = 'pop-search:booted';
 const BIOS = 'Pop Search BIOS 1.0';
 const BUILDING = 'A robot is building the desktop from nothing.';
-const SEARCH_TAB = '🔍 Search.exe';
+const SEARCH_TAB = 'Search.exe';
 
 const renderApp = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -133,10 +133,10 @@ describe('starting up', () => {
       renderApp();
 
       expect(
-        await screen.findByText('Goodness, I was not expecting visitors just now!', {}, { timeout: 3000 }),
+        await screen.findByText('Goodness, a visitor! Nothing is ready!', {}, { timeout: 3000 }),
       ).toBeInTheDocument();
       expect(
-        await screen.findByText(/make yourself at home, let me just tidy up/, {}, { timeout: 3000 }),
+        await screen.findByText(/Come on in, I will just tidy up/, {}, { timeout: 3000 }),
       ).toBeInTheDocument();
     });
 

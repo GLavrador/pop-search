@@ -14,10 +14,14 @@ import {
 } from './flight';
 import {
   HOP,
+  JOLT,
+  NOD,
+  SHAKE,
   landmark,
   lurk,
   openWindow,
-  planTrip,
+  createRotation,
+  pauseBetween,
   stomp,
   type Emotes,
   type Face,
@@ -47,6 +51,10 @@ export type Cue = 'greet' | 'teach' | 'cheer' | 'rest' | 'watch' | 'worry' | 'sl
 
 /** How restless it is between errands: the guide keeps it busy, the app lets it be. */
 export type Roam = 'eager' | 'calm' | 'never';
+
+/** Where it rests between errands of its own: up on the window, down on the taskbar, or inside the window. */
+type Rest = 'roof' | 'taskbar' | 'inside';
+const RESTS: readonly Rest[] = ['roof', 'taskbar', 'inside'];
 
 /** A control, or a way to find it once it is on screen. */
 export type Target = HTMLElement | (() => HTMLElement | null) | null;
@@ -132,10 +140,11 @@ const HEAD_TURN = 1.6;
 const FIRST_DWELL = 16000;
 const DWELL = 12000;
 const SEAT_DWELL = 8000;
-const CALM_FIRST = 24000;
-const CALM_DWELL = 34000;
-const CALM_SPREAD = 30000;
 const SETTLED_FOR = 6000;
+const POINTER_SETTLED_FOR = 2000;
+const NOT_NOW = 1500;
+// Something open over the window, or an icon in the hand: someone is in the middle of something.
+const IN_USE = '[role="dialog"], [data-carried]';
 const SPEECH: Record<Cue, number> = {
   greet: 3200,
   teach: 1900,
@@ -159,6 +168,8 @@ const REMEASURE_EVERY = 110;
 const SWIFT = 0.3;
 const SEATED = 9;
 const ROOST_INSET = 118;
+// Inside the window it sits in the far corner of the status bar, clear of the scrollbar over it.
+const INSIDE_INSET = 28;
 const BALLOON_GAP = 10;
 const BALLOON_LIFT = 23;
 const ASIDE = 10;
@@ -184,36 +195,48 @@ const SNORE_EVERY = 9000;
 
 const LAYERS = { behind: '0', front: '' };
 
+const SPEECHLESS: Emotes = {
+  heavy: '',
+  sorry: '',
+  knock: '',
+  puzzled: '',
+  grabbed: [],
+  dizzy: [],
+  enough: [],
+  lurk: [],
+  found: [],
+  flip: [],
+  roof: [],
+  yawn: [],
+  woke: [],
+  counting: [],
+  allThere: [],
+  missing: [],
+  later: [],
+  hiding: [],
+  unseen: [],
+  itsMe: '',
+  likeMe: [],
+  glass: [],
+  saver: [],
+  caught: [],
+  dialing: '',
+  modem: '',
+  online: [],
+  binFull: [],
+  binEmpty: [],
+};
+
 const SQUASH = [
   { transform: 'scale(1.1, 0.86)' },
   { transform: 'scale(0.97, 1.04)' },
   { transform: 'scale(1)' },
-];
-const JOLT = [
-  { transform: 'translateY(0) scale(1)' },
-  { transform: 'translateY(-10px) scale(0.94, 1.08)' },
-  { transform: 'translateY(0) scale(1)' },
 ];
 const SPIN = [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }];
 const FLIP = [
   { transformOrigin: '50% 55%', transform: 'translateY(0) rotate(0deg)' },
   { transformOrigin: '50% 55%', transform: 'translateY(-24px) rotate(-180deg)', offset: 0.5 },
   { transformOrigin: '50% 55%', transform: 'translateY(0) rotate(-360deg)' },
-];
-const NOD = [
-  { transform: 'translateY(0)' },
-  { transform: 'translateY(3px)' },
-  { transform: 'translateY(0)' },
-  { transform: 'translateY(3px)' },
-  { transform: 'translateY(0)' },
-];
-const SHAKE = [
-  { transform: 'translateX(0)' },
-  { transform: 'translateX(-4px)' },
-  { transform: 'translateX(4px)' },
-  { transform: 'translateX(-4px)' },
-  { transform: 'translateX(4px)' },
-  { transform: 'translateX(0)' },
 ];
 const MOVES: Record<Move, { frames: Keyframe[]; ms: number }> = {
   jolt: { frames: JOLT, ms: 420 },
@@ -243,7 +266,7 @@ export const createPilot = ({
   let mission: Mission | null = null;
   let briefed = false;
   let visits = 0;
-  let lastTrip = '';
+  const nextTrip = createRotation();
   let wantTrick = false;
 
   let pos: Point | null = null;
@@ -318,36 +341,22 @@ export const createPilot = ({
     y: clamp(at.y, 2, Math.max(2, window.innerHeight - size.h - 2)),
   });
 
-  const move = (frames: Keyframe[], duration: number) => {
-    if (!still) svg?.animate?.(frames, { duration, easing: 'ease-out' });
+  const move = (frames: Keyframe[], duration: number, easing = 'ease-out') => {
+    if (!still) svg?.animate?.(frames, { duration, easing });
   };
 
   const scene: Scene = {
     size,
     position: () => pos,
     onScreen,
-    emotes: () =>
-      mission?.emotes ?? {
-        heavy: '',
-        sorry: '',
-        knock: '',
-        puzzled: '',
-        grabbed: [],
-        dizzy: [],
-        enough: [],
-        lurk: [],
-        found: [],
-        flip: [],
-        roof: [],
-        yawn: [],
-        woke: [],
-      },
+    emotes: () => mission?.emotes ?? SPEECHLESS,
     after: (ms, run) => later.push({ at: clock + ms, run }),
     move,
+    say: (text, ms) => say(text, clock + ms),
     prank: (ms) => {
       prankUntil = clock + ms;
     },
-    idleFor: () => clock - lastInput,
+    idleFor: () => clock - Math.max(lastInput, pointer?.at ?? 0),
     vary,
   };
 
@@ -508,8 +517,32 @@ export const createPilot = ({
     return { at: { x, y }, pose: 'hover', hang: 'right' };
   };
 
-  /** Where it lives between errands: up on the window, or down by the clock. */
-  const roost = (): Stop | null => {
+  /** Inside the window, sat on the status bar in its far corner. */
+  const inside = (): Stop | null => {
+    const ledge = openWindow() ? boxOf(landmark('status')) : null;
+    if (!ledge) return null;
+    return {
+      at: { x: ledge.right - size.w - INSIDE_INSET, y: ledge.top - size.h + SEATED },
+      pose: 'sit',
+    };
+  };
+
+  /** The places it can rest in on this screen: up on the window only with room over it. */
+  const restsHere = (): Rest[] => {
+    const box = boxOf(openWindow());
+    return RESTS.filter(
+      (rest) =>
+        rest === 'taskbar' ||
+        (rest === 'roof' && box !== null && box.top >= size.h - 8) ||
+        (rest === 'inside' && inside() !== null),
+    );
+  };
+
+  /** Where it lives between errands: up on the window, down by the clock, or inside the window. */
+  const roost = (rest: Rest = 'roof'): Stop | null => {
+    if (rest === 'taskbar') return byClock();
+    if (rest === 'inside') return inside() ?? byClock();
+
     const frame = openWindow();
     const box = boxOf(frame);
     if (!frame || !box) return byClock();
@@ -524,14 +557,7 @@ export const createPilot = ({
 
     // A window filling a small screen has the taskbar under it: the status bar is the ledge.
     const fills = box.top <= 1 && box.bottom >= window.innerHeight - 1;
-    const ledge = fills ? boxOf(landmark('status')) : null;
-    if (ledge) {
-      return {
-        at: { x: ledge.right - size.w - 12, y: ledge.top - size.h + SEATED },
-        pose: 'sit',
-      };
-    }
-    return byClock();
+    return (fills ? inside() : null) ?? byClock();
   };
 
   /** Next to the control it is talking about, in its seat, or wherever it lives. */
@@ -543,8 +569,12 @@ export const createPilot = ({
     const festive = cue === 'greet' || cue === 'cheer';
     const speech = mission?.speech ?? SPEECH[cue];
 
+    // Between errands of its own it rests in one of its places, another one each time.
+    const places = restsHere();
+    const rest = roam === 'calm' && cue === 'rest' ? vary(`rest:${places.join()}`, places) : 'roof';
+
     let hold = DWELL;
-    if (roam === 'calm') hold = returning ? CALM_DWELL + Math.random() * CALM_SPREAD : CALM_FIRST;
+    if (roam === 'calm') hold = pauseBetween();
     else if (roam === 'eager' && mission?.target) hold = returning ? DWELL : FIRST_DWELL;
     else if (roam === 'eager') hold = SEAT_DWELL + speech;
 
@@ -564,7 +594,7 @@ export const createPilot = ({
           const box = seat.getBoundingClientRect();
           return { at: { x: box.left, y: box.top } };
         }
-        return roost();
+        return roost(rest);
       },
       pose: (where) => {
         if (cue === 'cheer' && !returning) return 'cheer';
@@ -670,6 +700,7 @@ export const createPilot = ({
     setFlag('data-pose', pose);
     setFlag('data-face', now < flashUntil ? flash : look);
     setFlag('data-talking', null);
+    setFlag('data-tint', null);
     if (sky.style.zIndex !== LAYERS.front) sky.style.zIndex = LAYERS.front;
     if (balloonOn) {
       balloonOn = false;
@@ -769,6 +800,12 @@ export const createPilot = ({
     if (speed < 24 && Math.abs(tilt) < 0.03 && Math.abs(tiltRate) < 0.4) touchDown(now);
   };
 
+  /** Someone is at it: typing, clicking, moving the pointer about, or with something open over the window. */
+  const busy = (now: number) =>
+    now - lastInput < SETTLED_FOR ||
+    (pointer !== null && now - pointer.at < POINTER_SETTLED_FOR) ||
+    document.querySelector(IN_USE) !== null;
+
   const advance = (now: number) => {
     const roam = mission?.roam ?? 'never';
     const restless =
@@ -781,16 +818,13 @@ export const createPilot = ({
 
     if (!queue.length && (wantTrick || restless)) {
       // In the app it waits for a pause: nobody wants it crossing the screen as they type.
-      if (!wantTrick && roam === 'calm' && now - lastInput < SETTLED_FOR) {
-        holdUntil = now + 2500;
+      if (!wantTrick && roam === 'calm' && busy(now)) {
+        holdUntil = now + NOT_NOW;
         return;
       }
-      const trip = planTrip(scene, lastTrip);
+      const trip = nextTrip(scene);
       wantTrick = false;
-      if (trip) {
-        lastTrip = trip.name;
-        queue = trip.legs;
-      }
+      if (trip) queue = trip.legs;
     }
 
     const next = queue.shift();
@@ -889,10 +923,14 @@ export const createPilot = ({
       say(vary('yawn', scene.emotes().yawn), now + 2600);
     }
 
+    const pose = perch?.pose ?? (typeof leg.pose === 'function' ? leg.pose(side) : leg.pose);
     let want: Point = AHEAD;
     const rest = typeof leg.gaze === 'function' ? leg.gaze(side) : leg.gaze;
     if (flying) {
       want = heading ?? want;
+    } else if (pose === 'statue') {
+      // Holding still as a picture: its eyes go nowhere.
+      want = rest && rest !== 'wander' ? rest : AHEAD;
     } else if (now < avertUntil) {
       // Caught reading over a shoulder: up and away from the field, as if nothing happened.
       const field = reading?.node.isConnected ? reading.node.getBoundingClientRect() : null;
@@ -936,8 +974,8 @@ export const createPilot = ({
       body.style.transform = spin;
     }
 
-    const pose = perch?.pose ?? (typeof leg.pose === 'function' ? leg.pose(side) : leg.pose);
     setFlag('data-pose', flying ? 'fly' : pose);
+    setFlag('data-tint', leg.tint ? String(leg.tint) : null);
     const resting = dozing ? 'sleepy' : face;
     setFlag('data-face', now < flashUntil ? flash : flying ? 'neutral' : resting);
     setFlag('data-talking', now < talkUntil ? '' : null);
@@ -973,13 +1011,31 @@ export const createPilot = ({
     say(vary('woke', scene.emotes().woke), now + 1700);
     move(JOLT, 420);
   };
+  /** Caught at something it was only doing to pass the time: it drops it and goes back. */
+  const cutShort = () => {
+    if (!leg?.skittish || held || slide) return;
+    const now = present();
+    queue = [];
+    later = [];
+    // Its own moves only: the ones in the stylesheet are its pose, and stay.
+    svg
+      ?.getAnimations?.()
+      .filter((running) => !('animationName' in running))
+      .forEach((running) => running.cancel());
+    flash = 'wow';
+    flashUntil = now + 700;
+    depart(station(), now);
+    say(vary('caught', scene.emotes().caught), now + 1400);
+  };
   const onPointer = (event: PointerEvent) => {
     pointer = { x: event.clientX, y: event.clientY, at: clock };
     stir();
+    cutShort();
   };
   const onInput = () => {
     lastInput = present();
     stir();
+    cutShort();
   };
   const onType = (event: Event) => {
     const node = event.target;
@@ -1002,6 +1058,7 @@ export const createPilot = ({
   window.addEventListener('pointermove', onPointer, { passive: true });
   window.addEventListener('pointerdown', onInput, { passive: true });
   window.addEventListener('keydown', onInput);
+  window.addEventListener('wheel', onInput, { passive: true });
   window.addEventListener('input', onType, true);
   raf = window.requestAnimationFrame(tick);
 
@@ -1043,6 +1100,16 @@ export const createPilot = ({
           queue = elsewhere;
           holdUntil = now + 350;
         }
+        return false;
+      }
+
+      // Found where it hides, the game is up: it comes out.
+      if (leg?.seeking) {
+        say(vary('found', scene.emotes().found), now + 1400);
+        flash = 'happy';
+        flashUntil = now + 1400;
+        queue = [];
+        holdUntil = now + 350;
         return false;
       }
 
@@ -1172,6 +1239,7 @@ export const createPilot = ({
       window.removeEventListener('pointermove', onPointer);
       window.removeEventListener('pointerdown', onInput);
       window.removeEventListener('keydown', onInput);
+      window.removeEventListener('wheel', onInput);
       window.removeEventListener('input', onType, true);
       sky.style.zIndex = '';
     },

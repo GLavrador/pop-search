@@ -52,7 +52,11 @@ contribuir exige conta.
   toda vez que abre a página, até pedir para não ver mais
 - **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
   qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
-  falha da IA, vídeo salvo) e pode ser arrastado pela tela
+  falha da IA, vídeo salvo) e pode ser arrastado pela tela. Nas pausas de quem
+  usa o site ele se distrai sozinho: confere se os ícones estão todos lá, brinca
+  de esconde-esconde atrás da janela do Pop Search, imita o próprio retrato no
+  ícone Truques, bate no vidro da tela, vira proteção de tela, disca para a
+  internet. Nunca enquanto alguém digita, mexe no mouse ou tem uma janela aberta
 - **Truques à vista**: o que dá para fazer fora do guia (com o robô, com a área
   de trabalho, com a busca) está numa lista do próprio BIP-98, que diz o que
   tentar e não o que acontece. Ela abre pelo ícone Truques da área de trabalho,

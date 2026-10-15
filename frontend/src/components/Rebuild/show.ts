@@ -38,7 +38,7 @@ const buildIcons = async (s: Stage, quick: boolean) => {
     ['app', 'three'],
     ['tricks', 'tricks'],
   ];
-  const blow = quick ? 200 : 360;
+  const blow = quick ? 130 : 360;
 
   for (const [zone, said] of order) {
     const slot = s.box(zone);
@@ -46,23 +46,23 @@ const buildIcons = async (s: Stage, quick: boolean) => {
       // To the right of it and turned its way, so the hammer comes down on the picture.
       const beside = { x: slot.left + slot.width / 2 + 20, y: Math.max(2, slot.top - 36) };
       s.look({ face: 'stern' });
-      await s.fly(beside, quick ? 380 : 650, { flip: true });
+      await s.fly(beside, quick ? 260 : 650, { flip: true });
       s.build(zone, 1);
-      await s.wait(quick ? 100 : 260);
+      await s.wait(quick ? 80 : 260);
       s.look({ tool: 'hammer', pose: 'hammer' });
       for (const built of [2, 3, DRAWN] as const) {
         await s.wait(blow);
         s.build(zone, built);
       }
-      await s.wait(quick ? 100 : 220);
+      await s.wait(quick ? 80 : 220);
 
       if (zone === 'app') {
         const back = { x: beside.x + 16, y: beside.y };
         s.look({ tool: null, face: 'curious' });
-        await s.fly(back, quick ? 150 : 240, { pose: 'hover', flip: true });
-        await s.wait(quick ? 240 : 520);
+        await s.fly(back, quick ? 120 : 240, { pose: 'hover', flip: true });
+        await s.wait(quick ? 120 : 520);
         s.look({ face: 'happy' });
-        await s.fly(beside, quick ? 130 : 220, { pose: 'hover', then: 'dust', flip: true });
+        await s.fly(beside, quick ? 120 : 220, { pose: 'hover', then: 'dust', flip: true });
         s.look({ tool: 'duster' });
         s.shine('app');
         s.emote('polish', 1200);
@@ -73,9 +73,10 @@ const buildIcons = async (s: Stage, quick: boolean) => {
       s.look({ tool: null, pose: 'hover', face: 'happy' });
     }
     s.build(zone, NAMED);
-    // It stays until what it muttered has been read: said on the wing, it is gone unread.
-    s.emote(said, 1000);
-    await s.wait(1000);
+    // It stays until what it muttered has been read. In a hurry it sets off sooner, and what it
+    // muttered stays up longer instead, going along with it to the next one.
+    s.emote(said, quick ? 1300 : 1000);
+    await s.wait(quick ? 380 : 1000);
   }
 
   s.look({ flip: false, face: 'stern' });
@@ -86,7 +87,7 @@ const raiseTaskbar = async (s: Stage, { h, centre }: Scene, quick: boolean) => {
   const grip = (by: number) => ({ x: centre, y: h - TASKBAR * (1 - by) - ROBOT.h + 8 });
   const lookOn = { x: centre, y: h - 130 };
   const pull = async (to: number, ms: number, grunt: EmoteKey | null) => {
-    await s.fly(grip(0.86), 320, { then: 'heave' });
+    await s.fly(grip(0.86), quick ? 260 : 320, { then: 'heave' });
     s.look({ face: 'strain' });
     if (grunt) s.emote(grunt);
     await Promise.all([
@@ -102,9 +103,9 @@ const raiseTaskbar = async (s: Stage, { h, centre }: Scene, quick: boolean) => {
   };
 
   s.look({ face: 'curious' });
-  await s.fly(lookOn, quick ? 600 : 900);
+  await s.fly(lookOn, quick ? 380 : 900);
   if (!quick) s.emote('bar');
-  await s.taskbar(0.86, 250);
+  await s.taskbar(0.86, quick ? 200 : 250);
 
   if (!quick) {
     await s.wait(550);
@@ -114,14 +115,14 @@ const raiseTaskbar = async (s: Stage, { h, centre }: Scene, quick: boolean) => {
     await slip('angry', 'slipAgain');
   }
 
-  await pull(-0.15, 420, quick ? null : 'barUp');
+  await pull(-0.15, quick ? 380 : 420, quick ? null : 'barUp');
   await Promise.all([
-    s.taskbar(0, 130),
-    s.fly(grip(0), 130, { pose: 'heave', ease: 'ease-in' }),
+    s.taskbar(0, quick ? 100 : 130),
+    s.fly(grip(0), quick ? 100 : 130, { pose: 'heave', ease: 'ease-in' }),
   ]);
   s.look({ face: 'phew' });
   if (!quick) s.emote('phew');
-  await s.wait(quick ? 250 : 800);
+  await s.wait(quick ? 120 : 800);
 };
 
 /** The Start button, put on the bar with one blow of the hammer. */
@@ -131,13 +132,13 @@ const installStart = async (s: Stage, { h }: Scene, quick: boolean) => {
   const beside = { x: 40, y: (bar?.top ?? h - TASKBAR) - 44 };
 
   s.look({ face: 'stern' });
-  await s.fly(beside, quick ? 450 : 750, { then: 'hammer', flip: true });
+  await s.fly(beside, quick ? 400 : 750, { then: 'hammer', flip: true });
   s.look({ tool: 'hammer' });
-  await s.wait(quick ? 230 : 400);
+  await s.wait(quick ? 200 : 400);
   s.start();
   s.look({ tool: null, pose: 'hover', face: 'happy' });
-  s.emote('start', 1250);
-  await s.wait(1250);
+  s.emote('start', quick ? 1300 : 1250);
+  await s.wait(quick ? 500 : 1250);
   s.look({ flip: false });
 };
 
@@ -147,19 +148,19 @@ const buildClock = async (s: Stage, { w, h }: Scene, quick: boolean) => {
   const dial = { x: w - 85, y: (bar?.top ?? h - TASKBAR) - 47 };
 
   s.look({ face: 'stern' });
-  await s.fly(dial, quick ? 600 : 900, { then: 'hammer' });
+  await s.fly(dial, quick ? 380 : 900, { then: 'hammer' });
   s.look({ tool: 'hammer' });
   if (!quick) s.emote('hammer');
-  await s.wait(quick ? 260 : 500);
+  await s.wait(quick ? 180 : 500);
   s.clock('frame');
-  await s.wait(quick ? 260 : 550);
+  await s.wait(quick ? 180 : 550);
   s.clock('blank');
 
   if (quick) {
-    await s.wait(260);
+    await s.wait(180);
     s.look({ tool: null, pose: 'cheer', face: 'happy' });
     s.clock('on');
-    await s.wait(350);
+    await s.wait(200);
     return;
   }
 
@@ -180,17 +181,18 @@ const buildClock = async (s: Stage, { w, h }: Scene, quick: boolean) => {
 
 /**
  * The blue, shooed off with a feather duster: it flies across two rows of it at
- * a time, one way and then back, and the pieces it reaches run from it.
+ * a time, three in a hurry, one way and then back, and the pieces it reaches run from it.
  */
 const shooBlue = async (s: Stage, { w, h }: Scene, quick: boolean) => {
   const { cols, rows } = s.tiles();
   const cell = { w: w / cols, h: h / rows };
-  const across = Math.max(quick ? 400 : 760, cols * (quick ? 34 : 68));
+  const across = Math.max(quick ? 360 : 760, cols * (quick ? 28 : 68));
+  const band = quick ? 3 : 2;
 
   s.look({ tool: 'duster', face: 'stern' });
 
-  for (let top = 0, pass = 0; top < rows; top += 2, pass += 1) {
-    const deep = Math.min(2, rows - top);
+  for (let top = 0, pass = 0; top < rows; top += band, pass += 1) {
+    const deep = Math.min(band, rows - top);
     const heading = pass % 2 === 0 ? 1 : -1;
     const flip = heading < 0;
     const over = (col: number) => ({
@@ -199,7 +201,7 @@ const shooBlue = async (s: Stage, { w, h }: Scene, quick: boolean) => {
     });
     const column = (step: number) => (flip ? cols - 1 - step : step);
 
-    await s.fly(over(column(0)), pass === 0 ? (quick ? 500 : 800) : 240, {
+    await s.fly(over(column(0)), pass === 0 ? (quick ? 340 : 800) : quick ? 170 : 240, {
       pose: 'dust',
       then: 'dust',
       flip,
@@ -213,12 +215,14 @@ const shooBlue = async (s: Stage, { w, h }: Scene, quick: boolean) => {
         await s.fly(over(col), across / cols, { pose: 'dust', then: 'dust', ease: 'linear', flip });
       }
 
-      // Ahead of the duster and away from its line: up from the row above it, down from the one below.
+      // Ahead of the duster and away from its line: up from the rows above it, down from the ones
+      // below, and either way, by turns, from the one in the middle.
       const pieces: Shooed[] = [];
       for (let row = top; row < top + deep; row += 1) {
         const index = row * cols + col;
         const stray = ((index * 37) % 11) / 11 - 0.5;
-        const upward = deep === 2 ? row === top : col % 2 === 0;
+        const middle = (row - top) * 2 + 1 === deep;
+        const upward = middle ? col % 2 === 0 : row - top < deep / 2;
         pieces.push({
           index,
           x: heading * (0.6 + 0.4 * stray),
@@ -229,10 +233,10 @@ const shooBlue = async (s: Stage, { w, h }: Scene, quick: boolean) => {
     }
   }
 
-  await s.wait(quick ? 300 : 500);
+  await s.wait(quick ? 150 : 500);
   s.look({ tool: null, pose: 'cheer', face: 'happy', flip: false });
   if (!quick) s.emote('clean');
-  await s.wait(quick ? 250 : 800);
+  await s.wait(quick ? 150 : 800);
 };
 
 /** The program: knocked on, and when that does nothing, rolled open by hand. */
@@ -282,14 +286,14 @@ const openProgram = async (s: Stage, { h }: Scene, quick: boolean) => {
     Promise.all([s.roll(by, ms), s.fly(hang(by), ms, { pose: 'tug', then: 'tug', ease })]);
 
   s.look({ face: 'stern' });
-  await s.fly(hang(0.94), quick ? 550 : 800, { then: 'tug' });
-  await s.roll(0.94, 150);
+  await s.fly(hang(0.94), quick ? 340 : 800, { then: 'tug' });
+  await s.roll(0.94, quick ? 120 : 150);
   s.look({ face: 'strain' });
   if (!quick) s.emote('pull');
 
   if (quick) {
-    await haul(0.5, 420);
-    await haul(0, 420);
+    await haul(0.5, 280);
+    await haul(0, 280);
   } else {
     await haul(0.7, 520);
     await s.wait(160);
@@ -306,7 +310,7 @@ const openProgram = async (s: Stage, { h }: Scene, quick: boolean) => {
 
   s.look({ face: 'phew', pose: 'hover' });
   if (!quick) s.emote('open');
-  await s.wait(quick ? 300 : 900);
+  await s.wait(quick ? 180 : 900);
 };
 
 const rebuild = async (s: Stage, scene: Scene, quick: boolean) => {
@@ -385,24 +389,24 @@ export const setupShow = async (s: Stage) => {
   const scene = measure(s);
   const { w, centre, talkAt } = scene;
 
-  await s.wait(400);
+  await s.wait(150);
   s.appear({ x: centre, y: -ROBOT.h - 20 }, { face: 'happy' });
-  await s.fly(talkAt, 700);
+  await s.fly(talkAt, 450);
   // Somebody is here already, and to either side there is nothing to receive them in.
   s.look({ face: 'wow' });
-  await s.say('visit', 2200);
+  await s.say('visit', 1800);
   s.look({ face: 'worried', gaze: -1 });
-  await s.wait(260);
+  await s.wait(200);
   s.look({ gaze: 1 });
-  await s.wait(260);
+  await s.wait(200);
   s.look({ gaze: 0, face: 'happy', pose: 'wave' });
-  await s.say('tidy', 3000);
+  await s.say('tidy', 2200);
 
   await rebuild(s, scene, true);
 
-  s.look({ face: 'happy' });
-  await s.fly(talkAt, 500, { then: 'wave' });
-  s.emote('ready', 1150);
-  await s.wait(1150);
-  await s.fly({ x: w + 40, y: talkAt.y - 20 }, 600);
+  // Said from where it opened the window, on its way out.
+  s.look({ face: 'happy', pose: 'wave' });
+  s.emote('ready', 1300);
+  await s.wait(800);
+  await s.fly({ x: w + 40, y: talkAt.y - 20 }, 400);
 };

@@ -49,7 +49,7 @@ describe('App access gating', () => {
   it('should keep search available to visitors', async () => {
     renderApp();
 
-    await waitFor(() => expect(screen.getByText('🔍 Search.exe')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Search.exe')).toBeInTheDocument());
     expect(screen.getByPlaceholderText('Type to search...')).toBeInTheDocument();
   });
 
@@ -65,8 +65,8 @@ describe('App access gating', () => {
   it('should hide the library tab from visitors', async () => {
     renderApp();
 
-    await waitFor(() => expect(screen.getByText('🔑 Sign In')).toBeInTheDocument());
-    expect(screen.queryByText('📁 My-Videos.exe')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Sign In' })).toBeInTheDocument());
+    expect(screen.queryByText('My-Videos.exe')).not.toBeInTheDocument();
   });
 
   it('should show the ingest form and library once signed in', async () => {
@@ -75,7 +75,7 @@ describe('App access gating', () => {
     renderApp();
 
     await waitFor(() => expect(screen.getByPlaceholderText('https://...')).toBeInTheDocument());
-    expect(screen.getByText('📁 My-Videos.exe')).toBeInTheDocument();
+    expect(screen.getByText('My-Videos.exe')).toBeInTheDocument();
     expect(screen.queryByText(/An account is required/)).not.toBeInTheDocument();
   });
 });
