@@ -18,6 +18,7 @@ import broom from '../../../assets/win98/clean_drive-0.png';
 import { Arcade } from '../Arcade';
 import { DINO_GAME, FLAPPY_GAME, GOALS } from '../Arcade/games';
 import { useRecords, type Game } from '../records';
+import { BARS, useBarColors } from '../../SystemBars/bars';
 import { Clutter, type ClutterHandle } from './Clutter';
 import { Confirm } from './Confirm';
 import { Defrag } from './Defrag';
@@ -82,6 +83,7 @@ export const Inside = ({ trashed, active, greeting, onRescue, onLeave }: InsideP
     ({ zone }) => isTrashable(zone) && trashed.includes(zone),
   );
   const { records, score } = useRecords();
+  useBarColors(BARS.bin);
   const [game, setGame] = useState<{ kind: Game; seed: number } | null>(null);
   const [earned, setEarned] = useState(false);
   const [clean, setClean] = useState(false);
