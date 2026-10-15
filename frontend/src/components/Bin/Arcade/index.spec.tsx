@@ -84,6 +84,21 @@ describe('the window a game is played in', () => {
     expect(screen.queryByText('Press to count')).not.toBeInTheDocument();
   });
 
+  it('should take a jump from a thumb anywhere under the game, not from a mouse there nor twice from a button', async () => {
+    renderArcade();
+    const under = document.body;
+
+    fireEvent.pointerDown(under, { pointerType: 'touch', clientY: 400 });
+    await waitFor(() => expect(points()).toBe('Points: 1'));
+
+    fireEvent.pointerDown(under, { pointerType: 'mouse', clientY: 400 });
+    fireEvent.pointerDown(screen.getByRole('button', { name: /Jump/ }), { pointerType: 'touch', clientY: 400 });
+    await waitFor(() => expect(points()).toBe('Points: 2'));
+    await new Promise((settle) => setTimeout(settle, 120));
+
+    expect(points()).toBe('Points: 2');
+  });
+
   it('should take a duck from the button held for it, for whoever has no keyboard', async () => {
     renderArcade();
     await score(1);

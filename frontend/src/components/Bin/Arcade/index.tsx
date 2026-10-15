@@ -104,7 +104,7 @@ export const Arcade = <S extends Playing>({
   const node = useRef<HTMLDivElement | null>(null);
   const live = useRef({ size, onEarn, onScore, onPoints });
   const overId = useId();
-  const controls = useControls(result === null);
+  const controls = useControls(result === null, node);
 
   useEffect(() => {
     live.current = { size, onEarn, onScore, onPoints };
