@@ -974,6 +974,7 @@ export const pt: Dictionary = {
       direct: { name: 'Resgatar direto', about: 'Sem desafio nenhum.' },
       leave: { name: 'Sair', about: 'Sem resgatar nada.' },
       won: 'Conseguimos! O botão Resgatar ali embaixo, do lado da barra, leva eles lá para cima. Ou jogue mais um pouco, eu não conto para ninguém.',
+      wonShort: 'Conseguimos! O Resgatar está ali embaixo.',
       untouchable: [
         'Aqui é tudo muito danificado, não dá nem para me tocar.',
         'Melhor não me pegar: tem setor defeituoso para todo lado aqui dentro.',
@@ -1075,6 +1076,7 @@ export const pt: Dictionary = {
       unlocked: {
         title: 'Resgate liberado!',
         text: 'O botão Resgatar, do lado da barra de progresso, já leva eles. Ou continue pelo seu recorde.',
+        short: 'O Resgatar está do lado da barra.',
       },
       newBest: 'Novo recorde!',
       met: 'atingida',

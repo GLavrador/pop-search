@@ -975,6 +975,7 @@ export const en = {
       direct: { name: 'Rescue right away', about: 'No challenge at all.' },
       leave: { name: 'Leave', about: 'Without rescuing anything.' },
       won: 'We did it! The Rescue button down there, beside the bar, takes them back up. Or play a little more, I will not tell anyone.',
+      wonShort: 'We did it! Rescue is down there.',
       untouchable: [
         'Everything in here is too damaged, you cannot even touch me.',
         'Better not pick me up: there are bad sectors all over the place in here.',
@@ -1076,6 +1077,7 @@ export const en = {
       unlocked: {
         title: 'Rescue unlocked!',
         text: 'The Rescue button beside the progress bar takes them up now. Or keep going for your best.',
+        short: 'Rescue is by the progress bar.',
       },
       newBest: 'New best!',
       met: 'reached',

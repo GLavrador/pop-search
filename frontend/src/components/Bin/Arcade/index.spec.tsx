@@ -141,6 +141,26 @@ describe('the window a game is played in', () => {
     expect(onEarn).toHaveBeenCalledTimes(1);
   });
 
+  it('should bring the news of the goal over the window on a phone, in a word, off the game', async () => {
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (media) =>
+        ({
+          matches: media.includes('max-width: 620px'),
+          media,
+          addEventListener() {},
+          removeEventListener() {},
+        }) as unknown as MediaQueryList,
+    );
+    renderArcade();
+
+    await score(GOAL);
+
+    const news = (await screen.findByText('Rescue is by the progress bar.')).closest('[role="status"]');
+    expect(news).toHaveTextContent('Rescue unlocked!');
+    expect(field()).not.toContainElement(news as HTMLElement);
+    vi.restoreAllMocks();
+  });
+
   it('should show the best score, and follow the game when it goes past it', async () => {
     renderArcade({ best: 2 });
 

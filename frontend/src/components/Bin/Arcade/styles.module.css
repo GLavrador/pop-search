@@ -1,4 +1,5 @@
 .arcade {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: min(100%, 780px);
@@ -147,7 +148,30 @@
   animation: burst 1.2s ease-out;
 }
 
-.field:has(.cheer)::after {
+/* Short of room: a line under its name, in smaller type, and less of a burst. */
+.cheer[data-brief] {
+  gap: 1px;
+  padding: 4px 10px 5px;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.cheer[data-brief] strong {
+  font-size: 0.86rem;
+}
+
+.cheer[data-brief] i {
+  --spread: 0.45;
+}
+
+/* Over the window, not on the game: nothing it covers is played or pressed. */
+.cheer[data-above] {
+  top: auto;
+  bottom: calc(100% + 6px);
+  max-width: 100%;
+}
+
+.arcade:has(.cheer) .field::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -644,7 +668,7 @@
   }
   to {
     opacity: 0;
-    translate: calc(-50% + var(--dx)) calc(-50% + var(--dy));
+    translate: calc(-50% + var(--dx) * var(--spread, 1)) calc(-50% + var(--dy) * var(--spread, 1));
     rotate: 200deg;
   }
 }
@@ -690,7 +714,7 @@
   .how,
   .cheer,
   .cheer i,
-  .field:has(.cheer)::after,
+  .arcade:has(.cheer) .field::after,
   .flyer[data-waiting] > *,
   .hazard[data-kind='window'] {
     animation: none;
