@@ -9,6 +9,8 @@ env/
 
 .env
 .env.local
+.env.production
+backend/temp_downloads/
 
 node_modules/
 dist/
