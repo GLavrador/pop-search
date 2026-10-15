@@ -48,6 +48,96 @@
   gap: 7px;
 }
 
+.binRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* A piece of the desktop, sunk into the dialog, with the bin on it as it is out there. */
+.corner {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 84px;
+  padding: 12px 2px 9px;
+  margin-top: 3px;
+  background: var(--win-teal);
+  border-top: 1px solid var(--win-shadow-dark);
+  border-left: 1px solid var(--win-shadow-dark);
+  border-right: 1px solid var(--win-light);
+  border-bottom: 1px solid var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-dark);
+}
+
+.corner img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  animation: rummage 4.5s ease-in-out infinite;
+}
+
+.corner span {
+  padding: 1px 3px;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: var(--win-light);
+  text-shadow: 1px 1px 0 var(--win-dark);
+}
+
+/* Something in there moves now and then. */
+@keyframes rummage {
+  0%,
+  80%,
+  100% {
+    transform: none;
+  }
+  83% {
+    transform: translate(-1px, 1px) rotate(-7deg);
+  }
+  86% {
+    transform: translate(1px, 0) rotate(6deg);
+  }
+  89% {
+    transform: translate(-1px, 1px) rotate(-4deg);
+  }
+  92% {
+    transform: none;
+  }
+}
+
+.fresh {
+  position: absolute;
+  top: -8px;
+  left: -9px;
+  padding: 1px 4px;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  color: var(--win-light);
+  background: #c00000;
+  border: 1px solid var(--win-dark);
+  box-shadow: 1px 1px 0 var(--win-dark);
+  transform: rotate(-8deg);
+}
+
+.binText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corner img {
+    animation: none;
+  }
+}
+
 .list {
   display: flex;
   flex-direction: column;

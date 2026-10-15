@@ -73,17 +73,19 @@ contribuir exige conta.
   não acredita, procura o que sumiu, reclama e reconstrói tudo peça por peça,
   com direito a barra de tarefas que escorrega e janela aberta à força
 - **Lixeira de verdade, e por dentro**: o Meu Computador e os Truques podem ir
-  para a Lixeira, que passa a aparecer cheia. Ao abri-la, o BIP-98 voa até lá,
-  vira de cabeça para baixo e se espreme para dentro. Lá dentro há um
-  Desfragmentador de disco esquecido há décadas, parado em 10%, com arquivos
-  largados e erros que ninguém fechou por cima da grade, num monitor gasto. A
-  janela da própria Lixeira, como o Explorer a abre, lista as saídas. Dois jogos
-  antigos, Flappy BIP e Dino BIP, fazem a desfragmentação andar: a barra enche
-  com os pontos, volta ao começo se a rodada se perde e, na meta, o resgate fica
-  pronto ao lado dela. Aí o robô fecha os erros e varre o desgaste da tela. Dá
-  para seguir jogando pelo recorde, que fica na conta de quem está logado (ou no
-  navegador, sem conta), resgatar direto ou sair sem nada. Os ícones são os
-  originais do Windows 98, do pacote de
+  para a Lixeira, que passa a aparecer cheia. A janela dos Truques tem um quadro
+  só para ela, com um botão que joga a própria lista lá dentro. Ao abrir a
+  Lixeira, o BIP-98 voa até lá, vira de cabeça para baixo e se espreme para
+  dentro. Lá dentro há um Desfragmentador de disco esquecido há décadas, parado
+  em 10%, com arquivos largados e erros que ninguém fechou por cima da grade, num
+  monitor gasto. A janela da própria Lixeira, como o Explorer a abre, lista as
+  saídas. Dois jogos antigos, Flappy BIP e Dino BIP, fazem a desfragmentação
+  andar: a barra enche com os pontos, volta ao começo se a rodada se perde e, na
+  meta, o resgate fica pronto ao lado dela. Aí o robô fecha os erros e varre o
+  desgaste da tela. Dá para seguir jogando pelo recorde, que fica na conta de
+  quem está logado (ou no navegador, sem conta: ele passa para a primeira conta
+  que entrar, e o navegador segue mostrando o recorde da última conta), resgatar
+  direto ou sair sem nada. Os ícones são os originais do Windows 98, do pacote de
   [win98icons.alexmeub.com](https://win98icons.alexmeub.com)
 - **Meu Computador mostra os bastidores**: o ícone abre as Propriedades do
   Sistema, com as peças de verdade num Gerenciador de dispositivos (servidor,

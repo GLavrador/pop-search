@@ -16,9 +16,10 @@ vi.mock('../../services/api', () => ({
   keepBinRecords: (records: unknown) => mockKeepBinRecords(records),
 }));
 
-import { RECORDS_KEY, readRecords, useRecords } from './records';
+import { RECORDS_KEY, SEEN_KEY, readRecords, useRecords } from './records';
 
 const kept = () => JSON.parse(localStorage.getItem(RECORDS_KEY) ?? 'null');
+const seen = (records: object) => localStorage.setItem(SEEN_KEY, JSON.stringify(records));
 
 const render = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -91,6 +92,31 @@ describe('the best scores at the games in the bin', () => {
     expect(readRecords()).toEqual({ flappy: 0, dino: 0 });
   });
 
+  it('should still show the records of the account last signed in here, and play against them', () => {
+    seen({ user: 'someone', flappy: 30, dino: 900 });
+    const { result } = render();
+
+    expect(result.current.records).toEqual({ flappy: 30, dino: 900 });
+
+    let fresh = true;
+    act(() => {
+      fresh = result.current.score('flappy', 20);
+    });
+    expect(fresh).toBe(false);
+  });
+
+  it('should keep in the browser only what was played in it, not what the account had', () => {
+    seen({ user: 'someone', flappy: 30, dino: 900 });
+    const { result } = render();
+
+    act(() => {
+      result.current.score('flappy', 31);
+    });
+
+    expect(result.current.records).toEqual({ flappy: 31, dino: 900 });
+    expect(kept()).toEqual({ flappy: 31, dino: 0 });
+  });
+
   describe('signed in', () => {
     beforeEach(signedIn);
 
@@ -111,6 +137,39 @@ describe('the best scores at the games in the bin', () => {
 
       await waitFor(() => expect(result.current.records).toEqual({ flappy: 40, dino: 900 }));
       expect(mockKeepBinRecords).toHaveBeenCalledWith({ flappy: 40, dino: 900 });
+      expect(kept()).toBeNull();
+    });
+
+    it('should remember the records of the account for when it signs out', async () => {
+      mockGetBinRecords.mockResolvedValue({ flappy: 30, dino: 900 });
+      const first = render();
+      await waitFor(() => expect(first.result.current.records.flappy).toBe(30));
+      first.unmount();
+
+      mockSession.mockReturnValue(null);
+      const { result } = render();
+
+      expect(result.current.records).toEqual({ flappy: 30, dino: 900 });
+    });
+
+    it('should show the records it remembers of the same account while the account answers', () => {
+      seen({ user: 'someone', flappy: 30, dino: 900 });
+      mockGetBinRecords.mockReturnValue(new Promise(() => {}));
+
+      const { result } = render();
+
+      expect(result.current.records).toEqual({ flappy: 30, dino: 900 });
+    });
+
+    it('should give another account nothing of the one signed in before it', async () => {
+      seen({ user: 'someone else', flappy: 30, dino: 900 });
+      localStorage.setItem(RECORDS_KEY, JSON.stringify({ flappy: 5, dino: 0 }));
+      mockGetBinRecords.mockResolvedValue({ flappy: 0, dino: 0 });
+
+      const { result } = render();
+
+      await waitFor(() => expect(mockKeepBinRecords).toHaveBeenCalledWith({ flappy: 5, dino: 0 }));
+      await waitFor(() => expect(result.current.records).toEqual({ flappy: 5, dino: 0 }));
     });
 
     it('should keep a new record in the account, not in the browser', async () => {

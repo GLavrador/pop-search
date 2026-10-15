@@ -32,6 +32,9 @@ interface DesktopIconProps {
   pressed?: boolean;
   /** Carried off by something other than the pointer. */
   borne?: Borne | null;
+  /** Thrown in the bin from afar: it flies there, and then it is in. */
+  tossed?: boolean;
+  onTossed?: () => void;
   onOpen?: () => void;
   /** It is being carried, and this is where the pointer has it. */
   onCarry?: (at: Spot) => void;
@@ -41,6 +44,8 @@ interface DesktopIconProps {
 const DRAG_AFTER = 5;
 const WHOLE = 6;
 const BACK_MS = 700;
+const TOSS_MS = 900;
+const ARC = 46;
 
 // Touch has no double click, so a single tap opens there and double click opens
 // on a mouse, which is what Windows itself does on each input.
@@ -86,6 +91,40 @@ const comeBack = (node: HTMLElement) => {
   );
 };
 
+/** Into the bin in an arc, turning over, the way it comes back out. It stays there, unseen, until it is in. */
+const toss = (node: HTMLElement, done: () => void) => {
+  const bin = document.querySelector('[data-robot="icon"][data-robot-zone="bin"]');
+  const place = placeOf(node);
+  if (!bin || !place || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    done();
+    return null;
+  }
+
+  const mouth = centreOf(bin.getBoundingClientRect());
+  const to = { x: mouth.x - place.x, y: mouth.y - place.y };
+  const half = { x: to.x * 0.55, y: to.y * 0.55 };
+  // Up and over, swinging out when the bin is straight above. Without room above, it dips instead.
+  const top =
+    place.y + half.y - ARC > 8
+      ? { x: half.x + (Math.abs(to.x) < ARC ? ARC : 0), y: half.y - ARC }
+      : { x: half.x, y: half.y + ARC };
+  const flight = node.animate?.(
+    [
+      { transform: 'translate(0, 0) scale(1) rotate(0deg)', easing: 'ease-out' },
+      { transform: `${moved(top)} scale(0.9) rotate(150deg)`, offset: 0.5, easing: 'ease-in' },
+      { transform: `${moved(to)} scale(0.2) rotate(300deg)`, opacity: 1, offset: 0.88 },
+      { transform: `${moved(to)} scale(0.2) rotate(300deg)`, opacity: 0 },
+    ],
+    { duration: TOSS_MS, fill: 'forwards' },
+  );
+  if (!flight) {
+    done();
+    return null;
+  }
+  flight.finished.then(done, () => {});
+  return flight;
+};
+
 export const DesktopIcon = ({
   art,
   label,
@@ -97,6 +136,8 @@ export const DesktopIcon = ({
   aimedAt = false,
   pressed = false,
   borne = null,
+  tossed = false,
+  onTossed,
   onOpen,
   onCarry,
   onDrop,
@@ -105,14 +146,30 @@ export const DesktopIcon = ({
   const press = useRef<{ x: number; y: number; carrying: boolean } | null>(null);
   const justDropped = useRef(false);
   const wasTrashed = useRef(trashed);
+  const flight = useRef<Animation | null>(null);
+  const landed = useRef(onTossed);
   const [carried, setCarried] = useState<Spot | null>(null);
   const [letGoAt, setLetGoAt] = useState<Spot | null>(null);
+
+  useLayoutEffect(() => {
+    landed.current = onTossed;
+  });
 
   useLayoutEffect(() => {
     const fetched = wasTrashed.current && !trashed;
     wasTrashed.current = trashed;
     if (fetched && node.current) comeBack(node.current);
+    // In the bin, out of sight: what kept it at the end of its flight lets go.
+    if (trashed) {
+      flight.current?.cancel();
+      flight.current = null;
+    }
   }, [trashed]);
+
+  useLayoutEffect(() => {
+    if (!tossed || !node.current) return;
+    flight.current = toss(node.current, () => landed.current?.());
+  }, [tossed]);
 
   const handleDown = (event: PointerEvent<HTMLButtonElement>) => {
     if (event.button !== 0) return;

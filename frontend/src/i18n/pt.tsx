@@ -857,6 +857,13 @@ export const pt: Dictionary = {
       text: 'Fica na barra azul, ao lado do minimizar. Clique nele e depois em qualquer coisa da tela: eu vou até lá e explico o que é e para que serve. Vale para botão, campo, aba, resultado da busca, até para mim.',
       action: 'Testar agora',
     },
+    bin: {
+      legend: 'A Lixeira',
+      fresh: 'Novo!',
+      what: 'Jogue um ícone na Lixeira e me mande buscar.',
+      text: 'Arraste o Meu Computador ou estes Truques até ela e abra a Lixeira. Eu vou, mas não prometo ir sorrindo. Dizem que lá dentro tem jogo.',
+      action: 'Jogar estes Truques no lixo',
+    },
     groups: [
       {
         legend: 'Comigo',
@@ -873,10 +880,6 @@ export const pt: Dictionary = {
           {
             what: 'Me solte em cima das coisas.',
             text: 'Na borda de cima da janela, num ícone, no relógio, no Iniciar, no X da janela, no botão do Pop Search lá na barra de tarefas. Sobre cada uma eu tenho uma opinião.',
-          },
-          {
-            what: 'Me mande buscar o que foi para a Lixeira.',
-            text: 'Jogue lá o Meu Computador ou os Truques e depois abra a Lixeira. Eu vou, mas não prometo ir sorrindo.',
           },
           {
             what: 'Me deixe sozinho.',

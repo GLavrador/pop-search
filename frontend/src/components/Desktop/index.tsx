@@ -31,6 +31,10 @@ interface DesktopProps {
   onTrashApp?: () => void;
   /** One of the other icons was. */
   onTrash?: (zone: Trashable) => void;
+  /** The icon thrown in the bin from somewhere else, on its way there. */
+  tossing?: Trashable | null;
+  /** It got there. */
+  onTossed?: () => void;
 }
 
 const isOver = (at: Spot, zone: IconZone) => {
@@ -63,6 +67,8 @@ export const Desktop = ({
   lifted = false,
   onTrashApp,
   onTrash,
+  tossing = null,
+  onTossed,
 }: DesktopProps) => {
   const icons = useDesktopIcons(appIcon, appLabel, trashed.length > 0);
   const robot = useRobot();
@@ -72,6 +78,11 @@ export const Desktop = ({
     app: onOpenApp,
     computer: onOpenComputer,
     tricks: onOpenTricks,
+  };
+
+  const binIt = (zone: Trashable) => {
+    robot.notify({ kind: 'iconTrashed', what: zone });
+    onTrash?.(zone);
   };
 
   // The bin takes any icon but itself. The program in it is another matter, and the robot sees it coming.
@@ -88,8 +99,7 @@ export const Desktop = ({
       robot.notify({ kind: 'appTrashed' });
       onTrashApp?.();
     } else if (binned && isTrashable(zone)) {
-      robot.notify({ kind: 'iconTrashed', what: zone });
-      onTrash?.(zone);
+      binIt(zone);
     } else {
       robot.notify({ kind: 'iconDropped' });
     }
@@ -110,6 +120,12 @@ export const Desktop = ({
           pressed={pressed === zone}
           shining={shining === zone}
           borne={zone === 'bin' ? binBorne : null}
+          tossed={zone === tossing}
+          onTossed={() => {
+            if (!isTrashable(zone)) return;
+            binIt(zone);
+            onTossed?.();
+          }}
           onOpen={opens[zone]}
           onCarry={(at) => carry(zone, at)}
           onDrop={(at) => drop(zone, at)}
