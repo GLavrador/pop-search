@@ -16,6 +16,7 @@ const BROADEST = Math.min(...PRECISION_PRESETS.map((preset) => preset.threshold)
 // The path that took Windows 98 down for real. It does the same here, on purpose.
 const FATAL_PATH = /^c:\\con\\con$/i;
 import styles from "./styles.module.css";
+import warningIcon from '../../assets/win98/msg_warning-0.png';
 
 export const SearchSection = () => {
   const [query, setQuery] = useState("");
@@ -183,7 +184,7 @@ export const SearchSection = () => {
 
         {!isLoading && error && (
           <div className="win95-border win95-error">
-            <span>⚠️</span>
+            <img src={warningIcon} alt="" className="win98-warning" />
             <strong>{error}</strong>
           </div>
         )}

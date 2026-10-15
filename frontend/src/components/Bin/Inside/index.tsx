@@ -18,6 +18,7 @@ import broom from '../../../assets/win98/clean_drive-0.png';
 import { Arcade } from '../Arcade';
 import { DINO_GAME, FLAPPY_GAME, GOALS } from '../Arcade/games';
 import { useRecords, type Game } from '../records';
+import { BARS, useBarColors } from '../../SystemBars/bars';
 import { Clutter, type ClutterHandle } from './Clutter';
 import { Confirm } from './Confirm';
 import { Defrag } from './Defrag';
@@ -42,6 +43,8 @@ interface InsideProps {
 
 // Where the bin is taller than it is wide the robot hovers over what it came for, for want of room beside it.
 const STACKED = '(max-aspect-ratio: 1 / 1), (max-width: 620px)';
+// A phone: what the robot says once the goal is reached is short enough to stay on the screen.
+const NARROW = '(max-width: 620px)';
 // The robot on its way to a game, and its finger on the button.
 const TO_BUTTON = 560;
 const ON_BUTTON = 240;
@@ -80,6 +83,7 @@ export const Inside = ({ trashed, active, greeting, onRescue, onLeave }: InsideP
     ({ zone }) => isTrashable(zone) && trashed.includes(zone),
   );
   const { records, score } = useRecords();
+  useBarColors(BARS.bin);
   const [game, setGame] = useState<{ kind: Game; seed: number } | null>(null);
   const [earned, setEarned] = useState(false);
   const [clean, setClean] = useState(false);
@@ -92,6 +96,7 @@ export const Inside = ({ trashed, active, greeting, onRescue, onLeave }: InsideP
   );
   const [flinch, setFlinch] = useState<{ line: number } | null>(null);
   const [stacked] = useState(() => window.matchMedia(STACKED).matches);
+  const [narrow] = useState(() => window.matchMedia(NARROW).matches);
   const [calm] = useState(wantsCalm);
   const [vary] = useState(() => createVariety());
   const [cleaningLine, setCleaningLine] = useState(0);
@@ -253,8 +258,9 @@ export const Inside = ({ trashed, active, greeting, onRescue, onLeave }: InsideP
 
   const says = useMemo(() => {
     if (flinch) return (clean ? copy.untouchedClean : copy.untouchable)[flinch.line];
-    return earned ? copy.won : copy.says[greeting % copy.says.length];
-  }, [flinch, clean, earned, greeting, copy]);
+    if (earned) return narrow ? copy.wonShort : copy.won;
+    return copy.says[greeting % copy.says.length];
+  }, [flinch, clean, earned, greeting, copy, narrow]);
 
   return (
     <div

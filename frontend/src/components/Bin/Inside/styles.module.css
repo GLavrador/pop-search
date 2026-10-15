@@ -825,6 +825,20 @@
   z-index: 4;
 }
 
+/* While a game is on, a thumb anywhere under it plays: nothing is selected, zoomed or lit up by it. */
+.inside[data-playing] {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* A button that cannot be pressed lets the touch through to the game. */
+.inside[data-playing] .controls :disabled {
+  pointer-events: none;
+}
+
 .prize {
   display: flex;
   gap: 8px;

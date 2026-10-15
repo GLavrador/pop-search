@@ -18,7 +18,7 @@ export const TaskButton = ({ icon, label, active, onClick }: TaskButtonProps) =>
     {...helpAt('taskbar.task')}
     className={`${styles.task} ${active ? styles.taskActive : ''}`}
   >
-    <span className={styles.taskIcon}>{icon}</span>
+    <img src={icon} alt="" className={styles.taskIcon} draggable={false} />
     <span className={styles.taskLabel}>{label}</span>
   </button>
 );

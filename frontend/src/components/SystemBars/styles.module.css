@@ -1,0 +1,18 @@
+/* Never seen, never in the way: only there for the browser to take the colour of its bars from. */
+.edge {
+  position: fixed;
+  right: 0;
+  left: 0;
+  z-index: 2147483647;
+  height: 6px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.top {
+  top: 0;
+}
+
+.bottom {
+  bottom: 0;
+}

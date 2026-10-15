@@ -82,7 +82,7 @@ describe('AuthPanel', () => {
     const onStartGuide = vi.fn();
     render(<AuthPanel onStartGuide={onStartGuide} />);
 
-    await user.click(screen.getByRole('button', { name: '▶ Open the guide' }));
+    await user.click(screen.getByRole('button', { name: '► Open the guide' }));
 
     expect(onStartGuide).toHaveBeenCalledOnce();
   });
@@ -109,7 +109,7 @@ describe('AuthPanel', () => {
     mockAuth.isAuthenticated = true;
     render(<AuthPanel onStartGuide={vi.fn()} invite={{ on: true, onChange: vi.fn() }} />);
 
-    expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Open the guide' })).toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 

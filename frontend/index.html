@@ -5,20 +5,31 @@
     <link rel="icon" type="image/png" href="/windows-98-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pop Search</title>
+    <meta name="theme-color" content="#008080" />
     <script>
       // The colour of the first paint, when the page is about to start up: blue under
       // the robot building the desktop, black under the boot screen that stands in for it.
       if (!sessionStorage.getItem('pop-search:booted')) {
         const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
         document.documentElement.dataset.boot = calm ? 'boot' : 'setup';
+        document.querySelector('meta[name="theme-color"]').content = calm ? '#000000' : '#0000aa';
       }
     </script>
     <style>
-      html[data-boot='boot'] body {
+      /* Over the colour of the page, not in it: Safari keeps the colour of the page it first
+         sees for its bars, and the page is the desktop. */
+      html[data-boot]::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+      }
+
+      html[data-boot='boot']::before {
         background: #000;
       }
 
-      html[data-boot='setup'] body {
+      html[data-boot='setup']::before {
         background: #0000aa;
       }
     </style>

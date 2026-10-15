@@ -39,7 +39,11 @@ export const useDesktopIcons = (appIcon: string, appLabel: string, binFull = fal
       art: <img src={computerIcon} alt="" className={styles.image} draggable={false} />,
       label: t.desktop.myComputer,
     },
-    { zone: 'app', art: <span className={styles.emoji}>{appIcon}</span>, label: appLabel },
+    {
+      zone: 'app',
+      art: <img src={appIcon} alt="" className={styles.image} draggable={false} />,
+      label: appLabel,
+    },
     { zone: 'tricks', art: <Robot className={styles.mascot} />, label: t.desktop.tricks },
   ];
 };

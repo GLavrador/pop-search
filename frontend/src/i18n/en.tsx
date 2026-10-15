@@ -264,7 +264,7 @@ export const en = {
     title: 'An account is required to add videos.',
     body: 'Indexing a video runs it through the AI, so it is limited to signed-in users. Searching the archive stays open to everyone.',
     signIn: 'Sign In',
-    openGuide: '▶ Show me how it works',
+    openGuide: '► Show me how it works',
   },
 
   footer: '© 1998 Pop Search Corp. - All rights reserved.',
@@ -672,7 +672,7 @@ export const en = {
     },
     progress: (current: number, total: number) => `Step ${current} of ${total}`,
     back: '◂ back',
-    next: 'Got it ▶',
+    next: 'Got it ►',
     skip: 'skip ▸',
     skipTitle: 'Carry on without doing this step',
     yourTurn: 'Your turn:',
@@ -680,7 +680,7 @@ export const en = {
     closeTitle: 'Close the guide. You can pick it up again where you stopped.',
     jumpTo: (step: number) => `Go to step ${step}`,
     paused: (current: number, total: number) => `Guide paused on step ${current} of ${total}.`,
-    resume: '▶ Resume',
+    resume: '► Resume',
     quit: 'end guide',
     offScript: (tab: string) => (
       <>
@@ -691,7 +691,7 @@ export const en = {
     invite: {
       lead: 'Want to see how Pop Search works?',
       text: 'I will show you all of it in two minutes, on a practice screen. No account needed.',
-      start: '▶ Start the guide',
+      start: '► Start the guide',
       close: 'Close for now. The invitation is back the next time the page opens.',
       hide: 'do not show again',
       hideTitle: 'Do not show this invitation again in this browser. The Sign In tab can turn it back on.',
@@ -704,7 +704,7 @@ export const en = {
     profile: {
       legend: 'Guided demo',
       note: 'A walk through keeping a video and finding it again. Nothing is saved and no AI is called.',
-      start: '▶ Open the guide',
+      start: '► Open the guide',
     },
     demo: {
       badge: 'DEMO',
@@ -725,7 +725,7 @@ export const en = {
             it is for.
           </>
         ),
-        next: 'Tell me ▶',
+        next: 'Tell me ►',
       },
       about: {
         title: 'What Pop Search is',
@@ -751,7 +751,7 @@ export const en = {
             Now I will show you each part working, in a tutorial. It will not take long :)
           </>
         ),
-        next: 'Off we go ▶',
+        next: 'Off we go ►',
       },
       paste: {
         title: 'Keeping a video',
@@ -774,7 +774,7 @@ export const en = {
       analyzing: {
         title: 'The AI is watching',
         say: 'Now the AI watches the whole video and writes a summary of it. In the real app this takes about a minute, and this bar shows how far along it is. Here we do not have to wait.',
-        next: 'Skip the wait ▶',
+        next: 'Skip the wait ►',
       },
       review: {
         title: 'Check what the AI wrote',
@@ -975,6 +975,7 @@ export const en = {
       direct: { name: 'Rescue right away', about: 'No challenge at all.' },
       leave: { name: 'Leave', about: 'Without rescuing anything.' },
       won: 'We did it! The Rescue button down there, beside the bar, takes them back up. Or play a little more, I will not tell anyone.',
+      wonShort: 'We did it! Rescue is down there.',
       untouchable: [
         'Everything in here is too damaged, you cannot even touch me.',
         'Better not pick me up: there are bad sectors all over the place in here.',
@@ -1076,6 +1077,7 @@ export const en = {
       unlocked: {
         title: 'Rescue unlocked!',
         text: 'The Rescue button beside the progress bar takes them up now. Or keep going for your best.',
+        short: 'Rescue is by the progress bar.',
       },
       newBest: 'New best!',
       met: 'reached',

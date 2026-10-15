@@ -10,6 +10,7 @@ import {
 } from '../../constants/startup';
 import { isAnyKey } from '../../utils/keys';
 import { Robot } from '../Assistant/Robot';
+import { BARS, useBarColors } from '../SystemBars/bars';
 import styles from './styles.module.css';
 
 interface BootProps {
@@ -37,6 +38,7 @@ export const Boot = ({ server, onDone }: BootProps) => {
   const [outOfPatience, setOutOfPatience] = useState(false);
   // A tab opened in the background starts up when it is first looked at.
   const watched = useSyncExternalStore(onVisibility, isVisible);
+  useBarColors(BARS.boot);
 
   const allShown = shown >= CHECKS;
   const waking = server.state === 'waking';

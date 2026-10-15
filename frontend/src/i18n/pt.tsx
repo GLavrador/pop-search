@@ -249,7 +249,7 @@ export const pt: Dictionary = {
     title: 'É preciso ter conta para adicionar vídeos.',
     body: 'Indexar um vídeo passa ele pela IA, então isso é limitado a quem está logado. Buscar no acervo continua aberto a todo mundo.',
     signIn: 'Entrar',
-    openGuide: '▶ Me mostre como funciona',
+    openGuide: '► Me mostre como funciona',
   },
 
   footer: '© 1998 Pop Search Corp. - Todos os direitos reservados.',
@@ -669,7 +669,7 @@ export const pt: Dictionary = {
     },
     progress: (current: number, total: number) => `Passo ${current} de ${total}`,
     back: '◂ voltar',
-    next: 'Entendi ▶',
+    next: 'Entendi ►',
     skip: 'pular ▸',
     skipTitle: 'Seguir sem fazer este passo',
     yourTurn: 'Sua vez:',
@@ -677,7 +677,7 @@ export const pt: Dictionary = {
     closeTitle: 'Fechar o guia. Dá para retomar de onde você parou.',
     jumpTo: (step: number) => `Ir para o passo ${step}`,
     paused: (current: number, total: number) => `Guia pausado no passo ${current} de ${total}.`,
-    resume: '▶ Retomar',
+    resume: '► Retomar',
     quit: 'encerrar guia',
     offScript: (tab: string) => (
       <>
@@ -688,7 +688,7 @@ export const pt: Dictionary = {
     invite: {
       lead: 'Quer ver como o Pop Search funciona?',
       text: 'Eu te mostro tudo em dois minutos, numa tela de treino. Não precisa de conta.',
-      start: '▶ Começar o guia',
+      start: '► Começar o guia',
       close: 'Fechar por agora. O convite volta quando a página abrir de novo.',
       hide: 'não mostrar mais',
       hideTitle: 'Não mostrar mais este convite neste navegador. Dá para ligar de novo na aba Sign In.',
@@ -701,7 +701,7 @@ export const pt: Dictionary = {
     profile: {
       legend: 'Demonstração guiada',
       note: 'Um passeio guardando um vídeo e encontrando ele de novo. Nada é salvo e nenhuma IA é chamada.',
-      start: '▶ Abrir o guia',
+      start: '► Abrir o guia',
     },
     demo: {
       badge: 'DEMO',
@@ -723,7 +723,7 @@ export const pt: Dictionary = {
             ele serve.
           </>
         ),
-        next: 'Me conta ▶',
+        next: 'Me conta ►',
       },
       about: {
         title: 'O que é o Pop Search',
@@ -749,7 +749,7 @@ export const pt: Dictionary = {
             Agora eu te mostro cada parte funcionando, num tutorial. É rapidinho :)
           </>
         ),
-        next: 'Vamos lá ▶',
+        next: 'Vamos lá ►',
       },
       paste: {
         title: 'Guardar um vídeo',
@@ -772,7 +772,7 @@ export const pt: Dictionary = {
       analyzing: {
         title: 'A IA está assistindo',
         say: 'Agora a IA assiste ao vídeo inteiro e escreve um resumo dele. No app de verdade isso leva mais ou menos um minuto, e esta barra mostra o andamento. Aqui a gente não precisa esperar.',
-        next: 'Pular a espera ▶',
+        next: 'Pular a espera ►',
       },
       review: {
         title: 'Confira o que a IA escreveu',
@@ -974,6 +974,7 @@ export const pt: Dictionary = {
       direct: { name: 'Resgatar direto', about: 'Sem desafio nenhum.' },
       leave: { name: 'Sair', about: 'Sem resgatar nada.' },
       won: 'Conseguimos! O botão Resgatar ali embaixo, do lado da barra, leva eles lá para cima. Ou jogue mais um pouco, eu não conto para ninguém.',
+      wonShort: 'Conseguimos! O Resgatar está ali embaixo.',
       untouchable: [
         'Aqui é tudo muito danificado, não dá nem para me tocar.',
         'Melhor não me pegar: tem setor defeituoso para todo lado aqui dentro.',
@@ -1075,6 +1076,7 @@ export const pt: Dictionary = {
       unlocked: {
         title: 'Resgate liberado!',
         text: 'O botão Resgatar, do lado da barra de progresso, já leva eles. Ou continue pelo seu recorde.',
+        short: 'O Resgatar está do lado da barra.',
       },
       newBest: 'Novo recorde!',
       met: 'atingida',

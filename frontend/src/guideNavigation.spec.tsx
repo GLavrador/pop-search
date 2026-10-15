@@ -64,7 +64,7 @@ describe('guided demo navigation', () => {
     expect(screen.getByText('Hi! I am BIP-98')).toBeInTheDocument();
     expect(screen.getByText('1/13')).toBeInTheDocument();
     expect(screen.getByText('DEMO')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tell me ▶' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tell me ►' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'skip ▸' })).not.toBeInTheDocument();
   });
 
@@ -72,7 +72,7 @@ describe('guided demo navigation', () => {
     renderApp();
     await startGuide();
 
-    await press('Tell me ▶');
+    await press('Tell me ►');
 
     expect(screen.getByText('What Pop Search is')).toBeInTheDocument();
     expect(screen.getByText('You keep it')).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('guided demo navigation', () => {
     expect(screen.getByText(/by meaning \(semantic\) and by the words \(exact\)/)).toBeInTheDocument();
     expect(screen.getByText('2/13')).toBeInTheDocument();
 
-    await press('Off we go ▶');
+    await press('Off we go ►');
 
     expect(screen.getByText('Keeping a video')).toBeInTheDocument();
   });
@@ -90,20 +90,20 @@ describe('guided demo navigation', () => {
   it('should hand the way forward to the app on a doing step', async () => {
     renderApp();
     await startGuide();
-    await press('Tell me ▶');
-    await press('Off we go ▶');
+    await press('Tell me ►');
+    await press('Off we go ►');
 
     expect(screen.getByText('Keeping a video')).toBeInTheDocument();
     expect(screen.getByText('Your turn:')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Got it ▶' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Got it ►' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'skip ▸' })).toBeInTheDocument();
   });
 
   it('should follow the user through the whole add flow', async () => {
     renderApp();
     await startGuide();
-    await press('Tell me ▶');
-    await press('Off we go ▶');
+    await press('Tell me ►');
+    await press('Off we go ►');
 
     await press('Next');
     expect(screen.getByText('What the AI looks at')).toBeInTheDocument();
@@ -111,10 +111,10 @@ describe('guided demo navigation', () => {
     await press('Run Analysis');
     expect(screen.getByText('The AI is watching')).toBeInTheDocument();
 
-    await press('Skip the wait ▶');
+    await press('Skip the wait ►');
     expect(screen.getByText('Check what the AI wrote')).toBeInTheDocument();
 
-    await press('Got it ▶');
+    await press('Got it ►');
     expect(screen.getByText('Keep it')).toBeInTheDocument();
 
     await press('Save');
@@ -199,7 +199,7 @@ describe('guided demo navigation', () => {
     expect(screen.queryByText('DEMO')).not.toBeInTheDocument();
     expect(screen.getByText('Guide paused on step 6 of 13.')).toBeInTheDocument();
 
-    await press('▶ Resume');
+    await press('► Resume');
 
     expect(screen.getByText('Check what the AI wrote')).toBeInTheDocument();
     expect(screen.getByText('6/13')).toBeInTheDocument();
@@ -213,7 +213,7 @@ describe('guided demo navigation', () => {
     await press('Finish ✓');
 
     expect(screen.queryByText('13/13')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: '▶ Start the guide' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '► Start the guide' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Guide: let BIP-98 show you around' })).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Now make yourself at home');
 
@@ -229,7 +229,7 @@ describe('guided demo navigation', () => {
 
     await press('end guide');
 
-    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Start the guide' })).toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
@@ -241,7 +241,7 @@ describe('guided demo navigation', () => {
 
     await user.click(tab('Search.exe'));
 
-    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Start the guide' })).toBeInTheDocument();
   });
 
   it('should invite again every time the page opens, whatever was done with the guide before', async () => {
@@ -286,7 +286,7 @@ describe('guided demo navigation', () => {
 
     await press('Undo');
 
-    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Start the guide' })).toBeInTheDocument();
     expect(localStorage.getItem('pop-search:guide-invite-off')).toBeNull();
     expect(
       screen.queryByRole('button', { name: 'Guide: let BIP-98 show you around' }),
@@ -305,7 +305,7 @@ describe('guided demo navigation', () => {
     page.unmount();
     renderApp();
 
-    expect(await screen.findByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: '► Start the guide' })).toBeInTheDocument();
   });
 
   it('should keep a way to the guide, and the switch of the invitation, on the sign in tab', async () => {
@@ -315,18 +315,18 @@ describe('guided demo navigation', () => {
     const invited = () =>
       screen.getByRole('checkbox', { name: 'Invite me to the guide every time Pop Search opens' });
 
-    expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Open the guide' })).toBeInTheDocument();
     expect(invited()).not.toBeChecked();
 
     await user.click(invited());
 
     expect(invited()).toBeChecked();
-    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Start the guide' })).toBeInTheDocument();
     expect(localStorage.getItem('pop-search:guide-invite-off')).toBeNull();
 
     await user.click(invited());
 
-    expect(screen.queryByRole('button', { name: '▶ Start the guide' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '► Start the guide' })).not.toBeInTheDocument();
     expect(localStorage.getItem('pop-search:guide-invite-off')).not.toBeNull();
   });
 
@@ -341,7 +341,7 @@ describe('guided demo navigation', () => {
     await user.click(invited);
     await user.click(invited);
 
-    expect(screen.getByRole('button', { name: '▶ Start the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Start the guide' })).toBeInTheDocument();
   });
 
   it('should stay put away on the next visit, with the guide in the title bar', async () => {
@@ -374,7 +374,7 @@ describe('guided demo navigation', () => {
 
     await user.click(screen.getByRole('tab', { name: 'ana' }));
 
-    expect(screen.getByRole('button', { name: '▶ Open the guide' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '► Open the guide' })).toBeInTheDocument();
   });
 
   it('should keep the robot around when the window is minimized', async () => {

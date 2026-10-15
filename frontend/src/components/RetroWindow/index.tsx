@@ -40,7 +40,7 @@ const SHAKE_FRAMES: Keyframe[] = [
 export const RetroWindow = ({
   title,
   children,
-  icon = '🌐',
+  icon,
   state = 'open',
   maximized = false,
   shakeKey = 0,
@@ -88,7 +88,7 @@ export const RetroWindow = ({
     >
       <div className={styles.titleBar}>
         <div className={styles.titleText}>
-          <span>{icon}</span>
+          {icon && <img src={icon} alt="" className="win98-small" draggable={false} />}
           {title}
         </div>
         <div className={styles.controls}>

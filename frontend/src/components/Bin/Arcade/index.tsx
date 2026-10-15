@@ -75,6 +75,14 @@ const CONFETTI = [
 ] as const;
 
 const wantsCalm = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// On a phone held upright the news of the goal goes over the window, clear of the game.
+// Short of room either way, it says less.
+const ABOVE = '(max-width: 620px)';
+const BRIEF = '(max-width: 620px), (max-height: 500px)';
+const cheerFits = () => ({
+  above: window.matchMedia(ABOVE).matches,
+  brief: window.matchMedia(BRIEF).matches,
+});
 
 /** The window a game is played in: the game itself, the score under it, and what a round ends in. */
 export const Arcade = <S extends Playing>({
@@ -97,6 +105,7 @@ export const Arcade = <S extends Playing>({
   const [result, setResult] = useState<Result | null>(null);
   const [cheering, setCheering] = useState(false);
   const [calm] = useState(wantsCalm);
+  const [fit] = useState(cheerFits);
   const game = useRef(store.get());
   const told = useRef({ earned, over: false, points: 0 });
   const rounds = useRef(0);
@@ -104,7 +113,7 @@ export const Arcade = <S extends Playing>({
   const node = useRef<HTMLDivElement | null>(null);
   const live = useRef({ size, onEarn, onScore, onPoints });
   const overId = useId();
-  const controls = useControls(result === null);
+  const controls = useControls(result === null, node);
 
   useEffect(() => {
     live.current = { size, onEarn, onScore, onPoints };
@@ -194,8 +203,24 @@ export const Arcade = <S extends Playing>({
   const shownBest = Math.max(best, state.score);
   const met = state.score >= goal;
 
+  const cheer = cheering && !result && (
+    <div
+      className={`win95-border ${styles.cheer}`}
+      role="status"
+      data-brief={fit.brief ? '' : undefined}
+      data-above={fit.above ? '' : undefined}
+    >
+      <strong>{words.unlocked.title}</strong>
+      <span>{fit.brief ? words.unlocked.short : words.unlocked.text}</span>
+      {CONFETTI.map(([dx, dy, colour]) => (
+        <i key={dx} style={{ '--dx': dx, '--dy': dy, '--c': colour } as CSSProperties} />
+      ))}
+    </div>
+  );
+
   return (
     <section className={`win95-border ${styles.arcade}`} aria-label={copy.title} data-arcade>
+      {fit.above && cheer}
       <header className={styles.titleBar}>
         <span className={styles.title}>{copy.title}</span>
         <button type="button" className={styles.close} aria-label={words.quit} onClick={quit}>
@@ -233,15 +258,7 @@ export const Arcade = <S extends Playing>({
         </output>
         {!state.started && <p className={styles.how}>{copy.how}</p>}
 
-        {cheering && !result && (
-          <div className={`win95-border ${styles.cheer}`} role="status">
-            <strong>{words.unlocked.title}</strong>
-            <span>{words.unlocked.text}</span>
-            {CONFETTI.map(([dx, dy, colour]) => (
-              <i key={dx} style={{ '--dx': dx, '--dy': dy, '--c': colour } as CSSProperties} />
-            ))}
-          </div>
-        )}
+        {!fit.above && cheer}
 
         {result && (
           <div

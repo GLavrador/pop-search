@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './styles.module.css';
+import film from '../../assets/win98/movie_maker-0.png';
 
 interface ThumbnailProps {
   src?: string | null;
@@ -12,7 +13,7 @@ export const Thumbnail = ({ src }: ThumbnailProps) => {
   if (!src || failed === src) {
     return (
       <span className={`win95-inset ${styles.frame} ${styles.empty}`} aria-hidden="true">
-        🎬
+        <img src={film} alt="" className={styles.film} />
       </span>
     );
   }

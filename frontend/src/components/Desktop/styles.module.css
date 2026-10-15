@@ -218,11 +218,6 @@
   object-fit: contain;
 }
 
-.emoji {
-  font-size: 27px;
-  line-height: 1;
-}
-
 /* The robot's own portrait, standing still: the one that moves is the robot. */
 .art .mascot {
   width: 28px;

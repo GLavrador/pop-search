@@ -2,6 +2,7 @@ import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';
 import type { ExistingVideo } from '../../types';
 import styles from './styles.module.css';
+import film from '../../assets/win98/movie_maker-0.png';
 
 interface DuplicateNoticeProps {
   video: ExistingVideo;
@@ -36,7 +37,7 @@ export const DuplicateNotice = ({ video, onDismiss }: DuplicateNoticeProps) => {
       </div>
 
       <div className={styles.copyVideo}>
-        <span className={styles.copyIcon} aria-hidden="true">🎬</span>
+        <img src={film} alt="" className={styles.copyIcon} />
         <span className={styles.copyTitle}>{video.titulo_video || video.url_original.trim()}</span>
         <span className={styles.copyDate}>
           {t.ingest.duplicate.added(formatDate(video.created_at, locale))}

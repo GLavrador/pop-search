@@ -38,7 +38,7 @@ export const StageProgress = ({ stage }: StageProgressProps) => {
               aria-current={state === 'current' ? 'step' : undefined}
             >
               <span className={styles.mark} aria-hidden="true">
-                {state === 'done' ? '✔' : state === 'current' ? '►' : ''}
+                {state === 'done' ? '✓' : state === 'current' ? '►' : ''}
               </span>
               {t.ingest.stages[step]}
             </li>

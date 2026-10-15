@@ -154,3 +154,18 @@ select:focus,
 button:focus {
   outline: none;
 }
+/* The icons of Windows 98, in place of anything a phone would draw as an emoji. */
+.win98-warning {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  vertical-align: -4px;
+}
+
+.win98-small {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  image-rendering: pixelated;
+}

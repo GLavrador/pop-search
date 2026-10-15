@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import styles from './App.module.css';
 import './App.css';
 import { RetroWindow } from './components/RetroWindow';
@@ -49,9 +49,14 @@ import { SystemProperties } from './components/SystemProperties';
 import { Tricks } from './components/Tricks';
 import { Bin } from './components/Bin';
 import { useBin } from './components/Bin/useBin';
+import { SystemBars } from './components/SystemBars';
+import { BARS, useBarColors } from './components/SystemBars/bars';
 import { BOOTED_KEY, SERVER_NOTICE_MS } from './constants/startup';
+import appIcon from './assets/win98/search_computer-0.png';
+import appIconSmall from './assets/win98/search_computer-1.png';
 
-const WINDOW_ICON = '💻';
+const APP_ICON = appIcon;
+const WINDOW_ICON = appIconSmall;
 const APP_NAME = 'Pop Search';
 const CLICKS_TO_CLOSE = 5;
 const CLOSING_MS = 320;
@@ -140,6 +145,10 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
     },
   });
   const wrecked = rebuild.view.phase === 'show';
+  // Blue while the blue screen is up, then the desktop's until the show is over, when they are looked at again.
+  const blueUp = useSyncExternalStore(rebuild.blue.subscribe, () => rebuild.blue.get() !== null);
+  useBarColors(blueUp ? BARS.blue : wrecked ? BARS.desktop : null);
+  useBarColors(isMaximized && windowState === 'open' ? BARS.window : null);
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -331,7 +340,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
       <BlueTiles blue={rebuild.blue} kind={rebuild.view.kind} />
 
       <Desktop
-        appIcon={WINDOW_ICON}
+        appIcon={APP_ICON}
         appLabel={APP_NAME}
         onOpenApp={handleOpen}
         onOpenComputer={openComputer}
@@ -577,6 +586,7 @@ function Startup({ rebooted }: { rebooted: boolean }) {
 function App() {
   return (
     <LanguageProvider>
+      <SystemBars />
       <BlueScreen>
         {(restarts) => (
           <AuthProvider>
