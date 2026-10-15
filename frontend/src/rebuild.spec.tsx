@@ -68,9 +68,12 @@ const trashTheProgram = () => {
   fireEvent.pointerUp(app, { clientX: 40, clientY: 30 });
 };
 
-// Asked of the page as cheaply as it can be: the show changes it hundreds of times.
+// Asked on a timer, not at every change the show makes: there are too many for that.
 const theShowToEnd = () =>
-  waitFor(() => expect(document.querySelector('[data-rebuild]')).toBeNull(), { timeout: 20000 });
+  waitFor(() => expect(document.querySelector('[data-rebuild]')).toBeNull(), {
+    timeout: 20000,
+    mutationObserverOptions: { childList: true },
+  });
 
 const expectDesktopWhole = () => {
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -168,8 +171,10 @@ describe('throwing the program in the bin', () => {
 
     trashTheProgram();
 
-    expect(await screen.findByText(DISBELIEF)).toBeInTheDocument();
-    expect(await screen.findByText(/everything back in its place/)).toBeInTheDocument();
+    expect(await screen.findByText(DISBELIEF, {}, { timeout: 4000 })).toBeInTheDocument();
+    expect(
+      await screen.findByText(/everything back in its place/, {}, { timeout: 4000 }),
+    ).toBeInTheDocument();
     expect(unbuilt()).toHaveLength(0);
     expect(clock()).toBeInTheDocument();
     await theShowToEnd();

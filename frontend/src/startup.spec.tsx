@@ -143,7 +143,10 @@ describe('starting up', () => {
     it('should have the robot build the desktop and leave the program open', async () => {
       renderApp();
 
-      await waitFor(() => expect(building()).toBeNull(), { timeout: 12000 });
+      await waitFor(() => expect(building()).toBeNull(), {
+        timeout: 12000,
+        mutationObserverOptions: { childList: true },
+      });
 
       expectDesktopReady();
     }, 15000);
