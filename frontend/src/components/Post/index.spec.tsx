@@ -16,8 +16,8 @@ describe('Thumbnail', () => {
   it('should show the film icon when there is no picture', () => {
     const { container } = render(<Thumbnail src={null} />);
 
-    expect(container.querySelector('img')).toBeNull();
-    expect(container).toHaveTextContent('🎬');
+    expect(container.querySelector('img')).not.toHaveAttribute('src', PICTURE);
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 
   it('should fall back to the film icon when the picture no longer loads', () => {
@@ -25,7 +25,7 @@ describe('Thumbnail', () => {
 
     fireEvent.error(container.querySelector('img')!);
 
-    expect(container.querySelector('img')).toBeNull();
-    expect(container).toHaveTextContent('🎬');
+    expect(container.querySelector('img')).not.toHaveAttribute('src', PICTURE);
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 });

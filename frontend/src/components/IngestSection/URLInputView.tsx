@@ -5,6 +5,7 @@ import type { AnalysisStage, ExistingVideo } from '../../types';
 import styles from './styles.module.css';
 import { StageProgress } from '../StageProgress';
 import { DuplicateNotice } from './DuplicateNotice';
+import warningIcon from '../../assets/win98/msg_warning-0.png';
 
 interface URLInputViewProps {
   url: string;
@@ -182,7 +183,7 @@ export const URLInputView = ({
 
       {error && (
         <div className="win95-border win95-error" {...helpAt('ingest.error')}>
-          <span>⚠️</span>
+          <img src={warningIcon} alt="" className="win98-warning" />
           <strong>{error}</strong>
         </div>
       )}

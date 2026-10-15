@@ -7,6 +7,7 @@ import { QuotaMeter } from '../QuotaMeter';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import ingest from '../IngestSection/styles.module.css';
 import styles from './styles.module.css';
+import warningIcon from '../../assets/win98/msg_warning-0.png';
 
 type Mode = 'signIn' | 'signUp';
 
@@ -167,7 +168,7 @@ export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
 
       {error && (
         <div className={styles.error} role="alert">
-          <span>⚠️</span>
+          <img src={warningIcon} alt="" className="win98-warning" />
           <span>{error}</span>
         </div>
       )}

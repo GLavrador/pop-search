@@ -4,6 +4,7 @@ import { isAnyKey } from '../../utils/keys';
 import { Robot } from '../Assistant/Robot';
 import { BARS, useBarColors } from '../SystemBars/bars';
 import styles from './styles.module.css';
+import wrench from '../../assets/win98/tools_gear-0.png';
 
 interface CrashProps {
   error: Error;
@@ -58,9 +59,7 @@ export const Crash = ({ error, again, onContinue }: CrashProps) => {
           data-face={again ? 'dizzy' : 'worried'}
         >
           <Robot />
-          <span className={styles.wrench} aria-hidden="true">
-            🔧
-          </span>
+          <img src={wrench} alt="" className={styles.wrench} />
         </span>
       </div>
     </div>

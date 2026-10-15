@@ -148,8 +148,8 @@
 
 .copyIcon {
   flex-shrink: 0;
-  font-size: 1.05rem;
-  line-height: 1;
+  width: 20px;
+  height: 20px;
 }
 
 .copyTitle {

@@ -11,7 +11,7 @@ const renderDesktop = (props: Partial<Parameters<typeof Desktop>[0]> = {}) => {
   render(
     <RobotContext.Provider value={{ explain: vi.fn(), notify }}>
       <Desktop
-        appIcon="💻"
+        appIcon="app.png"
         appLabel="Pop Search"
         onOpenApp={onOpenApp}
         onTrashApp={onTrashApp}
@@ -180,15 +180,15 @@ describe('the icons of the desktop', () => {
   });
 
   it('should show the bin full for as long as something is in it', () => {
-    const view = render(<Desktop appIcon="💻" appLabel="Pop Search" />);
+    const view = render(<Desktop appIcon="app.png" appLabel="Pop Search" />);
     const picture = () => view.getByRole('button', { name: 'Recycle Bin' }).querySelector('img');
     const empty = picture()?.getAttribute('src');
 
-    view.rerender(<Desktop appIcon="💻" appLabel="Pop Search" trashed={['tricks']} />);
+    view.rerender(<Desktop appIcon="app.png" appLabel="Pop Search" trashed={['tricks']} />);
     expect(picture()).toHaveAttribute('data-full');
     expect(picture()?.getAttribute('src')).not.toBe(empty);
 
-    view.rerender(<Desktop appIcon="💻" appLabel="Pop Search" trashed={[]} />);
+    view.rerender(<Desktop appIcon="app.png" appLabel="Pop Search" trashed={[]} />);
     expect(picture()).not.toHaveAttribute('data-full');
     expect(picture()?.getAttribute('src')).toBe(empty);
   });
@@ -211,14 +211,14 @@ describe('the icons of the desktop', () => {
 
   it('should shrink the program where it was let go while the bin swallows it', () => {
     const view = render(
-      <Desktop appIcon="💻" appLabel="Pop Search" />,
+      <Desktop appIcon="app.png" appLabel="Pop Search" />,
     );
     const app = () => view.getByRole('button', { name: APP });
 
     fireEvent.pointerDown(app(), { button: 0, clientX: 40, clientY: 200 });
     fireEvent.pointerMove(app(), { clientX: 40, clientY: 30 });
     fireEvent.pointerUp(app(), { clientX: 40, clientY: 30 });
-    view.rerender(<Desktop appIcon="💻" appLabel="Pop Search" swallowed />);
+    view.rerender(<Desktop appIcon="app.png" appLabel="Pop Search" swallowed />);
 
     expect(app()).toHaveAttribute('data-swallowed');
     expect(app()).toHaveStyle({ transform: 'translate(0px, -170px) scale(0.15)' });

@@ -114,8 +114,8 @@
   position: absolute;
   top: 6px;
   left: 34px;
-  font-size: 17px;
-  line-height: 1;
+  width: 20px;
+  height: 20px;
   transform-origin: 20% 80%;
   animation: tighten 0.9s ease-in-out infinite;
 }

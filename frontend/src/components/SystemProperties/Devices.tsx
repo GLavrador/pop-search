@@ -6,6 +6,14 @@ import type { ServerStatus } from '../../hooks/useServerWake';
 import { formatDuration } from '../../utils/duration';
 import { GroupBox } from '../Dialog/GroupBox';
 import styles from './styles.module.css';
+import screenIcon from '../../assets/win98/computer_2-0.png';
+import serverIcon from '../../assets/win98/server_window.png';
+import diskIcon from '../../assets/win98/hard_disk_drive-0.png';
+import processorIcon from '../../assets/win98/processor-0.png';
+import calculatorIcon from '../../assets/win98/calculator-0.png';
+import modemIcon from '../../assets/win98/modem-0.png';
+import agentIcon from '../../assets/win98/msagent-0.png';
+import computerIcon from '../../assets/win98/computer-0.png';
 
 type DeviceId = 'screen' | 'server' | 'database' | 'analysis' | 'embedding' | 'downloader' | 'robot';
 type Health = 'ok' | 'ready' | 'asking' | 'waking' | 'failing' | 'unsaid' | 'undriven';
@@ -26,7 +34,7 @@ interface DevicesProps {
 }
 
 const BADGES: Partial<Record<Health, string>> = {
-  asking: '⌛',
+  asking: '…',
   waking: '!',
   failing: 'X',
   unsaid: '!',
@@ -52,7 +60,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
   const devices: Device[] = [
     {
       id: 'screen',
-      icon: '🖥️',
+      icon: screenIcon,
       kind: copy.screen.kind,
       name: copy.screen.name(reactVersion),
       health: 'ok',
@@ -60,7 +68,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
     },
     {
       id: 'server',
-      icon: '🔌',
+      icon: serverIcon,
       kind: copy.server.kind,
       name: copy.server.name,
       health: SERVER_HEALTH[server.state],
@@ -77,7 +85,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
     },
     {
       id: 'database',
-      icon: '💾',
+      icon: diskIcon,
       kind: copy.database.kind,
       name: copy.database.name,
       health: unknown ?? (report?.database.ok ? 'ok' : 'failing'),
@@ -91,7 +99,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
     },
     {
       id: 'analysis',
-      icon: '🧠',
+      icon: processorIcon,
       kind: copy.analysis.kind,
       name: report ? copy.analysis.name(report.ai.analysis_model) : 'Gemini',
       health: installed,
@@ -99,7 +107,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
     },
     {
       id: 'embedding',
-      icon: '🧮',
+      icon: calculatorIcon,
       kind: copy.embedding.kind,
       name: report ? copy.embedding.name(report.ai.embedding_model) : 'Gemini',
       health: installed,
@@ -112,7 +120,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
     },
     {
       id: 'downloader',
-      icon: '📡',
+      icon: modemIcon,
       kind: copy.downloader.kind,
       name: report ? copy.downloader.name(report.downloader) : 'yt-dlp',
       health: installed,
@@ -120,7 +128,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
     },
     {
       id: 'robot',
-      icon: '🤖',
+      icon: agentIcon,
       kind: copy.robot.kind,
       name: copy.robot.name,
       health: 'undriven',
@@ -155,7 +163,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
     <div className={styles.devices}>
       <div className={`win95-inset ${styles.tree}`}>
         <p className={styles.root}>
-          <span aria-hidden="true">💻</span> {copy.root}
+          <img src={computerIcon} alt="" className="win98-small" /> {copy.root}
         </p>
         <ul className={styles.branches} aria-label={copy.list}>
           {devices.map((device) => (
@@ -168,7 +176,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
                 onClick={() => select(device.id)}
               >
                 <span className={styles.deviceIcon} aria-hidden="true">
-                  {device.icon}
+                  <img src={device.icon} alt="" className="win98-small" />
                   {BADGES[device.health] && (
                     <span className={styles.badge}>{BADGES[device.health]}</span>
                   )}

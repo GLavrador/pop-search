@@ -8,6 +8,7 @@ import type { MyVideo, VideoMetadata } from '../../types';
 import { Thumbnail } from '../Post/Thumbnail';
 import { ReviewForm } from '../ReviewForm';
 import styles from './styles.module.css';
+import warningIcon from '../../assets/win98/msg_warning-0.png';
 
 const formatDate = (value: string, locale: string): string => {
   const date = new Date(value);
@@ -123,7 +124,7 @@ export const MyVideos = () => {
   if (error) {
     return (
       <div className={styles.error} role="alert">
-        <span>⚠️</span>
+        <img src={warningIcon} alt="" className="win98-warning" />
         <span>{error}</span>
       </div>
     );
@@ -200,7 +201,10 @@ export const MyVideos = () => {
                     if (event.key === 'Escape' && !removing) keep();
                   }}
                 >
-                  <span className={styles.question}>⚠️ {t.myVideos.confirm.question}</span>
+                  <span className={styles.question}>
+                    <img src={warningIcon} alt="" className="win98-warning" />{' '}
+                    {t.myVideos.confirm.question}
+                  </span>
                   <div className={styles.actions}>
                     <button
                       type="button"

@@ -1427,7 +1427,7 @@
 }
 
 .say li + li::after {
-  content: '▶';
+  content: '►';
   position: absolute;
   top: calc(50% - 7px);
   left: -14px;
