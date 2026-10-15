@@ -82,8 +82,9 @@ contribuir exige conta.
   com os pontos, volta ao começo se a rodada se perde e, na meta, o resgate fica
   pronto ao lado dela. Aí o robô fecha os erros e varre o desgaste da tela. Dá
   para seguir jogando pelo recorde, que fica na conta de quem está logado (ou no
-  navegador, sem conta), resgatar direto ou sair sem nada. Os ícones são os
-  originais do Windows 98, do pacote de
+  navegador, sem conta: ele passa para a primeira conta que entrar, e o navegador
+  segue mostrando o recorde da última conta), resgatar direto ou sair sem nada.
+  Os ícones são os originais do Windows 98, do pacote de
   [win98icons.alexmeub.com](https://win98icons.alexmeub.com)
 - **Meu Computador mostra os bastidores**: o ícone abre as Propriedades do
   Sistema, com as peças de verdade num Gerenciador de dispositivos (servidor,
