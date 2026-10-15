@@ -67,7 +67,7 @@ const dropOn = (name: string | RegExp) => dropAt(screen.getByRole('button', { na
 const EMPTY_BIN = /^(it is empty|nothing to fetch in there|spotless, for now)$/;
 
 const openAdvanced = async () => {
-  await user.click(tab('🔍 Search.exe'));
+  await user.click(tab('Search.exe'));
   await press('▼ Advanced');
 };
 
@@ -138,10 +138,10 @@ describe('the robot outside the guide', () => {
     await press("What's this?");
     expect(within(screen.getByRole('status')).getByText(/Click on anything/)).toBeInTheDocument();
 
-    await clickThrough(tab('🔍 Search.exe'));
+    await clickThrough(tab('Search.exe'));
 
     expect(within(screen.getByRole('status')).getByText(/where you find a video/)).toBeInTheDocument();
-    expect(tab('💿 Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Add-Video.exe')).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('button', { name: "What's this?" })).toHaveAttribute(
       'aria-pressed',
       'false',

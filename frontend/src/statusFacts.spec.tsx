@@ -38,7 +38,7 @@ const user = userEvent.setup();
 
 const statusBar = () => within(document.querySelector('[data-robot="status"]') as HTMLElement);
 
-const openSearch = () => user.click(screen.getByRole('tab', { name: '🔍 Search.exe' }));
+const openSearch = () => user.click(screen.getByRole('tab', { name: 'Search.exe' }));
 
 describe('the status bar', () => {
   beforeEach(() => {

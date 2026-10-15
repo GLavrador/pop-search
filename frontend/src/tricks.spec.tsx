@@ -101,7 +101,7 @@ describe('the list of what there is to try', () => {
       },
     });
     renderApp();
-    await screen.findByText('📁 My-Videos.exe');
+    await screen.findByText('My-Videos.exe');
 
     openList();
 

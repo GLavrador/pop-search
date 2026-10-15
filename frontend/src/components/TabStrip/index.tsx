@@ -3,7 +3,8 @@ import type { HelpKey } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface TabStripProps<Id extends string> {
-  tabs: readonly { id: Id; label: string; help?: HelpKey }[];
+  /** Each with the small icon drawn before its name, when it has one. */
+  tabs: readonly { id: Id; label: string; icon?: string; help?: HelpKey }[];
   activeId: Id;
   onSelect: (id: Id) => void;
   /** Lets the other tabs recede while something else is asking for attention. */
@@ -47,7 +48,7 @@ export const TabStrip = <Id extends string>({
   return (
     <div className={`${styles.bar} ${quiet ? styles.quiet : ''}`}>
       <div ref={strip} className={styles.strip} role="tablist">
-        {tabs.map(({ id, label, help }) => (
+        {tabs.map(({ id, label, icon, help }) => (
           <button
             key={id}
             type="button"
@@ -57,6 +58,7 @@ export const TabStrip = <Id extends string>({
             onClick={() => onSelect(id)}
             className={`${styles.tab} ${activeId === id ? styles.tabActive : ''}`}
           >
+            {icon && <img src={icon} alt="" className={styles.icon} draggable={false} />}
             {label}
           </button>
         ))}

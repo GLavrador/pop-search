@@ -75,14 +75,14 @@ describe('signing in without a reload', () => {
   it('should show the library and stats tabs as soon as the session arrives', async () => {
     renderApp();
 
-    await waitFor(() => expect(screen.getByText('🔑 Sign In')).toBeInTheDocument());
-    expect(screen.queryByText('📁 My-Videos.exe')).not.toBeInTheDocument();
-    expect(screen.queryByText('📊 Stats.exe')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Sign In' })).toBeInTheDocument());
+    expect(screen.queryByText('My-Videos.exe')).not.toBeInTheDocument();
+    expect(screen.queryByText('Stats.exe')).not.toBeInTheDocument();
 
     signIn();
 
-    await waitFor(() => expect(screen.getByText('📁 My-Videos.exe')).toBeInTheDocument());
-    await waitFor(() => expect(screen.getByText('📊 Stats.exe')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('My-Videos.exe')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Stats.exe')).toBeInTheDocument());
     expect(getIsAdmin).toHaveBeenCalled();
   });
 
@@ -108,7 +108,7 @@ describe('signing in without a reload', () => {
 
     const { resetQueries } = renderApp();
 
-    await waitFor(() => expect(screen.getByText('📁 My-Videos.exe')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('My-Videos.exe')).toBeInTheDocument());
     expect(resetQueries).not.toHaveBeenCalled();
   });
 });

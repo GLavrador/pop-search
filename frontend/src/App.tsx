@@ -17,7 +17,7 @@ import { useServerWake, type ServerState, type ServerStatus } from './hooks/useS
 import { StatusBar } from './components/StatusBar';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { useI18n } from './i18n/languageContext';
-import { TAB_LABELS, type Tab } from './constants/tabs';
+import { TAB_ICONS, TAB_LABELS, type Tab } from './constants/tabs';
 import { Taskbar } from './components/Taskbar';
 import { TaskButton } from './components/Taskbar/TaskButton';
 import { Desktop } from './components/Desktop';
@@ -241,18 +241,26 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
 
   const isClosed = windowState === 'closed';
 
-  const tabs: { id: Tab; label: string; help: HelpKey }[] = [
-    { id: 'ingest', label: TAB_LABELS.ingest, help: 'tab.ingest' },
-    { id: 'search', label: TAB_LABELS.search, help: 'tab.search' },
+  const tabs: { id: Tab; label: string; icon: string; help: HelpKey }[] = [
+    { id: 'ingest', label: TAB_LABELS.ingest, icon: TAB_ICONS.ingest, help: 'tab.ingest' },
+    { id: 'search', label: TAB_LABELS.search, icon: TAB_ICONS.search, help: 'tab.search' },
     ...(isAuthenticated
-      ? [{ id: 'library' as Tab, label: TAB_LABELS.myVideos, help: 'tab.library' as HelpKey }]
+      ? [
+          {
+            id: 'library' as Tab,
+            label: TAB_LABELS.myVideos,
+            icon: TAB_ICONS.myVideos,
+            help: 'tab.library' as HelpKey,
+          },
+        ]
       : []),
     ...(isAdmin
-      ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats, help: 'tab.admin' as HelpKey }]
+      ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats, icon: TAB_ICONS.stats, help: 'tab.admin' as HelpKey }]
       : []),
     {
       id: 'account',
-      label: isAuthenticated ? `👤 ${displayName}` : TAB_LABELS.signIn,
+      label: isAuthenticated ? (displayName ?? '') : TAB_LABELS.signIn,
+      icon: isAuthenticated ? TAB_ICONS.account : TAB_ICONS.signIn,
       help: 'tab.account',
     },
   ];

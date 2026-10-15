@@ -39,7 +39,7 @@ vi.mock('./services/api', () => ({
 
 import App from './App';
 
-const SEARCH_TAB = '🔍 Search.exe';
+const SEARCH_TAB = 'Search.exe';
 
 const renderApp = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

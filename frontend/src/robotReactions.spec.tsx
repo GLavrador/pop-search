@@ -106,7 +106,7 @@ const signIn = () =>
   });
 
 const searchFor = async (words: string) => {
-  await user.click(tab('🔍 Search.exe'));
+  await user.click(tab('Search.exe'));
   await user.type(screen.getByPlaceholderText('Type to search...'), words);
   await press('Find Now');
 };
@@ -137,7 +137,7 @@ describe('the robot reacting to the app', () => {
   it('should say a word the first time a tab is opened', async () => {
     renderApp();
 
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     expect(screen.getByText(SEARCH_TAB)).toBeInTheDocument();
   });
@@ -175,7 +175,7 @@ describe('the robot reacting to the app', () => {
     ['a robô', ['that is me!!', 'did you call?', 'robot? present!']],
   ])('should prick up its ears when "%s" is typed into the search', async (words, lines) => {
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     await user.type(screen.getByPlaceholderText('Type to search...'), words);
 
@@ -185,7 +185,7 @@ describe('the robot reacting to the app', () => {
   it('should say a searched word back now and then, and then pretend it never did', async () => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     await user.type(screen.getByPlaceholderText('Type to search...'), 'a whale');
 
@@ -198,7 +198,7 @@ describe('the robot reacting to the app', () => {
   it('should pick the reading back up when the typing carries on', async () => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     const field = screen.getByPlaceholderText('Type to search...');
 
     await user.type(field, 'a wha');
@@ -219,7 +219,7 @@ describe('the robot reacting to the app', () => {
   it('should suggest a broader precision for a search of a single word', async () => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     await user.type(screen.getByPlaceholderText('Type to search...'), 'whale');
 
@@ -232,7 +232,7 @@ describe('the robot reacting to the app', () => {
   it('should keep that suggestion to itself when the search is already at its broadest', async () => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     await press('Broad');
 
     await user.type(screen.getByPlaceholderText('Type to search...'), 'whale');
@@ -261,7 +261,7 @@ describe('the robot reacting to the app', () => {
   ])('should say that quotes %s in %s mode', async (_, mode, lines) => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     await press('▼ Advanced');
     await press(mode);
 
@@ -305,7 +305,7 @@ describe('the robot reacting to the app', () => {
   it('should own up at once when the search is wiped under its nose', async () => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     const field = screen.getByPlaceholderText('Type to search...');
     await user.type(field, 'whale');
 
@@ -321,7 +321,7 @@ describe('the robot reacting to the app', () => {
   ])('should remark on %s in the search', async (_, words, lines) => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0.99);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     await user.type(screen.getByPlaceholderText('Type to search...'), words);
 
@@ -332,7 +332,7 @@ describe('the robot reacting to the app', () => {
   it('should notice a search being given up on', async () => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0.99);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     const field = screen.getByPlaceholderText('Type to search...');
     await user.type(field, 'whale');
 
@@ -347,7 +347,7 @@ describe('the robot reacting to the app', () => {
   it('should mind its own business most of the time', async () => {
     const chance = vi.spyOn(Math, 'random').mockReturnValue(0.99);
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     await user.type(screen.getByPlaceholderText('Type to search...'), 'a whale');
     await new Promise((done) => setTimeout(done, 1500));
@@ -358,7 +358,7 @@ describe('the robot reacting to the app', () => {
 
   it('should have a word for the buttons inside a tab', async () => {
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     await press('Broad');
     expect(
@@ -373,7 +373,7 @@ describe('the robot reacting to the app', () => {
 
   it('should not comment on a button that changes nothing', async () => {
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     await press('Broad');
     const said = screen.getByText(anyOf(BROAD)).textContent;
 
@@ -384,7 +384,7 @@ describe('the robot reacting to the app', () => {
 
   it('should put the same thing in different words the next time', async () => {
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
 
     await press('▼ Advanced');
     const first = screen.getByText(anyOf(ADVANCED_OPEN)).textContent;
@@ -424,7 +424,7 @@ describe('the robot reacting to the app', () => {
 
   it('should offer to search by meaning when the exact words matched nothing', async () => {
     renderApp();
-    await user.click(tab('🔍 Search.exe'));
+    await user.click(tab('Search.exe'));
     await press('▼ Advanced');
     await press('Exact');
 
