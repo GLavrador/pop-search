@@ -185,7 +185,8 @@ export const Clutter = memo(function Clutter({
   const holder = useRef<HTMLDivElement>(null);
   const live = useRef({ avoid, tidy, held });
 
-  useEffect(() => {
+  // Before it is put down below, so that it is put down as things are now.
+  useLayoutEffect(() => {
     live.current = { avoid, tidy, held };
   });
 
@@ -258,8 +259,12 @@ export const Clutter = memo(function Clutter({
         const seen = survey();
         if (!seen) return [];
         const { within, area, avoided, items } = seen;
+        // What the line has no room for goes with the wear, so that nothing lies over what is lined up.
         return inLine(items, area, avoided).flatMap(({ item, place }) => {
-          if (!place) return [];
+          if (!place) {
+            item.setAttribute('data-out', '');
+            return [];
+          }
           const now = item.getBoundingClientRect();
           return [
             {
