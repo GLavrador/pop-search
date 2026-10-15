@@ -122,6 +122,22 @@ describe('the list of what there is to try', () => {
     expect(within(screen.getByRole('status')).getByText(/Click on anything/)).toBeInTheDocument();
   });
 
+  it('should throw itself in the bin from the list, for the robot to be sent after it', async () => {
+    renderApp();
+    openList();
+    expect(within(list() as HTMLElement).getByText('Throw an icon in the Recycle Bin and send me after it.')).toBeInTheDocument();
+
+    await press('Throw these Tricks away');
+
+    expect(list()).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Tricks' })).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(/my tricks/i);
+
+    await press('Fetch it now');
+
+    expect(document.querySelector('[data-bin-trip]')).toBeInTheDocument();
+  });
+
   it('should be offered by the robot itself when it is poked', async () => {
     renderApp();
     expect(said()).not.toBeInTheDocument();

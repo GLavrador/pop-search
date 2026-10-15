@@ -858,6 +858,13 @@ export const en = {
       text: 'It is on the blue bar, beside the minimize button. Click it, then click anything on screen: I go over and explain what it is and what it is for. It works on buttons, fields, tabs, search results, even on me.',
       action: 'Try it now',
     },
+    bin: {
+      legend: 'The Recycle Bin',
+      fresh: 'New!',
+      what: 'Throw an icon in the Recycle Bin and send me after it.',
+      text: 'Drag My Computer or these Tricks onto it and open the bin. I go, though I do not promise to go smiling. Word is there are games in there.',
+      action: 'Throw these Tricks away',
+    },
     groups: [
       {
         legend: 'With me',
@@ -874,10 +881,6 @@ export const en = {
           {
             what: 'Drop me on things.',
             text: 'On the top edge of the window, on an icon, on the clock, on Start, on the X of the window, on the Pop Search button down on the taskbar. I have an opinion about each.',
-          },
-          {
-            what: 'Send me after what went in the Recycle Bin.',
-            text: 'Throw My Computer or Tricks in there, then open the bin. I go, though I do not promise to go smiling.',
           },
           {
             what: 'Leave me alone.',

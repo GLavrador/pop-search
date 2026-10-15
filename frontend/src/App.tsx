@@ -21,6 +21,7 @@ import { TAB_ICONS, TAB_LABELS, type Tab } from './constants/tabs';
 import { Taskbar } from './components/Taskbar';
 import { TaskButton } from './components/Taskbar/TaskButton';
 import { Desktop } from './components/Desktop';
+import type { Trashable } from './components/Desktop/icons';
 import { TabStrip } from './components/TabStrip';
 import { CatReveal } from './components/CatReveal';
 import { randomCat } from './constants/cats';
@@ -79,6 +80,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const [cat, setCat] = useState<{ image: string; phrase: string } | null>(null);
   const [computerOpen, setComputerOpen] = useState(false);
   const [tricksOpen, setTricksOpen] = useState(false);
+  const [tossing, setTossing] = useState<Trashable | null>(null);
   const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
   const guide = useGuide({ onEnterTab: setActiveTab });
@@ -124,6 +126,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
       dismiss();
       // Built again from nothing, the desktop has every icon on it and the bin has none.
       emptyBin();
+      setTossing(null);
       closeClicks.current = 0;
       pendingCat.current = null;
       setCat(null);
@@ -227,6 +230,12 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const tryHelp = () => {
     setTricksOpen(false);
     if (!robot.helping) robot.toggleHelp();
+  };
+
+  // The list goes in the bin by itself, for the robot to be sent after it.
+  const throwTricksAway = () => {
+    setTricksOpen(false);
+    setTossing('tricks');
   };
 
   const selectTab = (tab: Tab) => {
@@ -335,9 +344,11 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         shining={rebuild.view.shining}
         frozen={wrecked}
         binBorne={bin.view.borne}
-        lifted={bin.away}
+        lifted={bin.away || tossing !== null}
         onTrashApp={rebuild.trash}
         onTrash={bin.trash}
+        tossing={tossing}
+        onTossed={() => setTossing(null)}
       />
 
       {isClosed && cat && <CatReveal image={cat.image} phrase={cat.phrase} />}
@@ -473,7 +484,11 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
       )}
 
       {tricksOpen && !wrecked && (
-        <Tricks onClose={() => setTricksOpen(false)} onTryHelp={tryHelp} />
+        <Tricks
+          onClose={() => setTricksOpen(false)}
+          onTryHelp={tryHelp}
+          onThrowAway={throwTricksAway}
+        />
       )}
 
       {/* While the desktop is being rebuilt the robot is in the show, not at home. Nor is it while it is off to the bin. */}
