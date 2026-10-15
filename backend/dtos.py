@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import List, Literal, Optional
+from pydantic import BaseModel, Field, HttpUrl, field_validator
+from typing import Annotated, List, Literal, Optional
 
 from core.exceptions import validate_image_url
 
@@ -10,6 +10,7 @@ MAX_PESSOA_DESCRICAO_CHARS = 500
 MIN_PESSOA_DESCRICAO_CHARS = 3
 MAX_PAPEL_CHARS = 100
 MAX_ELEMENTOS_CENARIO = 50
+MAX_ELEMENTO_CENARIO_CHARS = 500
 MAX_TRANSCRICAO_CHARS = 5000
 MAX_MUSICA_CHARS = 200
 MAX_POST_TEXTO_CHARS = 2000
@@ -49,7 +50,9 @@ class AudioInfo(BaseModel):
 
 class MetadadosEstruturados(BaseModel):
     pessoas: List[Pessoa] = Field(default_factory=list, max_length=MAX_PESSOAS)
-    elementos_cenario: List[str] = Field(default_factory=list, max_length=MAX_ELEMENTOS_CENARIO)
+    elementos_cenario: List[Annotated[str, Field(max_length=MAX_ELEMENTO_CENARIO_CHARS)]] = Field(
+        default_factory=list, max_length=MAX_ELEMENTOS_CENARIO
+    )
     audio: AudioInfo = Field(default_factory=AudioInfo)
 
 
@@ -73,6 +76,16 @@ class VideoMetadataDTO(BaseModel):
     )
     metadados_estruturados: MetadadosEstruturados
     post: Optional[PostInfo] = None
+
+    @field_validator("titulo_sugerido", "descricao_completa", mode="before")
+    @classmethod
+    def trim_required_text(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("url_original")
+    @classmethod
+    def validate_original_url(cls, value: Optional[str]) -> Optional[str]:
+        return str(HttpUrl(value)) if value is not None else None
 
 
 SearchMode = Literal["hybrid", "semantic", "text"]

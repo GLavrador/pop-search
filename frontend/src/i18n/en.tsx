@@ -389,6 +389,7 @@ export const en = {
     copy: 'Copy',
     copyTitle: 'Copy URL',
     copied: 'URL copied to clipboard!',
+    copyFailed: 'Could not copy the URL. Select it and copy it manually.',
   },
 
   why: {
@@ -537,9 +538,9 @@ export const en = {
   review: {
     generalLegend: 'General Information',
     titleLabel: 'Suggested Title',
-    titleHint: '(min. 5 words)',
+    titleHint: '(5 to 200 characters)',
     descriptionLabel: 'Full Description',
-    descriptionHint: '(min. 20 words)',
+    descriptionHint: '(20 to 5000 characters)',
     sourceLabel: 'Source URL (Read-only)',
     postLegend: 'Original post',
     postLabel: 'Text of the post',
@@ -558,9 +559,12 @@ export const en = {
     urlInvalid: 'Please enter a valid URL',
     invalidUrl: 'Invalid URL',
     titleRequired: 'Title is required',
-    titleWords: 'Title must have at least 5 words',
+    titleLength: 'Title must have 5 to 200 characters',
     descriptionRequired: 'Description is required',
-    descriptionWords: 'Description must be at least 20 words long',
+    descriptionLength: 'Description must have 20 to 5000 characters',
+    textLength: (min: number, max: number) => `Use ${min} to ${max} characters.`,
+    itemLimit: (max: number) => `Use at most ${max} items.`,
+    peopleInvalid: 'Check the people: up to 20, descriptions of 3 to 500 characters and roles up to 100.',
   },
 
   auth: {
@@ -1195,7 +1199,7 @@ export const en = {
       title: {
         good: ['I like that title!', 'the AI did well!', 'good title, easy to find'],
         short: [
-          'short title: it needs 5 words',
+          'short title: it needs 5 characters',
           'is that all? the search wants more',
           'hm, that title is thin',
         ],

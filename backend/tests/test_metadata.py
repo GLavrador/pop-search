@@ -5,6 +5,7 @@ from dtos import (
     AudioInfo, 
     MetadadosEstruturados, 
     PostInfo,
+    MAX_ELEMENTO_CENARIO_CHARS,
     VideoMetadataDTO
 )
 from services.embedding import MAX_EMBEDDING_CHARS, generate_searchable_text
@@ -118,8 +119,7 @@ class TestSearchableTextTruncation:
             descricao_completa="D" * 5000,
             metadados_estruturados=MetadadosEstruturados(
                 pessoas=[Pessoa(descricao="P" * 500) for _ in range(20)],
-                # elementos_cenario caps the list length but not each entry
-                elementos_cenario=["E" * 1000 for _ in range(50)],
+                elementos_cenario=["E" * MAX_ELEMENTO_CENARIO_CHARS for _ in range(50)],
                 audio=AudioInfo(transcricao="A" * 5000),
             ),
             post=PostInfo(texto="X" * 2000),

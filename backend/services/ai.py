@@ -12,6 +12,7 @@ from core.exceptions import ContentBlockedError, ServiceQuotaExhaustedError
 from dtos import (
     MAX_DESCRICAO_CHARS,
     MAX_ELEMENTOS_CENARIO,
+    MAX_ELEMENTO_CENARIO_CHARS,
     MAX_MUSICA_CHARS,
     MAX_PAPEL_CHARS,
     MAX_PESSOA_DESCRICAO_CHARS,
@@ -155,7 +156,8 @@ def fit_to_limits(result: dict) -> dict:
 
     if isinstance(meta.get("elementos_cenario"), list):
         meta["elementos_cenario"] = [
-            item for item in meta["elementos_cenario"] if isinstance(item, str)
+            _cut(item, MAX_ELEMENTO_CENARIO_CHARS)
+            for item in meta["elementos_cenario"] if isinstance(item, str)
         ][:MAX_ELEMENTOS_CENARIO]
 
     audio = meta.get("audio")

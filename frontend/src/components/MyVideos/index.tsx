@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMyVideosQuery } from '../../hooks/useMyVideosQuery';
 import { useMyVideoActions } from '../../hooks/useMyVideoActions';
 import { useStatus } from '../../context/status';
+import { validationErrorMessage } from '../../utils/validationError';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
 import type { MyVideo, VideoMetadata } from '../../types';
@@ -69,7 +70,7 @@ export const MyVideos = () => {
       setEditing(null);
     } catch (err: unknown) {
       console.error('Failed to save the changes to a video:', err);
-      setStatus(t.myVideos.status.saveFailed, 5000);
+      setStatus(validationErrorMessage(err) ?? t.myVideos.status.saveFailed, 5000);
       robot.notify({ kind: 'saveFailed' });
     }
   };

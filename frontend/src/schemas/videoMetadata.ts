@@ -1,59 +1,61 @@
 import { z } from 'zod';
 
+export const MIN_TITLE_CHARS = 5;
+
 export interface ValidationMessages {
     urlRequired: string;
     urlInvalid: string;
     invalidUrl: string;
     titleRequired: string;
-    titleWords: string;
+    titleLength: string;
     descriptionRequired: string;
-    descriptionWords: string;
+    descriptionLength: string;
+    textLength: (min: number, max: number) => string;
+    itemLimit: (max: number) => string;
 }
 
 export const createVideoUrlInputSchema = (messages: ValidationMessages) =>
-    z.string()
+    z.string().trim()
         .min(1, messages.urlRequired)
-        .url(messages.urlInvalid);
+        .max(2048, messages.urlInvalid)
+        .pipe(z.url({ protocol: /^https?$/, error: messages.urlInvalid }));
 
-const countWords = (text: string): number =>
-    text.trim().split(/\s+/).filter(Boolean).length;
+export const createVideoMetadataFormSchema = (messages: ValidationMessages) => {
+    const text = (min: number, max: number) => z.string()
+        .refine((value) => Array.from(value).length >= min && Array.from(value).length <= max,
+            messages.textLength(min, max));
+    const scenario = z.array(text(0, 500)).max(50, messages.itemLimit(50));
 
-
-const pessoaSchema = z.object({
-    descricao: z.string(),
-    papel: z.string().nullable(),
-});
-
-const audioInfoSchema = z.object({
-    transcricao: z.string(),
-    musica: z.string().nullable(),
-    artista: z.string().nullable(),
-});
-
-const metadadosFormSchema = z.object({
-    pessoas: z.array(pessoaSchema),
-    elementos_cenario: z.string(),
-    audio: audioInfoSchema,
-});
-
-export const createVideoMetadataFormSchema = (messages: ValidationMessages) => z.object({
-    titulo_sugerido: z.string()
-        .min(1, messages.titleRequired)
-        .refine(
-            (text) => countWords(text) >= 5,
-            messages.titleWords
-        ),
-
-    descricao_completa: z.string()
-        .min(1, messages.descriptionRequired)
-        .refine(
-            (text) => countWords(text) >= 20,
-            messages.descriptionWords
-        ),
-
-    url_original: z.string().optional(),
-
-    metadados_estruturados: metadadosFormSchema,
-});
+    return z.object({
+        titulo_sugerido: z.string().trim()
+            .min(1, messages.titleRequired)
+            .refine((value) => Array.from(value).length >= MIN_TITLE_CHARS && Array.from(value).length <= 200,
+                messages.titleLength),
+        descricao_completa: z.string().trim()
+            .min(1, messages.descriptionRequired)
+            .refine((value) => Array.from(value).length >= 20 && Array.from(value).length <= 5000,
+                messages.descriptionLength),
+        url_original: createVideoUrlInputSchema(messages).optional(),
+        metadados_estruturados: z.object({
+            pessoas: z.array(z.object({
+                descricao: text(3, 500),
+                papel: text(0, 100).nullable(),
+            })).max(20, messages.itemLimit(20)),
+            elementos_cenario: z.string().superRefine((value, ctx) => {
+                const result = scenario.safeParse(value.split(',').map((item) => item.trim()).filter(Boolean));
+                if (!result.success) {
+                    for (const issue of result.error.issues) {
+                        ctx.addIssue({ code: 'custom', message: issue.message });
+                    }
+                }
+            }),
+            audio: z.object({
+                transcricao: text(0, 5000),
+                musica: text(0, 200).nullable(),
+                artista: text(0, 200).nullable(),
+            }),
+        }),
+    });
+};
 
 export type VideoMetadataForm = z.infer<ReturnType<typeof createVideoMetadataFormSchema>>;

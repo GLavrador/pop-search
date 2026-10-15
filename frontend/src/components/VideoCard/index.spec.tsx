@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, afterEach } from 'vitest';
 import { VideoCard } from './index';
 import type { SearchResult } from '../../types';
@@ -19,6 +19,31 @@ const mockData: SearchResult = {
 };
 
 describe('VideoCard Component', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it('confirms copying only after the clipboard accepts the URL', async () => {
+    let complete!: () => void;
+    const writeText = vi.fn(() => new Promise<void>((resolve) => { complete = resolve; }));
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+    render(<VideoCard data={mockData} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
+    expect(writeText).toHaveBeenCalledWith(mockData.url_original);
+    expect(mockSetStatus).not.toHaveBeenCalled();
+    complete();
+    await waitFor(() => expect(mockSetStatus).toHaveBeenCalledWith('URL copied to clipboard!', 2000));
+  });
+
+  it('shows an error if the clipboard refuses the URL', async () => {
+    vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) } });
+    render(<VideoCard data={mockData} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
+    await waitFor(() => expect(mockSetStatus).toHaveBeenCalledWith('Could not copy the URL. Select it and copy it manually.', 5000));
+    expect(mockSetStatus).not.toHaveBeenCalledWith('URL copied to clipboard!', 2000);
+  });
+
   it('should render title and summary correctly', () => {
     render(<VideoCard data={mockData} />);
 
