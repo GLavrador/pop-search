@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/authContext';
-import { useStatus } from '../../context/StatusContext';
+import { useStatus } from '../../context/status';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
 import { QuotaMeter } from '../QuotaMeter';

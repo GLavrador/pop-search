@@ -4,7 +4,7 @@ import { VideoCard } from './index';
 import type { SearchResult } from '../../types';
 
 const mockSetStatus = vi.fn();
-vi.mock('../../context/StatusContext', () => ({
+vi.mock('../../context/status', () => ({
   useStatus: () => ({
     setStatus: mockSetStatus
   })

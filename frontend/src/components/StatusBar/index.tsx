@@ -1,4 +1,4 @@
-import { useStatus } from '../../context/StatusContext';
+import { useStatus } from '../../context/status';
 import { useStatusFacts, type StatusScope } from '../../context/statusFacts';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';

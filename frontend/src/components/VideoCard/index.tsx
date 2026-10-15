@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { SearchResult } from "../../types";
-import { useStatus } from "../../context/StatusContext";
+import { useStatus } from "../../context/status";
 import { useI18n } from "../../i18n/languageContext";
 import { helpAt, useRobot } from "../../context/robotContext";
 import { useOverflowing } from "../../hooks/useOverflowing";

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMyVideosQuery } from '../../hooks/useMyVideosQuery';
 import { useMyVideoActions } from '../../hooks/useMyVideoActions';
-import { useStatus } from '../../context/StatusContext';
+import { useStatus } from '../../context/status';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
 import type { MyVideo, VideoMetadata } from '../../types';

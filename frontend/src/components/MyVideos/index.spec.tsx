@@ -14,7 +14,7 @@ vi.mock('../../hooks/useMyVideoActions', () => ({
 }));
 
 const setStatus = vi.fn();
-vi.mock('../../context/StatusContext', () => ({
+vi.mock('../../context/status', () => ({
   useStatus: () => ({ setStatus }),
 }));
 

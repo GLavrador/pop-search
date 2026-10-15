@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { act, render, screen, fireEvent } from '@testing-library/react';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { SearchSection } from './index';
 import { StatusProvider } from '../../context/StatusContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -33,6 +33,8 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('SearchSection Component', () => {
+  afterEach(() => vi.useRealTimers());
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -239,6 +241,27 @@ describe('SearchSection Component', () => {
     renderWithProviders(<SearchSection />);
     
     expect(screen.getByText('Database connection failed')).toBeInTheDocument();
+  });
+
+  it('repeats a search after changing options, but not after typing alone', () => {
+    vi.useFakeTimers();
+    const search = vi.fn();
+    vi.mocked(useVideoSearchQuery).mockReturnValue({
+      search, results: [], asked: null, isLoading: false,
+      hasSearched: true, settledAt: 0, error: null,
+    });
+    renderWithProviders(<SearchSection />);
+    fireEvent.change(screen.getByPlaceholderText('Type to search...'), {
+      target: { value: 'new query' },
+    });
+    act(() => vi.advanceTimersByTime(1000));
+    expect(search).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Broad' }));
+    act(() => vi.advanceTimersByTime(999));
+    expect(search).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(1));
+    expect(search).toHaveBeenCalledExactlyOnceWith('new query', 0.45, 5, 'hybrid');
   });
 
   it('should show loading state', () => {

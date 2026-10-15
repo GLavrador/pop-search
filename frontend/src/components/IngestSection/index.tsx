@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAnalysisJob } from '../../hooks/useAnalysisJob';
-import { useStatus } from '../../context/StatusContext';
+import { useStatus } from '../../context/status';
 import { lookUpPost, saveVideo } from '../../services/api';
 import type { RunningStage, VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
