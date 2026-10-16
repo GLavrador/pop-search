@@ -19,6 +19,7 @@ from core.exceptions import (
 )
 from core.auth import CurrentUser
 from services import jobs
+from services.jobs import ALREADY_RUNNING, AnalysisAlreadyRunningError
 from services.archive import find_existing
 from services.usage import get_project_usage, get_quota, record_event
 from asyncio import TimeoutError as AsyncTimeoutError
@@ -248,10 +249,12 @@ async def start_analysis(request: Request, body: VideoAnalysisRequest, user_id: 
         if current and jobs.is_running(current):
             raise HTTPException(
                 status_code=409,
-                detail="You already have an analysis running. Wait for it to finish or cancel it.",
+                detail=ALREADY_RUNNING,
             )
 
         job = await jobs.start(user_id, body.url, body.analyze_scenes, body.analyze_audio)
+    except AnalysisAlreadyRunningError:
+        raise HTTPException(status_code=409, detail=ALREADY_RUNNING)
     except HTTPException:
         raise
     except Exception as e:

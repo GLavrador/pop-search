@@ -25,6 +25,12 @@ INTERRUPTED_DETAIL = (
 
 ATTEMPTS = 3
 
+ALREADY_RUNNING = "You already have an analysis running. Wait for it to finish or cancel it."
+
+
+class AnalysisAlreadyRunningError(Exception):
+    pass
+
 
 def is_running(job: dict) -> bool:
     return job["stage"] in RUNNING_STAGES
@@ -39,24 +45,17 @@ def _is_stale(job: dict, now: Optional[datetime] = None) -> bool:
     return now - datetime.fromisoformat(job["updated_at"]) > STALE_AFTER
 
 
-def _start(user_id: str, url: str, analyze_scenes: bool, analyze_audio: bool) -> dict:
-    now = _now()
-    row = {
-        "user_id": user_id,
-        "id": str(uuid.uuid4()),
-        "url": url,
-        "analyze_scenes": analyze_scenes,
-        "analyze_audio": analyze_audio,
-        "stage": "queued",
-        "result": None,
-        "error_status": None,
-        "error_detail": None,
-        "created_at": now,
-        "updated_at": now,
-    }
-    # One row per user: starting again replaces whatever the last analysis left.
-    supabase.table(TABLE).upsert(row, on_conflict="user_id").execute()
-    return row
+def _start(user_id: str, url: str, analyze_scenes: bool, analyze_audio: bool, job_id: str) -> dict:
+    rows = supabase.rpc("reserve_analysis", {
+        "p_user_id": user_id,
+        "p_job_id": job_id,
+        "p_url": url,
+        "p_analyze_scenes": analyze_scenes,
+        "p_analyze_audio": analyze_audio,
+    }).execute().data or []
+    if not rows:
+        raise AnalysisAlreadyRunningError(ALREADY_RUNNING)
+    return rows[0]
 
 
 def _update(job_id: str, changes: dict) -> None:
@@ -101,7 +100,7 @@ async def _in_thread(function, *args):
 
 
 async def start(user_id: str, url: str, analyze_scenes: bool, analyze_audio: bool) -> dict:
-    return await _in_thread(_start, user_id, url, analyze_scenes, analyze_audio)
+    return await _in_thread(_start, user_id, url, analyze_scenes, analyze_audio, str(uuid.uuid4()))
 
 
 async def advance(job_id: str, stage: str) -> None:
