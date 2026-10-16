@@ -74,25 +74,44 @@ class TestCurrent:
 
 class TestWriting:
 
-    def test_starting_replaces_the_row_of_the_user(self):
+    def test_starting_uses_the_atomic_reservation(self):
         supabase = MagicMock()
+        row = {**_row("queued"), "result": None, "error_detail": None}
+        supabase.rpc.return_value.execute.return_value.data = [row]
 
         with patch("services.jobs.supabase", supabase):
-            job = jobs._start(USER, "https://x.com/a/status/1", True, False)
+            job = jobs._start(USER, "https://x.com/a/status/1", True, False, "job-1")
 
-        row = supabase.table.return_value.upsert.call_args[0][0]
-        assert supabase.table.return_value.upsert.call_args[1] == {"on_conflict": "user_id"}
-        assert row["stage"] == "queued"
-        assert row["result"] is None and row["error_detail"] is None
-        assert (row["analyze_scenes"], row["analyze_audio"]) == (True, False)
-        assert job["id"] == row["id"]
+        supabase.rpc.assert_called_once_with("reserve_analysis", {
+            "p_user_id": USER, "p_job_id": "job-1", "p_url": "https://x.com/a/status/1",
+            "p_analyze_scenes": True, "p_analyze_audio": False,
+        })
+        assert job == row
 
     def test_each_start_is_a_run_of_its_own(self):
-        with patch("services.jobs.supabase", MagicMock()):
-            first = jobs._start(USER, "https://x.com/a/status/1", True, True)
-            second = jobs._start(USER, "https://x.com/a/status/1", True, True)
+        supabase = MagicMock()
+        supabase.rpc.return_value.execute.return_value.data = [_row("queued")]
+        with patch("services.jobs.supabase", supabase):
+            asyncio.run(jobs.start(USER, "https://x.com/a/status/1", True, True))
+            asyncio.run(jobs.start(USER, "https://x.com/a/status/1", True, True))
 
-        assert first["id"] != second["id"]
+        first, second = supabase.rpc.call_args_list
+        assert first.args[1]["p_job_id"] != second.args[1]["p_job_id"]
+
+    def test_refuses_a_reservation_when_the_account_is_busy(self):
+        supabase = MagicMock()
+        supabase.rpc.return_value.execute.return_value.data = []
+        with patch("services.jobs.supabase", supabase), pytest.raises(jobs.AnalysisAlreadyRunningError):
+            jobs._start(USER, "https://x.com/a/status/1", True, True, "job-1")
+
+    def test_a_retry_keeps_the_reservation_identifier(self):
+        supabase = MagicMock()
+        response = MagicMock(data=[_row("queued")])
+        supabase.rpc.return_value.execute.side_effect = [httpx.ReadError("reset"), response]
+        with patch("services.jobs.supabase", supabase), patch("services.jobs.time.sleep"):
+            assert asyncio.run(jobs.start(USER, "https://x.com/a/status/1", True, True))["stage"] == "queued"
+        first, retry = supabase.rpc.call_args_list
+        assert first.args[1]["p_job_id"] == retry.args[1]["p_job_id"]
 
     def test_progress_is_written_to_the_run_not_the_user(self):
         """A cancelled run that is slow to stop must not write over the next one."""
