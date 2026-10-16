@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useEffectEvent, useRef } from "react";
 import { useVideoSearchQuery } from "../../hooks/useVideoSearchQuery";
-import { useStatus } from "../../context/StatusContext";
+import { useStatus } from "../../context/status";
 import { ResultList } from "../ResultList";
 import { TaskProgress } from "../TaskProgress";
 import { AdvancedSearchOptions } from "../AdvancedSearchOptions";
@@ -39,7 +39,7 @@ export const SearchSection = () => {
     }
   }, [error, setStatus, t.search.status]);
 
-  useEffect(() => {
+  const repeatSearch = useEffectEvent(() => {
     if (hasSearched && query.trim()) {
       const handler = setTimeout(() => {
         const isNewSearch = search(query, threshold, limit, mode);
@@ -50,7 +50,9 @@ export const SearchSection = () => {
       }, 1000);
       return () => clearTimeout(handler);
     }
-  }, [threshold, limit, mode]);
+  });
+
+  useEffect(() => repeatSearch(), [threshold, limit, mode]);
 
   // Once per search that comes back, however often the settings around it
   // change, and not when a video is edited or deleted under the list.

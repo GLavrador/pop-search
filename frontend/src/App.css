@@ -1,16 +1,3 @@
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: sans-serif;
-}
-
-.input-group {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
 input {
   flex: 1;
   padding: 10px;
@@ -21,17 +8,4 @@ button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-}
-
-.result-preview {
-  background: var(--win-dark);
-  padding: 20px;
-  border-radius: 8px;
-  overflow-x: auto;
-  text-align: left;
-}
-
-.error {
-  color: var(--win-error-text);
-  font-weight: bold;
 }

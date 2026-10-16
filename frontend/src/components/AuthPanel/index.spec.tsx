@@ -16,7 +16,7 @@ vi.mock('../../context/authContext', () => ({
   useAuth: () => mockAuth,
 }));
 
-vi.mock('../../context/StatusContext', () => ({
+vi.mock('../../context/status', () => ({
   useStatus: () => ({ setStatus: vi.fn() }),
 }));
 

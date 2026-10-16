@@ -386,6 +386,7 @@ export const pt: Dictionary = {
     copy: 'Copiar',
     copyTitle: 'Copiar URL',
     copied: 'URL copiada para a área de transferência!',
+    copyFailed: 'Não foi possível copiar a URL. Selecione e copie o texto manualmente.',
   },
 
   why: {
@@ -534,9 +535,9 @@ export const pt: Dictionary = {
   review: {
     generalLegend: 'Informações gerais',
     titleLabel: 'Título sugerido',
-    titleHint: '(mín. 5 palavras)',
+    titleHint: '(5 a 200 caracteres)',
     descriptionLabel: 'Descrição completa',
-    descriptionHint: '(mín. 20 palavras)',
+    descriptionHint: '(20 a 5000 caracteres)',
     sourceLabel: 'URL de origem (somente leitura)',
     postLegend: 'Post original',
     postLabel: 'Texto do post',
@@ -555,9 +556,12 @@ export const pt: Dictionary = {
     urlInvalid: 'Digite uma URL válida',
     invalidUrl: 'URL inválida',
     titleRequired: 'O título é obrigatório',
-    titleWords: 'O título precisa ter pelo menos 5 palavras',
+    titleLength: 'O título precisa ter de 5 a 200 caracteres',
     descriptionRequired: 'A descrição é obrigatória',
-    descriptionWords: 'A descrição precisa ter pelo menos 20 palavras',
+    descriptionLength: 'A descrição precisa ter de 20 a 5000 caracteres',
+    textLength: (min: number, max: number) => `Use de ${min} a ${max} caracteres.`,
+    itemLimit: (max: number) => `Use no máximo ${max} itens.`,
+    peopleInvalid: 'Confira as pessoas: até 20, descrições de 3 a 500 caracteres e papéis de até 100.',
   },
 
   auth: {
@@ -1194,7 +1198,7 @@ export const pt: Dictionary = {
       title: {
         good: ['gostei desse título!', 'a IA caprichou!', 'bom título, fácil de achar'],
         short: [
-          'título curtinho: precisa de 5 palavras',
+          'título curtinho: precisa de 5 caracteres',
           'só isso? a busca quer mais',
           'hm, falta título aí',
         ],

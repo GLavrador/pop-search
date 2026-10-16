@@ -88,7 +88,7 @@ def create_embedding(data: VideoMetadataDTO) -> list[float]:
         return embedding
 
     except Exception as e:
-        logger.error(f"Failed to generate embedding: {e}")
+        logger.error("Embedding failed: error_type=%s", type(e).__name__)
         raise e
 
 
@@ -99,7 +99,7 @@ QUERY_CACHE_SIZE = 256
 # every change of precision or mode. A failed call raises, so it is not kept.
 @lru_cache(maxsize=QUERY_CACHE_SIZE)
 def _embed_query(text: str) -> tuple[float, ...]:
-    logger.debug(f"Embedding query text: {text[:50]}...")
+    logger.debug("Embedding query: query_chars=%s", len(text))
     result = genai.embed_content(
         model=EMBEDDING_MODEL,
         content=text,
@@ -120,5 +120,5 @@ def embed_query(text: str) -> list[float]:
     try:
         return list(_embed_query(" ".join(text.split())))
     except Exception as e:
-        logger.error(f"Failed to embed query: {e}")
+        logger.error("Query embedding failed: error_type=%s", type(e).__name__)
         raise e

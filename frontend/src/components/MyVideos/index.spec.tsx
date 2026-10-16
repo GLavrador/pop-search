@@ -14,7 +14,7 @@ vi.mock('../../hooks/useMyVideoActions', () => ({
 }));
 
 const setStatus = vi.fn();
-vi.mock('../../context/StatusContext', () => ({
+vi.mock('../../context/status', () => ({
   useStatus: () => ({ setStatus }),
 }));
 
@@ -163,6 +163,18 @@ describe('editing one of my videos', () => {
     );
     expect(await screen.findByText('1 indexed')).toBeInTheDocument();
     expect(setStatus).toHaveBeenLastCalledWith('Changes saved.', 5000);
+  });
+
+  it('shows the backend validation reason when an edit is rejected', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    update.mockRejectedValueOnce({ response: { status: 422, data: { detail: [
+      { loc: ['body', 'descricao_completa'], msg: 'Description is too long' },
+    ] } } });
+    render(<MyVideos />);
+    await press(`Edit "${TITLE}"`);
+    await press('Save');
+    await waitFor(() => expect(setStatus).toHaveBeenLastCalledWith('descricao_completa: Description is too long', 5000));
+    expect(screen.getByDisplayValue(TITLE)).toBeInTheDocument();
   });
 
   it('should stay in the form, with what was typed, when saving fails', async () => {

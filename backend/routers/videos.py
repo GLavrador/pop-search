@@ -95,7 +95,7 @@ def _remove(path: Optional[str]) -> None:
             os.remove(path)
             logger.debug(f"Cleaned up temp file: {path}")
     except OSError as e:
-        logger.warning(f"Could not remove temp file {path}: {e}")
+        logger.warning("Could not remove temp file: error_type=%s", type(e).__name__)
 
 
 async def _download(url: str) -> Download:
@@ -116,7 +116,7 @@ async def _report_failure(job_id: str, status: int, detail: str) -> None:
     try:
         await jobs.fail(job_id, status, detail)
     except Exception as e:
-        logger.error(f"Could not record the failure of job {job_id}: {e}")
+        logger.error("Could not record job failure: job_id=%s error_type=%s", job_id, type(e).__name__)
 
 
 async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -> None:
@@ -155,7 +155,7 @@ async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -
         try:
             dto = VideoMetadataDTO(**analysis_result)
         except ValueError as e:
-            logger.error(f"Validation error parsing AI output: {e}\nRaw output: {analysis_result}")
+            logger.error("Invalid AI output: job_id=%s error_type=%s", job_id, type(e).__name__)
             failure_reason = "schema_validation"
             await _report_failure(job_id, 500, "Internal AI schema validation failed")
             return
@@ -185,7 +185,7 @@ async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -
         )
 
     except ContentBlockedError as e:
-        logger.warning(f"Analysis blocked for {body.url}: {e.reason}")
+        logger.warning("Analysis blocked: job_id=%s error_type=%s", job_id, type(e).__name__)
         failure_reason = f"blocked:{e.reason}"
         await _report_failure(
             job_id, 422,
@@ -193,7 +193,7 @@ async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -
         )
 
     except Exception as e:
-        logger.exception(f"Error processing video flow: {e}")
+        logger.error("Analysis failed: job_id=%s error_type=%s", job_id, type(e).__name__)
         failure_reason = failure_reason or "internal_error"
         await _report_failure(job_id, 500, INTERNAL_ERROR)
 
@@ -210,13 +210,13 @@ async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -
 @router.post("/analyze", status_code=202, response_model=AnalysisJob)
 @limiter.limit("5/minute")
 async def start_analysis(request: Request, body: VideoAnalysisRequest, user_id: str = CurrentUser):
-    logger.info(f"Analysis requested by {user_id} for URL: {body.url} (Scenes: {body.analyze_scenes}, Audio: {body.analyze_audio})")
+    logger.info("Analysis requested: url_chars=%s", len(body.url))
 
     # Before the quota: a copy is refused whatever the user has left, and
     # finding out here costs them nothing.
     existing = await find_existing(body.url)
     if existing:
-        logger.info(f"Already archived as {existing['id']}: {body.url}")
+        logger.info("Video already archived: video_id=%s", existing["id"])
         return _already_archived(
             existing,
             "This video is already in the archive. Nothing was taken from your quota.",
@@ -255,7 +255,7 @@ async def start_analysis(request: Request, body: VideoAnalysisRequest, user_id: 
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"Could not start an analysis for {user_id}: {e}")
+        logger.error("Could not start analysis: error_type=%s", type(e).__name__)
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR)
 
     await launch(user_id, _run_analysis(job["id"], user_id, body))
@@ -269,7 +269,7 @@ async def read_analysis(request: Request, user_id: str = CurrentUser):
     try:
         current = await jobs.current(user_id)
     except Exception as e:
-        logger.exception(f"Could not read the analysis of {user_id}: {e}")
+        logger.error("Could not read analysis: error_type=%s", type(e).__name__)
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR)
 
     return _as_job(current) if current else None
@@ -283,7 +283,7 @@ async def discard_analysis(request: Request, user_id: str = CurrentUser):
     try:
         await jobs.discard(user_id)
     except Exception as e:
-        logger.exception(f"Could not discard the analysis of {user_id}: {e}")
+        logger.error("Could not discard analysis: error_type=%s", type(e).__name__)
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR)
 
     task = _running.get(user_id)
@@ -305,21 +305,21 @@ async def look_up_post(request: Request, body: VideoLink, user_id: str = Current
             loop.run_in_executor(None, fetch_post, body.url), timeout=POST_LOOKUP_TIMEOUT
         )
     except Exception as e:
-        logger.warning(f"Could not look up the post of {body.url}: {e}")
+        logger.warning("Could not look up post: error_type=%s", type(e).__name__)
         return None
 
 
 @router.post("")
 @limiter.limit("10/minute")
 async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str = CurrentUser):
-    logger.info(f"Save request from {user_id} for video: {metadata.titulo_sugerido}")
+    logger.info("Save requested: title_chars=%s", len(metadata.titulo_sugerido))
 
     if not metadata.url_original:
         raise HTTPException(status_code=400, detail="url_original is required for saving")
 
     existing = await find_existing(metadata.url_original)
     if existing:
-        logger.info(f"Refusing to save a copy of {existing['id']}: {metadata.url_original}")
+        logger.info("Refusing duplicate: video_id=%s", existing["id"])
         return _already_archived(existing, "This video is already in the archive.")
 
     try:
@@ -337,7 +337,9 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
         }
 
         logger.info("Persisting to Supabase...")
-        data, count = supabase.table("videos").insert(db_payload).execute()
+        data, count = await loop.run_in_executor(
+            None, lambda: supabase.table("videos").insert(db_payload).execute()
+        )
 
         logger.info(f"Video saved successfully. ID: {data[1][0]['id']}")
 
@@ -348,7 +350,7 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
         try:
             await jobs.discard(user_id, metadata.url_original)
         except Exception as e:
-            logger.warning(f"Could not clear the saved analysis of {user_id}: {e}")
+            logger.warning("Could not clear saved analysis: error_type=%s", type(e).__name__)
 
         return {
             "status": "success",
@@ -357,7 +359,7 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
         }
 
     except Exception as e:
-        logger.exception(f"Failed to save video: {e}")
+        logger.error("Could not save video: error_type=%s", type(e).__name__)
         raise HTTPException(
             status_code=500,
             detail="An internal error occurred while saving the video. Please try again."

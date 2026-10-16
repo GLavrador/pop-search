@@ -1,3 +1,4 @@
+import { MIN_TITLE_CHARS } from '../schemas/videoMetadata';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Dictionary } from '../i18n/en';
 import type { Reaction } from '../components/Assistant/pilot';
@@ -39,7 +40,6 @@ const REVIEW_AFTER = 1400;
 const FLIGHT_TO_TITLE = 1300;
 const WORD_EVERY = 480;
 const WORDS_READ = 4;
-const TITLE_MIN_WORDS = 5;
 const TITLE_LONG_WORDS = 14;
 const VERDICT_FOR = 3000;
 
@@ -209,7 +209,7 @@ export const useReadingAlong = ({ react, vary, says }: Options) => {
         }
 
         const verdict: Verdict =
-          words.length < TITLE_MIN_WORDS
+          Array.from(title.trim()).length < MIN_TITLE_CHARS
             ? 'short'
             : words.length > TITLE_LONG_WORDS
               ? 'long'

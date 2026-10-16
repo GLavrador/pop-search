@@ -99,7 +99,11 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
             className="win95-inset win95-input"
             disabled
           />
+          {errors.url_original && <span role="alert" className={styles.errorText}>{errors.url_original.message}</span>}
         </div>
+        {errors.metadados_estruturados?.pessoas && (
+          <p role="alert" className={styles.errorText}>{t.validation.peopleInvalid}</p>
+        )}
       </fieldset>
 
       <fieldset className={styles.groupFrame} {...helpAt('review.post')}>
@@ -135,6 +139,9 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
               className="win95-inset win95-input"
               placeholder={t.review.scenesPlaceholder}
             />
+            {errors.metadados_estruturados?.elementos_cenario && (
+              <span role="alert" className={styles.errorText}>{errors.metadados_estruturados.elementos_cenario.message}</span>
+            )}
           </div>
         </fieldset>
       )}
@@ -149,6 +156,9 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
             {...register("metadados_estruturados.audio.transcricao")}
             className={`win95-inset win95-input ${styles.textarea}`}
           />
+          {errors.metadados_estruturados?.audio?.transcricao && (
+            <span role="alert" className={styles.errorText}>{errors.metadados_estruturados.audio.transcricao.message}</span>
+          )}
         </div>
 
         <div className={styles.gridRow}>
@@ -158,6 +168,9 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
               {...register("metadados_estruturados.audio.musica")}
               className="win95-inset win95-input"
             />
+            {errors.metadados_estruturados?.audio?.musica && (
+              <span role="alert" className={styles.errorText}>{errors.metadados_estruturados.audio.musica.message}</span>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -166,6 +179,9 @@ export const ReviewForm = ({ initialData, onSave, onCancel, showScenes = true, s
               {...register("metadados_estruturados.audio.artista")}
               className="win95-inset win95-input"
             />
+            {errors.metadados_estruturados?.audio?.artista && (
+              <span role="alert" className={styles.errorText}>{errors.metadados_estruturados.audio.artista.message}</span>
+            )}
           </div>
         </div>
         </fieldset>

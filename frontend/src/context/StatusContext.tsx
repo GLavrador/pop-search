@@ -1,12 +1,6 @@
-import { createContext, useContext, useState, useRef, useEffect, useMemo, type ReactNode, useCallback } from 'react';
+import { useState, useRef, useEffect, useMemo, type ReactNode, useCallback } from 'react';
 import { StatusFactsContext, type StatusFact, type StatusScope } from './statusFacts';
-
-interface StatusContextType {
-  status: string | null;
-  setStatus: (message: string, duration?: number) => void;
-}
-
-const StatusContext = createContext<StatusContextType | undefined>(undefined);
+import { StatusContext } from './status';
 
 export const StatusProvider = ({ children }: { children: ReactNode }) => {
   const [status, setStatusState] = useState<string | null>(null);
@@ -48,12 +42,4 @@ export const StatusProvider = ({ children }: { children: ReactNode }) => {
       <StatusFactsContext.Provider value={posted}>{children}</StatusFactsContext.Provider>
     </StatusContext.Provider>
   );
-};
-
-export const useStatus = () => {
-  const context = useContext(StatusContext);
-  if (!context) {
-    throw new Error('useStatus must be used within a StatusProvider');
-  }
-  return context;
 };

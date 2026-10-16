@@ -375,6 +375,20 @@ describe('following an analysis', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows the backend validation reason and keeps the draft after a rejected save', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    saveVideo.mockRejectedValueOnce({ response: { status: 422, data: { detail: [
+      { loc: ['body', 'titulo_sugerido'], msg: 'Invalid title' },
+    ] } } });
+    renderApp();
+    await runAnalysis();
+    onServer = job('done');
+    await screen.findByDisplayValue(TITLE);
+    await press('Save');
+    expect(await screen.findByText('titulo_sugerido: Invalid title')).toBeInTheDocument();
+    expect(screen.getByDisplayValue(TITLE)).toBeInTheDocument();
+  });
+
   it('should let go of the analysis once its video is saved', async () => {
     renderApp();
     await runAnalysis();

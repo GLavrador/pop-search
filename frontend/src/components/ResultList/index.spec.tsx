@@ -6,7 +6,7 @@ import type { SearchResult } from '../../types';
 import { ResultList } from './index';
 import type { Asked } from './Why';
 
-vi.mock('../../context/StatusContext', () => ({
+vi.mock('../../context/status', () => ({
   useStatus: () => ({ setStatus: vi.fn() }),
 }));
 

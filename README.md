@@ -1,8 +1,13 @@
 # Pop Search
 
-Acervo de vídeos do Twitter/X indexados por IA multimodal, com busca híbrida
-(significado + palavras) e validação humana antes de qualquer coisa entrar no
-índice.
+Encontre vídeos do Twitter/X mesmo sem lembrar as palavras exatas do post.
+O Pop Search combina busca por significado e por palavras, com análise de IA
+e revisão humana dos metadados antes da indexação.
+
+**Stack:** React, TypeScript, Vite, TanStack Query, Python/FastAPI,
+Supabase (PostgreSQL + pgvector e Auth), Google Gemini e yt-dlp.
+
+<!-- TODO: screenshot -->
 
 **[Ver funcionando](https://pop-search-ochre.vercel.app)** - buscar é aberto,
 contribuir exige conta.
@@ -15,7 +20,6 @@ contribuir exige conta.
 - [Visão geral](#visão-geral)
 - [Como a busca funciona](#como-a-busca-funciona)
 - [Contas e limites](#contas-e-limites)
-- [Tecnologias](#tecnologias)
 - [Instalação](#instalação)
   - [1. Banco de dados](#1-banco-de-dados)
   - [2. Autenticação no Supabase](#2-autenticação-no-supabase)
@@ -24,6 +28,8 @@ contribuir exige conta.
 - [Uso da API](#uso-da-api)
 - [Testes](#testes)
 - [Deploy](#deploy)
+- [Interface e interações](#interface-e-interações)
+- [Limitações conhecidas](#limitações-conhecidas)
 - [Estrutura do projeto](#estrutura-do-projeto)
 
 ## Visão geral
@@ -46,51 +52,6 @@ contribuir exige conta.
 - **Meus vídeos**: quem adicionou um vídeo pode corrigir o que foi escrito sobre
   ele ou tirá-lo do acervo
 - **Contas com limite mensal**: contribuir exige cadastro; buscar não
-- **Assistente guiado**: um assistente conduz o visitante pelas telas de verdade,
-  com uma adição de vídeo e uma busca de mentira, sem conta e sem chamada de IA.
-  Quem não está logado é convidado pelo próprio robô, num balão acima das abas,
-  toda vez que abre a página, até pedir para não ver mais
-- **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
-  qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
-  falha da IA, vídeo salvo) e pode ser arrastado pela tela. Nas pausas de quem
-  usa o site ele se distrai sozinho: confere se os ícones estão todos lá, brinca
-  de esconde-esconde atrás da janela do Pop Search, imita o próprio retrato no
-  ícone Truques, bate no vidro da tela, vira proteção de tela, disca para a
-  internet. Nunca enquanto alguém digita, mexe no mouse ou tem uma janela aberta
-- **Truques à vista**: o que dá para fazer fora do guia (com o robô, com a área
-  de trabalho, com a busca) está numa lista do próprio BIP-98, que diz o que
-  tentar e não o que acontece. Ela abre pelo ícone Truques da área de trabalho,
-  e o robô a oferece quando é cutucado e quando o guia termina
-- **Abertura com o robô montando tudo**: na primeira vez em cada aba, o BIP-98
-  constrói a área de trabalho à vista (ícones a martelo, barra de tarefas,
-  relógio, o azul espanado) e abre o programa. Qualquer tecla pula
-- **Tela azul e reinício**: um erro que derrubaria a tela vira uma tela azul, e
-  uma tecla reinicia pela tela de boot, em que cada linha é uma verificação de
-  verdade (sessão, servidor). O boot também é a entrada de quem pediu menos
-  movimento ao sistema
-- **Área de trabalho que reage**: os ícones podem ser arrastados e voltam para o
-  lugar. Soltar o do Pop Search na Lixeira derruba tudo numa tela azul: o robô
-  não acredita, procura o que sumiu, reclama e reconstrói tudo peça por peça,
-  com direito a barra de tarefas que escorrega e janela aberta à força
-- **Lixeira de verdade, e por dentro**: o Meu Computador e os Truques podem ir
-  para a Lixeira, que passa a aparecer cheia. A janela dos Truques tem um quadro
-  só para ela, com um botão que joga a própria lista lá dentro. Ao abrir a
-  Lixeira, o BIP-98 voa até lá, vira de cabeça para baixo e se espreme para
-  dentro. Lá dentro há um Desfragmentador de disco esquecido há décadas, parado
-  em 10%, com arquivos largados e erros que ninguém fechou por cima da grade, num
-  monitor gasto. A janela da própria Lixeira, como o Explorer a abre, lista as
-  saídas. Dois jogos antigos, Flappy BIP e Dino BIP, fazem a desfragmentação
-  andar: a barra enche com os pontos, volta ao começo se a rodada se perde e, na
-  meta, o resgate fica pronto ao lado dela. Aí o robô fecha os erros e varre o
-  desgaste da tela. Dá para seguir jogando pelo recorde, que fica na conta de
-  quem está logado (ou no navegador, sem conta: ele passa para a primeira conta
-  que entrar, e o navegador segue mostrando o recorde da última conta), resgatar
-  direto ou sair sem nada. Os ícones são os originais do Windows 98, do pacote de
-  [win98icons.alexmeub.com](https://win98icons.alexmeub.com)
-- **Meu Computador mostra os bastidores**: o ícone abre as Propriedades do
-  Sistema, com as peças de verdade num Gerenciador de dispositivos (servidor,
-  banco, Gemini, yt-dlp e como cada uma está agora), o tamanho do acervo e quanto
-  tempo a última busca levou em cada etapa
 
 ## Como a busca funciona
 
@@ -139,19 +100,34 @@ tempo de IA.
 Contas marcadas como `is_admin` veem uma aba de estatísticas com custo médio e
 mediano por análise, taxa de falha, volume diário e consumo por usuário.
 
-## Tecnologias
-
-**Backend** - FastAPI, Supabase (PostgreSQL + pgvector), Google Gemini, yt-dlp \
-**Frontend** - React, TypeScript, Vite, TanStack Query, Supabase Auth
-
 ## Instalação
 
 ### Requisitos
 
 - Python 3.10+
-- Node.js 18+
+- Node.js 22.12+
+- ffmpeg disponível no PATH
 - Projeto Supabase
 - API key do Google Gemini ([AI Studio](https://aistudio.google.com))
+
+Instale o ffmpeg antes de executar downloads localmente. Use o comando do seu sistema:
+
+```powershell
+# Windows
+winget install --id Gyan.FFmpeg --exact
+```
+
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install ffmpeg
+```
+
+Abra um novo terminal após a instalação e confira com `ffmpeg -version`.
+O container já inclui o ffmpeg.
 
 ### 1. Banco de dados
 
@@ -380,7 +356,7 @@ vez de bater na rede.
 ```bash
 cd frontend
 npm run test
-npx tsc --noEmit
+npm run build
 ```
 
 ## Deploy
@@ -439,6 +415,65 @@ desmarcar para desenvolver.
 - **O download pode falhar na nuvem.** O X bloqueia faixas de IP de datacenter,
   então `/videos/analyze` pode não funcionar hospedado mesmo funcionando local.
   A busca, o acervo e a entrada manual não dependem de download e continuam de pé
+
+## Interface e interações
+
+- **Assistente guiado**: um assistente conduz o visitante pelas telas de verdade,
+  com uma adição de vídeo e uma busca de mentira, sem conta e sem chamada de IA.
+  Quem não está logado é convidado pelo próprio robô, num balão acima das abas,
+  toda vez que abre a página, até pedir para não ver mais
+- **BIP-98 pelo app inteiro**: o robô do guia mora na área de trabalho. Explica
+  qualquer controle pelo botão `?` da janela, reage ao que acontece (busca vazia,
+  falha da IA, vídeo salvo) e pode ser arrastado pela tela. Nas pausas de quem
+  usa o site ele se distrai sozinho: confere se os ícones estão todos lá, brinca
+  de esconde-esconde atrás da janela do Pop Search, imita o próprio retrato no
+  ícone Truques, bate no vidro da tela, vira proteção de tela, disca para a
+  internet. Nunca enquanto alguém digita, mexe no mouse ou tem uma janela aberta
+- **Truques à vista**: o que dá para fazer fora do guia (com o robô, com a área
+  de trabalho, com a busca) está numa lista do próprio BIP-98, que diz o que
+  tentar e não o que acontece. Ela abre pelo ícone Truques da área de trabalho,
+  e o robô a oferece quando é cutucado e quando o guia termina
+- **Abertura com o robô montando tudo**: na primeira vez em cada aba, o BIP-98
+  constrói a área de trabalho à vista (ícones a martelo, barra de tarefas,
+  relógio, o azul espanado) e abre o programa. Qualquer tecla pula
+- **Tela azul e reinício**: um erro que derrubaria a tela vira uma tela azul, e
+  uma tecla reinicia pela tela de boot, em que cada linha é uma verificação de
+  verdade (sessão, servidor). O boot também é a entrada de quem pediu menos
+  movimento ao sistema
+- **Área de trabalho que reage**: os ícones podem ser arrastados e voltam para o
+  lugar. Soltar o do Pop Search na Lixeira derruba tudo numa tela azul: o robô
+  não acredita, procura o que sumiu, reclama e reconstrói tudo peça por peça,
+  com direito a barra de tarefas que escorrega e janela aberta à força
+- **Lixeira de verdade, e por dentro**: o Meu Computador e os Truques podem ir
+  para a Lixeira, que passa a aparecer cheia. A janela dos Truques tem um quadro
+  só para ela, com um botão que joga a própria lista lá dentro. Ao abrir a
+  Lixeira, o BIP-98 voa até lá, vira de cabeça para baixo e se espreme para
+  dentro. Lá dentro há um Desfragmentador de disco esquecido há décadas, parado
+  em 10%, com arquivos largados e erros que ninguém fechou por cima da grade, num
+  monitor gasto. A janela da própria Lixeira, como o Explorer a abre, lista as
+  saídas. Dois jogos antigos, Flappy BIP e Dino BIP, fazem a desfragmentação
+  andar: a barra enche com os pontos, volta ao começo se a rodada se perde e, na
+  meta, o resgate fica pronto ao lado dela. Aí o robô fecha os erros e varre o
+  desgaste da tela. Dá para seguir jogando pelo recorde, que fica na conta de
+  quem está logado (ou no navegador, sem conta: ele passa para a primeira conta
+  que entrar, e o navegador segue mostrando o recorde da última conta), resgatar
+  direto ou sair sem nada. Os ícones são os originais do Windows 98, do pacote de
+  [win98icons.alexmeub.com](https://win98icons.alexmeub.com)
+- **Meu Computador mostra os bastidores**: o ícone abre as Propriedades do
+  Sistema, com as peças de verdade num Gerenciador de dispositivos (servidor,
+  banco, Gemini, yt-dlp e como cada uma está agora), o tamanho do acervo e quanto
+  tempo a última busca levou em cada etapa
+
+## Limitações conhecidas
+
+- O backend é um monolito por escolha, adequado ao escopo deste portfólio.
+- O backend pode hibernar no plano gratuito, e o X pode bloquear downloads
+  originados de IPs de datacenter. A entrada manual continua disponível.
+- O banco usa um schema SQL para instalação; mudanças em bancos existentes
+  precisam ser aplicadas manualmente.
+- A lista de vídeos da conta retorna até 200 registros, sem paginação.
+- Os testes simulam Supabase, Gemini e X; a aprovação da suíte não valida a
+  disponibilidade nem a integração real desses serviços.
 
 ## Estrutura do projeto
 

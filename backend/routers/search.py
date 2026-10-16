@@ -22,7 +22,7 @@ def _ms_since(moment: float) -> float:
 @router.post("/search", response_model=list[SearchResult])
 @limiter.limit("20/minute")
 async def search_videos(request: Request, response: Response, search_request: SearchRequest):
-    logger.info(f"Search requested: '{search_request.query}' (mode: {search_request.mode})")
+    logger.info("Search requested: query_chars=%s", len(search_request.query))
 
     started = time.perf_counter()
     # How long each step took, sent back in the Server-Timing header.
@@ -45,10 +45,11 @@ async def search_videos(request: Request, response: Response, search_request: Se
             "search_mode": search_request.mode,
         }
 
-        logger.debug(f"Executing RPC match_videos with query: {search_request.query}")
+        logger.debug("Executing RPC match_videos: query_chars=%s", len(search_request.query))
 
         asked = time.perf_counter()
-        matches = supabase.rpc("match_videos", rpc_params).execute()
+        loop = asyncio.get_event_loop()
+        matches = await loop.run_in_executor(None, lambda: supabase.rpc("match_videos", rpc_params).execute())
         steps["db"] = _ms_since(asked)
 
         # No post-filtering here on purpose. match_threshold applies to the vector
@@ -66,7 +67,7 @@ async def search_videos(request: Request, response: Response, search_request: Se
         return results
 
     except Exception as e:
-        logger.exception(f"Search failed: {e}")
+        logger.error("Search failed: error_type=%s", type(e).__name__)
         raise HTTPException(
             status_code=500,
             detail="An internal error occurred during search. Please try again."

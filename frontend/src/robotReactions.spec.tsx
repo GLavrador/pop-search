@@ -279,9 +279,9 @@ describe('the robot reacting to the app', () => {
     ],
     [
       'too short to be saved',
-      'Whale jumps',
+      'Whal',
       [
-        'short title: it needs 5 words',
+        'short title: it needs 5 characters',
         'is that all? the search wants more',
         'hm, that title is thin',
       ],

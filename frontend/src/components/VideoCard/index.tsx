@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { SearchResult } from "../../types";
-import { useStatus } from "../../context/StatusContext";
+import { useStatus } from "../../context/status";
 import { useI18n } from "../../i18n/languageContext";
 import { helpAt, useRobot } from "../../context/robotContext";
 import { useOverflowing } from "../../hooks/useOverflowing";
@@ -35,10 +35,14 @@ export const VideoCard = ({ data, onWhy, explaining = false }: VideoCardProps) =
   const displayUrl = data.url_original;
   const origin = t.card[matchOriginKey(data.similarity, data.text_rank ?? 0)];
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(displayUrl);
-    setStatus(t.card.copied, 2000);
-    robot.notify({ kind: 'copied' });
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(displayUrl);
+      setStatus(t.card.copied, 2000);
+      robot.notify({ kind: 'copied' });
+    } catch {
+      setStatus(t.card.copyFailed, 5000);
+    }
   };
 
   return (

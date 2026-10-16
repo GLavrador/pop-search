@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAnalysisJob } from '../../hooks/useAnalysisJob';
-import { useStatus } from '../../context/StatusContext';
+import { useStatus } from '../../context/status';
+import { validationErrorMessage } from '../../utils/validationError';
 import { lookUpPost, saveVideo } from '../../services/api';
 import type { RunningStage, VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
@@ -176,7 +177,7 @@ export const IngestSection = () => {
         backToStart();
       } catch (err: unknown) {
         console.error("Failed to save video to database:", err);
-        setStatus(t.ingest.status.saveFailed, 5000);
+        setStatus(validationErrorMessage(err) ?? t.ingest.status.saveFailed, 5000);
         robot.notify({ kind: 'saveFailed' });
       }
   };
