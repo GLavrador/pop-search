@@ -209,7 +209,7 @@ describe('AuthProvider', () => {
         email: 'ana@example.com',
         password: 'secret123',
         options: {
-          data: { display_name: 'Ana Lima' },
+          data: { display_name: 'Ana Lima', language: 'en' },
           emailRedirectTo: window.location.origin,
         },
       }),
