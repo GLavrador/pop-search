@@ -13,12 +13,14 @@ from dtos import (
     AdminStatsReport,
     BinRecords,
     MyVideo,
+    PendingAccount,
     PostInfo,
     ProjectUsageReport,
     QuotaStatus,
     UserUsageRow,
     VideoMetadataDTO,
 )
+from services import review
 from services.embedding import create_embedding
 from services.usage import (
     get_admin_stats,
@@ -35,7 +37,7 @@ router = APIRouter(prefix="/me", tags=["Me"])
 MAX_VIDEOS = 200
 
 VIDEO_COLUMNS = (
-    "id, titulo_video, descricao_completa, url_original, created_at, post, metadados_estruturados"
+    "id, titulo_video, descricao_completa, url_original, created_at, post, metadados_estruturados, approved"
 )
 
 VIDEO_NOT_FOUND = "This video is not in your library."
@@ -52,6 +54,8 @@ async def read_my_quota(request: Request, user_id: str = CurrentUser):
             remaining=quota.remaining,
             resets_at=quota.resets_at,
             tokens_this_month=quota.tokens_this_month,
+            approved=quota.approved,
+            can_add=quota.can_add,
         )
     except Exception as e:
         logger.exception(f"Failed to read quota for {user_id}: {e}")
@@ -136,6 +140,71 @@ async def read_admin_stats(request: Request, days: int = 30, user_id: str = Curr
             status_code=500,
             detail="An internal error occurred while loading statistics. Please try again.",
         )
+
+
+NOT_PENDING = "This account is not waiting for approval."
+
+
+@router.get("/admin/pending", response_model=list[PendingAccount])
+@limiter.limit("30/minute")
+async def read_pending_accounts(request: Request, user_id: str = CurrentUser):
+    if not await is_admin(user_id):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    try:
+        return await review.list_pending()
+    except Exception as e:
+        logger.exception(f"Failed to list accounts under review: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while loading the accounts. Please try again.",
+        )
+
+
+@router.post("/admin/pending/{account_id}/approve", status_code=204)
+@limiter.limit("30/minute")
+async def approve_account(request: Request, account_id: uuid.UUID, user_id: str = CurrentUser):
+    """Approves the account and makes its video public. Only an administrator can."""
+    if not await is_admin(user_id):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    try:
+        approved = await review.approve(str(account_id))
+    except Exception as e:
+        logger.exception(f"Failed to approve {account_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while approving the account. Please try again.",
+        )
+
+    if not approved:
+        raise HTTPException(status_code=404, detail=NOT_PENDING)
+
+    logger.info(f"Account {account_id} approved by {user_id}")
+    return Response(status_code=204)
+
+
+@router.delete("/admin/pending/{account_id}/video", status_code=204)
+@limiter.limit("30/minute")
+async def remove_pending_video(request: Request, account_id: uuid.UUID, user_id: str = CurrentUser):
+    """Deletes the video an account under review is waiting on. An approved video is out of reach."""
+    if not await is_admin(user_id):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    try:
+        removed = await review.remove_pending_video(str(account_id))
+    except Exception as e:
+        logger.exception(f"Failed to remove the pending video of {account_id}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while deleting the video. Please try again.",
+        )
+
+    if not removed:
+        raise HTTPException(status_code=404, detail="This account has no video waiting for approval.")
+
+    logger.info(f"Pending video of {account_id} removed by {user_id}")
+    return Response(status_code=204)
 
 
 def _read_records(user_id: str) -> BinRecords:

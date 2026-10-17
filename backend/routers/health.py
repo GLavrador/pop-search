@@ -30,7 +30,9 @@ async def health_check():
 
 
 def _count_videos() -> int:
-    answer = supabase.table("videos").select("id", count="exact", head=True).execute()
+    answer = (
+        supabase.table("videos").select("id", count="exact", head=True).eq("approved", True).execute()
+    )
     return answer.count or 0
 
 

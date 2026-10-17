@@ -25,7 +25,7 @@ def test_the_time_a_search_took_can_be_read_from_the_page():
 
 def _database_with(videos):
     database = MagicMock()
-    database.table.return_value.select.return_value.execute.return_value.count = videos
+    database.table.return_value.select.return_value.eq.return_value.execute.return_value.count = videos
     return database
 
 
@@ -62,9 +62,19 @@ def test_system_report_counts_the_videos_without_fetching_them():
     database.table.return_value.select.assert_called_once_with("id", count="exact", head=True)
 
 
+def test_system_report_counts_only_approved_videos():
+    """A video under review is its owner's alone, so the public count leaves it out."""
+    database = _database_with(128)
+
+    with patch("routers.health.supabase", database):
+        client.get("/system")
+
+    database.table.return_value.select.return_value.eq.assert_called_once_with("approved", True)
+
+
 def test_system_report_still_answers_when_the_database_does_not():
     database = MagicMock()
-    database.table.return_value.select.return_value.execute.side_effect = RuntimeError("down")
+    database.table.return_value.select.return_value.eq.return_value.execute.side_effect = RuntimeError("down")
 
     with patch("routers.health.supabase", database):
         response = client.get("/system")

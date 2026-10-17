@@ -20,7 +20,7 @@ def video_key(url: str) -> Optional[tuple[str, str]]:
 
 def _find_existing(url: str) -> Optional[dict]:
     key = video_key(url)
-    query = supabase.table("videos").select("id, titulo_video, url_original, created_at")
+    query = supabase.table("videos").select("id, titulo_video, url_original, created_at, approved, user_id")
 
     if key is None:
         rows = query.eq("url_original", url).limit(1).execute().data or []
