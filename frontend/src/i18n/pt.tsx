@@ -434,6 +434,10 @@ export const pt: Dictionary = {
     exhausted: (date: string) =>
       `Limite atingido. Renova em ${date}. Você ainda pode adicionar vídeos manualmente.`,
     remaining: (left: number, date: string) => `${left} restantes, renova em ${date}`,
+    reviewLabel: 'Análises antes da aprovação',
+    reviewRemaining: (left: number) =>
+      `${left} restante(s). Elas não renovam: a aprovação traz a cota mensal.`,
+    reviewExhausted: 'Todas usadas. Você ainda pode adicionar seu vídeo manualmente.',
   },
 
   myVideos: {
@@ -451,6 +455,8 @@ export const pt: Dictionary = {
     remove: 'Excluir',
     removeOf: (title: string) => `Excluir "${title}"`,
     editing: 'Editando o vídeo',
+    pending: 'Aguardando aprovação',
+    pendingNote: 'Só você vê este vídeo. Todo mundo vai vê-lo quando sua conta for aprovada.',
     confirm: {
       question: 'Excluir este vídeo do acervo? Não dá para desfazer.',
       yes: 'Sim, excluir',
@@ -500,6 +506,12 @@ export const pt: Dictionary = {
       open: 'Abrir o post',
       dismiss: 'Fechar o aviso',
     },
+    locked: {
+      title: 'Sua conta está aguardando aprovação',
+      body: 'Seu primeiro vídeo está guardado e aparece em My-Videos.exe. Quando a conta for aprovada, todo mundo vai encontrá-lo na busca, e você poderá adicionar mais vídeos.',
+      contact: 'Para pedir a aprovação, entre em contato:',
+      field: 'Adicionar vídeos fica travado até sua conta ser aprovada',
+    },
     draft: {
       title: 'Você deixou uma análise sem salvar',
       body: 'A IA já descreveu este vídeo. Continue de onde parou, ou descarte: uma análise descartada não volta para a sua cota.',
@@ -519,6 +531,8 @@ export const pt: Dictionary = {
       manual: 'Modo manual: preencha os dados do vídeo abaixo.',
       saving: 'Salvando os dados no banco...',
       saved: 'Vídeo salvo! Pronto para o próximo.',
+      savedForReview: 'Vídeo salvo! Só você o vê até sua conta ser aprovada.',
+      locked: 'Adicionar vídeos espera a aprovação da sua conta.',
       saveFailed: 'Erro: não foi possível salvar o vídeo. Tente de novo.',
       cancelled: 'Análise cancelada pelo usuário.',
       reset: 'Pronto para o próximo vídeo.',
@@ -575,7 +589,13 @@ export const pt: Dictionary = {
     displayName: 'Nome de exibição',
     email: 'E-mail',
     password: 'Senha',
-    created: 'Conta criada. Se for preciso confirmar, veja sua caixa de entrada antes de entrar.',
+    checkEmail: (email: string) =>
+      `Conta criada. Enviamos um link para ${email}: abra-o para confirmar a conta e você volta para cá já conectado. Se não chegar em alguns minutos, olhe no spam.`,
+    confirmed: 'E-mail confirmado. Você entrou.',
+    linkFailed:
+      'Esse link de confirmação não vale mais. Entre com seu e-mail e senha; se a conta nunca foi confirmada, crie de novo para receber outro link.',
+    reviewNote:
+      'Uma conta nova começa com um vídeo, que só você vê até a conta ser aprovada. Depois disso, ele fica público e você pode adicionar mais.',
     guideInvite: 'Enquanto isso, deixe o assistente te mostrar o app. Não consome análise nem precisa de conta.',
     working: 'Processando...',
     toSignIn: 'Já tem conta? Entre',
@@ -589,6 +609,26 @@ export const pt: Dictionary = {
   },
 
   admin: {
+    pending: {
+      legend: 'Contas aguardando aprovação',
+      loading: 'Carregando as contas...',
+      empty: 'Nenhuma conta aguardando.',
+      joined: (date: string) => `Conta criada em ${date}`,
+      noVideo: 'Nenhum vídeo ainda.',
+      approve: 'Aprovar',
+      approveOf: (name: string) => `Aprovar ${name}`,
+      approving: 'Aprovando...',
+      removeVideo: 'Excluir vídeo',
+      removeVideoOf: (name: string) => `Excluir o vídeo de ${name}`,
+      confirmRemove: 'Excluir este vídeo? A conta continua em avaliação e pode enviar outro.',
+      yes: 'Sim, excluir',
+      loadFailed: 'Não foi possível carregar as contas aguardando aprovação.',
+      failed: 'Não deu certo. Tente de novo.',
+      approved: (name: string) => `Conta de ${name} aprovada. O vídeo agora é público.`,
+      approvedNoVideo: (name: string) => `Conta de ${name} aprovada.`,
+      removed: 'Vídeo excluído.',
+      note: 'Aprovar torna o vídeo público e tira a conta do limite de um vídeo. Só você pode fazer isso.',
+    },
     notAdmin: 'Esta página é para administradores.',
     loading: 'Carregando estatísticas...',
     noData: 'Ainda não há dados.',
@@ -1143,6 +1183,7 @@ export const pt: Dictionary = {
       manual: ['eu confio em você!', 'capricha na descrição!', 'você escreve melhor mesmo'],
       saved: ['guardado!', 'no acervo!', 'salvo, pode buscar!'],
       saveFailed: ['não salvou...', 'xi, não gravou', 'tenta de novo?'],
+      addLocked: ['ainda aguardando aprovação!', 'um vídeo por enquanto', 'primeiro a aprovação!'],
       removed: ['foi embora', 'um a menos', 'tirei do acervo'],
       removeFailed: ['não consegui tirar...', 'xi, ele ficou', 'tenta de novo?'],
       hello: [
@@ -1241,6 +1282,8 @@ export const pt: Dictionary = {
         inviteClose: ['até já!', 'tô por aqui!', 'qualquer coisa, me chama'],
         tricks: ['meus segredos!', 'vai contar tudo, é?', 'agora você sabe demais'],
         adminRange: ['outro período!', 'mudando a janela', 'recontando...'],
+        approveAccount: ['bem-vinda ao acervo!', 'aprovada!', 'mais uma no clube'],
+        removePending: ['lá se vai', 'esse não', 'excluído!'],
         why: ['deixa que eu explico!', 'raio-x!', 'os bastidores!'],
         computer: ['olha eu por dentro!', 'não repara a bagunça', 'meus bastidores!'],
         deviceRobot: ['esse sou eu!', 'sem driver, com orgulho', 'desconhecido, eu?'],
@@ -1440,6 +1483,10 @@ export const pt: Dictionary = {
         title: 'Vídeo repetido',
         text: 'Alguém já guardou este vídeo, então ele não é analisado de novo e nada sai da sua cota. Ele já aparece na busca.',
       },
+      'ingest.locked': {
+        title: 'Aguardando aprovação',
+        text: 'Uma conta nova adiciona um vídeo e espera. Quando a conta é aprovada, o vídeo aparece na busca para todo mundo e você pode adicionar mais. O link leva a quem aprova.',
+      },
       'ingest.draft': {
         title: 'Análise sem salvar',
         text: 'Uma análise que terminou e não foi salva fica guardada aqui. Continue a revisão para salvar, ou descarte para analisar outro vídeo.',
@@ -1570,6 +1617,10 @@ export const pt: Dictionary = {
       admin: {
         title: 'Estatísticas',
         text: 'O painel de quem administra o projeto: quanto a IA foi usada, quanto custou e por que as análises falharam.',
+      },
+      'admin.pending': {
+        title: 'Contas aguardando aprovação',
+        text: 'As contas novas e o vídeo que cada uma enviou, que ninguém mais vê ainda. Aprovar torna o vídeo público e libera a conta. Excluir vídeo joga o vídeo fora e deixa a conta esperando.',
       },
     },
   },

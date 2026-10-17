@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { arrival } from '../lib/arrival';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../i18n/languageContext';
 import { AuthContext, type AuthContextType } from './authContext';
@@ -29,6 +30,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { t } = useI18n();
 
   useEffect(() => {
+    // The client leaves a failed link in the address; it means nothing once read.
+    if (arrival === 'linkFailed') {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+    }
+  }, []);
+
+  useEffect(() => {
     let active = true;
 
     supabase.auth.getSession().then(({ data }) => {
@@ -56,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       null,
     isLoading,
     isAuthenticated: session !== null,
+    arrival,
 
     signIn: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -63,12 +72,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     },
 
     signUp: async (email, password, displayName) => {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { display_name: displayName } },
+        options: {
+          data: { display_name: displayName },
+          // The link in the e-mail brings the person back here, signed in.
+          emailRedirectTo: window.location.origin,
+        },
       });
-      return { error: error ? toFriendlyError(error.message, t.auth.errors) : null };
+      if (error) return { error: toFriendlyError(error.message, t.auth.errors) };
+      return { error: null, confirmEmail: !data.session };
     },
 
     signOut: async () => {

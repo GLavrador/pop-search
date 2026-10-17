@@ -76,7 +76,9 @@ interface AppContentProps {
 }
 
 function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('ingest');
+  const { arrival } = useAuth();
+  // A confirmation link that failed lands where the way in is.
+  const [activeTab, setActiveTab] = useState<Tab>(arrival === 'linkFailed' ? 'account' : 'ingest');
   const [windowState, setWindowState] = useState<WindowState>(intro ? 'closed' : 'open');
   const [isMaximized, setIsMaximized] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);

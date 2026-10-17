@@ -34,6 +34,7 @@ const session = (overrides = {}) =>
 const Probe = () => {
   const { isLoading, isAuthenticated, displayName, signIn, signUp } = useAuth();
   const [lastError, setLastError] = useState<string>('-');
+  const [confirm, setConfirm] = useState<string>('-');
 
   return (
     <div>
@@ -41,15 +42,18 @@ const Probe = () => {
       <span data-testid="authed">{String(isAuthenticated)}</span>
       <span data-testid="name">{displayName ?? '-'}</span>
       <span data-testid="error">{lastError}</span>
+      <span data-testid="confirm">{confirm}</span>
       <button
         onClick={async () => setLastError((await signIn('ana@example.com', 'pw')).error ?? 'none')}
       >
         do-sign-in
       </button>
       <button
-        onClick={async () =>
-          setLastError((await signUp('ana@example.com', 'secret123', 'Ana Lima')).error ?? 'none')
-        }
+        onClick={async () => {
+          const result = await signUp('ana@example.com', 'secret123', 'Ana Lima');
+          setLastError(result.error ?? 'none');
+          setConfirm(String(result.confirmEmail ?? '-'));
+        }}
       >
         do-sign-up
       </button>
@@ -173,8 +177,28 @@ describe('AuthProvider', () => {
     });
   });
 
+  it('should say an account that waits for its e-mail must be confirmed', async () => {
+    mockSignUp.mockResolvedValue({ data: { user: {}, session: null }, error: null });
+    renderProvider();
+    await settled();
+
+    fireEvent.click(screen.getByText('do-sign-up'));
+
+    await waitFor(() => expect(screen.getByTestId('confirm')).toHaveTextContent('true'));
+  });
+
+  it('should not ask for a confirmation the project does not require', async () => {
+    mockSignUp.mockResolvedValue({ data: { user: {}, session: session() }, error: null });
+    renderProvider();
+    await settled();
+
+    fireEvent.click(screen.getByText('do-sign-up'));
+
+    await waitFor(() => expect(screen.getByTestId('confirm')).toHaveTextContent('false'));
+  });
+
   it('should send the display name so the profile trigger can use it', async () => {
-    mockSignUp.mockResolvedValue({ error: null });
+    mockSignUp.mockResolvedValue({ data: { user: {}, session: null }, error: null });
     renderProvider();
     await settled();
 
@@ -184,7 +208,10 @@ describe('AuthProvider', () => {
       expect(mockSignUp).toHaveBeenCalledWith({
         email: 'ana@example.com',
         password: 'secret123',
-        options: { data: { display_name: 'Ana Lima' } },
+        options: {
+          data: { display_name: 'Ana Lima' },
+          emailRedirectTo: window.location.origin,
+        },
       }),
     );
   });

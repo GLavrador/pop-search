@@ -7,6 +7,7 @@ const mockSignUp = vi.fn();
 const mockAuth = {
   isAuthenticated: false,
   displayName: '',
+  arrival: null as 'confirmed' | 'linkFailed' | null,
   signIn: vi.fn(),
   signUp: (...args: unknown[]) => mockSignUp(...args),
   signOut: vi.fn(),
@@ -41,9 +42,40 @@ const createAccount = async () => {
 describe('AuthPanel', () => {
   beforeEach(() => {
     mockSignUp.mockReset();
-    mockSignUp.mockResolvedValue({ error: null });
+    mockSignUp.mockResolvedValue({ error: null, confirmEmail: true });
     mockAuth.isAuthenticated = false;
     mockAuth.displayName = '';
+    mockAuth.arrival = null;
+  });
+
+  it('should tell a new account to confirm its e-mail, at the address it gave', async () => {
+    render(<AuthPanel />);
+
+    await createAccount();
+
+    expect(screen.getByText(/We sent a link to maria@exemplo\.com/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
+  });
+
+  it('should say before the account is created that it starts with one video', async () => {
+    const user = userEvent.setup();
+    render(<AuthPanel />);
+
+    await user.click(screen.getByRole('button', { name: /No account yet/i }));
+
+    expect(screen.getByText(/A new account starts with one video/)).toBeInTheDocument();
+  });
+
+  it('should say how to go in when the link from the e-mail no longer works', async () => {
+    mockAuth.arrival = 'linkFailed';
+    const user = userEvent.setup();
+    render(<AuthPanel />);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('That confirmation link no longer works.');
+
+    await user.click(screen.getByRole('button', { name: /No account yet/i }));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('should offer the guide from the signed in profile', async () => {
