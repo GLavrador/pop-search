@@ -38,8 +38,7 @@ export const pt: Dictionary = {
     silent: 'o servidor não respondeu',
     general: {
       system: 'Sistema:',
-      name: 'Pop Search 98',
-      version: (version) => `versão ${version}`,
+      name: (version) => `Pop Search ${version}`,
       registered: 'Registrado para:',
       visitor: 'Visitante',
       computer: 'Computador:',
@@ -74,6 +73,7 @@ export const pt: Dictionary = {
           `Levou ${time} para responder nesta visita. Ele dorme quando ninguém está usando.`,
         up: (time) => `Ligado há ${time}.`,
         runtime: (python, framework) => `Python ${python}, ${framework}.`,
+        version: (version) => `Versão ${version}.`,
         refusal: 'Sem ele ninguém busca nada. Pedido negado.',
       },
       database: {

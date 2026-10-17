@@ -1,6 +1,7 @@
 import { useI18n } from '../../i18n/languageContext';
 import type { SystemView } from '../../hooks/useSystemQuery';
 import computerIcon from '../../assets/computer_explorer.png';
+import { APP_VERSION } from '../../constants/version';
 import styles from './styles.module.css';
 
 interface GeneralProps {
@@ -23,8 +24,7 @@ export const General = ({ system, owner }: GeneralProps) => {
 
       <dl className={styles.facts}>
         <dt>{copy.system}</dt>
-        <dd>{copy.name}</dd>
-        {report ? <dd>{copy.version(report.version)}</dd> : pending}
+        <dd>{copy.name(APP_VERSION)}</dd>
 
         <dt>{copy.registered}</dt>
         <dd>{owner ?? copy.visitor}</dd>

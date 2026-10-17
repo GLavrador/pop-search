@@ -79,6 +79,7 @@ export const Devices = ({ system, server }: DevicesProps) => {
           ? [
               copy.server.up(time(report.uptime_seconds * 1000)),
               copy.server.runtime(report.python, report.framework),
+              copy.server.version(report.version),
             ]
           : []),
       ],

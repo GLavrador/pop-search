@@ -50,8 +50,7 @@ export const en = {
     silent: 'the server did not answer',
     general: {
       system: 'System:',
-      name: 'Pop Search 98',
-      version: (version: string) => `version ${version}`,
+      name: (version: string) => `Pop Search ${version}`,
       registered: 'Registered to:',
       visitor: 'Visitor',
       computer: 'Computer:',
@@ -87,6 +86,7 @@ export const en = {
           `Took ${time} to answer on this visit. It sleeps when nobody is using it.`,
         up: (time: string) => `On for ${time}.`,
         runtime: (python: string, framework: string) => `Python ${python}, ${framework}.`,
+        version: (version: string) => `Version ${version}.`,
         refusal: 'Without it nobody searches for anything. Request denied.',
       },
       database: {

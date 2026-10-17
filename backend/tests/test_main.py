@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 from main import app
+from core.version import VERSION
 
 client = TestClient(app)
 
@@ -35,7 +36,7 @@ def test_system_report_says_what_the_server_is_made_of():
 
     assert response.status_code == 200
     report = response.json()
-    assert report["version"] == "1.0.0"
+    assert report["version"] == VERSION
     assert report["uptime_seconds"] >= 0
     assert report["framework"].startswith("FastAPI ")
     assert report["downloader"].startswith("yt-dlp ")
@@ -70,7 +71,7 @@ def test_system_report_still_answers_when_the_database_does_not():
 
     assert response.status_code == 200
     assert response.json()["database"] == {"ok": False, "ms": None, "videos": None}
-    assert response.json()["version"] == "1.0.0"
+    assert response.json()["version"] == VERSION
 
 
 def test_system_report_is_open_to_visitors(anonymous):
