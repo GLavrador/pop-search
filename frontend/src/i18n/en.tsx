@@ -439,7 +439,8 @@ export const en = {
     remaining: (left: number, date: string) => `${left} left, renews on ${date}`,
     reviewLabel: 'Analyses before approval',
     reviewRemaining: (left: number) =>
-      `${left} left. They do not renew: approval brings the monthly allowance.`,
+      `${left} left for your video. They do not renew: approval brings the monthly allowance.`,
+    reviewMore: 'How does the review work?',
     reviewExhausted: 'All used. You can still add your video by hand.',
   },
 
@@ -511,7 +512,7 @@ export const en = {
     },
     locked: {
       title: 'Your account is waiting for approval',
-      body: 'Your first video is kept and shows up in My-Videos.exe. Once the account is approved, everyone will find it in the search, and you can add more videos.',
+      body: 'Your first video is kept and shows up in My-Videos.exe, where only you see it. Once the account is approved, everyone will find it in the search, and you can add more videos with the monthly allowance of analyses.',
       contact: 'To ask for approval, get in touch:',
       field: 'Adding videos is locked until your account is approved',
     },
@@ -611,9 +612,35 @@ export const en = {
     },
   },
 
+  underReview: {
+    title: 'Your account is under review',
+    intro: 'Welcome to Pop Search! Like every new account, yours starts under review. It works like this:',
+    oneVideo: 'You can keep 1 video, analysed by the AI or filled in by hand.',
+    analyses: (n: number) =>
+      `For that video you have ${n} AI analyses. They do not renew; if they run out, you can still fill it in by hand.`,
+    private: 'Until the account is approved, only you see that video, in My-Videos.exe.',
+    locks: 'Once it is saved, Add-Video.exe locks until the account is approved.',
+    contact: 'To ask for approval, get in touch:',
+    after: 'Once the account is approved, the video goes public in the search and you get the monthly allowance of analyses.',
+    ok: 'Got it',
+  },
+
   admin: {
+    sheets: {
+      pending: (n: number) => (n > 0 ? `Waiting for approval (${n})` : 'Waiting for approval'),
+      approved: 'Approved lately',
+      usage: 'AI usage',
+    },
+    approved: {
+      on: (date: string) => `approved on ${date}`,
+      count: (n: number) => (n === 1 ? '1 video' : `${n} videos`),
+      added: (date: string) => `Added on ${date}`,
+      more: (n: number) => `and ${n} more`,
+      empty: 'No account was approved in the last 30 days.',
+      loadFailed: 'Could not load the accounts approved lately.',
+      note: 'Accounts approved in the last 30 days, each with the latest videos it added. Accounts approved before this list existed do not show up here.',
+    },
     pending: {
-      legend: 'Accounts waiting for approval',
       loading: 'Loading the accounts...',
       empty: 'No account is waiting.',
       joined: (date: string) => `Account created on ${date}`,
@@ -1184,6 +1211,7 @@ export const en = {
       manual: ['I trust you!', 'make it a good one!', 'you write better anyway'],
       saved: ['kept!', 'in the archive!', 'saved, go search for it!'],
       saveFailed: ['it did not save...', 'uh oh, not saved', 'try again?'],
+      underReview: ['welcome! read this first', 'new here? one moment', 'a quick word first!'],
       addLocked: ['still waiting for approval!', 'one video for now', 'approval first!'],
       removed: ['off it goes', 'one fewer', 'out of the archive'],
       removeFailed: ['I could not remove it...', 'uh oh, it stayed', 'try again?'],
@@ -1617,6 +1645,10 @@ export const en = {
       admin: {
         title: 'Statistics',
         text: 'The panel for whoever runs the project: how much the AI was used, what it cost and why analyses failed.',
+      } as HelpCopy,
+      'admin.approved': {
+        title: 'Approved lately',
+        text: 'The accounts approved in the last 30 days and the videos they added since, to keep an eye on what newcomers put in the archive.',
       } as HelpCopy,
       'admin.pending': {
         title: 'Accounts waiting for approval',

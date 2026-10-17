@@ -47,7 +47,7 @@ describe('QuotaMeter', () => {
 
     expect(screen.getByText('Analyses before approval')).toBeInTheDocument();
     expect(screen.getByText('1 / 2')).toBeInTheDocument();
-    expect(screen.getByText(/1 left\. They do not renew/)).toBeInTheDocument();
+    expect(screen.getByText(/1 left for your video\. They do not renew/)).toBeInTheDocument();
     expect(screen.queryByText(/renews on/)).not.toBeInTheDocument();
   });
 

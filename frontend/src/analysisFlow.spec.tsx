@@ -543,6 +543,8 @@ describe('an account waiting for approval', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    // How the review works was already read: these are about what comes after.
+    localStorage.setItem('pop-search:review-read:user-1', '1');
     onServer = null;
     serverDown = false;
     mockGetSession.mockResolvedValue({
@@ -558,6 +560,50 @@ describe('an account waiting for approval', () => {
 
   afterEach(() => {
     vi.mocked(getMyQuota).mockResolvedValue(standing({ limit: 20, remaining: 20, approved: true }));
+  });
+
+  it('should explain the review on the first visit, and let nothing past until it is read', async () => {
+    localStorage.clear();
+    vi.mocked(getMyQuota).mockResolvedValue(standing({}));
+    renderApp();
+
+    const notice = await screen.findByRole('dialog', { name: 'Your account is under review' });
+
+    expect(notice).toHaveAttribute('aria-modal', 'true');
+    expect(within(notice).getByText(/you have 2 AI analyses/)).toBeInTheDocument();
+    expect(within(notice).getByRole('link', { name: 'linkedin.com/in/guilherme-lviana' })).toBeInTheDocument();
+    expect(within(notice).queryByRole('button', { name: /Close/ })).not.toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('dialog', { name: 'Your account is under review' })).toBeInTheDocument();
+
+    await user.click(within(notice).getByRole('button', { name: 'Got it' }));
+
+    expect(screen.queryByRole('dialog', { name: 'Your account is under review' })).not.toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:review-read:user-1')).not.toBeNull();
+  });
+
+  it('should not explain the review again once it was read', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({}));
+    renderApp();
+
+    await screen.findAllByText('Analyses before approval');
+
+    expect(screen.queryByRole('dialog', { name: 'Your account is under review' })).not.toBeInTheDocument();
+  });
+
+  it('should explain the review again on request, from the meter', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({ used: 1, remaining: 1 }));
+    renderApp();
+
+    // The meter is on Add-Video.exe and on the account tab alike.
+    expect(await screen.findAllByText(/1 left for your video/)).not.toHaveLength(0);
+    await user.click(screen.getAllByRole('button', { name: 'How does the review work?' })[0]);
+
+    const notice = screen.getByRole('dialog', { name: 'Your account is under review' });
+    await user.click(within(notice).getByRole('button', { name: /Close/ }));
+
+    expect(screen.queryByRole('dialog', { name: 'Your account is under review' })).not.toBeInTheDocument();
   });
 
   it('should find the way to add locked once its video is in, and where to ask for approval', async () => {

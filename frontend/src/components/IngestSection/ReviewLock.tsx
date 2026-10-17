@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { useQuotaQuery } from '../../hooks/useQuotaQuery';
+import { ReviewWelcome } from '../ReviewWelcome';
 import { helpAt, useRobot } from '../../context/robotContext';
 import { useStatus } from '../../context/status';
 import { CONTACT_URL } from '../../constants/contact';
@@ -9,6 +12,8 @@ export const ReviewLock = () => {
   const { t } = useI18n();
   const robot = useRobot();
   const { setStatus } = useStatus();
+  const { quota } = useQuotaQuery();
+  const [explaining, setExplaining] = useState(false);
 
   const tried = () => {
     setStatus(t.ingest.status.locked, 4000);
@@ -40,7 +45,12 @@ export const ReviewLock = () => {
             {CONTACT_URL.replace(/^https:\/\/www\./, '')}
           </a>
         </span>
+        <button type="button" className={styles.more} onClick={() => setExplaining(true)}>
+          {t.quota.reviewMore}
+        </button>
       </div>
+
+      {explaining && <ReviewWelcome analyses={quota?.limit ?? 2} onClose={() => setExplaining(false)} />}
     </div>
   );
 };

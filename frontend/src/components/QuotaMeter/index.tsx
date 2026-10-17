@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useQuotaQuery } from '../../hooks/useQuotaQuery';
+import { ReviewWelcome } from '../ReviewWelcome';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';
 import styles from './styles.module.css';
@@ -16,6 +18,7 @@ const formatDate = (value: string, locale: string): string => {
 export const QuotaMeter = () => {
   const { quota, isLoading } = useQuotaQuery();
   const { t, locale } = useI18n();
+  const [explaining, setExplaining] = useState(false);
 
   if (isLoading && !quota) {
     return (
@@ -64,11 +67,17 @@ export const QuotaMeter = () => {
       )}
 
       {underReview ? (
-        isExhausted ? (
-          <span className={styles.warning}>{t.quota.reviewExhausted}</span>
-        ) : (
-          <span className={styles.note}>{t.quota.reviewRemaining(quota.remaining)}</span>
-        )
+        <>
+          {isExhausted ? (
+            <span className={styles.warning}>{t.quota.reviewExhausted}</span>
+          ) : (
+            <span className={styles.note}>{t.quota.reviewRemaining(quota.remaining)}</span>
+          )}
+          <button type="button" className={styles.more} onClick={() => setExplaining(true)}>
+            {t.quota.reviewMore}
+          </button>
+          {explaining && <ReviewWelcome analyses={quota.limit} onClose={() => setExplaining(false)} />}
+        </>
       ) : isExhausted ? (
         <span className={styles.warning}>
           {t.quota.exhausted(formatDate(quota.resets_at, locale))}

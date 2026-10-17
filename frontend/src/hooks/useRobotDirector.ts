@@ -435,6 +435,9 @@ export const useRobotDirector = ({ guiding, onTricks, onFetch }: DirectorOptions
         case 'saveFailed':
           react({ face: 'worried', emote: vary('saveFailed', says.saveFailed), move: 'shake' });
           break;
+        case 'underReview':
+          react({ face: 'happy', emote: vary('underReview', says.underReview), move: 'hop' });
+          break;
         case 'addLocked':
           hush('analysis');
           react({ face: 'curious', emote: vary('addLocked', says.addLocked), move: 'shake' });

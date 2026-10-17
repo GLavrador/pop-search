@@ -436,7 +436,10 @@ export const pt: Dictionary = {
     remaining: (left: number, date: string) => `${left} restantes, renova em ${date}`,
     reviewLabel: 'Análises antes da aprovação',
     reviewRemaining: (left: number) =>
-      `${left} restante(s). Elas não renovam: a aprovação traz a cota mensal.`,
+      left === 1
+        ? 'Resta 1 para o seu vídeo. Elas não renovam: a aprovação traz a cota mensal.'
+        : `Restam ${left} para o seu vídeo. Elas não renovam: a aprovação traz a cota mensal.`,
+    reviewMore: 'Como funciona a avaliação?',
     reviewExhausted: 'Todas usadas. Você ainda pode adicionar seu vídeo manualmente.',
   },
 
@@ -508,7 +511,7 @@ export const pt: Dictionary = {
     },
     locked: {
       title: 'Sua conta está aguardando aprovação',
-      body: 'Seu primeiro vídeo está guardado e aparece em My-Videos.exe. Quando a conta for aprovada, todo mundo vai encontrá-lo na busca, e você poderá adicionar mais vídeos.',
+      body: 'Seu primeiro vídeo está guardado e aparece em My-Videos.exe, onde só você o vê. Quando a conta for aprovada, todo mundo vai encontrá-lo na busca, e você poderá adicionar mais vídeos com a cota mensal de análises.',
       contact: 'Para pedir a aprovação, entre em contato:',
       field: 'Adicionar vídeos fica travado até sua conta ser aprovada',
     },
@@ -608,9 +611,35 @@ export const pt: Dictionary = {
     },
   },
 
+  underReview: {
+    title: 'Sua conta está em avaliação',
+    intro: 'Boas-vindas ao Pop Search! Como toda conta nova, a sua começa em avaliação. Funciona assim:',
+    oneVideo: 'Você pode guardar 1 vídeo, analisado pela IA ou preenchido à mão.',
+    analyses: (n: number) =>
+      `Para esse vídeo, você tem ${n} análises de IA. Elas não renovam; se acabarem, ainda dá para preencher à mão.`,
+    private: 'Até a conta ser aprovada, só você vê esse vídeo, em My-Videos.exe.',
+    locks: 'Depois que ele for salvo, o Add-Video.exe fica travado até a aprovação.',
+    contact: 'Para pedir a aprovação, entre em contato:',
+    after: 'Com a conta aprovada, o vídeo fica público na busca e você ganha a cota mensal de análises.',
+    ok: 'Entendi',
+  },
+
   admin: {
+    sheets: {
+      pending: (n: number) => (n > 0 ? `Aguardando aprovação (${n})` : 'Aguardando aprovação'),
+      approved: 'Aprovadas há pouco',
+      usage: 'Uso da IA',
+    },
+    approved: {
+      on: (date: string) => `aprovada em ${date}`,
+      count: (n: number) => (n === 1 ? '1 vídeo' : `${n} vídeos`),
+      added: (date: string) => `Adicionado em ${date}`,
+      more: (n: number) => `e mais ${n}`,
+      empty: 'Nenhuma conta foi aprovada nos últimos 30 dias.',
+      loadFailed: 'Não foi possível carregar as contas aprovadas há pouco.',
+      note: 'As contas aprovadas nos últimos 30 dias, cada uma com os últimos vídeos que adicionou. Contas aprovadas antes desta lista existir não aparecem aqui.',
+    },
     pending: {
-      legend: 'Contas aguardando aprovação',
       loading: 'Carregando as contas...',
       empty: 'Nenhuma conta aguardando.',
       joined: (date: string) => `Conta criada em ${date}`,
@@ -1183,6 +1212,7 @@ export const pt: Dictionary = {
       manual: ['eu confio em você!', 'capricha na descrição!', 'você escreve melhor mesmo'],
       saved: ['guardado!', 'no acervo!', 'salvo, pode buscar!'],
       saveFailed: ['não salvou...', 'xi, não gravou', 'tenta de novo?'],
+      underReview: ['boas-vindas! leia antes', 'chegou agora? um instante', 'antes, um recado!'],
       addLocked: ['ainda aguardando aprovação!', 'um vídeo por enquanto', 'primeiro a aprovação!'],
       removed: ['foi embora', 'um a menos', 'tirei do acervo'],
       removeFailed: ['não consegui tirar...', 'xi, ele ficou', 'tenta de novo?'],
@@ -1617,6 +1647,10 @@ export const pt: Dictionary = {
       admin: {
         title: 'Estatísticas',
         text: 'O painel de quem administra o projeto: quanto a IA foi usada, quanto custou e por que as análises falharam.',
+      },
+      'admin.approved': {
+        title: 'Aprovadas há pouco',
+        text: 'As contas aprovadas nos últimos 30 dias e os vídeos que elas adicionaram desde então, para acompanhar o que quem chegou agora põe no acervo.',
       },
       'admin.pending': {
         title: 'Contas aguardando aprovação',

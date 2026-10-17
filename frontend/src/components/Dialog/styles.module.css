@@ -16,6 +16,14 @@
   line-height: 1.35;
 }
 
+/* Under one that must be read, so nothing behind it can be reached first. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  background: rgba(0, 0, 0, 0.25);
+}
+
 .dialog:focus {
   outline: none;
 }

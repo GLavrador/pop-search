@@ -12,6 +12,9 @@ interface DialogProps {
   /** What stands beside OK, if anything. */
   footer?: ReactNode;
   help?: HelpKey;
+  /** Read to the end: no X and no Escape, only its button closes it. */
+  required?: boolean;
+  okLabel?: string;
 }
 
 // How much of the title bar always stays on screen, to be grabbed again.
@@ -26,7 +29,15 @@ interface Grip {
 }
 
 /** A small window over everything else: dragged by its title bar, closed by X, OK or Escape. */
-export const Dialog = ({ title, children, onClose, footer, help }: DialogProps) => {
+export const Dialog = ({
+  title,
+  children,
+  onClose,
+  footer,
+  help,
+  required = false,
+  okLabel,
+}: DialogProps) => {
   const { t } = useI18n();
   const shown = useOwnerShown();
   const [moved, setMoved] = useState({ x: 0, y: 0 });
@@ -80,47 +91,53 @@ export const Dialog = ({ title, children, onClose, footer, help }: DialogProps) 
   };
 
   return createPortal(
-    <div
-      ref={frame}
-      className={`win95-border ${styles.dialog}`}
-      style={{ transform: `translate(calc(-50% + ${moved.x}px), ${moved.y}px)` }}
-      role="dialog"
-      aria-labelledby={titleId}
-      tabIndex={-1}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') onClose();
-      }}
-      {...(help ? helpAt(help) : {})}
-    >
+    <>
+      {required && <div className={styles.backdrop} />}
       <div
-        className={styles.titleBar}
-        onPointerDown={handleDown}
-        onPointerMove={handleMove}
-        onPointerUp={handleUp}
-        onPointerCancel={handleUp}
+        ref={frame}
+        className={`win95-border ${styles.dialog}`}
+        style={{ transform: `translate(calc(-50% + ${moved.x}px), ${moved.y}px)` }}
+        role="dialog"
+        aria-modal={required || undefined}
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape' && !required) onClose();
+        }}
+        {...(help ? helpAt(help) : {})}
       >
-        <span id={titleId} className={styles.title}>
-          {title}
-        </span>
-        <button
-          type="button"
-          className={styles.close}
-          aria-label={t.common.closeOf(title)}
-          onClick={onClose}
+        <div
+          className={styles.titleBar}
+          onPointerDown={handleDown}
+          onPointerMove={handleMove}
+          onPointerUp={handleUp}
+          onPointerCancel={handleUp}
         >
-          X
-        </button>
-      </div>
+          <span id={titleId} className={styles.title}>
+            {title}
+          </span>
+          {!required && (
+            <button
+              type="button"
+              className={styles.close}
+              aria-label={t.common.closeOf(title)}
+              onClick={onClose}
+            >
+              X
+            </button>
+          )}
+        </div>
 
-      <div className={styles.body}>{children}</div>
+        <div className={styles.body}>{children}</div>
 
-      <div className={styles.footer}>
-        {footer}
-        <button type="button" className={`win95-btn ${styles.ok}`} onClick={onClose}>
-          {t.common.ok}
-        </button>
+        <div className={styles.footer}>
+          {footer}
+          <button type="button" className={`win95-btn ${styles.ok}`} onClick={onClose}>
+            {okLabel ?? t.common.ok}
+          </button>
+        </div>
       </div>
-    </div>,
+    </>,
     document.body,
   );
 };

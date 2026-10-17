@@ -1,0 +1,12 @@
+.text {
+  margin: 0 0 8px;
+}
+
+.points {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+
+.points li {
+  margin-bottom: 4px;
+}

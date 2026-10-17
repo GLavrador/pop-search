@@ -44,6 +44,8 @@ export type RobotEvent =
   | { kind: 'manualOpened' }
   | { kind: 'saved' }
   | { kind: 'saveFailed' }
+  /** An account under review is shown how the review works, on its first visit. */
+  | { kind: 'underReview' }
   /** Someone tried to add a video while their account waits for approval. */
   | { kind: 'addLocked' }
   | { kind: 'videoRemoved' }
