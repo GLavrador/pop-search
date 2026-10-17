@@ -11,6 +11,7 @@ from core.logger import get_logger
 from db import supabase
 from dtos import (
     AdminStatsReport,
+    ApprovedAccount,
     BinRecords,
     MyVideo,
     PendingAccount,
@@ -155,6 +156,22 @@ async def read_pending_accounts(request: Request, user_id: str = CurrentUser):
         return await review.list_pending()
     except Exception as e:
         logger.exception(f"Failed to list accounts under review: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while loading the accounts. Please try again.",
+        )
+
+
+@router.get("/admin/approved", response_model=list[ApprovedAccount])
+@limiter.limit("30/minute")
+async def read_approved_accounts(request: Request, user_id: str = CurrentUser):
+    if not await is_admin(user_id):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    try:
+        return await review.list_approved()
+    except Exception as e:
+        logger.exception(f"Failed to list approved accounts: {e}")
         raise HTTPException(
             status_code=500,
             detail="An internal error occurred while loading the accounts. Please try again.",

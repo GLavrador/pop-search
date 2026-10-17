@@ -28,7 +28,8 @@ create table profiles (
   is_admin boolean not null default false,
   -- A new account is under review: it adds one video, which only it sees,
   -- until an administrator approves it.
-  approved boolean not null default false
+  approved boolean not null default false,
+  approved_at timestamptz
 );
 
 -- security definer: the signup context cannot write to public.profiles.
@@ -390,7 +391,7 @@ security invoker
 set search_path = public
 as $$
 begin
-  update public.profiles set approved = true where id = p_user_id and not approved;
+  update public.profiles set approved = true, approved_at = now() where id = p_user_id and not approved;
   if not found then
     return false;
   end if;

@@ -181,7 +181,7 @@ class MyVideo(BaseModel):
     approved: bool = True
 
 
-class PendingVideo(BaseModel):
+class AccountVideo(BaseModel):
     id: str
     titulo_video: Optional[str] = None
     descricao_completa: Optional[str] = None
@@ -194,7 +194,17 @@ class PendingAccount(BaseModel):
     user_id: str
     display_name: str
     created_at: str
-    video: Optional[PendingVideo] = None
+    video: Optional[AccountVideo] = None
+
+
+class ApprovedAccount(BaseModel):
+    user_id: str
+    display_name: str
+    created_at: str
+    approved_at: str
+    video_count: int
+    # The most recent ones only.
+    videos: List[AccountVideo]
 
 
 AnalysisStage = Literal["queued", "downloading", "uploading", "watching", "writing", "done", "failed"]

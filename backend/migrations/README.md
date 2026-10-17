@@ -4,6 +4,14 @@ Não há aplicação automática durante o deploy: cada arquivo é executado à 
 SQL Editor do Supabase. Para uma instalação nova, execute `backend/schema.sql`,
 que já inclui todas elas.
 
+## Histórico de aprovações (`20261017_approval_history.sql`)
+
+Execute depois de `20261017_account_approval.sql` e **antes** do merge. Adiciona
+`profiles.approved_at` e faz `approve_account` gravar a data da aprovação, que o
+`Stats.exe` usa para listar as contas aprovadas nos últimos 30 dias. As contas
+aprovadas antes disso ficam sem data e não aparecem nessa lista. Nenhum registro
+é alterado.
+
 ## Aprovação de contas (`20261017_account_approval.sql`)
 
 Execute **antes** do merge que publica o backend com a aprovação de contas.

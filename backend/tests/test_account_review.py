@@ -250,6 +250,7 @@ class TestApproval:
 
     @pytest.mark.parametrize("method, path", [
         ("get", "/me/admin/pending"),
+        ("get", "/me/admin/approved"),
         ("post", f"/me/admin/pending/{OTHER_USER_ID}/approve"),
         ("delete", f"/me/admin/pending/{OTHER_USER_ID}/video"),
     ])
@@ -271,6 +272,22 @@ class TestApproval:
 
         assert body[0]["display_name"] == "Bia"
         assert body[0]["video"]["titulo_video"] == "Um gato"
+
+    def test_lists_the_accounts_approved_lately_with_their_videos(self):
+        approved = [{
+            "user_id": OTHER_USER_ID,
+            "display_name": "Bia",
+            "created_at": "2026-10-16T12:00:00+00:00",
+            "approved_at": "2026-10-17T12:00:00+00:00",
+            "video_count": 1,
+            "videos": [PENDING[0]["video"]],
+        }]
+
+        with admin(), patch("routers.me.review.list_approved", new=AsyncMock(return_value=approved)):
+            body = client.get("/me/admin/approved").json()
+
+        assert body[0]["approved_at"] == "2026-10-17T12:00:00+00:00"
+        assert body[0]["videos"][0]["titulo_video"] == "Um gato"
 
     def test_approves_an_account(self):
         approve = AsyncMock(return_value=True)
@@ -322,6 +339,26 @@ class TestReviewService:
 
         deleting.eq.assert_called_once_with("user_id", OTHER_USER_ID)
         deleting.eq.return_value.eq.assert_called_once_with("approved", False)
+
+    def test_keeps_the_latest_videos_of_each_account_approved_lately(self):
+        database = MagicMock()
+        profiles = database.table.return_value.select.return_value.gte.return_value
+        profiles.order.return_value.limit.return_value.execute.return_value.data = [
+            {"id": "bia", "display_name": "Bia", "created_at": "c", "approved_at": "a"},
+            {"id": "caio", "display_name": "Caio", "created_at": "c", "approved_at": "a"},
+        ]
+        videos = database.table.return_value.select.return_value.in_.return_value.order.return_value
+        videos.execute.return_value.data = [
+            {"id": f"v{n}", "user_id": "bia", "url_original": URL, "created_at": "c"} for n in range(7)
+        ]
+
+        with patch("services.review.supabase", database):
+            accounts = review._fetch_approved()
+
+        assert accounts[0]["video_count"] == 7
+        assert [video["id"] for video in accounts[0]["videos"]] == ["v0", "v1", "v2", "v3", "v4"]
+        assert accounts[1]["video_count"] == 0
+        assert accounts[1]["videos"] == []
 
     def test_puts_the_accounts_with_a_video_first(self):
         database = MagicMock()
