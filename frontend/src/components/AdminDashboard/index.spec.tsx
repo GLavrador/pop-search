@@ -7,6 +7,10 @@ vi.mock('../../hooks/useAdminStatsQuery', () => ({
   useAdminStatsQuery: (days: number) => mockUseAdminStatsQuery(days),
 }));
 
+vi.mock('./PendingAccounts', () => ({
+  PendingAccounts: () => null,
+}));
+
 import { AdminDashboard } from './index';
 
 const stats = (overrides = {}) => ({

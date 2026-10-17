@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { RANGE_OPTIONS, useAdminStatsQuery } from '../../hooks/useAdminStatsQuery';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
+import { PendingAccounts } from './PendingAccounts';
 import styles from './styles.module.css';
 
 interface CardProps {
@@ -31,12 +32,13 @@ export const AdminDashboard = () => {
     return <p className={styles.empty}>{t.admin.notAdmin}</p>;
   }
 
-  if (error) {
-    return <p className={styles.empty}>{error}</p>;
-  }
-
-  if (!stats) {
-    return <p className={styles.empty}>{isLoading ? t.admin.loading : t.admin.noData}</p>;
+  if (error || !stats) {
+    return (
+      <div className={styles.page}>
+        <PendingAccounts />
+        <p className={styles.empty}>{error ?? (isLoading ? t.admin.loading : t.admin.noData)}</p>
+      </div>
+    );
   }
 
   const ceilingHit = stats.daily_limit > 0 && stats.analyses_today >= stats.daily_limit;
@@ -63,6 +65,8 @@ export const AdminDashboard = () => {
           ))}
         </div>
       </div>
+
+      <PendingAccounts />
 
       <div className={styles.cards}>
         <Card
