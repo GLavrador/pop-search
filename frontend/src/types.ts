@@ -181,19 +181,32 @@ export interface MyVideo {
   approved?: boolean;
 }
 
+/** A video as the administrator sees it, next to the account that sent it. */
+export interface AccountVideo {
+  id: string;
+  titulo_video?: string | null;
+  descricao_completa?: string | null;
+  url_original: string;
+  created_at: string;
+  post?: PostInfo | null;
+}
+
 /** An account waiting for approval, with the video it sent, if any. */
 export interface PendingAccount {
   user_id: string;
   display_name: string;
   created_at: string;
-  video: {
-    id: string;
-    titulo_video?: string | null;
-    descricao_completa?: string | null;
-    url_original: string;
-    created_at: string;
-    post?: PostInfo | null;
-  } | null;
+  video: AccountVideo | null;
+}
+
+/** An account approved in the last days, with its latest videos. */
+export interface ApprovedAccount {
+  user_id: string;
+  display_name: string;
+  created_at: string;
+  approved_at: string;
+  video_count: number;
+  videos: AccountVideo[];
 }
 
 export interface SearchParams {

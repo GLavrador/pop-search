@@ -141,7 +141,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin: 6px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -203,4 +203,52 @@
   font-size: 0.82rem;
   background: var(--win-warning-bg);
   border: 1px solid var(--win-shadow-dark);
+}
+
+.sheets {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  margin: 0 0 -2px;
+  padding-left: 2px;
+}
+
+.sheet {
+  margin-top: 2px;
+  padding: 3px 9px 4px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--win-dark);
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: none;
+  box-shadow: inset -1px 0 0 0 var(--win-shadow-dark);
+  cursor: default;
+  white-space: nowrap;
+}
+
+.sheet[aria-selected='true'] {
+  position: relative;
+  z-index: 1;
+  margin: 0 -2px;
+  padding: 5px 11px 6px;
+  font-weight: bold;
+}
+
+.sheet:focus-visible {
+  outline: 1px dotted var(--win-dark);
+  outline-offset: -5px;
+}
+
+.sheetPanel {
+  padding: 12px;
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+  box-shadow: inset -1px -1px 0 0 var(--win-shadow-dark);
 }

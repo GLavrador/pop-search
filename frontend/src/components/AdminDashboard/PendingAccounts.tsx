@@ -1,22 +1,17 @@
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { approveAccount, getPendingAccounts, removePendingVideo } from '../../services/api';
-import { useAuth } from '../../context/authContext';
+import { useQueryClient } from '@tanstack/react-query';
+import { approveAccount, removePendingVideo } from '../../services/api';
+import { usePendingAccountsQuery } from '../../hooks/useReviewQueries';
 import { useStatus } from '../../context/status';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, useRobot } from '../../context/robotContext';
 import type { PendingAccount } from '../../types';
-import { Thumbnail } from '../Post/Thumbnail';
+import { VideoSummary } from './VideoSummary';
+import { formatDate } from './formatDate';
 import styles from './styles.module.css';
 import warningIcon from '../../assets/win98/msg_warning-0.png';
 
-const formatDate = (value: string, locale: string): string => {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(locale);
-};
-
 export const PendingAccounts = () => {
-  const { session } = useAuth();
   const { setStatus } = useStatus();
   const { t, locale } = useI18n();
   const robot = useRobot();
@@ -25,12 +20,7 @@ export const PendingAccounts = () => {
   const [asking, setAsking] = useState<string | null>(null);
   const copy = t.admin.pending;
 
-  const query = useQuery({
-    queryKey: ['pendingAccounts', session?.user.id],
-    queryFn: ({ signal }) => getPendingAccounts(signal),
-    staleTime: 0,
-    retry: false,
-  });
+  const query = usePendingAccountsQuery();
   const accounts = query.data ?? [];
 
   const act = async (account: PendingAccount, approving: boolean) => {
@@ -46,7 +36,10 @@ export const PendingAccounts = () => {
         await removePendingVideo(account.user_id);
         setStatus(copy.removed, 5000);
       }
-      await queryClient.invalidateQueries({ queryKey: ['pendingAccounts'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['pendingAccounts'] }),
+        queryClient.invalidateQueries({ queryKey: ['approvedAccounts'] }),
+      ]);
     } catch (err: unknown) {
       console.error('Failed to act on an account waiting for approval:', err);
       setStatus(copy.failed, 5000);
@@ -57,12 +50,7 @@ export const PendingAccounts = () => {
   };
 
   return (
-    <fieldset className={styles.group} {...helpAt('admin.pending')}>
-      <legend className={styles.legend}>
-        {copy.legend}
-        {accounts.length > 0 && ` (${accounts.length})`}
-      </legend>
-
+    <div {...helpAt('admin.pending')}>
       {query.isPending ? (
         <p className={styles.empty}>{copy.loading}</p>
       ) : query.isError ? (
@@ -77,37 +65,17 @@ export const PendingAccounts = () => {
 
             return (
               <li key={account.user_id} className={styles.pendingRow}>
-                <div className={styles.pendingVideo}>
-                  <Thumbnail src={video?.post?.miniatura} />
-                  <div className={styles.pendingBody}>
-                    <span>
-                      <strong>{account.display_name}</strong>{' '}
-                      <span className={styles.cardHint}>
-                        {copy.joined(formatDate(account.created_at, locale))}
-                      </span>
-                    </span>
-                    {video ? (
-                      <>
-                        <a
-                          href={video.url_original}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.pendingLink}
-                        >
-                          {video.titulo_video || video.url_original}
-                        </a>
-                        {video.descricao_completa && (
-                          <p className={styles.pendingText}>{video.descricao_completa}</p>
-                        )}
-                        {video.post?.texto && (
-                          <p className={styles.pendingText}>{`"${video.post.texto}"`}</p>
-                        )}
-                      </>
-                    ) : (
-                      <span className={styles.cardHint}>{copy.noVideo}</span>
-                    )}
-                  </div>
-                </div>
+                <span>
+                  <strong>{account.display_name}</strong>{' '}
+                  <span className={styles.cardHint}>
+                    {copy.joined(formatDate(account.created_at, locale))}
+                  </span>
+                </span>
+                {video ? (
+                  <VideoSummary video={video} />
+                ) : (
+                  <span className={styles.cardHint}>{copy.noVideo}</span>
+                )}
 
                 {asking === account.user_id ? (
                   <div className={styles.pendingConfirm} role="group" aria-label={copy.removeVideoOf(account.display_name)}>
@@ -164,6 +132,6 @@ export const PendingAccounts = () => {
         </ul>
       )}
       <p className={styles.note}>{copy.note}</p>
-    </fieldset>
+    </div>
   );
 };

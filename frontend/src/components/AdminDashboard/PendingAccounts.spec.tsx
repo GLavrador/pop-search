@@ -72,7 +72,6 @@ describe('PendingAccounts', () => {
     expect(screen.getByText(/far too small/)).toBeInTheDocument();
     expect(screen.getByText('"look at him"')).toBeInTheDocument();
     expect(screen.getByText('No video yet.')).toBeInTheDocument();
-    expect(screen.getByText('Accounts waiting for approval (2)')).toBeInTheDocument();
   });
 
   it('should say so when nobody is waiting', async () => {

@@ -46,6 +46,9 @@ import { Rebuild } from './components/Rebuild';
 import { BlueTiles } from './components/Rebuild/BlueTiles';
 import { useRebuild } from './components/Rebuild/useRebuild';
 import { SystemProperties } from './components/SystemProperties';
+import { ReviewWelcome } from './components/ReviewWelcome';
+import { useReviewWelcome } from './hooks/useReviewWelcome';
+import { usePendingAccountsQuery } from './hooks/useReviewQueries';
 import { Tricks } from './components/Tricks';
 import { Bin } from './components/Bin';
 import { useBin } from './components/Bin/useBin';
@@ -90,6 +93,8 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
   const [tossing, setTossing] = useState<Trashable | null>(null);
   const { isAuthenticated, isLoading: isAuthLoading, displayName } = useAuth();
   const { isAdmin } = useAdminStatsQuery(30);
+  const waiting = usePendingAccountsQuery(isAdmin).data?.length ?? 0;
+  const welcome = useReviewWelcome();
   const guide = useGuide({ onEnterTab: setActiveTab });
   const robot = useRobotDirector({
     guiding: guide.isVisible,
@@ -275,7 +280,14 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
         ]
       : []),
     ...(isAdmin
-      ? [{ id: 'admin' as Tab, label: TAB_LABELS.stats, icon: TAB_ICONS.stats, help: 'tab.admin' as HelpKey }]
+      ? [
+          {
+            id: 'admin' as Tab,
+            label: waiting > 0 ? `${TAB_LABELS.stats} (${waiting})` : TAB_LABELS.stats,
+            icon: TAB_ICONS.stats,
+            help: 'tab.admin' as HelpKey,
+          },
+        ]
       : []),
     {
       id: 'account',
@@ -284,6 +296,17 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
       help: 'tab.account',
     },
   ];
+
+  // An account under review reads how the review works before anything else, once.
+  const showWelcome =
+    welcome.due && windowState === 'open' && !wrecked && !bin.away && !guide.isVisible;
+  const toldWelcome = useRef(false);
+
+  useEffect(() => {
+    if (!showWelcome || toldWelcome.current) return;
+    toldWelcome.current = true;
+    notify({ kind: 'underReview' });
+  }, [showWelcome, notify]);
 
   const step = guide.isVisible ? guide.step : null;
   const onStepTab = step !== null && step.tab === activeTab;
@@ -492,6 +515,10 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
           owner={isAuthenticated ? displayName : null}
           onClose={() => setComputerOpen(false)}
         />
+      )}
+
+      {showWelcome && (
+        <ReviewWelcome analyses={welcome.analyses} onClose={welcome.read} required />
       )}
 
       {tricksOpen && !wrecked && (

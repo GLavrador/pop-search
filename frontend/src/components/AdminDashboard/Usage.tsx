@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { RANGE_OPTIONS, useAdminStatsQuery } from '../../hooks/useAdminStatsQuery';
 import { useI18n } from '../../i18n/languageContext';
-import { helpAt, useRobot } from '../../context/robotContext';
-import { PendingAccounts } from './PendingAccounts';
+import { useRobot } from '../../context/robotContext';
 import styles from './styles.module.css';
 
 interface CardProps {
@@ -20,32 +19,24 @@ const Card = ({ label, value, hint, alert }: CardProps) => (
   </div>
 );
 
-export const AdminDashboard = () => {
+/** How much the AI was used, what it cost and why analyses failed. */
+export const Usage = () => {
   const [days, setDays] = useState<number>(30);
-  const { isAdmin, stats, isLoading, error } = useAdminStatsQuery(days);
+  const { stats, isLoading, error } = useAdminStatsQuery(days);
   const { t, locale } = useI18n();
   const robot = useRobot();
 
   const n = (value: number) => value.toLocaleString(locale);
 
-  if (!isAdmin) {
-    return <p className={styles.empty}>{t.admin.notAdmin}</p>;
-  }
-
   if (error || !stats) {
-    return (
-      <div className={styles.page}>
-        <PendingAccounts />
-        <p className={styles.empty}>{error ?? (isLoading ? t.admin.loading : t.admin.noData)}</p>
-      </div>
-    );
+    return <p className={styles.empty}>{error ?? (isLoading ? t.admin.loading : t.admin.noData)}</p>;
   }
 
   const ceilingHit = stats.daily_limit > 0 && stats.analyses_today >= stats.daily_limit;
   const busiestDay = Math.max(1, ...stats.daily.map((point) => point.analyses));
 
   return (
-    <div className={styles.page} {...helpAt('admin')}>
+    <div className={styles.page}>
       <div className={styles.header}>
         <h2 className={styles.title}>{t.admin.title}</h2>
         <div className={styles.ranges} role="group" aria-label={t.admin.rangeLabel}>
@@ -65,8 +56,6 @@ export const AdminDashboard = () => {
           ))}
         </div>
       </div>
-
-      <PendingAccounts />
 
       <div className={styles.cards}>
         <Card

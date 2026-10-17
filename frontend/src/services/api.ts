@@ -12,6 +12,7 @@ import type {
   SystemReport,
   BinRecords,
   PendingAccount,
+  ApprovedAccount,
 } from '../types';
 import { lastSearch, timed } from './searchTrace';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
@@ -117,6 +118,11 @@ export const getAdminStats = async (
 
 export const getPendingAccounts = async (signal?: AbortSignal): Promise<PendingAccount[]> => {
   const response = await api.get<PendingAccount[]>('/me/admin/pending', { signal });
+  return response.data;
+};
+
+export const getApprovedAccounts = async (signal?: AbortSignal): Promise<ApprovedAccount[]> => {
+  const response = await api.get<ApprovedAccount[]>('/me/admin/approved', { signal });
   return response.data;
 };
 
