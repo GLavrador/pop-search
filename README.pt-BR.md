@@ -75,6 +75,12 @@ Entre um clique e outro, o BIP-98 descansa em cima da janela, na barra de tarefa
 
 O `Meu Computador` abre as Propriedades do Sistema. O Gerenciador de dispositivos lista as peças de que o app é feito de verdade, com o estado atual vindo do servidor, e a aba Desempenho divide a última busca em etapas, cronometradas pelo servidor no cabeçalho `Server-Timing`.
 
+### O Stats.exe, para quem administra
+
+<img src="docs/media/pt-BR/stats.png" width="808" alt="O Stats.exe com contas de exemplo: a aba das contas aguardando aprovação, uma com o vídeo que enviou e os botões Aprovar e Excluir vídeo, e a aba de uso da IA com o custo médio de uma análise, a taxa de falha, o dia de hoje contra o teto diário, quanto custaria um dia cheio e as análises de cada dia">
+
+Uma conta de administrador ganha mais uma aba. A primeira parte lista as contas aguardando aprovação com o que o vídeo delas mostra, para julgar sem abrir o post; `Aprovar` torna o vídeo público, e `Excluir vídeo` joga fora. A segunda lista as contas aprovadas nos últimos 30 dias com os vídeos que adicionaram desde então. A terceira é sobre a cota de IA: quanto custa uma análise em tokens (média, mediana, a mais barata e a mais cara), com que frequência as análises falham e quantos tokens essas falhas gastaram, o dia de hoje contra o teto diário, quanto custaria um dia cheio no teto, as análises de cada dia e o consumo de cada conta. Os números da imagem são de exemplo. As rotas por trás dela respondem 404 para quem não é administrador.
+
 ### No celular
 
 <img src="docs/media/pt-BR/mobile.png" width="720" alt="O Pop Search num celular: a área de trabalho com os ícones em fila e a janela embaixo, e uma busca com o resultado">

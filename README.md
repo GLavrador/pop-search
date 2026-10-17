@@ -75,6 +75,12 @@ Between your clicks BIP-98 rests on the window, the taskbar or the status bar. L
 
 `My Computer` opens System Properties. Device Manager lists the parts the app is actually made of, with live status from the server, and Performance breaks the last search into steps, timed by the server through the `Server-Timing` header.
 
+### Stats.exe, for whoever runs it
+
+<img src="docs/media/stats.png" width="808" alt="Stats.exe with sample accounts: the sheet of accounts waiting for approval, one with the video it sent and the Approve and Delete video buttons, and the AI usage sheet with the average cost of an analysis, the failure rate, today against the daily ceiling, what a full day would cost and the analyses of each day">
+
+An admin account gets one more tab. The first sheet lists the accounts waiting for approval with what their video shows, so it can be judged without opening the post; `Approve` makes it public, and `Delete video` throws it away. The second lists the accounts approved in the last 30 days with the videos they added since. The third is about the AI quota: what an analysis costs in tokens (average, median, cheapest and priciest), how often analyses fail and how many tokens those failures burned, today against the daily ceiling, what a full day at the ceiling would cost, the analyses of each day and the consumption of each account. The numbers in the picture are sample data. The routes behind it answer 404 to anyone who is not an admin.
+
 ### On a phone
 
 <img src="docs/media/mobile.png" width="720" alt="Pop Search on a phone: the desktop with the icons in a row and the window below, and a search with its result">
