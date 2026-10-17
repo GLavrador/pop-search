@@ -38,7 +38,7 @@ Pop Search is up at **[pop-search-ochre.vercel.app](https://pop-search-ochre.ver
 
 - **The first visit in a tab** starts with the robot building the desktop, about 20 seconds. Any key or the `skip ▸▸` button jumps straight to the program.
 - **Searching needs no account.** Open `Search.exe`, describe the video in your own words, in English or Portuguese, and press `Find Now`.
-- **Adding videos needs an account** (an AI analysis uses up quota). You can create one from the `Sign In` tab and confirm it from the link in the e-mail it sends. A new account is under review: it adds one video, by AI or by hand, which only it sees. Once I approve the account, that video goes public and the account adds more, within a monthly analysis limit.
+- **Adding videos needs an account** (an AI analysis uses up quota). You can create one from the `Sign In` tab and confirm it from the link in the e-mail it sends. A new account is under review, and on its first visit a notice explains how it works: it adds one video, by AI (two analyses at most) or by hand, which only it sees, and asks for approval through the link in the notice. Once I approve the account, that video goes public and the account adds more, within a monthly analysis limit.
 - **Not sure where to start?** Take the guide from the invitation above the tabs. It walks through adding and finding a video on practice screens, with no account and no AI call.
 - **Then wander.** Double-click the `Tricks` icon for the robot's own list of things to try, and leave the page alone for a little while to see what it gets up to.
 - **The interface follows your browser's language**, English or Portuguese, and can be switched in the `Sign In` tab. The pictures here are in English.
@@ -328,6 +328,7 @@ Authenticated routes expect `Authorization: Bearer <access_token>`, the Supabase
 | `GET`, `PUT /me/bin-records` | yes | Best scores in the bin's games; a record only goes up | 30/min |
 | `GET /me/is-admin`, `/me/all-usage`, `/me/admin/stats` | admin | Usage and cost statistics | 30 to 60/min |
 | `GET /me/admin/pending` | admin | Accounts under review, each with its pending video | 30/min |
+| `GET /me/admin/approved` | admin | Accounts approved in the last 30 days, each with its latest videos | 30/min |
 | `POST /me/admin/pending/{id}/approve` | admin | Approves the account and makes its video public | 30/min |
 | `DELETE /me/admin/pending/{id}/video` | admin | Deletes the video an account under review is waiting on | 30/min |
 

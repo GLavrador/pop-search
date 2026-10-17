@@ -38,7 +38,7 @@ O Pop Search está no ar em **[pop-search-ochre.vercel.app](https://pop-search-o
 
 - **A primeira visita em cada aba** começa com o robô montando a área de trabalho, uns 20 segundos. Qualquer tecla ou o botão `pular ▸▸` vai direto para o programa.
 - **Buscar não precisa de conta.** Abra o `Search.exe`, descreva o vídeo do seu jeito, em português ou em inglês, e clique em `Buscar`.
-- **Adicionar vídeos precisa de conta** (a análise por IA consome cota). Dá para criar uma na aba `Sign In` e confirmar pelo link do e-mail que ela envia. Uma conta nova fica em avaliação: adiciona um vídeo, por IA ou à mão, que só ela vê. Quando eu aprovo a conta, esse vídeo fica público e a conta passa a adicionar mais, dentro de um limite mensal de análises.
+- **Adicionar vídeos precisa de conta** (a análise por IA consome cota). Dá para criar uma na aba `Sign In` e confirmar pelo link do e-mail que ela envia. Uma conta nova fica em avaliação, e na primeira visita um aviso explica como funciona: ela adiciona um vídeo, por IA (no máximo duas análises) ou à mão, que só ela vê, e pede a aprovação pelo link do aviso. Quando eu aprovo a conta, esse vídeo fica público e a conta passa a adicionar mais, dentro de um limite mensal de análises.
 - **Não sabe por onde começar?** Aceite o convite do guia, acima das abas. Ele mostra como adicionar e encontrar um vídeo em telas de treino, sem conta e sem chamar a IA.
 - **Depois, explore.** Dê dois cliques no ícone `Truques` para ver a lista do próprio robô com o que tentar, e deixe a página quieta por um tempinho para ver o que ele traquina.
 - **A interface segue o idioma do navegador**, em português ou em inglês, e troca na aba `Sign In`. As imagens daqui estão em português.
@@ -328,6 +328,7 @@ As rotas autenticadas esperam `Authorization: Bearer <access_token>`, o token de
 | `GET`, `PUT /me/bin-records` | sim | Recordes dos jogos da Lixeira; um recorde só sobe | 30/min |
 | `GET /me/is-admin`, `/me/all-usage`, `/me/admin/stats` | admin | Estatísticas de uso e de custo | 30 a 60/min |
 | `GET /me/admin/pending` | admin | Contas em avaliação, cada uma com seu vídeo pendente | 30/min |
+| `GET /me/admin/approved` | admin | Contas aprovadas nos últimos 30 dias, cada uma com seus últimos vídeos | 30/min |
 | `POST /me/admin/pending/{id}/approve` | admin | Aprova a conta e torna o vídeo dela público | 30/min |
 | `DELETE /me/admin/pending/{id}/video` | admin | Exclui o vídeo que uma conta em avaliação está esperando | 30/min |
 
