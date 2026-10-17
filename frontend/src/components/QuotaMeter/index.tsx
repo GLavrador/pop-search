@@ -30,6 +30,7 @@ export const QuotaMeter = () => {
   }
 
   const isExhausted = quota.remaining === 0;
+  const underReview = quota.approved === false;
   const percent = quota.limit > 0 ? Math.min((quota.used / quota.limit) * 100, 100) : 0;
 
   return (
@@ -38,7 +39,7 @@ export const QuotaMeter = () => {
       {...helpAt('ingest.quota')}
     >
       <div className={styles.row}>
-        <span className={styles.label}>{t.quota.label}</span>
+        <span className={styles.label}>{underReview ? t.quota.reviewLabel : t.quota.label}</span>
         <span className={styles.count}>
           {quota.used} / {quota.limit}
         </span>
@@ -62,7 +63,13 @@ export const QuotaMeter = () => {
         </span>
       )}
 
-      {isExhausted ? (
+      {underReview ? (
+        isExhausted ? (
+          <span className={styles.warning}>{t.quota.reviewExhausted}</span>
+        ) : (
+          <span className={styles.note}>{t.quota.reviewRemaining(quota.remaining)}</span>
+        )
+      ) : isExhausted ? (
         <span className={styles.warning}>
           {t.quota.exhausted(formatDate(quota.resets_at, locale))}
         </span>

@@ -44,6 +44,8 @@ export type RobotEvent =
   | { kind: 'manualOpened' }
   | { kind: 'saved' }
   | { kind: 'saveFailed' }
+  /** Someone tried to add a video while their account waits for approval. */
+  | { kind: 'addLocked' }
   | { kind: 'videoRemoved' }
   | { kind: 'videoRemoveFailed' }
   | { kind: 'signedIn'; name: string | null }

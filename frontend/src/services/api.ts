@@ -11,6 +11,7 @@ import type {
   AdminStatsReport,
   SystemReport,
   BinRecords,
+  PendingAccount,
 } from '../types';
 import { lastSearch, timed } from './searchTrace';
 import { DEFAULT_LIMIT, DEFAULT_THRESHOLD } from '../constants/searchPresets';
@@ -79,8 +80,10 @@ export const discardAnalysis = async (): Promise<void> => {
   await api.delete('/videos/analyze');
 };
 
-export const saveVideo = async (data: VideoMetadata): Promise<void> => {
-  await api.post('/videos', data);
+/** Answers whether the saved video is public, or waits for its account to be approved. */
+export const saveVideo = async (data: VideoMetadata): Promise<{ approved: boolean }> => {
+  const response = await api.post<{ approved?: boolean }>('/videos', data);
+  return { approved: response.data?.approved ?? true };
 };
 
 /** The text and the picture of the post behind a link, or null when X shows none. */
@@ -110,6 +113,19 @@ export const getAdminStats = async (
 ): Promise<AdminStatsReport> => {
   const response = await api.get<AdminStatsReport>('/me/admin/stats', { params: { days }, signal });
   return response.data;
+};
+
+export const getPendingAccounts = async (signal?: AbortSignal): Promise<PendingAccount[]> => {
+  const response = await api.get<PendingAccount[]>('/me/admin/pending', { signal });
+  return response.data;
+};
+
+export const approveAccount = async (userId: string): Promise<void> => {
+  await api.post(`/me/admin/pending/${userId}/approve`);
+};
+
+export const removePendingVideo = async (userId: string): Promise<void> => {
+  await api.delete(`/me/admin/pending/${userId}/video`);
 };
 
 export const getBinRecords = async (signal?: AbortSignal): Promise<BinRecords> => {

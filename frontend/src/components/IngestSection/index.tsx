@@ -7,8 +7,10 @@ import { lookUpPost, saveVideo } from '../../services/api';
 import type { RunningStage, VideoMetadata } from '../../types';
 import { ReviewForm } from '../ReviewForm';
 import { QuotaMeter } from '../QuotaMeter';
+import { useQuotaQuery } from '../../hooks/useQuotaQuery';
 import { URLInputView } from './URLInputView';
 import { DraftNotice } from './DraftNotice';
+import { ReviewLock } from './ReviewLock';
 import { createVideoUrlInputSchema } from '../../schemas/videoMetadata';
 import { useI18n } from '../../i18n/languageContext';
 import { useRobot } from '../../context/robotContext';
@@ -37,7 +39,9 @@ export const IngestSection = () => {
   const [manualData, setManualData] = useState<VideoMetadata | null>(null);
   const analysis = useAnalysisJob();
   const queryClient = useQueryClient();
-  const { isLoading, stage, data, draft, duplicate, error } = analysis;
+  const { isLoading, stage, data, draft, duplicate, error, refusedAsLocked } = analysis;
+  const { quota } = useQuotaQuery();
+  const locked = quota?.can_add === false;
   const { setStatus } = useStatus();
   const { t } = useI18n();
   const robot = useRobot();
@@ -124,6 +128,12 @@ export const IngestSection = () => {
   }, [duplicate, robot, setStatus, t.ingest.status.duplicate]);
 
   useEffect(() => {
+    if (!refusedAsLocked) return;
+    setStatus(t.ingest.status.locked, 5000);
+    robot.notify({ kind: 'addLocked' });
+  }, [refusedAsLocked, robot, setStatus, t.ingest.status.locked]);
+
+  useEffect(() => {
     if (data) {
       setStatus(t.ingest.status.analysed, 5000);
     }
@@ -168,14 +178,22 @@ export const IngestSection = () => {
   const handleSave = async (finalData: VideoMetadata) => {
       try {
         setStatus(t.ingest.status.saving);
-        await saveVideo(finalData);
+        const saved = await saveVideo(finalData);
         // The library stays mounted behind its tab, so it would never ask again.
         queryClient.invalidateQueries({ queryKey: ['myVideos'] });
-        setStatus(t.ingest.status.saved, 5000);
-        robot.notify({ kind: 'saved' });
+        queryClient.invalidateQueries({ queryKey: ['quota'] });
         // Nothing to discard: saving already cleared the analysis on the server.
         backToStart();
+        setStatus(saved.approved ? t.ingest.status.saved : t.ingest.status.savedForReview, 5000);
+        robot.notify({ kind: 'saved' });
       } catch (err: unknown) {
+        if ((err as { response?: { status?: number } }).response?.status === 403) {
+          queryClient.invalidateQueries({ queryKey: ['quota'] });
+          backToStart();
+          setStatus(t.ingest.status.locked, 5000);
+          robot.notify({ kind: 'addLocked' });
+          return;
+        }
         console.error("Failed to save video to database:", err);
         setStatus(validationErrorMessage(err) ?? t.ingest.status.saveFailed, 5000);
         robot.notify({ kind: 'saveFailed' });
@@ -212,6 +230,14 @@ export const IngestSection = () => {
           showScenes={shownFields.analyzeScenes}
           showAudio={shownFields.analyzeAudio}
         />
+      </div>
+    );
+  }
+
+  if (locked) {
+    return (
+      <div className={styles.ingestContainer}>
+        <ReviewLock />
       </div>
     );
   }

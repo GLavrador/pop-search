@@ -23,6 +23,15 @@
   gap: 8px;
 }
 
+/* A click on the disabled field lands on the row, which answers it. */
+.locked {
+  cursor: not-allowed;
+}
+
+.locked > * {
+  pointer-events: none;
+}
+
 .runButton {
   min-width: 140px;
 }

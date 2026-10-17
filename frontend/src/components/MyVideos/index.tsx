@@ -164,6 +164,12 @@ export const MyVideos = () => {
                   >
                     {name}
                   </a>
+                  {video.approved === false && (
+                    <p className={styles.pending}>
+                      <strong className={styles.pendingMark}>{t.myVideos.pending}</strong>{' '}
+                      {t.myVideos.pendingNote}
+                    </p>
+                  )}
                   {video.descricao_completa && (
                     <p className={styles.description}>{video.descricao_completa}</p>
                   )}

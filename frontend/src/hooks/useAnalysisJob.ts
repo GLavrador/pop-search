@@ -49,6 +49,8 @@ interface UseAnalysisJobReturn {
   draft: AnalysisJob | null;
   duplicate: ExistingVideo | null;
   error: string | null;
+  /** The server refused because the account already added its one video before approval. */
+  refusedAsLocked: boolean;
 }
 
 export const useAnalysisJob = (): UseAnalysisJobReturn => {
@@ -92,6 +94,7 @@ export const useAnalysisJob = (): UseAnalysisJobReturn => {
       if (!isRunning(job)) queryClient.invalidateQueries({ queryKey: ['quota'] });
     },
     onError: (error: Refusal) => {
+      if (error.response?.status === 403) queryClient.invalidateQueries({ queryKey: ['quota'] });
       // Refused because one is already running elsewhere: follow that one.
       if (error.response?.status === 409 && !error.response.data?.existing) {
         queryClient.invalidateQueries({ queryKey: KEY });
@@ -112,7 +115,7 @@ export const useAnalysisJob = (): UseAnalysisJobReturn => {
   });
 
   const refusalMessage = (error: Refusal | null): string | null => {
-    if (!error || error.response?.data?.existing) return null;
+    if (!error || error.response?.data?.existing || error.response?.status === 403) return null;
 
     // Checked first: 429 covers both the per-minute rate limit and the monthly
     // quota, and only the server knows which one it was.
@@ -162,5 +165,6 @@ export const useAnalysisJob = (): UseAnalysisJobReturn => {
         : job?.stage === 'failed'
           ? (job.error?.detail ?? t.ingest.errors.generic)
           : refusalMessage(refusal),
+    refusedAsLocked: !isLoading && refusal?.response?.status === 403,
   };
 };

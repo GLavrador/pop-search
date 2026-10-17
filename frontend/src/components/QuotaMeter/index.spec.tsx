@@ -37,6 +37,31 @@ describe('QuotaMeter', () => {
     expect(bar).toHaveAttribute('aria-valuemax', '20');
   });
 
+  it('should count the analyses of an account under review as ones that do not renew', () => {
+    mockUseQuotaQuery.mockReturnValue({
+      quota: quota({ used: 1, limit: 2, remaining: 1, approved: false }),
+      isLoading: false,
+    });
+
+    render(<QuotaMeter />);
+
+    expect(screen.getByText('Analyses before approval')).toBeInTheDocument();
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
+    expect(screen.getByText(/1 left\. They do not renew/)).toBeInTheDocument();
+    expect(screen.queryByText(/renews on/)).not.toBeInTheDocument();
+  });
+
+  it('should send an account under review that used them to the form', () => {
+    mockUseQuotaQuery.mockReturnValue({
+      quota: quota({ used: 2, limit: 2, remaining: 0, approved: false }),
+      isLoading: false,
+    });
+
+    render(<QuotaMeter />);
+
+    expect(screen.getByText(/add your video by hand/)).toBeInTheDocument();
+  });
+
   it('should say what is still possible once the limit is reached', () => {
     mockUseQuotaQuery.mockReturnValue({
       quota: quota({ used: 20, remaining: 0 }),

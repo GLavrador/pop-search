@@ -106,6 +106,10 @@ export interface QuotaStatus {
   remaining: number;
   resets_at: string;
   tokens_this_month: number;
+  /** False while the account waits for approval. A server from before the rule leaves it out. */
+  approved?: boolean;
+  /** False once an account under review has added its one video. */
+  can_add?: boolean;
 }
 
 /** The best score at each of the games in the Recycle Bin. */
@@ -172,6 +176,23 @@ export interface MyVideo {
     pessoas?: Pessoa[];
     elementos_cenario?: string[];
     audio?: Partial<AudioInfo>;
+  } | null;
+  /** False while its account waits for approval, when only its owner sees it. */
+  approved?: boolean;
+}
+
+/** An account waiting for approval, with the video it sent, if any. */
+export interface PendingAccount {
+  user_id: string;
+  display_name: string;
+  created_at: string;
+  video: {
+    id: string;
+    titulo_video?: string | null;
+    descricao_completa?: string | null;
+    url_original: string;
+    created_at: string;
+    post?: PostInfo | null;
   } | null;
 }
 
