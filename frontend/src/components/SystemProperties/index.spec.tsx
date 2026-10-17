@@ -5,6 +5,7 @@ import { RobotContext, type RobotEvent } from '../../context/robotContext';
 import { lastSearch, type SearchTrace } from '../../services/searchTrace';
 import type { ServerStatus } from '../../hooks/useServerWake';
 import type { SystemReport } from '../../types';
+import { APP_VERSION } from '../../constants/version';
 
 const getSystem = vi.fn<() => Promise<SystemReport>>();
 
@@ -95,7 +96,7 @@ describe('System Properties', () => {
     it('should say what the program runs on and how many videos it keeps', async () => {
       open();
 
-      expect(screen.getByText('Pop Search 1.0.0')).toBeInTheDocument();
+      expect(screen.getByText(`Pop Search ${APP_VERSION}`)).toBeInTheDocument();
       expect(await screen.findByText('768 numbers of memory per video')).toBeInTheDocument();
       expect(screen.getByText('Gemini (gemini-2.5-flash)')).toBeInTheDocument();
       expect(screen.getByText('1,280 videos in the archive')).toBeInTheDocument();
@@ -113,7 +114,7 @@ describe('System Properties', () => {
       open();
 
       expect(screen.getByText('Visitor')).toBeInTheDocument();
-      expect(screen.getByText('Pop Search 1.0.0')).toBeInTheDocument();
+      expect(screen.getByText(`Pop Search ${APP_VERSION}`)).toBeInTheDocument();
       expect(screen.getAllByText('asking the server...')).toHaveLength(1);
     });
 
