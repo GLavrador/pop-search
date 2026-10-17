@@ -23,3 +23,5 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+# The full Windows 98 icon pack belongs to Microsoft: only the icons the app uses are kept, in frontend/src/assets/win98.
+frontend/src/assets/windows98-icons/
