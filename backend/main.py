@@ -7,6 +7,7 @@ from core.limiter import limiter
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from routers import health_router, videos_router, search_router, me_router
+from core.version import VERSION
 
 configure_logging()
 logger = get_logger("main")
@@ -19,7 +20,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Pop Search API",
-    version="1.0.0",
+    version=VERSION,
     description="API para indexação e busca de vídeos usando IA multimodal",
     lifespan=lifespan
 )

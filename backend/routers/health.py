@@ -12,12 +12,12 @@ from core.logger import get_logger
 from db import supabase
 from dtos import AiStatus, DatabaseStatus, SystemReport
 from services.embedding import QUERY_CACHE_SIZE, questions_kept
+from core.version import VERSION
 
 logger = get_logger("routers.health")
 
 router = APIRouter(tags=["Health"])
 
-VERSION = "1.0.0"
 STARTED = time.monotonic()
 
 
