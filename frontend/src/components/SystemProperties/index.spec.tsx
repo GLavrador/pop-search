@@ -15,7 +15,7 @@ vi.mock('../../services/api', () => ({
 import { SystemProperties } from './index';
 
 const REPORT: SystemReport = {
-  version: '1.0.0',
+  version: '0.9.9',
   uptime_seconds: 780,
   python: '3.12.4',
   framework: 'FastAPI 0.123.0',
@@ -65,7 +65,7 @@ const status = () => screen.getByRole('group', { name: 'Device status' });
 
 const openOnDevices = async () => {
   open();
-  await screen.findByText('version 1.0.0');
+  await screen.findByText('768 numbers of memory per video');
   sheet('Device Manager');
 };
 
@@ -95,9 +95,9 @@ describe('System Properties', () => {
     it('should say what the program runs on and how many videos it keeps', async () => {
       open();
 
-      expect(await screen.findByText('version 1.0.0')).toBeInTheDocument();
+      expect(screen.getByText('Pop Search 1.0.0')).toBeInTheDocument();
+      expect(await screen.findByText('768 numbers of memory per video')).toBeInTheDocument();
       expect(screen.getByText('Gemini (gemini-2.5-flash)')).toBeInTheDocument();
-      expect(screen.getByText('768 numbers of memory per video')).toBeInTheDocument();
       expect(screen.getByText('1,280 videos in the archive')).toBeInTheDocument();
     });
 
@@ -113,14 +113,15 @@ describe('System Properties', () => {
       open();
 
       expect(screen.getByText('Visitor')).toBeInTheDocument();
-      expect(screen.getAllByText('asking the server...')).toHaveLength(2);
+      expect(screen.getByText('Pop Search 1.0.0')).toBeInTheDocument();
+      expect(screen.getAllByText('asking the server...')).toHaveLength(1);
     });
 
     it('should say so when the server does not answer', async () => {
       getSystem.mockRejectedValue(new Error('down'));
       open();
 
-      expect(await screen.findAllByText('the server did not answer')).toHaveLength(2);
+      expect(await screen.findAllByText('the server did not answer')).toHaveLength(1);
     });
   });
 
@@ -142,13 +143,14 @@ describe('System Properties', () => {
       ]);
     });
 
-    it('should start on the server, with how long it took to wake and how long it has been on', async () => {
+    it('should start on the server, with how long it took to wake, how long it has been on and its version', async () => {
       await openOnDevices();
 
       expect(status()).toHaveTextContent('This device is working properly.');
       expect(status()).toHaveTextContent('Took 34 s to answer on this visit.');
       expect(status()).toHaveTextContent('On for 13 min.');
       expect(status()).toHaveTextContent('Python 3.12.4, FastAPI 0.123.0.');
+      expect(status()).toHaveTextContent('Version 0.9.9.');
     });
 
     it('should say the server is still waking up while it is', () => {
