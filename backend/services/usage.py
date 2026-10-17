@@ -21,6 +21,16 @@ DEFAULT_MONTHLY_LIMIT = 20
 # Generative Language API quotas, divided by your average tokens per analysis.
 DAILY_ANALYSIS_LIMIT = int(os.getenv("DAILY_ANALYSIS_LIMIT", "100"))
 
+# An account under review gets a try and a retry, for good, not each month.
+PENDING_ANALYSIS_LIMIT = int(os.getenv("PENDING_ANALYSIS_LIMIT", "2"))
+
+# The share of the day all accounts under review draw from together, so a wave
+# of new accounts cannot leave the approved ones without analyses.
+PENDING_DAILY_ANALYSIS_LIMIT = int(os.getenv("PENDING_DAILY_ANALYSIS_LIMIT", "5"))
+
+# Videos one account may save in a day, by hand or after an analysis.
+DAILY_SAVE_LIMIT = int(os.getenv("DAILY_SAVE_LIMIT", "20"))
+
 
 @dataclass
 class Quota:
@@ -28,6 +38,10 @@ class Quota:
     limit: int
     resets_at: str
     tokens_this_month: int = 0
+    approved: bool = True
+    # Only counted for an account under review: it is the one video it may add.
+    has_video: bool = False
+    saves_today: int = 0
 
     @property
     def remaining(self) -> int:
@@ -36,6 +50,10 @@ class Quota:
     @property
     def is_exhausted(self) -> bool:
         return self.used >= self.limit
+
+    @property
+    def can_add(self) -> bool:
+        return self.approved or not self.has_video
 
 
 def _month_start(now: Optional[datetime] = None) -> datetime:
@@ -52,7 +70,7 @@ def _next_month_start(now: Optional[datetime] = None) -> datetime:
 def _fetch_quota(user_id: str) -> Quota:
     profile = (
         supabase.table("profiles")
-        .select("monthly_analysis_limit")
+        .select("monthly_analysis_limit, approved")
         .eq("id", user_id)
         .limit(1)
         .execute()
@@ -61,11 +79,13 @@ def _fetch_quota(user_id: str) -> Quota:
 
     if rows:
         limit = rows[0]["monthly_analysis_limit"]
+        approved = rows[0].get("approved", True)
     else:
         # The signup trigger should make this impossible, so reaching here means
         # it failed and the user is silently on the default allowance.
         logger.warning(f"No profile for {user_id}; falling back to the default limit")
         limit = DEFAULT_MONTHLY_LIMIT
+        approved = False
 
     since = _month_start().isoformat()
 
@@ -82,19 +102,48 @@ def _fetch_quota(user_id: str) -> Quota:
     # without a view, and a month of one user's rows is a handful.
     spent = (
         supabase.table("usage_events")
-        .select("total_tokens")
+        .select("kind, total_tokens, created_at")
         .eq("user_id", user_id)
         .gte("created_at", since)
         .execute()
+    ).data or []
+    tokens = sum((row.get("total_tokens") or 0) for row in spent)
+    today = _day_start().date().isoformat()
+    saves_today = sum(
+        1 for row in spent
+        if row.get("kind") == "save" and str(row.get("created_at", ""))[:10] == today
     )
-    tokens = sum((row.get("total_tokens") or 0) for row in (spent.data or []))
 
-    return Quota(
+    quota = Quota(
         used=counted.count or 0,
         limit=limit,
         resets_at=_next_month_start().isoformat(),
         tokens_this_month=tokens,
+        approved=approved,
+        saves_today=saves_today,
     )
+
+    if approved:
+        return quota
+
+    ever = (
+        supabase.table("usage_events")
+        .select("id", count="exact")
+        .eq("user_id", user_id)
+        .eq("kind", "analysis")
+        .execute()
+    )
+    kept = (
+        supabase.table("videos")
+        .select("id", count="exact")
+        .eq("user_id", user_id)
+        .execute()
+    )
+
+    quota.used = ever.count or 0
+    quota.limit = min(limit, PENDING_ANALYSIS_LIMIT)
+    quota.has_video = (kept.count or 0) > 0
+    return quota
 
 
 async def get_quota(user_id: str) -> Quota:
@@ -135,6 +184,24 @@ def _fetch_project_usage() -> ProjectUsage:
 async def get_project_usage() -> ProjectUsage:
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, _fetch_project_usage)
+
+
+def _fetch_pending_analyses_today() -> int:
+    counted = (
+        supabase.table("usage_events")
+        .select("id", count="exact")
+        .eq("kind", "analysis")
+        .eq("while_pending", True)
+        .gte("created_at", _day_start().isoformat())
+        .execute()
+    )
+    return counted.count or 0
+
+
+async def get_pending_analyses_today() -> int:
+    """Analyses run today by accounts under review, all of them together."""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _fetch_pending_analyses_today)
 
 
 @dataclass
@@ -304,6 +371,7 @@ async def record_event(
     prompt_tokens: Optional[int] = None,
     output_tokens: Optional[int] = None,
     total_tokens: Optional[int] = None,
+    while_pending: bool = False,
 ) -> None:
     """Never raises: losing an accounting row must not fail a request that
     already succeeded."""
@@ -315,6 +383,7 @@ async def record_event(
         "prompt_tokens": prompt_tokens,
         "output_tokens": output_tokens,
         "total_tokens": total_tokens,
+        "while_pending": while_pending,
     }
 
     def insert():

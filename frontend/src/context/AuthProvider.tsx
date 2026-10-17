@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { arrival } from '../lib/arrival';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../i18n/languageContext';
 import { AuthContext, type AuthContextType } from './authContext';
@@ -26,7 +27,14 @@ const toFriendlyError = (message: string, errors: Dictionary['auth']['errors']):
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+
+  useEffect(() => {
+    // The client leaves a failed link in the address; it means nothing once read.
+    if (arrival === 'linkFailed') {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -56,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       null,
     isLoading,
     isAuthenticated: session !== null,
+    arrival,
 
     signIn: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -63,18 +72,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     },
 
     signUp: async (email, password, displayName) => {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { display_name: displayName } },
+        options: {
+          // The confirmation e-mail is written in the language the account was created in.
+          data: { display_name: displayName, language },
+          // The link in the e-mail brings the person back here, signed in.
+          emailRedirectTo: window.location.origin,
+        },
       });
-      return { error: error ? toFriendlyError(error.message, t.auth.errors) : null };
+      if (error) return { error: toFriendlyError(error.message, t.auth.errors) };
+      return { error: null, confirmEmail: !data.session };
     },
 
     signOut: async () => {
       await supabase.auth.signOut();
     },
-  }), [session, isLoading, t]);
+  }), [session, isLoading, t, language]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

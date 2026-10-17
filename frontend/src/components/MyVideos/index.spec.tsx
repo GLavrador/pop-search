@@ -76,6 +76,19 @@ describe('MyVideos', () => {
     expect(screen.getByText('1 indexed')).toBeInTheDocument();
   });
 
+  it('should mark a video that waits for its account to be approved', () => {
+    mockUseMyVideosQuery.mockReturnValue({
+      videos: [video({ approved: false }), video({ id: 'video-2', titulo_video: 'Gato pulando', approved: true })],
+      isLoading: false,
+      error: null,
+    });
+
+    render(<MyVideos />);
+
+    expect(screen.getAllByText('Waiting for approval')).toHaveLength(1);
+    expect(screen.getByText(/Only you see this video/)).toBeInTheDocument();
+  });
+
   it('should show the picture of each video, and not what its post said', () => {
     const post = { texto: 'olha essa capivara', miniatura: 'https://pbs.twimg.com/a.jpg' };
     mockUseMyVideosQuery.mockReturnValue({

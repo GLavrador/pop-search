@@ -38,7 +38,7 @@ Pop Search is up at **[pop-search-ochre.vercel.app](https://pop-search-ochre.ver
 
 - **The first visit in a tab** starts with the robot building the desktop, about 20 seconds. Any key or the `skip ▸▸` button jumps straight to the program.
 - **Searching needs no account.** Open `Search.exe`, describe the video in your own words, in English or Portuguese, and press `Find Now`.
-- **Adding videos needs an account** (an AI analysis uses up quota). You can create one from the `Sign In` tab. Each account has a monthly analysis limit.
+- **Adding videos needs an account** (an AI analysis uses up quota). You can create one from the `Sign In` tab and confirm it from the link in the e-mail it sends. A new account is under review, and on its first visit a notice explains how it works: it adds one video, by AI (two analyses at most) or by hand, which only it sees, and asks for approval through the link in the notice. Once I approve the account, that video goes public and the account adds more, within a monthly analysis limit.
 - **Not sure where to start?** Take the guide from the invitation above the tabs. It walks through adding and finding a video on practice screens, with no account and no AI call.
 - **Then wander.** Double-click the `Tricks` icon for the robot's own list of things to try, and leave the page alone for a little while to see what it gets up to.
 - **The interface follows your browser's language**, English or Portuguese, and can be switched in the `Sign In` tab. The pictures here are in English.
@@ -174,11 +174,13 @@ flowchart LR
 - **Writes only through the backend.** The `videos` table has no write policy for signed-in users. Every insert goes through the API with the `service_role` key, which is where the quota is checked. The JWT is verified locally with the project's secret, without a call to Supabase on each request. The cost: `service_role` bypasses Row Level Security, so every backend query has to filter by owner itself, without the database as a safety net. And local verification does not check revocation: a token stays valid until it expires, even after the person signs out.
 - **A cache in front of the AI.** Question embeddings are kept in memory (up to 256), so a repeated question does not go back to Gemini while the same server stays up. The Performance tab shows it as an AI step of under a millisecond. The cost: the cache is emptied when the server restarts or sleeps, and it is not shared between instances.
 - **A robot engine with no libraries.** BIP-98 is an inline SVG driven by a `requestAnimationFrame` state machine (`pilot.ts`), CSS poses switched by data attributes and the Web Animations API. There is no animation, component or state library beyond TanStack Query. The cost: thousands of hand-written lines to maintain, and the automated tests cover what the robot decides to do, not how the motion looks on screen, which is checked by eye.
+- **Open sign-up, reviewed publishing.** Anyone can create an account, but a new one adds a single video that stays private until an administrator approves the account in `Stats.exe`. The rule lives in the backend and the database, not only in the screen: a partial unique index keeps one pending video per account, Row Level Security hides pending videos from the public key, and the search function only reads approved ones. The cost: a newcomer waits for a person before their video is public, and approving is manual.
 - **No migration tool.** [`backend/schema.sql`](backend/schema.sql) builds a fresh database from nothing; changes to an existing one are one-off SQL files in [`backend/migrations`](backend/migrations), applied by hand in the Supabase SQL editor. The cost: the deploy order is manual. When the backend depends on a database change, the SQL has to be applied first, and nothing stops anyone from forgetting.
 
 ### Known limitations
 
-- **AI quota.** The Gemini free tier allows few analyses a day. Besides each account's monthly limit there is a project-wide daily cap (`DAILY_ANALYSIS_LIMIT`).
+- **AI quota.** The Gemini free tier allows few analyses a day. Besides each account's monthly limit there is a project-wide daily cap (`DAILY_ANALYSIS_LIMIT`). An account under review gets two analyses until it is approved (`PENDING_ANALYSIS_LIMIT`), and all accounts under review share a smaller daily cap of their own (`PENDING_DAILY_ANALYSIS_LIMIT`), so new accounts cannot use up the day. Saving, by hand or after an analysis, is capped per account per day (`DAILY_SAVE_LIMIT`).
+- **Approval by hand.** Nobody is told when an account is waiting or when it is approved: the person learns it by opening `Add-Video.exe` again. A pending video that its owner deletes frees the place for another one.
 - **Downloads from X.** X can block datacenter IP ranges, so an analysis may fail when hosted even when it works locally. Search, the archive and manual entry do not depend on downloads.
 - **One process.** Rate limits are kept in memory per instance, and running analyses do not survive a restart. Fine for one instance; scaling out would need a shared store and a job queue.
 - **Small gaps.** An account's video list returns up to 200 entries, without pagination, for now.
@@ -214,14 +216,14 @@ Only `SELECT` policies should exist. There is no write policy on `videos` on pur
 ### 2. Supabase Auth
 
 1. **Authentication → Providers → Email**: enable it. Turning off *Confirm email* makes development easier.
-2. **Authentication → URL Configuration**: set `Site URL` to `http://localhost:5173`.
+2. **Authentication → URL Configuration**: set `Site URL` to `http://localhost:5173` and add it to `Redirect URLs`. The link in the confirmation e-mail goes back to the page the account was created on.
 3. **Settings → API Keys**: copy the `anon` key and the `service_role` key.
 4. **Settings → JWT Keys**: copy the JWT secret.
 
-To make your account an admin after creating it in the app (it unlocks the `Stats.exe` tab):
+A new account starts under review, yours included. To make your account an approved admin after creating it in the app (it unlocks the `Stats.exe` tab, where other accounts are approved):
 
 ```sql
-update profiles set is_admin = true where id = '<your-uuid>';
+update profiles set is_admin = true, approved = true where id = '<your-uuid>';
 ```
 
 ### 3. Environment variables
@@ -237,6 +239,9 @@ update profiles set is_admin = true where id = '<your-uuid>';
 | `LOG_LEVEL` | `DEBUG` in development, `INFO` in production |
 | `CORS_ORIGINS` | The frontend origin, `http://localhost:5173` in development, no trailing slash |
 | `DAILY_ANALYSIS_LIMIT` | Analyses per day for the whole project, all accounts together. Set it from your real Gemini quota |
+| `PENDING_ANALYSIS_LIMIT` | Analyses an account under review can run before it is approved. Default 2 |
+| `PENDING_DAILY_ANALYSIS_LIMIT` | Analyses per day for all accounts under review together, out of the project's. Default 5 |
+| `DAILY_SAVE_LIMIT` | Videos one account can save in a day. Default 20 |
 
 `frontend/.env`, from [`frontend/.env.example`](frontend/.env.example):
 
@@ -315,13 +320,17 @@ Authenticated routes expect `Authorization: Bearer <access_token>`, the Supabase
 | `GET /videos/analyze` | yes | The account's analysis: its stage, then its result or error | 120/min |
 | `DELETE /videos/analyze` | yes | Cancels the running analysis or discards the finished one | 30/min |
 | `POST /videos/post` | yes | The thumbnail and text of the post behind a link | 20/min |
-| `POST /videos` | yes | Indexes a reviewed video | 10/min |
-| `GET /me/quota` | yes | Analyses used and left this month | 60/min |
+| `POST /videos` | yes | Indexes a reviewed video; from an account under review, it is kept private | 10/min |
+| `GET /me/quota` | yes | Analyses used and left, whether the account is approved and whether it can add a video | 60/min |
 | `GET /me/videos` | yes | The account's own videos | 30/min |
 | `PUT /me/videos/{id}` | yes | Corrects one of them and rebuilds its embedding | 20/min |
 | `DELETE /me/videos/{id}` | yes | Removes one of them from the archive | 20/min |
 | `GET`, `PUT /me/bin-records` | yes | Best scores in the bin's games; a record only goes up | 30/min |
 | `GET /me/is-admin`, `/me/all-usage`, `/me/admin/stats` | admin | Usage and cost statistics | 30 to 60/min |
+| `GET /me/admin/pending` | admin | Accounts under review, each with its pending video | 30/min |
+| `GET /me/admin/approved` | admin | Accounts approved in the last 30 days, each with its latest videos | 30/min |
+| `POST /me/admin/pending/{id}/approve` | admin | Approves the account and makes its video public | 30/min |
+| `DELETE /me/admin/pending/{id}/video` | admin | Deletes the video an account under review is waiting on | 30/min |
 
 </details>
 

@@ -25,7 +25,11 @@ create table profiles (
   display_name text not null,
   created_at timestamptz not null default now(),
   monthly_analysis_limit int not null default 20,
-  is_admin boolean not null default false
+  is_admin boolean not null default false,
+  -- A new account is under review: it adds one video, which only it sees,
+  -- until an administrator approves it.
+  approved boolean not null default false,
+  approved_at timestamptz
 );
 
 -- security definer: the signup context cannot write to public.profiles.
@@ -65,6 +69,8 @@ create table usage_events (
   prompt_tokens int,
   output_tokens int,
   total_tokens int,
+  -- Spent by an account under review, which has a smaller daily pool of its own.
+  while_pending boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -115,6 +121,8 @@ create table videos (
   -- What is kept of the post: {texto, miniatura}. Read while the video is
   -- downloaded; null for a video saved before that. Who posted is not kept.
   post jsonb,
+  -- False for the video of an account under review: only its owner sees it.
+  approved boolean not null default true,
 -- Creates new vector
   embedding vector(768),
   -- Full-text column backing the lexical branch of the hybrid search.
@@ -157,6 +165,9 @@ create index videos_fts_idx on videos using gin (fts);
 
 create index videos_user_id_idx on videos (user_id);
 
+-- An account under review keeps one video at a time, however many requests race.
+create unique index videos_one_pending_per_user on videos (user_id) where not approved;
+
 -- 8. Row Level Security
 alter table profiles enable row level security;
 
@@ -178,9 +189,9 @@ alter table bin_records enable row level security;
 
 alter table videos enable row level security;
 
-create policy "videos: public read"
+create policy "videos: approved, or the owner's own"
   on videos for select
-  using (true);
+  using (approved or auth.uid() = user_id);
 
 -- No write policy on purpose: it forces every insert through the backend,
 -- where the quota is enforced. Only service_role can write.
@@ -240,6 +251,7 @@ as $$
       row_number() over (order by v.embedding <=> query_embedding) as rank
     from videos v
     where v.embedding is not null
+      and v.approved
     -- Ordering directly on the <=> operator is what allows the HNSW index to
     -- be used. Wrapping it in "1 - (...)" disables the index and forces a
     -- sequential scan over every row.
@@ -262,6 +274,7 @@ as $$
     -- on malformed input, and avoids the ILIKE wildcard problem where a "%"
     -- typed by the user would match every row.
     where v.fts @@ websearch_to_tsquery('portuguese_unaccent', query_text)
+      and v.approved
     limit case
       when search_mode in ('hybrid', 'text')
       then least(greatest(match_count, 1) * 4, 200)
@@ -369,3 +382,24 @@ revoke all on function public.reserve_analysis(uuid, uuid, text, boolean, boolea
   from public, anon, authenticated;
 grant execute on function public.reserve_analysis(uuid, uuid, text, boolean, boolean)
   to service_role;
+
+-- Approves an account and makes its pending video public, both or neither.
+create or replace function public.approve_account(p_user_id uuid)
+returns boolean
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  update public.profiles set approved = true, approved_at = now() where id = p_user_id and not approved;
+  if not found then
+    return false;
+  end if;
+
+  update public.videos set approved = true where user_id = p_user_id and not approved;
+  return true;
+end;
+$$;
+
+revoke all on function public.approve_account(uuid) from public, anon, authenticated;
+grant execute on function public.approve_account(uuid) to service_role;

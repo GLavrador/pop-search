@@ -7,7 +7,26 @@ vi.mock('../../hooks/useAdminStatsQuery', () => ({
   useAdminStatsQuery: (days: number) => mockUseAdminStatsQuery(days),
 }));
 
+const pendingAccounts = vi.fn();
+vi.mock('../../hooks/useReviewQueries', () => ({
+  usePendingAccountsQuery: () => ({ data: pendingAccounts() }),
+}));
+
+vi.mock('./PendingAccounts', () => ({
+  PendingAccounts: () => <p>pending list</p>,
+}));
+
+vi.mock('./ApprovedAccounts', () => ({
+  ApprovedAccounts: () => <p>approved list</p>,
+}));
+
 import { AdminDashboard } from './index';
+
+/** The statistics are on a sheet of their own, after the accounts. */
+const renderUsage = () => {
+  render(<AdminDashboard />);
+  fireEvent.click(screen.getByRole('tab', { name: 'AI usage' }));
+};
 
 const stats = (overrides = {}) => ({
   range_days: 30,
@@ -44,6 +63,25 @@ const asAdmin = (overrides = {}) => ({
 describe('AdminDashboard', () => {
   beforeEach(() => {
     mockUseAdminStatsQuery.mockReturnValue(asAdmin());
+    pendingAccounts.mockReturnValue([]);
+  });
+
+  it('should open on the accounts waiting for approval, and say how many there are', () => {
+    pendingAccounts.mockReturnValue([{ user_id: 'bia' }, { user_id: 'caio' }]);
+
+    render(<AdminDashboard />);
+
+    expect(screen.getByRole('tab', { name: 'Waiting for approval (2)' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('pending list')).toBeInTheDocument();
+  });
+
+  it('should show the accounts approved lately on their own sheet', () => {
+    render(<AdminDashboard />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Approved lately' }));
+
+    expect(screen.getByText('approved list')).toBeInTheDocument();
+    expect(screen.queryByText('pending list')).not.toBeInTheDocument();
   });
 
   it('should refuse to render for a regular user', () => {
@@ -58,7 +96,7 @@ describe('AdminDashboard', () => {
   });
 
   it('should show the spread, not just the average', () => {
-    render(<AdminDashboard />);
+    renderUsage();
 
     expect(screen.getByText(/5,714|5\.714/)).toBeInTheDocument();
     expect(screen.getByText(/median 5,200|median 5\.200/)).toBeInTheDocument();
@@ -66,13 +104,13 @@ describe('AdminDashboard', () => {
   });
 
   it('should report what a full day at the ceiling would cost', () => {
-    render(<AdminDashboard />);
+    renderUsage();
 
     expect(screen.getByText(/571,400|571\.400/)).toBeInTheDocument();
   });
 
   it('should say how many tokens the failures burned', () => {
-    render(<AdminDashboard />);
+    renderUsage();
 
     expect(screen.getByText('4.8%')).toBeInTheDocument();
     expect(screen.getByText(/12,000 tokens spent for nothing|12\.000 tokens spent for nothing/)).toBeInTheDocument();
@@ -82,13 +120,13 @@ describe('AdminDashboard', () => {
   it('should warn when the ceiling has stopped everyone', () => {
     mockUseAdminStatsQuery.mockReturnValue(asAdmin({ analyses_today: 100 }));
 
-    render(<AdminDashboard />);
+    renderUsage();
 
     expect(screen.getByText(/ceiling reached, nobody can analyse/)).toBeInTheDocument();
   });
 
   it('should ask for a different range when one is picked', () => {
-    render(<AdminDashboard />);
+    renderUsage();
 
     fireEvent.click(screen.getByRole('button', { name: '7 days' }));
 
@@ -96,7 +134,7 @@ describe('AdminDashboard', () => {
   });
 
   it('should mark the active range', () => {
-    render(<AdminDashboard />);
+    renderUsage();
 
     expect(screen.getByRole('button', { name: '30 days' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: '7 days' })).toHaveAttribute('aria-pressed', 'false');
@@ -105,7 +143,7 @@ describe('AdminDashboard', () => {
   it('should say plainly when a range has no failures', () => {
     mockUseAdminStatsQuery.mockReturnValue(asAdmin({ failures_by_reason: [] }));
 
-    render(<AdminDashboard />);
+    renderUsage();
 
     expect(screen.getByText('No failures in this range.')).toBeInTheDocument();
   });
@@ -115,7 +153,7 @@ describe('AdminDashboard', () => {
       asAdmin({ daily: [], analyses: 0, avg_tokens: 0, measured: 0 }),
     );
 
-    render(<AdminDashboard />);
+    renderUsage();
 
     expect(screen.getByText('Nothing in this range.')).toBeInTheDocument();
   });

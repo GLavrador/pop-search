@@ -21,7 +21,14 @@ from core.auth import CurrentUser
 from services import jobs
 from services.jobs import ALREADY_RUNNING, AnalysisAlreadyRunningError
 from services.archive import find_existing
-from services.usage import get_project_usage, get_quota, record_event
+from services.usage import (
+    DAILY_SAVE_LIMIT,
+    PENDING_DAILY_ANALYSIS_LIMIT,
+    get_pending_analyses_today,
+    get_project_usage,
+    get_quota,
+    record_event,
+)
 from asyncio import TimeoutError as AsyncTimeoutError
 
 logger = get_logger("routers.videos")
@@ -31,6 +38,15 @@ router = APIRouter(prefix="/videos", tags=["Videos"])
 INTERNAL_ERROR = "An internal error occurred while processing the video. Please try again."
 
 POST_LOOKUP_TIMEOUT = 15
+
+ADD_LOCKED = (
+    "Your account is waiting for approval. Your video is kept, and everyone will see it once "
+    "the account is approved. Adding more videos also waits for that approval."
+)
+
+PENDING_SLOT = "videos_one_pending_per_user"
+
+COPY_UNDER_REVIEW = "This video was already sent by another account and is waiting for approval."
 
 
 class VideoLink(BaseModel):
@@ -49,7 +65,11 @@ class VideoAnalysisRequest(VideoLink):
     analyze_audio: bool = True
 
 
-def _already_archived(existing: dict, detail: str) -> JSONResponse:
+def _already_archived(existing: dict, user_id: str, detail: str) -> JSONResponse:
+    # A video under review is its owner's alone: anyone else only learns it is taken.
+    if not existing.get("approved", True) and existing.get("user_id") != user_id:
+        return JSONResponse(status_code=409, content={"detail": COPY_UNDER_REVIEW})
+
     return JSONResponse(
         status_code=409,
         content={"detail": detail, "existing": ExistingVideo(**existing).model_dump()},
@@ -120,7 +140,9 @@ async def _report_failure(job_id: str, status: int, detail: str) -> None:
         logger.error("Could not record job failure: job_id=%s error_type=%s", job_id, type(e).__name__)
 
 
-async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -> None:
+async def _run_analysis(
+    job_id: str, user_id: str, body: VideoAnalysisRequest, while_pending: bool = False
+) -> None:
     video_path = None
     # Only set once the video reaches Gemini: a failed download costs no tokens
     # and must not consume the user's quota.
@@ -203,6 +225,7 @@ async def _run_analysis(job_id: str, user_id: str, body: VideoAnalysisRequest) -
             await record_event(
                 user_id, "analysis", succeeded, failure_reason,
                 tokens.prompt, tokens.output, tokens.total,
+                while_pending=while_pending,
             )
 
         _remove(video_path)
@@ -220,12 +243,21 @@ async def start_analysis(request: Request, body: VideoAnalysisRequest, user_id: 
         logger.info("Video already archived: video_id=%s", existing["id"])
         return _already_archived(
             existing,
+            user_id,
             "This video is already in the archive. Nothing was taken from your quota.",
         )
 
     quota = await get_quota(user_id)
+    if not quota.can_add:
+        raise HTTPException(status_code=403, detail=ADD_LOCKED)
+
     if quota.is_exhausted:
         logger.info(f"Quota exhausted for {user_id}: {quota.used}/{quota.limit}")
+        if not quota.approved:
+            raise HTTPException(
+                status_code=429,
+                detail=f"An account waiting for approval can run {quota.limit} analyses. You can still add your video by hand.",
+            )
         raise HTTPException(
             status_code=429,
             detail=f"You have used all {quota.limit} analyses for this month. Your quota renews on {quota.resets_at[:10]}.",
@@ -240,6 +272,15 @@ async def start_analysis(request: Request, body: VideoAnalysisRequest, user_id: 
             status_code=503,
             detail="The archive has reached its analysis limit for today. Nothing was taken from your quota. Try again tomorrow.",
         )
+
+    if not quota.approved:
+        pending_today = await get_pending_analyses_today()
+        if pending_today >= PENDING_DAILY_ANALYSIS_LIMIT:
+            logger.warning(f"Daily limit for accounts under review reached: {pending_today}")
+            raise HTTPException(
+                status_code=503,
+                detail="Accounts waiting for approval have used up today's analyses. Nothing was taken from your quota. Add your video by hand, or try again tomorrow.",
+            )
 
     try:
         current = await jobs.current(user_id)
@@ -261,7 +302,7 @@ async def start_analysis(request: Request, body: VideoAnalysisRequest, user_id: 
         logger.error("Could not start analysis: error_type=%s", type(e).__name__)
         raise HTTPException(status_code=500, detail=INTERNAL_ERROR)
 
-    await launch(user_id, _run_analysis(job["id"], user_id, body))
+    await launch(user_id, _run_analysis(job["id"], user_id, body, while_pending=not quota.approved))
     return _as_job(job)
 
 
@@ -323,7 +364,17 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
     existing = await find_existing(metadata.url_original)
     if existing:
         logger.info("Refusing duplicate: video_id=%s", existing["id"])
-        return _already_archived(existing, "This video is already in the archive.")
+        return _already_archived(existing, user_id, "This video is already in the archive.")
+
+    quota = await get_quota(user_id)
+    if not quota.can_add:
+        raise HTTPException(status_code=403, detail=ADD_LOCKED)
+
+    if quota.saves_today >= DAILY_SAVE_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail=f"You have added {DAILY_SAVE_LIMIT} videos today, the most an account can add in a day. Try again tomorrow.",
+        )
 
     try:
         loop = asyncio.get_event_loop()
@@ -336,7 +387,8 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
             "url_original": metadata.url_original,
             "metadados_estruturados": metadata.metadados_estruturados.model_dump(),
             "post": metadata.post.to_store() if metadata.post else None,
-            "embedding": vector
+            "embedding": vector,
+            "approved": quota.approved,
         }
 
         logger.info("Persisting to Supabase...")
@@ -358,10 +410,15 @@ async def save_video(request: Request, metadata: VideoMetadataDTO, user_id: str 
         return {
             "status": "success",
             "id": data[1][0]['id'],
-            "message": "Video indexed successfully"
+            "message": "Video indexed successfully",
+            "approved": quota.approved,
         }
 
     except Exception as e:
+        # Two saves raced past the check above, and the database kept only one.
+        if PENDING_SLOT in str(e):
+            raise HTTPException(status_code=403, detail=ADD_LOCKED)
+
         logger.error("Could not save video: error_type=%s", type(e).__name__)
         raise HTTPException(
             status_code=500,

@@ -83,7 +83,7 @@ class TestUsageRecording:
             response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 200
-        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", True, None, 0, 0, 0)
+        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", True, None, 0, 0, 0, while_pending=False)
 
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
@@ -97,7 +97,9 @@ class TestUsageRecording:
             response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 422
-        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "blocked:SAFETY", 0, 0, 0)
+        recorder.assert_awaited_once_with(
+            TEST_USER_ID, "analysis", False, "blocked:SAFETY", 0, 0, 0, while_pending=False
+        )
 
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
@@ -112,7 +114,9 @@ class TestUsageRecording:
             response = analyze(client, ANALYZE_BODY)
 
         assert response.status_code == 504
-        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "timeout", 0, 0, 0)
+        recorder.assert_awaited_once_with(
+            TEST_USER_ID, "analysis", False, "timeout", 0, 0, 0, while_pending=False
+        )
 
     @patch("routers.videos.analyze_video_content")
     @patch("routers.videos.download_video")
@@ -134,7 +138,7 @@ class TestUsageRecording:
             analyze(client, ANALYZE_BODY)
 
         recorder.assert_awaited_once_with(
-            TEST_USER_ID, "analysis", True, None, 8451, 609, 10890
+            TEST_USER_ID, "analysis", True, None, 8451, 609, 10890, while_pending=False
         )
 
     @patch("routers.videos.analyze_video_content")
@@ -155,7 +159,7 @@ class TestUsageRecording:
             analyze(client, ANALYZE_BODY)
 
         recorder.assert_awaited_once_with(
-            TEST_USER_ID, "analysis", False, "blocked:SAFETY", 8000, 0, 8523
+            TEST_USER_ID, "analysis", False, "blocked:SAFETY", 8000, 0, 8523, while_pending=False
         )
 
     @patch("routers.videos.download_video")
@@ -209,6 +213,8 @@ class TestQuotaEndpoint:
             "remaining": 13,
             "resets_at": "2026-09-01T00:00:00+00:00",
             "tokens_this_month": 48213,
+            "approved": True,
+            "can_add": True,
         }
 
     def test_requires_a_session(self, anonymous):
@@ -217,14 +223,16 @@ class TestQuotaEndpoint:
 
 class TestProfileLookup:
 
-    def _supabase_with(self, profile_rows, count=0, token_rows=None):
+    def _supabase_with(self, profile_rows, count=0, token_rows=None, ever=0, videos=0):
         mock = patch("services.usage.supabase").start()
         table = mock.table.return_value
-        table.select.return_value.eq.return_value.limit.return_value.execute.return_value.data = profile_rows
-        counted = table.select.return_value.eq.return_value.eq.return_value.gte.return_value
-        counted.execute.return_value.count = count
-        summed = table.select.return_value.eq.return_value.gte.return_value
-        summed.execute.return_value.data = token_rows or []
+        by_user = table.select.return_value.eq.return_value
+        by_user.limit.return_value.execute.return_value.data = profile_rows
+        by_user.eq.return_value.gte.return_value.execute.return_value.count = count
+        by_user.gte.return_value.execute.return_value.data = token_rows or []
+        # Only asked of an account under review.
+        by_user.eq.return_value.execute.return_value.count = ever
+        by_user.execute.return_value.count = videos
         return mock
 
     def teardown_method(self):
@@ -258,8 +266,51 @@ class TestProfileLookup:
         with patch("services.usage.logger") as mock_logger:
             quota = usage._fetch_quota(TEST_USER_ID)
 
-        assert quota.limit == usage.DEFAULT_MONTHLY_LIMIT
+        assert quota.limit == min(usage.DEFAULT_MONTHLY_LIMIT, usage.PENDING_ANALYSIS_LIMIT)
+        assert quota.approved is False
         mock_logger.warning.assert_called_once()
+
+    def test_an_approved_account_can_always_add(self):
+        self._supabase_with([{"monthly_analysis_limit": 20, "approved": True}], videos=40)
+
+        quota = usage._fetch_quota(TEST_USER_ID)
+
+        assert quota.approved is True
+        assert quota.can_add is True
+
+    def test_an_account_under_review_counts_its_analyses_for_good(self):
+        """Its allowance does not come back with the month: it is a try and a retry."""
+        self._supabase_with(
+            [{"monthly_analysis_limit": 20, "approved": False}], count=0, ever=2
+        )
+
+        quota = usage._fetch_quota(TEST_USER_ID)
+
+        assert quota.used == 2
+        assert quota.limit == usage.PENDING_ANALYSIS_LIMIT
+        assert quota.is_exhausted is True
+
+    def test_an_account_under_review_adds_until_it_has_a_video(self):
+        self._supabase_with([{"monthly_analysis_limit": 20, "approved": False}], videos=0)
+        assert usage._fetch_quota(TEST_USER_ID).can_add is True
+
+        patch.stopall()
+        self._supabase_with([{"monthly_analysis_limit": 20, "approved": False}], videos=1)
+        assert usage._fetch_quota(TEST_USER_ID).can_add is False
+
+    def test_counts_the_saves_of_today_only(self):
+        today = usage._day_start().date().isoformat()
+        self._supabase_with(
+            [{"monthly_analysis_limit": 20, "approved": True}],
+            token_rows=[
+                {"kind": "save", "created_at": f"{today}T09:00:00+00:00"},
+                {"kind": "save", "created_at": f"{today}T10:00:00+00:00"},
+                {"kind": "analysis", "created_at": f"{today}T10:00:00+00:00"},
+                {"kind": "save", "created_at": "2000-01-01T10:00:00+00:00"},
+            ],
+        )
+
+        assert usage._fetch_quota(TEST_USER_ID).saves_today == 2
 
 
 class TestRecordEventResilience:

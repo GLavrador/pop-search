@@ -77,11 +77,13 @@ export const useMyVideoActions = (): UseMyVideoActionsReturn => {
     const remove = useCallback(
         async (id: string) => {
             await settle(deleteVideo(id));
+            // The one video of an account under review frees its place when it goes.
+            queryClient.invalidateQueries({ queryKey: ['quota'] });
 
             changeLibrary((videos) => videos.filter((video) => video.id !== id));
             changeResults((results) => results.filter((result) => result.id !== id));
         },
-        [changeLibrary, changeResults, settle],
+        [changeLibrary, changeResults, queryClient, settle],
     );
 
     return { update, remove };

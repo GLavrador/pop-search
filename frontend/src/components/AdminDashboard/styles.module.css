@@ -136,3 +136,119 @@
   font-size: 0.8rem;
   color: var(--win-text-secondary);
 }
+
+.pending {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pendingRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--win-light);
+  border: 1px dotted var(--win-shadow-dark);
+}
+
+.pendingVideo {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.pendingBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.82rem;
+}
+
+.pendingLink {
+  font-weight: bold;
+  color: var(--win-link);
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.pendingText {
+  margin: 0;
+  max-height: 6.5em;
+  overflow-y: auto;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.pendingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.pendingConfirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  font-size: 0.82rem;
+  background: var(--win-warning-bg);
+  border: 1px solid var(--win-shadow-dark);
+}
+
+.sheets {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  margin: 0 0 -2px;
+  padding-left: 2px;
+}
+
+.sheet {
+  margin-top: 2px;
+  padding: 3px 9px 4px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--win-dark);
+  background: var(--win-gray);
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: none;
+  box-shadow: inset -1px 0 0 0 var(--win-shadow-dark);
+  cursor: default;
+  white-space: nowrap;
+}
+
+.sheet[aria-selected='true'] {
+  position: relative;
+  z-index: 1;
+  margin: 0 -2px;
+  padding: 5px 11px 6px;
+  font-weight: bold;
+}
+
+.sheet:focus-visible {
+  outline: 1px dotted var(--win-dark);
+  outline-offset: -5px;
+}
+
+.sheetPanel {
+  padding: 12px;
+  border-top: 2px solid var(--win-light);
+  border-left: 2px solid var(--win-light);
+  border-right: 2px solid var(--win-dark);
+  border-bottom: 2px solid var(--win-dark);
+  box-shadow: inset -1px -1px 0 0 var(--win-shadow-dark);
+}

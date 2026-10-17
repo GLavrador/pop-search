@@ -254,7 +254,9 @@ class TestCancelling:
 
         removed = asyncio.run(scenario())
 
-        recorder.assert_awaited_once_with(TEST_USER_ID, "analysis", False, "cancelled", 0, 0, 0)
+        recorder.assert_awaited_once_with(
+            TEST_USER_ID, "analysis", False, "cancelled", 0, 0, 0, while_pending=False
+        )
         removed.assert_called_once_with(DOWNLOADED.path)
 
 

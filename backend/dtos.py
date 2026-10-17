@@ -109,6 +109,9 @@ class QuotaStatus(BaseModel):
     remaining: int
     resets_at: str
     tokens_this_month: int = 0
+    # False while the account is under review, when it adds one video and no more.
+    approved: bool = True
+    can_add: bool = True
 
 
 class UserUsageRow(BaseModel):
@@ -175,6 +178,33 @@ class MyVideo(BaseModel):
     post: Optional[PostInfo] = None
     # As stored, unchecked: a video saved under older limits must still be listed.
     metadados_estruturados: Optional[dict] = None
+    approved: bool = True
+
+
+class AccountVideo(BaseModel):
+    id: str
+    titulo_video: Optional[str] = None
+    descricao_completa: Optional[str] = None
+    url_original: str
+    created_at: str
+    post: Optional[PostInfo] = None
+
+
+class PendingAccount(BaseModel):
+    user_id: str
+    display_name: str
+    created_at: str
+    video: Optional[AccountVideo] = None
+
+
+class ApprovedAccount(BaseModel):
+    user_id: str
+    display_name: str
+    created_at: str
+    approved_at: str
+    video_count: int
+    # The most recent ones only.
+    videos: List[AccountVideo]
 
 
 AnalysisStage = Literal["queued", "downloading", "uploading", "watching", "writing", "done", "failed"]

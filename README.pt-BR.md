@@ -38,7 +38,7 @@ O Pop Search está no ar em **[pop-search-ochre.vercel.app](https://pop-search-o
 
 - **A primeira visita em cada aba** começa com o robô montando a área de trabalho, uns 20 segundos. Qualquer tecla ou o botão `pular ▸▸` vai direto para o programa.
 - **Buscar não precisa de conta.** Abra o `Search.exe`, descreva o vídeo do seu jeito, em português ou em inglês, e clique em `Buscar`.
-- **Adicionar vídeos precisa de conta** (a análise por IA consome cota). Dá para criar uma na aba `Sign In`. Cada conta tem um limite mensal de análises.
+- **Adicionar vídeos precisa de conta** (a análise por IA consome cota). Dá para criar uma na aba `Sign In` e confirmar pelo link do e-mail que ela envia. Uma conta nova fica em avaliação, e na primeira visita um aviso explica como funciona: ela adiciona um vídeo, por IA (no máximo duas análises) ou à mão, que só ela vê, e pede a aprovação pelo link do aviso. Quando eu aprovo a conta, esse vídeo fica público e a conta passa a adicionar mais, dentro de um limite mensal de análises.
 - **Não sabe por onde começar?** Aceite o convite do guia, acima das abas. Ele mostra como adicionar e encontrar um vídeo em telas de treino, sem conta e sem chamar a IA.
 - **Depois, explore.** Dê dois cliques no ícone `Truques` para ver a lista do próprio robô com o que tentar, e deixe a página quieta por um tempinho para ver o que ele traquina.
 - **A interface segue o idioma do navegador**, em português ou em inglês, e troca na aba `Sign In`. As imagens daqui estão em português.
@@ -174,11 +174,13 @@ flowchart LR
 - **Escrita só pelo backend.** A tabela `videos` não tem política de escrita para usuários logados. Toda inserção passa pela API com a chave `service_role`, que é onde a cota é conferida. O JWT é validado localmente com o segredo do projeto, sem consultar o Supabase a cada requisição. O preço: a `service_role` ignora o Row Level Security, então cada consulta do backend precisa filtrar pelo dono por conta própria, sem a proteção do banco por trás. E a validação local não consulta revogação: um token continua valendo até expirar, mesmo depois de a pessoa sair da conta.
 - **Um cache na frente da IA.** Os embeddings das perguntas ficam em memória (até 256), então uma pergunta repetida não volta ao Gemini enquanto o mesmo servidor estiver de pé. A aba Desempenho mostra isso como uma etapa de IA de menos de um milissegundo. O preço: o cache zera quando o servidor reinicia ou dorme, e não é compartilhado entre instâncias.
 - **Um motor de robô sem bibliotecas.** O BIP-98 é um SVG desenhado no próprio código e movido por uma máquina de estados em `requestAnimationFrame` (`pilot.ts`), poses em CSS trocadas por atributos e a Web Animations API. Não há biblioteca de animação, de componentes nem de estado além do TanStack Query. O preço: são milhares de linhas escritas à mão para manter, e os testes automatizados cobrem o que o robô decide fazer, não como o movimento fica na tela, que é conferido no olho.
+- **Cadastro aberto, publicação revisada.** Qualquer pessoa cria uma conta, mas uma conta nova adiciona um único vídeo, que fica privado até um administrador aprovar a conta no `Stats.exe`. A regra está no backend e no banco, não só na tela: um índice único parcial deixa um vídeo pendente por conta, o Row Level Security esconde os vídeos pendentes da chave pública e a função de busca só lê os aprovados. O preço: quem chega espera por uma pessoa antes de o vídeo ficar público, e a aprovação é manual.
 - **Sem ferramenta de migração.** O [`backend/schema.sql`](backend/schema.sql) monta um banco novo do zero; mudanças num banco existente são arquivos SQL avulsos em [`backend/migrations`](backend/migrations), aplicados à mão no editor SQL do Supabase. O preço: a ordem do deploy é manual. Quando o backend depende de uma mudança no banco, o SQL tem que ser aplicado antes, e nada impede de esquecer.
 
 ### Limitações conhecidas
 
-- **Cota de IA.** O plano gratuito do Gemini permite poucas análises por dia. Além do limite mensal de cada conta, existe um teto diário do projeto inteiro (`DAILY_ANALYSIS_LIMIT`).
+- **Cota de IA.** O plano gratuito do Gemini permite poucas análises por dia. Além do limite mensal de cada conta, existe um teto diário do projeto inteiro (`DAILY_ANALYSIS_LIMIT`). Uma conta em avaliação tem duas análises até ser aprovada (`PENDING_ANALYSIS_LIMIT`), e todas as contas em avaliação dividem um teto diário próprio e menor (`PENDING_DAILY_ANALYSIS_LIMIT`), para que contas novas não esgotem o dia. Salvar, à mão ou depois de uma análise, tem um limite por conta por dia (`DAILY_SAVE_LIMIT`).
+- **Aprovação à mão.** Ninguém é avisado quando uma conta está esperando nem quando é aprovada: a pessoa descobre ao abrir o `Add-Video.exe` de novo. Um vídeo pendente que o dono exclui libera o lugar para outro.
 - **Downloads do X.** O X pode bloquear faixas de IP de datacenter, então uma análise pode falhar hospedada mesmo funcionando localmente. A busca, o acervo e o cadastro manual não dependem de download.
 - **Um processo só.** Os limites de requisição ficam em memória, por instância, e as análises em andamento não sobrevivem se reiniciar. Serve bem para uma instância; escalar exigiria um armazenamento compartilhado e uma fila de tarefas.
 - **Pequenas faltas.** A lista de vídeos de uma conta traz até 200 itens, sem paginação, por enquanto.
@@ -214,14 +216,14 @@ Devem existir só políticas de `SELECT`. Não existe política de escrita em `v
 ### 2. Supabase Auth
 
 1. **Authentication → Providers → Email**: habilite. Desligar o *Confirm email* facilita o desenvolvimento.
-2. **Authentication → URL Configuration**: `Site URL` = `http://localhost:5173`.
+2. **Authentication → URL Configuration**: `Site URL` = `http://localhost:5173`, e adicione o mesmo endereço em `Redirect URLs`. O link do e-mail de confirmação volta para a página em que a conta foi criada.
 3. **Settings → API Keys**: copie a chave `anon` e a `service_role`.
 4. **Settings → JWT Keys**: copie o segredo do JWT.
 
-Para tornar sua conta administradora depois de criá-la pelo app (isso libera a aba `Stats.exe`):
+Uma conta nova começa em avaliação, inclusive a sua. Para tornar sua conta administradora e aprovada depois de criá-la pelo app (isso libera a aba `Stats.exe`, onde as outras contas são aprovadas):
 
 ```sql
-update profiles set is_admin = true where id = '<seu-uuid>';
+update profiles set is_admin = true, approved = true where id = '<seu-uuid>';
 ```
 
 ### 3. Variáveis de ambiente
@@ -237,6 +239,9 @@ update profiles set is_admin = true where id = '<seu-uuid>';
 | `LOG_LEVEL` | `DEBUG` em desenvolvimento, `INFO` em produção |
 | `CORS_ORIGINS` | A origem do frontend, `http://localhost:5173` em desenvolvimento, sem barra no final |
 | `DAILY_ANALYSIS_LIMIT` | Análises por dia no projeto inteiro, somando todas as contas. Ajuste pela sua cota real do Gemini |
+| `PENDING_ANALYSIS_LIMIT` | Análises que uma conta em avaliação pode fazer antes de ser aprovada. Padrão 2 |
+| `PENDING_DAILY_ANALYSIS_LIMIT` | Análises por dia somando todas as contas em avaliação, dentro do teto do projeto. Padrão 5 |
+| `DAILY_SAVE_LIMIT` | Vídeos que uma conta pode salvar por dia. Padrão 20 |
 
 `frontend/.env`, a partir do [`frontend/.env.example`](frontend/.env.example):
 
@@ -315,13 +320,17 @@ As rotas autenticadas esperam `Authorization: Bearer <access_token>`, o token de
 | `GET /videos/analyze` | sim | A análise da conta: a etapa e, no fim, o resultado ou o erro | 120/min |
 | `DELETE /videos/analyze` | sim | Cancela a análise em andamento ou descarta a que terminou | 30/min |
 | `POST /videos/post` | sim | A miniatura e o texto do post por trás de um link | 20/min |
-| `POST /videos` | sim | Indexa um vídeo revisado | 10/min |
-| `GET /me/quota` | sim | Análises usadas e restantes no mês | 60/min |
+| `POST /videos` | sim | Indexa um vídeo revisado; de uma conta em avaliação, ele fica privado | 10/min |
+| `GET /me/quota` | sim | Análises usadas e restantes, se a conta está aprovada e se pode adicionar um vídeo | 60/min |
 | `GET /me/videos` | sim | Os vídeos da própria conta | 30/min |
 | `PUT /me/videos/{id}` | sim | Corrige um deles e refaz o embedding | 20/min |
 | `DELETE /me/videos/{id}` | sim | Tira um deles do acervo | 20/min |
 | `GET`, `PUT /me/bin-records` | sim | Recordes dos jogos da Lixeira; um recorde só sobe | 30/min |
 | `GET /me/is-admin`, `/me/all-usage`, `/me/admin/stats` | admin | Estatísticas de uso e de custo | 30 a 60/min |
+| `GET /me/admin/pending` | admin | Contas em avaliação, cada uma com seu vídeo pendente | 30/min |
+| `GET /me/admin/approved` | admin | Contas aprovadas nos últimos 30 dias, cada uma com seus últimos vídeos | 30/min |
+| `POST /me/admin/pending/{id}/approve` | admin | Aprova a conta e torna o vídeo dela público | 30/min |
+| `DELETE /me/admin/pending/{id}/video` | admin | Exclui o vídeo que uma conta em avaliação está esperando | 30/min |
 
 </details>
 

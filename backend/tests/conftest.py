@@ -173,6 +173,7 @@ def no_real_database():
 
     with patch("services.usage.supabase", guard), \
          patch("services.archive.supabase", guard), \
+         patch("services.review.supabase", guard), \
          patch("services.jobs.supabase", guard), \
          patch("routers.me.supabase", guard), \
          patch("routers.videos.supabase", guard), \

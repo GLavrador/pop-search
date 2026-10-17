@@ -23,6 +23,15 @@
   gap: 8px;
 }
 
+/* A click on the disabled field lands on the row, which answers it. */
+.locked {
+  cursor: not-allowed;
+}
+
+.locked > * {
+  pointer-events: none;
+}
+
 .runButton {
   min-width: 140px;
 }
@@ -269,4 +278,16 @@
   gap: 8px;
   margin-top: 16px;
   justify-content: flex-end;
+}
+
+.more {
+  align-self: flex-start;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--win-link);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
 }

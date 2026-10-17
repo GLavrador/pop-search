@@ -23,6 +23,7 @@ const auth = (over: Partial<AuthContextType> = {}): AuthContextType => ({
   displayName: null,
   isLoading: false,
   isAuthenticated: false,
+  arrival: null,
   signIn: vi.fn(),
   signUp: vi.fn(),
   signOut: vi.fn(),

@@ -437,6 +437,11 @@ export const en = {
     exhausted: (date: string) =>
       `Limit reached. Renews on ${date}. You can still add videos manually.`,
     remaining: (left: number, date: string) => `${left} left, renews on ${date}`,
+    reviewLabel: 'Analyses before approval',
+    reviewRemaining: (left: number) =>
+      `${left} left for your video. They do not renew: approval brings the monthly allowance.`,
+    reviewMore: 'How does the review work?',
+    reviewExhausted: 'All used. You can still add your video by hand.',
   },
 
   myVideos: {
@@ -454,6 +459,8 @@ export const en = {
     remove: 'Delete',
     removeOf: (title: string) => `Delete "${title}"`,
     editing: 'Editing the video',
+    pending: 'Waiting for approval',
+    pendingNote: 'Only you see this video. Everyone will see it once your account is approved.',
     confirm: {
       question: 'Delete this video from the archive? This cannot be undone.',
       yes: 'Yes, delete',
@@ -503,6 +510,12 @@ export const en = {
       open: 'Open the post',
       dismiss: 'Dismiss the notice',
     },
+    locked: {
+      title: 'Your account is waiting for approval',
+      body: 'Your first video is kept and shows up in My-Videos.exe, where only you see it. Once the account is approved, everyone will find it in the search, and you can add more videos with the monthly allowance of analyses.',
+      contact: 'To ask for approval, get in touch:',
+      field: 'Adding videos is locked until your account is approved',
+    },
     draft: {
       title: 'You left an analysis unsaved',
       body: 'The AI has already described this video. Pick it up where you left off, or discard it: a discarded analysis does not go back to your quota.',
@@ -522,6 +535,8 @@ export const en = {
       manual: 'Manual mode: Fill in the video details below.',
       saving: 'Saving data to database...',
       saved: 'Video saved successfully! Ready for next.',
+      savedForReview: 'Video saved! Only you see it until your account is approved.',
+      locked: 'Adding videos waits for your account to be approved.',
       saveFailed: 'Error: Failed to save video. Please try again.',
       cancelled: 'Analysis cancelled by user.',
       reset: 'Ready for next video.',
@@ -578,7 +593,13 @@ export const en = {
     displayName: 'Display name',
     email: 'E-mail',
     password: 'Password',
-    created: 'Account created. If confirmation is required, check your inbox before signing in.',
+    checkEmail: (email: string) =>
+      `Account created. We sent a link to ${email}: open it to confirm the account and you come back here signed in. If it does not arrive in a few minutes, look in the spam folder.`,
+    confirmed: 'E-mail confirmed. You are signed in.',
+    linkFailed:
+      'That confirmation link no longer works. Sign in with your e-mail and password; if the account was never confirmed, create it again to get a new link.',
+    reviewNote:
+      'A new account starts with one video, which only you see until the account is approved. After that, it goes public and you can add more.',
     guideInvite: 'In the meantime, let the assistant walk you through the app. It costs no analysis and needs no account.',
     working: 'Working...',
     toSignIn: 'Already have an account? Sign in',
@@ -591,7 +612,53 @@ export const en = {
     },
   },
 
+  underReview: {
+    title: 'Your account is under review',
+    intro: 'Welcome to Pop Search! Like every new account, yours starts under review. It works like this:',
+    oneVideo: 'You can keep 1 video, analysed by the AI or filled in by hand.',
+    analyses: (n: number) =>
+      `For that video you have ${n} AI analyses. They do not renew; if they run out, you can still fill it in by hand.`,
+    private: 'Until the account is approved, only you see that video, in My-Videos.exe.',
+    locks: 'Once it is saved, Add-Video.exe locks until the account is approved.',
+    contact: 'To ask for approval, get in touch:',
+    after: 'Once the account is approved, the video goes public in the search and you get the monthly allowance of analyses.',
+    ok: 'Got it',
+  },
+
   admin: {
+    sheets: {
+      pending: (n: number) => (n > 0 ? `Waiting for approval (${n})` : 'Waiting for approval'),
+      approved: 'Approved lately',
+      usage: 'AI usage',
+    },
+    approved: {
+      on: (date: string) => `approved on ${date}`,
+      count: (n: number) => (n === 1 ? '1 video' : `${n} videos`),
+      added: (date: string) => `Added on ${date}`,
+      more: (n: number) => `and ${n} more`,
+      empty: 'No account was approved in the last 30 days.',
+      loadFailed: 'Could not load the accounts approved lately.',
+      note: 'Accounts approved in the last 30 days, each with the latest videos it added. Accounts approved before this list existed do not show up here.',
+    },
+    pending: {
+      loading: 'Loading the accounts...',
+      empty: 'No account is waiting.',
+      joined: (date: string) => `Account created on ${date}`,
+      noVideo: 'No video yet.',
+      approve: 'Approve',
+      approveOf: (name: string) => `Approve ${name}`,
+      approving: 'Approving...',
+      removeVideo: 'Delete video',
+      removeVideoOf: (name: string) => `Delete the video of ${name}`,
+      confirmRemove: 'Delete this video? The account stays under review and can send another one.',
+      yes: 'Yes, delete',
+      loadFailed: 'Could not load the accounts waiting for approval.',
+      failed: 'That did not work. Try again.',
+      approved: (name: string) => `${name}'s account approved. The video is now public.`,
+      approvedNoVideo: (name: string) => `${name}'s account approved.`,
+      removed: 'Video deleted.',
+      note: 'Approving makes the video public and lifts the one-video limit. Only you can do it.',
+    },
     notAdmin: 'This page is for administrators.',
     loading: 'Loading statistics...',
     noData: 'No data yet.',
@@ -1144,6 +1211,8 @@ export const en = {
       manual: ['I trust you!', 'make it a good one!', 'you write better anyway'],
       saved: ['kept!', 'in the archive!', 'saved, go search for it!'],
       saveFailed: ['it did not save...', 'uh oh, not saved', 'try again?'],
+      underReview: ['welcome! read this first', 'new here? one moment', 'a quick word first!'],
+      addLocked: ['still waiting for approval!', 'one video for now', 'approval first!'],
       removed: ['off it goes', 'one fewer', 'out of the archive'],
       removeFailed: ['I could not remove it...', 'uh oh, it stayed', 'try again?'],
       hello: [
@@ -1242,6 +1311,8 @@ export const en = {
         inviteClose: ['see you!', 'I will be around!', 'call me if you need me'],
         tricks: ['my secrets!', 'telling everything, are we?', 'now you know too much'],
         adminRange: ['another period!', 'moving the window', 'recounting...'],
+        approveAccount: ['welcome to the archive!', 'approved!', 'one more in the club'],
+        removePending: ['out it goes', 'not that one', 'deleted!'],
         why: ['let me explain!', 'x-ray!', 'behind the scenes!'],
         computer: ['that is me inside!', 'mind the mess', 'my insides!'],
         deviceRobot: ['that is me!', 'no driver, and proud', 'unknown, me?'],
@@ -1441,6 +1512,10 @@ export const en = {
         title: 'Repeated video',
         text: 'Someone has already kept this video, so it is not analysed again and nothing leaves your quota. It already shows up in the search.',
       } as HelpCopy,
+      'ingest.locked': {
+        title: 'Waiting for approval',
+        text: 'A new account adds one video and waits. Once the account is approved, the video shows up in the search for everyone and you can add more. The link goes to whoever approves.',
+      } as HelpCopy,
       'ingest.draft': {
         title: 'Unsaved analysis',
         text: 'An analysis that finished and was not saved is kept here. Continue the review to save it, or discard it to analyse another video.',
@@ -1570,6 +1645,14 @@ export const en = {
       admin: {
         title: 'Statistics',
         text: 'The panel for whoever runs the project: how much the AI was used, what it cost and why analyses failed.',
+      } as HelpCopy,
+      'admin.approved': {
+        title: 'Approved lately',
+        text: 'The accounts approved in the last 30 days and the videos they added since, to keep an eye on what newcomers put in the archive.',
+      } as HelpCopy,
+      'admin.pending': {
+        title: 'Accounts waiting for approval',
+        text: 'New accounts and the video each one sent, which nobody else sees yet. Approve makes the video public and frees the account. Delete video throws the video away and leaves the account waiting.',
       } as HelpCopy,
     },
   },

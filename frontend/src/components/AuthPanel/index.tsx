@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useAuth } from '../../context/authContext';
 import { useStatus } from '../../context/status';
 import { useI18n } from '../../i18n/languageContext';
@@ -18,7 +18,7 @@ interface AuthPanelProps {
 }
 
 export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
-  const { isAuthenticated, displayName, signIn, signUp, signOut } = useAuth();
+  const { isAuthenticated, displayName, arrival, signIn, signUp, signOut } = useAuth();
   const { setStatus } = useStatus();
   const { t } = useI18n();
   const robot = useRobot();
@@ -30,6 +30,17 @@ export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
+  // A link from the e-mail that failed is told until the form is used.
+  const [linkFailed, setLinkFailed] = useState(arrival === 'linkFailed');
+
+  const toldArrival = useRef(false);
+
+  useEffect(() => {
+    if (toldArrival.current) return;
+    toldArrival.current = true;
+    if (arrival === 'confirmed') setStatus(t.auth.confirmed, 6000);
+    if (arrival === 'linkFailed') setStatus(t.auth.linkFailed, 8000);
+  }, [arrival, setStatus, t.auth.confirmed, t.auth.linkFailed]);
 
   // The invitation is only ever made to a visitor, so only a visitor gets its switch.
   const guide = onStartGuide && (
@@ -86,6 +97,7 @@ export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
     e.preventDefault();
     setError(null);
     setNotice(null);
+    setLinkFailed(false);
     setIsBusy(true);
     robot.notify({ kind: 'pressed', what: 'authSubmit' });
 
@@ -101,8 +113,8 @@ export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
       return;
     }
 
-    if (mode === 'signUp') {
-      setNotice(t.auth.created);
+    if (mode === 'signUp' && result.confirmEmail) {
+      setNotice(t.auth.checkEmail(email));
       setMode('signIn');
       setPassword('');
       return;
@@ -121,6 +133,7 @@ export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
     >
       <p className={styles.title}>{isSignUp ? t.auth.createAccount : t.auth.signIn}</p>
       <p className={styles.subtitle}>{t.auth.subtitle}</p>
+      {isSignUp && <p className={styles.subtitle}>{t.auth.reviewNote}</p>}
 
       {isSignUp && (
         <div className={styles.field}>
@@ -166,10 +179,10 @@ export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
         />
       </div>
 
-      {error && (
+      {(error || linkFailed) && (
         <div className={styles.error} role="alert">
           <img src={warningIcon} alt="" className="win98-warning" />
-          <span>{error}</span>
+          <span>{error ?? t.auth.linkFailed}</span>
         </div>
       )}
 
@@ -202,6 +215,7 @@ export const AuthPanel = ({ onStartGuide, invite }: AuthPanelProps) => {
           setMode(isSignUp ? 'signIn' : 'signUp');
           setError(null);
           setNotice(null);
+          setLinkFailed(false);
         }}
       >
         {isSignUp ? t.auth.toSignIn : t.auth.toSignUp}

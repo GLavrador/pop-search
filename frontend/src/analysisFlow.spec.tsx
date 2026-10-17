@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { AnalysisJob, AnalysisStage } from './types';
 
@@ -52,7 +52,8 @@ vi.mock('./services/api', () => ({
 }));
 
 import App from './App';
-import { getMyVideos } from './services/api';
+import { getMyQuota, getMyVideos } from './services/api';
+import type { QuotaStatus } from './types';
 
 const LINK = 'https://x.com/a/status/1';
 const TITLE = 'A whale jumps right beside the boat';
@@ -139,7 +140,7 @@ describe('following an analysis', () => {
       onServer = null;
       return Promise.resolve();
     });
-    saveVideo.mockResolvedValue(undefined);
+    saveVideo.mockResolvedValue({ approved: true });
     lookUpPost.mockResolvedValue(null);
   });
 
@@ -397,7 +398,7 @@ describe('following an analysis', () => {
 
     saveVideo.mockImplementation(() => {
       onServer = null;
-      return Promise.resolve();
+      return Promise.resolve({ approved: true });
     });
     await press('Save');
 
@@ -416,7 +417,7 @@ describe('following an analysis', () => {
 
     saveVideo.mockImplementation(() => {
       onServer = null;
-      return Promise.resolve();
+      return Promise.resolve({ approved: true });
     });
     await press('Save');
 
@@ -460,7 +461,7 @@ describe('describing a video by hand', () => {
         },
       },
     });
-    saveVideo.mockResolvedValue(undefined);
+    saveVideo.mockResolvedValue({ approved: true });
   });
 
   /** Asking X takes seconds. It used to happen inside the save, which waited for it. */
@@ -522,5 +523,145 @@ describe('describing a video by hand', () => {
         expect.objectContaining({ post: { texto: '', miniatura: POST.miniatura } }),
       ),
     );
+  });
+});
+
+describe('an account waiting for approval', () => {
+  const standing = (changes: Partial<QuotaStatus>): QuotaStatus => ({
+    used: 0,
+    limit: 2,
+    remaining: 2,
+    resets_at: '2026-11-01',
+    tokens_this_month: 0,
+    approved: false,
+    can_add: true,
+    ...changes,
+  });
+
+  const lock = () => screen.findByText('Your account is waiting for approval');
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    // How the review works was already read: these are about what comes after.
+    localStorage.setItem('pop-search:review-read:user-1', '1');
+    onServer = null;
+    serverDown = false;
+    mockGetSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'token-abc',
+          user: { id: 'user-1', email: 'ana@example.com', user_metadata: {} },
+        },
+      },
+    });
+    lookUpPost.mockResolvedValue(null);
+  });
+
+  afterEach(() => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({ limit: 20, remaining: 20, approved: true }));
+  });
+
+  it('should explain the review on the first visit, and let nothing past until it is read', async () => {
+    localStorage.clear();
+    vi.mocked(getMyQuota).mockResolvedValue(standing({}));
+    renderApp();
+
+    const notice = await screen.findByRole('dialog', { name: 'Your account is under review' });
+
+    expect(notice).toHaveAttribute('aria-modal', 'true');
+    expect(within(notice).getByText(/you have 2 AI analyses/)).toBeInTheDocument();
+    expect(within(notice).getByRole('link', { name: 'linkedin.com/in/guilherme-lviana' })).toBeInTheDocument();
+    expect(within(notice).queryByRole('button', { name: /Close/ })).not.toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('dialog', { name: 'Your account is under review' })).toBeInTheDocument();
+
+    await user.click(within(notice).getByRole('button', { name: 'Got it' }));
+
+    expect(screen.queryByRole('dialog', { name: 'Your account is under review' })).not.toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:review-read:user-1')).not.toBeNull();
+  });
+
+  it('should not explain the review again once it was read', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({}));
+    renderApp();
+
+    await screen.findAllByText('Analyses before approval');
+
+    expect(screen.queryByRole('dialog', { name: 'Your account is under review' })).not.toBeInTheDocument();
+  });
+
+  it('should explain the review again on request, from the meter', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({ used: 1, remaining: 1 }));
+    renderApp();
+
+    // The meter is on Add-Video.exe and on the account tab alike.
+    expect(await screen.findAllByText(/1 left for your video/)).not.toHaveLength(0);
+    await user.click(screen.getAllByRole('button', { name: 'How does the review work?' })[0]);
+
+    const notice = screen.getByRole('dialog', { name: 'Your account is under review' });
+    await user.click(within(notice).getByRole('button', { name: /Close/ }));
+
+    expect(screen.queryByRole('dialog', { name: 'Your account is under review' })).not.toBeInTheDocument();
+  });
+
+  it('should find the way to add locked once its video is in, and where to ask for approval', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({ can_add: false }));
+    renderApp();
+
+    expect(await lock()).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'linkedin.com/in/guilherme-lviana' })).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/guilherme-lviana',
+    );
+    expect(screen.getByLabelText(/Adding videos is locked/)).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Next' })).toBeDisabled();
+  });
+
+  it('should answer an attempt to add another one', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({ can_add: false }));
+    renderApp();
+    await lock();
+
+    await user.click(screen.getByLabelText(/Adding videos is locked/).parentElement!);
+
+    expect(await screen.findByText('Adding videos waits for your account to be approved.')).toBeInTheDocument();
+  });
+
+  it('should say the first video is kept out of sight, and then lock', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({}));
+    saveVideo.mockImplementation(() => {
+      vi.mocked(getMyQuota).mockResolvedValue(standing({ can_add: false }));
+      return Promise.resolve({ approved: false });
+    });
+    renderApp();
+
+    await user.type(await screen.findByPlaceholderText('https://...'), LINK);
+    await user.click(screen.getByLabelText('Manual Input'));
+    await press('Open Form');
+    await user.type(document.querySelector('input[name="titulo_sugerido"]')!, TITLE);
+    await user.type(
+      document.querySelector('textarea[name="descricao_completa"]')!,
+      RESULT.descricao_completa,
+    );
+    await press('Save');
+
+    expect(await screen.findByText(/Only you see it until your account is approved/)).toBeInTheDocument();
+    expect(await lock()).toBeInTheDocument();
+  });
+
+  it('should lock when the server refuses a second video the screen did not know about', async () => {
+    vi.mocked(getMyQuota).mockResolvedValue(standing({}));
+    startAnalysis.mockImplementation(() => {
+      vi.mocked(getMyQuota).mockResolvedValue(standing({ can_add: false }));
+      return Promise.reject({ response: { status: 403, data: { detail: 'waiting for approval' } } });
+    });
+    renderApp();
+
+    await runAnalysis();
+
+    expect(await lock()).toBeInTheDocument();
+    expect(screen.queryByText('waiting for approval')).not.toBeInTheDocument();
   });
 });
