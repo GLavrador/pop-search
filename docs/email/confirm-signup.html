@@ -1,0 +1,82 @@
+{{ $pt := false }}{{ if .Data.language }}{{ if eq .Data.language "pt" }}{{ $pt = true }}{{ end }}{{ end }}<!DOCTYPE html>
+<html lang="{{ if $pt }}pt-BR{{ else }}en{{ end }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pop Search</title>
+</head>
+<body style="margin:0; padding:0; background:#008080;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#008080;">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px; background:#c0c0c0; border-top:2px solid #ffffff; border-left:2px solid #ffffff; border-right:2px solid #404040; border-bottom:2px solid #404040;">
+          <tr>
+            <td style="padding:3px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background:#000080; padding:5px 8px; font-family:Tahoma, Verdana, Arial, sans-serif; font-size:13px; font-weight:bold; color:#ffffff;">
+                    {{ if $pt }}Pop Search - Confirmar conta{{ else }}Pop Search - Confirm account{{ end }}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:18px 16px 8px; font-family:Tahoma, Verdana, Arial, sans-serif; font-size:14px; line-height:1.5; color:#000000;">
+                    {{ if $pt }}
+                    <p style="margin:0 0 12px; font-weight:bold;">Olá{{ if .Data.display_name }}, {{ .Data.display_name }}{{ end }}!</p>
+                    <p style="margin:0 0 16px;">Falta só um clique para a sua conta no Pop Search ficar pronta. Confirme o e-mail no botão abaixo e você volta para o site já conectado.</p>
+                    {{ else }}
+                    <p style="margin:0 0 12px; font-weight:bold;">Hi{{ if .Data.display_name }}, {{ .Data.display_name }}{{ end }}!</p>
+                    <p style="margin:0 0 16px;">One click and your Pop Search account is ready. Confirm your e-mail with the button below and you come back to the site signed in.</p>
+                    {{ end }}
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding:4px 16px 18px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background:#c0c0c0; border-top:2px solid #ffffff; border-left:2px solid #ffffff; border-right:2px solid #000000; border-bottom:2px solid #000000;">
+                          <a href="{{ .ConfirmationURL }}" style="display:inline-block; padding:8px 22px; font-family:Tahoma, Verdana, Arial, sans-serif; font-size:14px; font-weight:bold; color:#000000; text-decoration:none;">{{ if $pt }}Confirmar minha conta{{ else }}Confirm my account{{ end }}</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0 16px 8px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffe1; border:1px solid #808080;">
+                      <tr>
+                        <td style="padding:10px 12px; font-family:Tahoma, Verdana, Arial, sans-serif; font-size:13px; line-height:1.45; color:#000000;">
+                          {{ if $pt }}
+                          <strong>Sua conta começa em avaliação.</strong> Você pode guardar um vídeo, que só você vê até a conta ser aprovada. O site explica tudo na primeira visita.
+                          {{ else }}
+                          <strong>Your account starts under review.</strong> You can keep one video, which only you see until the account is approved. The site explains it all on your first visit.
+                          {{ end }}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px 18px; font-family:Tahoma, Verdana, Arial, sans-serif; font-size:12px; line-height:1.45; color:#404040;">
+                    {{ if $pt }}
+                    <p style="margin:0 0 6px;">Se o botão não funcionar, copie este endereço no navegador:</p>
+                    {{ else }}
+                    <p style="margin:0 0 6px;">If the button does not work, paste this address into your browser:</p>
+                    {{ end }}
+                    <p style="margin:0 0 12px; word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#0000ee;">{{ .ConfirmationURL }}</a></p>
+                    {{ if $pt }}
+                    <p style="margin:0;">Se você não criou esta conta, é só ignorar este e-mail.</p>
+                    {{ else }}
+                    <p style="margin:0;">If you did not create this account, just ignore this e-mail.</p>
+                    {{ end }}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:14px 0 0; font-family:Tahoma, Verdana, Arial, sans-serif; font-size:11px; color:#ffffff;">{{ if $pt }}© 1998 Pop Search Corp. - Todos os direitos reservados.{{ else }}© 1998 Pop Search Corp. - All rights reserved.{{ end }}</p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
