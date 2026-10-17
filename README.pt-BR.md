@@ -14,6 +14,7 @@
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20pgvector-3FCF8E?logo=supabase&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Google-Gemini-8E75B2?logo=googlegemini&logoColor=white)
+[![Licença: MIT](https://img.shields.io/badge/Licen%C3%A7a-MIT-yellow)](LICENSE)
 
 <a href="https://pop-search-ochre.vercel.app/"><img src="https://img.shields.io/badge/Abrir%20o%20Pop%20Search-pop--search--ochre.vercel.app-008080?style=for-the-badge" alt="Abrir o Pop Search"></a>
 
@@ -353,7 +354,9 @@ docs/
 
 ## Créditos
 
-Os ícones do Windows 98 vêm de [win98icons.alexmeub.com](https://win98icons.alexmeub.com).
+O código está sob a licença MIT, em [`LICENSE`](LICENSE).
+
+Os ícones do Windows 98 vêm de [win98icons.alexmeub.com](https://win98icons.alexmeub.com). Eles pertencem à Microsoft, são usados aqui num projeto pessoal sem fins comerciais e não estão cobertos pela licença MIT.
 
 ## Autor
 
