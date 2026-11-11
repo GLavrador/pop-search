@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Face, Pose } from '../../Assistant/trips';
 import type { Closing, Move } from './Clutter';
+import { play } from '../../../sound/engine';
 
 interface Point {
   x: number;
@@ -113,6 +114,7 @@ export const useSweep = (onDone: () => void) => {
       const nudge = fromRight ? -2 : 2;
       await go({ x: spot.x + nudge, y: spot.y }, 70, { pose: fromRight ? 'point-left' : 'point-right' });
       setClosing((now) => ({ ...now, [index]: 'pressed' }));
+      play('click');
       await wait(240);
       await go(spot, 70, { pose: fromRight ? 'point-left' : 'point-right' });
       setClosing((now) => ({ ...now, [index]: 'closed' }));
@@ -138,6 +140,7 @@ export const useSweep = (onDone: () => void) => {
       await wait(70);
       const ms = clamp(far * 0.65, 200, 380);
       slide(ms);
+      play('slide');
       await go(by(end), ms, { pose: 'tug' });
     };
 
@@ -171,6 +174,7 @@ export const useSweep = (onDone: () => void) => {
       await go({ x: left, y: lane }, 420, { talking: false });
       look({ broom: true, face: 'happy' });
       setWiping(true);
+      play('sweep');
       await go({ x: right, y: lane }, SWEEP, { ease: 'linear', broom: true });
       look({ broom: false, lean: 0 });
 
@@ -180,6 +184,7 @@ export const useSweep = (onDone: () => void) => {
 
       const home = back();
       if (home) await go(home, 520, { pose: 'hover' });
+      play('ding');
     };
 
     void script()

@@ -14,6 +14,7 @@ const GOAL = 3;
 const COUNTING: Cartridge<Counting> = {
   goal: GOAL,
   ducks: true,
+  jump: 'jump',
   create: (width) => ({ width, started: false, over: false, score: 0, ducked: false }),
   step: (state, input) => {
     if (state.over) return state;

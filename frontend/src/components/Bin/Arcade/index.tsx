@@ -8,6 +8,8 @@ import {
   type ComponentType,
   type CSSProperties,
 } from 'react';
+import { play } from '../../../sound/engine';
+import type { Cue } from '../../../sound/cues';
 import { useI18n } from '../../../i18n/languageContext';
 import { createStore } from '../../../utils/store';
 import stop from '../../../assets/win98/msg_error-0.png';
@@ -26,11 +28,20 @@ export interface ViewProps<S> {
 }
 
 /** One game: its rules, how it is drawn, and how many points set the icons free. */
+// A jump throws the player up: the speed upwards leaps in one step.
+const lifted = (before: Playing, after: Playing) => {
+  const was = (before as Playing & { vy?: number }).vy;
+  const is = (after as Playing & { vy?: number }).vy;
+  return !after.over && was !== undefined && is !== undefined && is < was - 100;
+};
+
 export interface Cartridge<S extends Playing> {
   goal: number;
   /** It has something to duck under, and so needs a way to ask for that. */
   ducks: boolean;
   create: (width: number, seed: number) => S;
+  /** What a jump sounds like in it. */
+  jump: Cue;
   step: (state: S, input: Input, dt: number) => S;
   View: ComponentType<ViewProps<S>>;
 }
@@ -160,21 +171,25 @@ export const Arcade = <S extends Playing>({
       const { width } = live.current.size;
       const now = game.current.width === width ? game.current : { ...game.current, width };
       game.current = cartridge.step(now, controls.take(), dt);
+      if (lifted(now, game.current)) play(cartridge.jump);
     },
     draw: () => {
       const now = game.current;
       if (now.score !== told.current.points) {
+        if (now.score > told.current.points) play('point');
         told.current.points = now.score;
         live.current.onPoints?.(now.score);
       }
       if (!told.current.earned && now.score >= goal) {
         told.current.earned = true;
+        play('tada');
         live.current.onEarn();
         setCheering(true);
         later(CHEER_FOR, () => setCheering(false));
       }
       if (now.over && !told.current.over) {
         told.current.over = true;
+        play('hit');
         const points = now.score;
         const fresh = live.current.onScore(points);
         rounds.current += 1;

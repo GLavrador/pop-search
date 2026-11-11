@@ -8,6 +8,7 @@ export const FLAPPY_GAME: Cartridge<FlappyState> = {
   goal: FLAPPY.goal,
   ducks: false,
   create: createFlappy,
+  jump: 'flap',
   step: stepFlappy,
   View: FlappyView,
 };
@@ -16,6 +17,7 @@ export const DINO_GAME: Cartridge<DinoState> = {
   goal: DINO.goal,
   ducks: true,
   create: createDino,
+  jump: 'jump',
   step: stepDino,
   View: DinoView,
 };

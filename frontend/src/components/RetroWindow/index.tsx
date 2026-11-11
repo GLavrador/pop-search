@@ -3,6 +3,7 @@ import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';
 import type { Slide } from '../Rebuild/stage';
 import { OwnerContext } from '../Dialog/owner';
+import { play } from '../../sound/engine';
 import styles from './styles.module.css';
 
 export type WindowState = 'open' | 'minimized' | 'closing' | 'closed';
@@ -54,6 +55,15 @@ export const RetroWindow = ({
 }: RetroWindowProps) => {
   const { t } = useI18n();
   const frame = useRef<HTMLDivElement>(null);
+  const was = useRef(state);
+
+  useEffect(() => {
+    const before = was.current;
+    was.current = state;
+    if (state === before) return;
+    if (state === 'open') play('open');
+    else if (state === 'minimized' || state === 'closing') play('close');
+  }, [state]);
 
   useEffect(() => {
     if (shakeKey === 0) return;

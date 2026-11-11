@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { play } from '../sound/engine';
+import { cueOf } from '../sound/events';
 import { en, type Dictionary } from '../i18n/en';
 import { useI18n } from '../i18n/languageContext';
 import {
@@ -309,6 +311,8 @@ export const useRobotDirector = ({ guiding, onTricks, onFetch }: DirectorOptions
     (event: RobotEvent) => {
       if (live.current.guiding) return;
       const { says } = live.current.t.robot;
+      const cue = cueOf(event);
+      if (cue) play(cue);
 
       switch (event.kind) {
         case 'tab': {

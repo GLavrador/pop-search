@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt, type HelpKey } from '../../context/robotContext';
 import { useOwnerShown } from './owner';
+import { play } from '../../sound/engine';
 import styles from './styles.module.css';
 
 interface DialogProps {
@@ -49,8 +50,10 @@ export const Dialog = ({
   useEffect(() => {
     const opener = document.activeElement;
     frame.current?.focus();
+    play('open');
     return () => {
       if (opener instanceof HTMLElement) opener.focus();
+      play('close');
     };
   }, []);
 
