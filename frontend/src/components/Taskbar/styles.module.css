@@ -123,6 +123,33 @@
   border-bottom: 1px solid var(--win-light);
 }
 
+.speaker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.speaker img {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.speaker:focus-visible {
+  outline: 1px dotted var(--win-dark);
+}
+
+.tray[data-clock='frame'] .speaker {
+  visibility: hidden;
+}
+
 .clock {
   font-size: 0.78rem;
   white-space: nowrap;

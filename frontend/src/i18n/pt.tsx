@@ -19,6 +19,8 @@ export const pt: Dictionary = {
 
   taskbar: {
     start: 'Iniciar',
+    soundOff: 'Desligar o som',
+    soundOn: 'Ligar o som',
   },
 
   desktop: {
@@ -1464,6 +1466,10 @@ export const pt: Dictionary = {
       'taskbar.start': {
         title: 'Iniciar',
         text: 'Esse é só enfeite. Eu já pulei em cima dele várias vezes e nunca abriu nada.',
+      },
+      'taskbar.sound': {
+        title: 'Volume',
+        text: 'Liga e desliga os sons do programa, os meus também. Este navegador guarda a escolha.',
       },
       'taskbar.clock': {
         title: 'Relógio',

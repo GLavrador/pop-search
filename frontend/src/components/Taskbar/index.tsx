@@ -2,7 +2,10 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { helpAt } from '../../context/robotContext';
 import type { ClockState, Slide } from '../Rebuild/stage';
+import { setSoundOn, useSoundOn } from '../../sound/engine';
 import logo from '../../assets/windows-98-logo.png';
+import speaker from '../../assets/win98/loudspeaker_rays-1.png';
+import speakerMuted from '../../assets/win98/loudspeaker_muted-1.png';
 import styles from './styles.module.css';
 
 const CLOCK_TICK_MS = 20_000;
@@ -38,6 +41,8 @@ export const Taskbar = ({
 }: TaskbarProps) => {
   const { t, locale } = useI18n();
   const time = useClock(locale);
+  const soundOn = useSoundOn();
+  const soundLabel = soundOn ? t.taskbar.soundOff : t.taskbar.soundOn;
   const moved = sunk !== undefined && (sunk.by !== 0 || sunk.ms !== 0);
 
   return (
@@ -72,6 +77,16 @@ export const Taskbar = ({
 
       {clock !== 'none' && (
         <div className={styles.tray} data-clock={clock}>
+          <button
+            type="button"
+            className={styles.speaker}
+            aria-label={soundLabel}
+            title={soundLabel}
+            onClick={() => setSoundOn(!soundOn)}
+            {...helpAt('taskbar.sound')}
+          >
+            <img src={soundOn ? speaker : speakerMuted} alt="" draggable={false} />
+          </button>
           <span
             className={styles.clock}
             data-robot="clock"
