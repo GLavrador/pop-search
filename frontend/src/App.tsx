@@ -48,6 +48,7 @@ import { useRebuild } from './components/Rebuild/useRebuild';
 import { SystemProperties } from './components/SystemProperties';
 import { ReviewWelcome } from './components/ReviewWelcome';
 import { useReviewWelcome } from './hooks/useReviewWelcome';
+import { play } from './sound/engine';
 import { usePendingAccountsQuery } from './hooks/useReviewQueries';
 import { Tricks } from './components/Tricks';
 import { Bin } from './components/Bin';
@@ -148,6 +149,7 @@ function AppContent({ server, intro, onIntroEnd }: AppContentProps) {
     },
     onOpenWindow: () => setWindowState('open'),
     onEnd: (kind) => {
+      play('startup');
       if (kind === 'setup') onIntroEnd();
     },
   });
@@ -605,7 +607,10 @@ function Startup({ rebooted }: { rebooted: boolean }) {
 
   const enter = useCallback(() => {
     sessionStorage.setItem(BOOTED_KEY, '1');
-    setStarting(null);
+    setStarting((now) => {
+      if (now === 'boot') play('startup');
+      return null;
+    });
   }, []);
 
   if (starting === 'boot') return <Boot server={server} onDone={enter} />;

@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useI18n } from '../../i18n/languageContext';
+import { play } from '../../sound/engine';
 import type { Line } from '../../hooks/useRobotDirector';
 import styles from './styles.module.css';
 
@@ -11,6 +13,10 @@ interface SpeechProps {
 export const Speech = ({ line, onDismiss }: SpeechProps) => {
   const { t } = useI18n();
   const copy = line.copy(t);
+
+  useEffect(() => {
+    play('chirp');
+  }, [line.id]);
 
   return (
     <div className={styles.speech} role="status" data-robot-says>

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useI18n } from '../../i18n/languageContext';
 import { isAnyKey } from '../../utils/keys';
+import { play } from '../../sound/engine';
 import { Robot } from '../Assistant/Robot';
 import { BARS, useBarColors } from '../SystemBars/bars';
 import styles from './styles.module.css';
@@ -17,6 +18,10 @@ export const Crash = ({ error, again, onContinue }: CrashProps) => {
   const { t } = useI18n();
   const goOn = useRef<HTMLButtonElement>(null);
   useBarColors(BARS.blue);
+
+  useEffect(() => {
+    play('bsod');
+  }, []);
 
   useEffect(() => {
     goOn.current?.focus();

@@ -89,6 +89,8 @@ A mesma área de trabalho, arrumada para a telinha.
 
 **Em duas línguas.** A interface é inteira em inglês e em português, a partir de dois dicionários tipados. O dicionário em português tem o tipo do inglês, então uma chave que falte em qualquer um dos dois não compila.
 
+**Com som.** Os cliques, as janelas, o robô e os jogos têm seus sons, todos feitos no código com a Web Audio API: não há gravações. O alto-falante ao lado do relógio desliga, e o navegador guarda a escolha.
+
 <details>
 <summary><strong>Segredos e easter eggs (spoilers)</strong></summary>
 

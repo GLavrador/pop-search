@@ -31,6 +31,8 @@ export const en = {
 
   taskbar: {
     start: 'Start',
+    soundOff: 'Turn the sound off',
+    soundOn: 'Turn the sound on',
   },
 
   desktop: {
@@ -1463,6 +1465,10 @@ export const en = {
       'taskbar.start': {
         title: 'Start',
         text: 'That one is just for show. I have jumped on it many times and it never opened a thing.',
+      } as HelpCopy,
+      'taskbar.sound': {
+        title: 'Volume',
+        text: 'Turns the sounds of the program on and off, mine included. This browser remembers the choice.',
       } as HelpCopy,
       'taskbar.clock': {
         title: 'Clock',

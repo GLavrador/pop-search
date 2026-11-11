@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { Taskbar } from './index';
 
@@ -6,6 +6,21 @@ const bar = () => document.querySelector('[data-robot="taskbar"]') as HTMLElemen
 const clock = () => document.querySelector('[data-robot="clock"]');
 
 describe('Taskbar', () => {
+  it('should turn the sound off and on from the tray, and remember it', () => {
+    localStorage.clear();
+    render(<Taskbar />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Turn the sound off' }));
+
+    expect(screen.getByRole('button', { name: 'Turn the sound on' })).toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:sound-off')).not.toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Turn the sound on' }));
+
+    expect(screen.getByRole('button', { name: 'Turn the sound off' })).toBeInTheDocument();
+    expect(localStorage.getItem('pop-search:sound-off')).toBeNull();
+  });
+
   it('should show the time and stay where it belongs when nothing is being rebuilt', () => {
     render(<Taskbar />);
 

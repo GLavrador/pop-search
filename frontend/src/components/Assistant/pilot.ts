@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+import { play } from '../../sound/engine';
 import {
   climbing,
   contain,
@@ -382,6 +383,7 @@ export const createPilot = ({
 
   const say = (text: string, until: number) => {
     if (!text) return;
+    play('chirp');
     emote.textContent = text;
     emote.setAttribute('data-on', '');
     emoteUntil = until;

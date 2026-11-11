@@ -89,6 +89,8 @@ Same desktop, laid out for a little screen.
 
 **In two languages.** The whole interface exists in English and Portuguese, from two typed dictionaries. The Portuguese one has the type of the English one, so a key missing from either does not compile.
 
+**With sound.** Clicks, windows, the robot and the games have their sounds, all made in code with the Web Audio API: there are no recordings. The speaker beside the clock turns them off, and the browser remembers it.
+
 <details>
 <summary><strong>Secrets and easter eggs (spoilers)</strong></summary>
 

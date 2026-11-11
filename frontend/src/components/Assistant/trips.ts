@@ -1,4 +1,5 @@
 import { planFlight, type Box, type Point, type Side, type Size } from './flight';
+import { play } from '../../sound/engine';
 import type { Variety } from './variety';
 
 export type Face =
@@ -713,7 +714,10 @@ export const TRIPS: Record<string, Trip> = {
           skittish: true,
           onLand: () => {
             scene.move(GLASS, GLASS_MS, 'linear');
-            scene.after(GLASS_MS * 0.17, () => scene.say(scene.emotes().knock, GLASS_MS * 0.62));
+            scene.after(GLASS_MS * 0.17, () => {
+              play('knock');
+              scene.say(scene.emotes().knock, GLASS_MS * 0.62);
+            });
           },
         },
         {
@@ -930,6 +934,7 @@ export const TRIPS: Record<string, Trip> = {
           gaze: { x: 0.3, y: -1 },
           emote: () => scene.emotes().dialing,
           hold: 1800,
+          onLand: () => play('dial'),
         },
         {
           where,
@@ -938,7 +943,10 @@ export const TRIPS: Record<string, Trip> = {
           gaze: { x: -0.3, y: -1 },
           emote: () => scene.emotes().modem,
           hold: 2000,
-          onLand: () => scene.move(SHAKE, 600),
+          onLand: () => {
+            play('modem');
+            scene.move(SHAKE, 600);
+          },
         },
         {
           where,
